@@ -139,7 +139,7 @@ public class TaskBundleFactory {
     task.setOwner(FhirUtil.toReference(Organization.class, performerId));
     //Add description to both Task and ServiceRequest. To be revised.
     if (!Strings.isNullOrEmpty(details)) {
-      serviceRequest.addNote()
+      task.addNote()
           .setText(details);
     }
     return task;
