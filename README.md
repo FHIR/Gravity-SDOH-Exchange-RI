@@ -18,3 +18,5 @@ java -Dserver.port=8080 -jar ehr-app/target/ehr-app-1.0-SNAPSHOT.jar
 ```
 
 Change port `8080` to any other port you want an application to listen to.
+
+**MORE DETAILS WILL BE PROVIDED SOON!**
