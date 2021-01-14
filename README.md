@@ -6,10 +6,15 @@ Currently only an EHR App API is implemented. The app is running at https://sdoh
 Since it is bound to a Logica Sandbox at https://sandbox.logicahealth.org/GravitySandboxNew - to log in please request access to this sandbox first from the Track leads.
 ## Local Testing
 ### Configure
-Go to ehr-app/src/main/resources/application.yaml and update Sandbox URL, security details and other settings. Description of every setting will be present soon.
+Go to `ehr-app/src/main/resources/application.yaml` and update Sandbox URL, security details and other settings. Description of every setting will be present soon.
 ### Build
 Latest Java and Maven have to be installed. Just run a command from a base directory:
-```mvn clean install```
+```sh
+mvn clean install
+```
 ### Run
-```java -Dserver.port=8080 -jar ehr-app/target/ehr-app-1.0-SNAPSHOT.jar```
+```sh
+java -Dserver.port=8080 -jar ehr-app/target/ehr-app-1.0-SNAPSHOT.jar
+```
+
 Change port `8080` to any other port you want an application to listen to.
