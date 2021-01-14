@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
@@ -24,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Service for CBRO interaction. This logic definitely should not have been a service class, but, for simplicity,
@@ -219,13 +217,14 @@ public class CbroTaskUpdateService {
         .addAll(serviceRequest.getReasonReference());
     // Currently we do not transform Processor references, just copy them from EHR's ServiceRequest instance.
     // Everything except Consent.
-    resultProc.getReasonReference()
-        .addAll(serviceRequest.getSupportingInfo()
-            .stream()
-            .filter(r -> !Consent.class.getSimpleName()
-                .equals(r.getReferenceElement()
-                    .getResourceType()))
-            .collect(Collectors.toList()));
+    //TODO uncomment when we decide where we can put GOALs
+    //    resultProc.getReasonReference()
+    //        .addAll(serviceRequest.getSupportingInfo()
+    //            .stream()
+    //            .filter(r -> !Consent.class.getSimpleName()
+    //                .equals(r.getReferenceElement()
+    //                    .getResourceType()))
+    //            .collect(Collectors.toList()));
     return resultProc;
   }
 
