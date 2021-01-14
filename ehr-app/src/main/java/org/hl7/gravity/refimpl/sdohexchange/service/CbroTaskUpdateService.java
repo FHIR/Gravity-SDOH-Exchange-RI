@@ -172,7 +172,7 @@ public class CbroTaskUpdateService {
       Procedure resultProc = copyProcedure(cbroProc, ehrTask.getFor(), srId, serviceRequest);
       resultProc.setId(IdType.newRandomUuid());
       // Add Procedure to result bundle
-      FhirUtil.createPostEntry(resultProc);
+      resultBundle.addEntry(FhirUtil.createPostEntry(resultProc));
 
       //Modify Task.output. If task output is of type resulting-activity and contains a Reference to a proper
       // Procedure - copy output changing a Procedure reference to a local one.
