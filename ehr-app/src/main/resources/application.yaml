@@ -13,7 +13,8 @@ spring:
             client-secret: ANJV4C6tZRUkXlKvCcnrKq7UoqVq8q18y0gQ_hZ55jTPiCuzV9eWGJVdOkb0cAiL8bu87q5L_lwEPOn4AbmRUg0
             client-name: Gravity-SDOH-Exchange-EHR-App-LOCAL
             provider: ehr-provider
-            redirect-uri: "http://localhost:8080/login/oauth2/code/ehr-client"
+            #redirect-uri: "http://localhost:8080/login/oauth2/code/ehr-client"
+            redirect-uri: "https://sdoh-exchange-ri-ehr.herokuapp.com/login/oauth2/code/ehr-client"
             client-authentication-method: basic
             authorization-grant-type: authorization_code
             # scope 'launch/patient' for a standalone launch if needed.
