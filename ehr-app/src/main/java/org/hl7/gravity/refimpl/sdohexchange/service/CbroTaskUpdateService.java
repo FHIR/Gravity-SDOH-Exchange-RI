@@ -1,17 +1,18 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.SDOHDomainCode;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.TaskResultingActivity;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.util.FhirUtil;
@@ -21,8 +22,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service for CBRO interaction. This logic definitely should not have been a service class, but, for simplicity,
@@ -145,67 +147,54 @@ public class CbroTaskUpdateService {
     // property.
     if (Task.TaskStatus.COMPLETED.equals(cbroTask.getStatus()) || Task.TaskStatus.CANCELLED.equals(
         cbroTask.getStatus())) {
-      Bundle cbroProcedureBundle = cbroClient.search()
-          .forResource(Procedure.class)
-          .where(new TokenClientParam("based-on:ServiceRequest.identifier").exactly()
-              .systemAndValues(identifierSystem, srId))
-          .returnBundle(Bundle.class)
-          .execute();
-      //If there are issues with a Procedure - do not fail a process. Just log a warning.
-      if (cbroProcedureBundle.getEntry()
-          .size() == 0) {
-        log.warn("No Procedure is present at '{}' for ServiceRequest with identifier '{}'.", cbroClient.getServerBase(),
-            identifierSystem + "|" + srId);
-        // Stop here
-        return;
-      } else if (cbroProcedureBundle.getEntry()
-          .size() > 1) {
-        log.warn(
-            "More than one Procedure is present at '{}' for ServiceRequest with identifier '{}'. Fetching a first one.",
-            cbroClient.getServerBase(), identifierSystem + "|" + srId);
-        //Continue
-      }
-      Procedure cbroProc = FhirUtil.getFromBundle(cbroProcedureBundle, Procedure.class)
-          .get(0);
-      Procedure resultProc = copyProcedure(cbroProc, ehrTask.getFor(), srId, serviceRequest);
-      resultProc.setId(IdType.newRandomUuid());
-      // Add Procedure to result bundle
-      resultBundle.addEntry(FhirUtil.createPostEntry(resultProc));
-
       //Modify Task.output. If task output is of type resulting-activity and contains a Reference to a proper
       // Procedure - copy output changing a Procedure reference to a local one.
-      Optional<Task.TaskOutputComponent> output = cbroTask.getOutput()
+      List<Task.TaskOutputComponent> cbroOutputs = cbroTask.getOutput()
           .stream()
-          .filter(t -> "resulting-activity".equals(t.getType()
-              .getCodingFirstRep()
-              .getCode()))
-          .filter(t -> Reference.class.isInstance(t.getValue()) && cbroProc.getIdElement()
-              .toUnqualifiedVersionless()
-              .equals(((Reference) t.getValue()).getReferenceElement()
-                  .toUnqualifiedVersionless()))
-          .findFirst();
-      if (output.isPresent()) {
-        Task.TaskOutputComponent newOut = output.get()
-            .copy();
-        newOut.setValue(new Reference(resultProc.getIdElement()
-            .getValue()));
-        ehrTask.addOutput(newOut);
-      } else {
+          //We only copy outputs which reference a Code and a Reference
+          .filter(t -> CodeableConcept.class.isInstance(t.getValue()) || (Reference.class.isInstance(t.getValue())
+              && ((Reference) t.getValue()).getReferenceElement()
+              .getResourceType()
+              .equals(Procedure.class.getSimpleName())))
+          .collect(Collectors.toList());
+
+      if (cbroOutputs.size() == 0) {
         log.warn(
             "Not output of type 'http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes|resulting"
                 + "-activity' with a reference to a proper Procedure is present in task with id '{}' at '{}'. "
-                + "Expecting a reference to a 'Procedure/{}'.", cbroTask.getIdElement()
-                .getIdPart(), cbroClient.getServerBase(), cbroProc.getIdElement()
-                .getIdPart());
+                + "Expecting a reference to a Procedure resource.", cbroTask.getIdElement()
+                .getIdPart(), cbroClient.getServerBase());
+      }
+      for (Task.TaskOutputComponent cbroOutput : cbroOutputs) {
+        //TODO fix the conditions check.
+        Task.TaskOutputComponent newOut = cbroOutput.copy();
+        if (Reference.class.isInstance(cbroOutput.getValue())) {
+          String cbroProcId = ((Reference) cbroOutput.getValue()).getReferenceElement()
+              .getIdPart();
+          Procedure cbroProc = cbroClient.read()
+              .resource(Procedure.class)
+              .withId(cbroProcId)
+              .execute();
+          Procedure resultProc = copyProcedure(cbroProc, ehrTask.getFor(), srId);
+          resultProc.setId(IdType.newRandomUuid());
+          resultProc.addIdentifier()
+              //TODO set a proper system identifier for a CBRO
+              .setSystem("test-cbro-system")
+              .setValue(cbroProcId);
+          // Add Procedure to result bundle
+          resultBundle.addEntry(FhirUtil.createPostEntry(resultProc));
+          newOut.setValue(new Reference(resultProc.getIdElement()
+              .getValue()));
+        }
+        ehrTask.addOutput(newOut);
       }
     }
   }
 
-  protected Procedure copyProcedure(Procedure cbroProc, Reference patientReference, String srId,
-      ServiceRequest serviceRequest) {
+  protected Procedure copyProcedure(Procedure cbroProc, Reference patientReference, String srId) {
     Procedure resultProc = new Procedure();
-    //    resultProc.getMeta()
-    //        .addProfile(SDOHProfiles.PROCEDURE);
+    resultProc.getMeta()
+        .addProfile(SDOHProfiles.PROCEDURE);
     resultProc.addBasedOn(new Reference(new IdType(ServiceRequest.class.getSimpleName(), srId)));
     resultProc.setStatus(cbroProc.getStatus());
     resultProc.setStatusReason(cbroProc.getStatusReason());
@@ -214,17 +203,7 @@ public class CbroTaskUpdateService {
     resultProc.setSubject(patientReference);
     resultProc.setPerformed(cbroProc.getPerformed());
     resultProc.getReasonReference()
-        .addAll(serviceRequest.getReasonReference());
-    // Currently we do not transform Processor references, just copy them from EHR's ServiceRequest instance.
-    // Everything except Consent.
-    //TODO uncomment when we decide where we can put GOALs
-    //    resultProc.getReasonReference()
-    //        .addAll(serviceRequest.getSupportingInfo()
-    //            .stream()
-    //            .filter(r -> !Consent.class.getSimpleName()
-    //                .equals(r.getReferenceElement()
-    //                    .getResourceType()))
-    //            .collect(Collectors.toList()));
+        .addAll(cbroProc.getReasonReference());
     return resultProc;
   }
 
