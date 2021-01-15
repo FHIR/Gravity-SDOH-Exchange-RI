@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -38,17 +37,15 @@ public class CbroTaskCreateService {
         .setValue(task.getIdElement()
             .getIdPart());
 
-    Bundle bundle = new Bundle();
-    bundle.setType(Bundle.BundleType.TRANSACTION);
-    bundle.addEntry(FhirUtil.createPostEntry(t));
     try {
-      cbroClient.transaction()
-          .withBundle(bundle)
+      cbroClient.create()
+          .resource(t)
           .execute();
     } catch (BaseServerResponseException exc) {
-      throw new CbroTaskCreateException(String.format("Could not create a Task with identifier '%s' in CBRO at '%s'",
-          identifierSystem + "|" + task.getIdElement()
-              .getIdPart(), cbroClient.getServerBase()), exc);
+      throw new CbroTaskCreateException(
+          String.format("Could not create a Task with identifier '%s' in CBRO at '%s'. Reason: %s.",
+              identifierSystem + "|" + task.getIdElement()
+                  .getIdPart(), cbroClient.getServerBase(), exc.getMessage()), exc);
     }
   }
 

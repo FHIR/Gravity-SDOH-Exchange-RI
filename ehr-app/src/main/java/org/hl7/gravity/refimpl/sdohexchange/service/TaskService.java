@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.google.common.base.Strings;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -31,6 +32,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
 public class TaskService {
 
   private final IGenericClientProvider clientProvider;
@@ -156,7 +158,11 @@ public class TaskService {
       b.addEntry(FhirUtil.createPutEntry(task.setStatus(Task.TaskStatus.RECEIVED)
           .setLastModified(new Date())));
     } catch (CbroTaskCreateService.CbroTaskCreateException exc) {
-      //Additionally update a ServiceRequest status, but first - Read it.
+      log.warn(String.format("Task '%s' creation failed at CBRO. Failing a local Task and related ServiceRequest.",
+          task.getIdElement()
+              .getId()), exc);
+      // If Task creation failed in CBRO - set local Task.status to FAILED and ServiceRequest status to REVOKED.
+      // Additionally update a ServiceRequest status, but first - Read it.
       ServiceRequest serviceRequest = client.read()
           .resource(ServiceRequest.class)
           .withId(task.getFocus()
