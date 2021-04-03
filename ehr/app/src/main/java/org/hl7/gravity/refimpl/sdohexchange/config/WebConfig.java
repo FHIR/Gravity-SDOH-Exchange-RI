@@ -12,10 +12,4 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableScheduling
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
-  @Override
-  public void addViewControllers(ViewControllerRegistry registry) {
-    // Redirect to Swagger UI by default. In future, when UI is implemented - this might be changed.
-    registry.addRedirectViewController("/", "/swagger-ui/");
-  }
 }
