@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,12 +32,27 @@ public class CbroTaskCreateService {
   private String openFhirServerUri;
 
   public void createTask(IGenericClient cbroClient, Task task) throws CbroTaskCreateException {
-    Task t = externalizeResource(task.copy());
+    Task t = new Task();
+    t.getMeta()
+        .addProfile(SDOHProfiles.TASK);
+    t.setStatus(task.getStatus());
+    t.setIntent(task.getIntent());
+    t.setCode(task.getCode());
+    t.setAuthoredOn(task.getAuthoredOn());
+    t.setLastModified(task.getLastModified());
+    t.setNote(task.getNote());
     t.addIdentifier()
         .setSystem(identifierSystem)
         .setValue(task.getIdElement()
             .getIdPart());
-
+//    t.getFocus().setReference("https://api.logicahealth.org/GravityEHR/open/" + task.getFocus().getReference());
+//    t.getFor().setReference("https://api.logicahealth.org/GravityEHR/open/" + task.getFor().getReference());
+//    t.getOwner().setReference("https://api.logicahealth.org/GravityEHR/open/" + task.getOwner().getReference());
+//    Task t = externalizeResource(task.copy());
+//    t.addIdentifier()
+//        .setSystem(identifierSystem)
+//        .setValue(task.getIdElement()
+//            .getIdPart());
     try {
       cbroClient.create()
           .resource(t)
