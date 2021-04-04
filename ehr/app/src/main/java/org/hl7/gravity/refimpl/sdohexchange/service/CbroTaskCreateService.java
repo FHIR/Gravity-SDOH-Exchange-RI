@@ -32,27 +32,11 @@ public class CbroTaskCreateService {
   private String openFhirServerUri;
 
   public void createTask(IGenericClient cbroClient, Task task) throws CbroTaskCreateException {
-    Task t = new Task();
-    t.getMeta()
-        .addProfile(SDOHProfiles.TASK);
-    t.setStatus(task.getStatus());
-    t.setIntent(task.getIntent());
-    t.setCode(task.getCode());
-    t.setAuthoredOn(task.getAuthoredOn());
-    t.setLastModified(task.getLastModified());
-    t.setNote(task.getNote());
+    Task t = externalizeResource(task.copy());
     t.addIdentifier()
         .setSystem(identifierSystem)
         .setValue(task.getIdElement()
             .getIdPart());
-//    t.getFocus().setReference("https://api.logicahealth.org/GravityEHR/open/" + task.getFocus().getReference());
-//    t.getFor().setReference("https://api.logicahealth.org/GravityEHR/open/" + task.getFor().getReference());
-//    t.getOwner().setReference("https://api.logicahealth.org/GravityEHR/open/" + task.getOwner().getReference());
-//    Task t = externalizeResource(task.copy());
-//    t.addIdentifier()
-//        .setSystem(identifierSystem)
-//        .setValue(task.getIdElement()
-//            .getIdPart());
     try {
       cbroClient.create()
           .resource(t)
