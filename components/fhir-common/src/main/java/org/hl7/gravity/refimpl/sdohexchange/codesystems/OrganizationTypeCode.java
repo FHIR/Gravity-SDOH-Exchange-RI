@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems;
+package org.hl7.gravity.refimpl.sdohexchange.codesystems;
 
 import com.google.common.base.Strings;
 import org.hl7.fhir.exceptions.FHIRException;

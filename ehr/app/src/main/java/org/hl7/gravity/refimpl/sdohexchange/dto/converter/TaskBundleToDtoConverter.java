@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.TaskCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.util.FhirUtil;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
@@ -24,7 +24,6 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
 
   @Override
   public List<TaskDto> convert(Bundle bundle) {
-
     // Retrieve all Task.focus ServiceRequest instances
     Map<String, ServiceRequest> srMap = FhirUtil.getFromBundle(bundle, ServiceRequest.class)
         .stream()

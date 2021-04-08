@@ -24,10 +24,10 @@ import org.hl7.fhir.r4.model.codesystems.ConsentScope;
 import org.hl7.fhir.r4.model.codesystems.TaskCode;
 import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 import org.hl7.fhir.r4.model.codesystems.V3RoleClass;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.RequestCode;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.RequestCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.SDOHDomainCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.util.FhirUtil;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;

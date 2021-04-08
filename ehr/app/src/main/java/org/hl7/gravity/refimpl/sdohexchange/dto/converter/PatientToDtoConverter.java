@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.PatientDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.util.FhirUtil;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
 import java.time.LocalDate;

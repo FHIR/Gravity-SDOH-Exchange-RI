@@ -8,6 +8,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ConditionBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.GoalBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OrganizationToDtoConverter;
@@ -16,9 +18,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OrganizationDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.IGenericClientProvider;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SmartOnFhirContextProvider;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.OrganizationTypeCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.SDOHDomainCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.util.FhirUtil;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -45,8 +45,8 @@ public class SupportService {
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
         .where(Condition.PATIENT.hasId(smartOnFhirContext.getPatient()))
-//        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
-//            .value(SDOHProfiles.CONDITION))
+        //        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
+        //            .value(SDOHProfiles.CONDITION))
         .where(Condition.CATEGORY.hasSystemWithAnyCode(SDOHDomainCode.SYSTEM))
         .returnBundle(Bundle.class)
         .execute();
@@ -63,7 +63,7 @@ public class SupportService {
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
         .where(Goal.PATIENT.hasId(smartOnFhirContext.getPatient()))
-//        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
+        //        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
         //            .value(SDOHProfiles.GOAL))
         .where(Goal.CATEGORY.hasSystemWithAnyCode(SDOHDomainCode.SYSTEM))
         .returnBundle(Bundle.class)

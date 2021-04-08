@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.codesystems.ConditionState;
 import org.hl7.fhir.r4.model.codesystems.ConditionVerStatus;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.SDOHDomainCode;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
