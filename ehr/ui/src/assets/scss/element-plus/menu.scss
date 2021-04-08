@@ -1,0 +1,22 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-menu.el-menu--horizontal {
+	border-bottom: 0;
+
+	.el-menu-item {
+		color: $global-text-color;
+		height: 79px;
+		line-height: 79px;
+		padding: 0 40px;
+
+		&:not(:last-child)::after {
+			content: '';
+			width: 0;
+			height: 50%;
+			position: absolute;
+			border-right: 1px solid $global-base-border-color;
+			top: 25%;
+			right: 0;
+		}
+	}
+}
