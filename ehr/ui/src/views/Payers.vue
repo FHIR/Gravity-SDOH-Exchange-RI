@@ -2,12 +2,12 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-	name: "Home"
+	name: "Payers"
 });
 </script>
 
 <template>
 	<div>
-		home
+		payers
 	</div>
 </template>
