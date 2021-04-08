@@ -5,9 +5,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.RequestCode;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.RequestCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.SDOHDomainCode;
 
 import java.util.ArrayList;
 import java.util.List;

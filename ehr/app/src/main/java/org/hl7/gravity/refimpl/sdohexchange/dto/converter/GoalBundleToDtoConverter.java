@@ -6,10 +6,10 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.codesystems.GoalAchievement;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.OrganizationTypeCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.SDOHDomainCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.util.FhirUtil;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
@@ -52,9 +52,7 @@ public class GoalBundleToDtoConverter implements Converter<Bundle, List<GoalDto>
                     .getIdPart()));
       }
     }
-
     goalDto.setStatusDate(FhirUtil.toLocalDate(g.getStatusDateElement()));
-
     return goalDto;
   }
 }

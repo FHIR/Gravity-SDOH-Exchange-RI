@@ -4,8 +4,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.OrganizationTypeCode;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -16,7 +16,8 @@ spring:
             client-authentication-method: basic
             authorization-grant-type: authorization_code
             # scope 'launch/patient' for a standalone launch if needed.
-            scope: 'patient/*.*,user/*.read,profile,openid,launch'
+            # user/*.* will give us full access to resources in Logica sendbox (might be a bug), should be system/*.*
+            scope: 'user/*.*,profile,openid,launch'
         provider:
           cbro-provider:
             token-uri: https://auth.logicahealth.org/token

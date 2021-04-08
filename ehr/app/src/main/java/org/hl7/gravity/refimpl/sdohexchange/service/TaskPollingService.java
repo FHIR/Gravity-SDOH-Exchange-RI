@@ -12,9 +12,9 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
 import org.hl7.fhir.r4.model.codesystems.SearchModifierCode;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.IGenericClientProvider;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.OrganizationTypeCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.util.FhirUtil;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -79,7 +79,7 @@ public class TaskPollingService {
     List<Task> tasks = FhirUtil.getFromBundle(bundle, Task.class);
     //Collect all entries from every Task bundle for performance considerations.
     Bundle b = new Bundle();
-    bundle.setType(Bundle.BundleType.TRANSACTION);
+    b.setType(Bundle.BundleType.TRANSACTION);
     for (Task t : tasks) {
       b.getEntry()
           .addAll(getUpdateBundle(client, t, orgMap, endpointMap).getEntry());
@@ -139,14 +139,7 @@ public class TaskPollingService {
 
     log.warn("Setting status FAILED for Task '" + task.getIdElement()
         .getIdPart() + "'. Reason: " + reason);
-    bundle.addEntry()
-        .setResource(task)
-        .setFullUrl(task.getIdElement()
-            .getValue())
-        .getRequest()
-        .setUrl(task.getIdElement()
-            .getValue())
-        .setMethod(Bundle.HTTPVerb.PUT);
+    bundle.addEntry(FhirUtil.createPutEntry(task));
     return bundle;
   }
 }

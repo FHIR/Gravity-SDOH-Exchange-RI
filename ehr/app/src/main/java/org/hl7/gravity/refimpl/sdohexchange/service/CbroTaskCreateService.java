@@ -10,8 +10,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.util.FhirUtil;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,6 +36,7 @@ public class CbroTaskCreateService {
         .setSystem(identifierSystem)
         .setValue(task.getIdElement()
             .getIdPart());
+    t.setStatus(Task.TaskStatus.RECEIVED);
     try {
       cbroClient.create()
           .resource(t)

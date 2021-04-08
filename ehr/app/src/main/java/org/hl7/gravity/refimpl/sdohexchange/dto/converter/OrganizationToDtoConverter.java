@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OrganizationDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.OrganizationTypeCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.util.FhirUtil;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
 @Slf4j

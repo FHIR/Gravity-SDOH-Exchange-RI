@@ -17,6 +17,7 @@
   </properties>
 
   <modules>
+    <module>components</module>
     <module>ehr</module>
     <module>cbro</module>
   </modules>
