@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.codesystems.GoalAchievement;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codesystems.SDOHDomainCode;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

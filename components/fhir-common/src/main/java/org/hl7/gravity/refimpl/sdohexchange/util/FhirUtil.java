@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.util;
+package org.hl7.gravity.refimpl.sdohexchange.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.springframework.util.Assert;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -145,8 +144,10 @@ public class FhirUtil {
    * time for performance considerations.
    */
   public List<Reference> getAllReferences(FhirContext fhirR4Context, Resource resource) {
-    Assert.isTrue(FhirVersionEnum.R4.equals(fhirR4Context.getVersion()
-        .getVersion()), "fhirR4Context param must be of a FHIR R4 version.");
+    if (!FhirVersionEnum.R4.equals(fhirR4Context.getVersion()
+        .getVersion())) {
+      throw new IllegalArgumentException("fhirR4Context param must be of a FHIR R4 version.");
+    }
     return new FhirPathR4(fhirR4Context).evaluate(resource, "repeat(*).where(type().name = 'Reference')",
         Reference.class);
   }
