@@ -44,9 +44,9 @@ export default defineComponent({
 	<el-card class="patient-info">
 		<div class="heading">
 			<span class="name">{{ name }}</span>
-			<div>
-				<span class="insurance-label">Insurance: </span>
-				<span class="insurance-value">{{ insurance }}</span>
+			<div class="insurance">
+				<span class="label">Insurance: </span>
+				<span class="value">{{ insurance }}</span>
 			</div>
 		</div>
 		<el-row>
@@ -168,10 +168,14 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
 
+.patient-info {
+	height: 100%;
+}
+
 .heading {
 	display: flex;
 	justify-content: space-between;
-	margin-bottom: 30px;
+	margin-bottom: 25px;
 
 	.name {
 		font-size: $global-xxlarge-font-size;
@@ -194,7 +198,7 @@ export default defineComponent({
 
 .info-item {
 	display: flex;
-	margin-bottom: 17px;
+	margin-bottom: 16px;
 
 	&:last-child {
 		margin-bottom: 0;
@@ -206,11 +210,17 @@ export default defineComponent({
 	}
 }
 
-.insurance-label {
-	color: $grey;
-}
+.insurance {
+	display: flex;
+	align-items: flex-end;
 
-.insurance-value {
-	font-weight: $global-font-weight-medium;
+	.label {
+		color: $grey;
+		margin-right: 5px;
+	}
+
+	.value {
+		font-weight: $global-font-weight-medium;
+	}
 }
 </style>
