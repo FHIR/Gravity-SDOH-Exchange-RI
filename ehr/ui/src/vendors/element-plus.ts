@@ -9,7 +9,11 @@ import {
 	ElMenuItem,
 	ElCol,
 	ElRow,
-	ElCard
+	ElCard,
+	ElBreadcrumb,
+	ElBreadcrumbItem,
+	ElTabs,
+	ElTabPane
 } from "element-plus";
 
 export default (app: App) => {
@@ -21,4 +25,8 @@ export default (app: App) => {
 	app.use(ElCol);
 	app.use(ElRow);
 	app.use(ElCard);
+	app.use(ElBreadcrumb);
+	app.use(ElBreadcrumbItem);
+	app.use(ElTabs);
+	app.use(ElTabPane);
 };
