@@ -2,12 +2,12 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-	name: "Home"
+	name: "ReferralOrgs"
 });
 </script>
 
 <template>
 	<div>
-		home
+		Referral Organizations
 	</div>
 </template>

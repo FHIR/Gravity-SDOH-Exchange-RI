@@ -1,0 +1,7 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-breadcrumb__inner.is-link {
+	color: $global-primary-color;
+	text-decoration: underline;
+	font-weight: $global-font-weight-normal;
+}
