@@ -69,9 +69,12 @@ export default defineComponent({
 		<h4 class="title">
 			Request Table
 		</h4>
-		<div class="table-wrapper">
+		<div
+			class="table-wrapper"
+			v-loading="isLoading"
+		>
 			<el-table
-				v-loading="isLoading"
+				v-if="!isLoading && tableData.length > 0"
 				:data="tableData"
 			>
 				<el-table-column
@@ -124,6 +127,20 @@ export default defineComponent({
 					label="Comment"
 				/>
 			</el-table>
+			<div
+				v-if="!isLoading && !tableData.length"
+				class="no-data"
+			>
+				<h2>No Referral Requests Yet</h2>
+				<el-button
+					plain
+					round
+					type="primary"
+					size="mini"
+				>
+					Add New Request
+				</el-button>
+			</div>
 		</div>
 	</div>
 </template>
@@ -141,6 +158,7 @@ export default defineComponent({
 	border-radius: 5px;
 	box-shadow: 0 2px 5px rgba(51, 51, 51, 0.25);
 	padding: 10px 20px;
+	min-height: 200px;
 }
 
 .el-table {
@@ -247,6 +265,21 @@ export default defineComponent({
 			font-size: $global-small-font-size;
 			color: $grey
 		}
+	}
+}
+
+.no-data {
+	height: 350px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+	h2 {
+		color: $whisper;
+		font-size: $global-xxxlarge-font-size;
+		font-weight: $global-font-weight-normal;
+		margin-bottom: 50px;
 	}
 }
 </style>

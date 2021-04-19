@@ -19,7 +19,8 @@ import {
 	ElRadioButton,
 	ElTable,
 	ElTableColumn,
-	ElLoading
+	ElLoading,
+	ElButton
 } from "element-plus";
 
 export default (app: App) => {
@@ -41,4 +42,5 @@ export default (app: App) => {
 	app.use(ElTable);
 	app.use(ElTableColumn);
 	app.use(ElLoading);
+	app.use(ElButton);
 };
