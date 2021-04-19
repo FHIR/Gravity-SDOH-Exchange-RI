@@ -66,12 +66,22 @@ export default defineComponent({
 
 <template>
 	<div>
-		<h4 class="title">
-			Request Table
-		</h4>
+		<div class="title">
+			<h4>
+				Request Table
+			</h4>
+			<el-button
+				plain
+				round
+				type="primary"
+				size="mini"
+			>
+				Add New Request
+			</el-button>
+		</div>
 		<div
-			class="table-wrapper"
 			v-loading="isLoading"
+			class="table-wrapper"
 		>
 			<el-table
 				v-if="!isLoading && tableData.length > 0"
@@ -80,7 +90,13 @@ export default defineComponent({
 				<el-table-column
 					prop="request"
 					label="Request/Task"
-				/>
+				>
+					<template #default="scope">
+						<el-button type="text">
+							{{ scope.row.request }}
+						</el-button>
+					</template>
+				</el-table-column>
 				<el-table-column
 					prop="status"
 					label="Status"
@@ -150,7 +166,15 @@ export default defineComponent({
 @import "~@/assets/scss/abstracts/mixins";
 
 .title {
-	font-weight: $global-font-weight-medium;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 20px 0;
+
+	h4 {
+		font-weight: $global-font-weight-medium;
+		margin: 0;
+	}
 }
 
 .table-wrapper {
@@ -164,6 +188,15 @@ export default defineComponent({
 .el-table {
 	&::before {
 		background-color: $global-background;
+	}
+
+	::v-deep(.el-table__body) {
+		border-spacing: 0 10px;
+
+		th,
+		td {
+			padding: 7px 0;
+		}
 	}
 
 	::v-deep(.el-table__row) {
@@ -180,15 +213,6 @@ export default defineComponent({
 				border-right: 1px solid $global-base-border-color;
 				border-radius: 0 5px 5px 0;
 			}
-		}
-	}
-
-	::v-deep(.el-table__body) {
-		border-spacing: 0 10px;
-
-		th,
-		td {
-			padding: 7px 0;
 		}
 	}
 
@@ -263,7 +287,7 @@ export default defineComponent({
 
 		.date {
 			font-size: $global-small-font-size;
-			color: $grey
+			color: $grey;
 		}
 	}
 }
