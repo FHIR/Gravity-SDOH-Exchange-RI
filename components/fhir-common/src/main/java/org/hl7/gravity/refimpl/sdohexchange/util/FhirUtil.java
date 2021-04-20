@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -150,5 +152,34 @@ public class FhirUtil {
     }
     return new FhirPathR4(fhirR4Context).evaluate(resource, "repeat(*).where(type().name = 'Reference')",
         Reference.class);
+  }
+
+  /**
+   * Extract all references from all fields for a specified instance and filter them by resource types. Pass a
+   * FHIRContext not to create a new one every time for performance considerations.
+   */
+  public Map<String, List<Reference>> getReferences(FhirContext fhirR4Context, Resource resource,
+      List<Class<? extends DomainResource>> resourceTypes) {
+    List<String> resourceTypeNames = resourceTypes.stream()
+        .map(Class::getSimpleName)
+        .collect(Collectors.toList());
+    return getAllReferences(fhirR4Context, resource).stream()
+        .filter(reference -> resourceTypeNames.contains(reference.getReferenceElement()
+            .getResourceType()))
+        .collect(Collectors.groupingBy(reference -> reference.getReferenceElement()
+            .getResourceType()));
+  }
+
+  /**
+   * Extract all references from all fields for a specified instance and filter them by resource types. Pass a
+   * FHIRContext not to create a new one every time for performance considerations.
+   */
+  public List<Reference> getReferences(FhirContext fhirR4Context, Resource resource,
+      Class<? extends IBaseResource> resourceType) {
+    return getAllReferences(fhirR4Context, resource).stream()
+        .filter(reference -> resourceType.getSimpleName()
+            .equals(reference.getReferenceElement()
+                .getResourceType()))
+        .collect(Collectors.toList());
   }
 }

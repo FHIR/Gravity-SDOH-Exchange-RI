@@ -38,26 +38,28 @@ public class TaskService {
   private final IGenericClientProvider clientProvider;
   private final SmartOnFhirContextProvider smartProvider;
   private final CbroTaskCreateService cbroTaskCreateService;
+  private final OrganizationService organizationService;
 
-  public String newTask(NewTaskRequestDto newTaskRequestDto) {
-    if (newTaskRequestDto.getConsent() != Boolean.TRUE) {
+  public String newTask(NewTaskRequestDto taskRequest) {
+    if (taskRequest.getConsent() != Boolean.TRUE) {
       throw new IllegalStateException("Patient consent must be provided. Set consent to TRUE.");
     }
-
     // Create a Task Bundle
-    TaskBundleFactory taskBundleFactory = new TaskBundleFactory(smartProvider.context()
-        .getPatient(), newTaskRequestDto.getCategory(), newTaskRequestDto.getRequest(),
-        newTaskRequestDto.getPerformerId());
-    taskBundleFactory.setDetails(newTaskRequestDto.getDetails());
+
+    //TODO: We need to take requester organization id - how? TBD
+    TaskBundleFactory taskBundleFactory = new TaskBundleFactory(taskRequest.getRequestName(), smartProvider.context()
+        .getPatient(), taskRequest.getCategory(), taskRequest.getRequest(), taskRequest.getPriority(),
+        taskRequest.getPerformerId(), organizationService.getRequesterId());
+    taskBundleFactory.setDetails(taskRequest.getDetails());
 
     // TODO check conditions and goals are of SDOHCC profile?
-    if (newTaskRequestDto.getConditionIds() != null) {
+    if (taskRequest.getConditionIds() != null) {
       taskBundleFactory.getConditionIds()
-          .addAll(newTaskRequestDto.getConditionIds());
+          .addAll(taskRequest.getConditionIds());
     }
-    if (newTaskRequestDto.getGoalIds() != null) {
+    if (taskRequest.getGoalIds() != null) {
       taskBundleFactory.getGoalIds()
-          .addAll(newTaskRequestDto.getGoalIds());
+          .addAll(taskRequest.getGoalIds());
     }
 
     // Verify References
@@ -67,14 +69,13 @@ public class TaskService {
         .search()
         .forResource(Organization.class)
         .where(Organization.RES_ID.exactly()
-            .codes(newTaskRequestDto.getPerformerId()))
+            .codes(taskRequest.getPerformerId()))
         .include(Organization.INCLUDE_ENDPOINT)
         .returnBundle(Bundle.class)
         .execute();
     List<Organization> orgs = FhirUtil.getFromBundle(bundle, Organization.class);
     if (orgs.size() == 0) {
-      throw new IllegalStateException(
-          "Organization with id '" + newTaskRequestDto.getPerformerId() + "' does not exist.");
+      throw new IllegalStateException("Organization with id '" + taskRequest.getPerformerId() + "' does not exist.");
     }
 
     Organization org = orgs.get(0);
@@ -150,14 +151,16 @@ public class TaskService {
   }
 
   protected void handleCbroTask(IGenericClient client, Task task, Endpoint endpoint) {
-    // Create task in CBRO and update local task receive status.
-    Bundle b = new Bundle();
-    b.setType(Bundle.BundleType.TRANSACTION);
     try {
+      // Create task in CBRO.
       cbroTaskCreateService.createTask(clientProvider.client(endpoint.getAddress(), null), task);
-      b.addEntry(FhirUtil.createPutEntry(task.setStatus(Task.TaskStatus.RECEIVED)
-          .setLastModified(new Date())));
+
+      //TODO: Change task to received after CBRO receive it
+      //      b.addEntry(FhirUtil.createPutEntry(task.setStatus(Task.TaskStatus.RECEIVED)
+      //          .setLastModified(new Date())));
     } catch (CbroTaskCreateService.CbroTaskCreateException exc) {
+      Bundle b = new Bundle();
+      b.setType(Bundle.BundleType.TRANSACTION);
       log.warn(String.format("Task '%s' creation failed at CBRO. Failing a local Task and related ServiceRequest.",
           task.getIdElement()
               .getId()), exc);
@@ -172,9 +175,9 @@ public class TaskService {
           .setLastModified(new Date())
           .setStatusReason(new CodeableConcept().setText(exc.getMessage()))));
       b.addEntry(FhirUtil.createPutEntry(serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.REVOKED)));
+      client.transaction()
+          .withBundle(b)
+          .execute();
     }
-    client.transaction()
-        .withBundle(b)
-        .execute();
   }
 }

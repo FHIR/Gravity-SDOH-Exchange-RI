@@ -14,7 +14,11 @@ import java.util.List;
 public class NewTaskRequestDto {
 
   @NotNull
+  private String requestName;
+  @NotNull
   private SDOHDomainCode category;
+  private Priority priority;
+  //TODO: Add occurrence
   @NotNull
   private RequestCode request;
   private String details;

@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.TaskCode;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
@@ -46,9 +47,12 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
     TaskDto taskDto = new TaskDto(t.getIdElement()
         .getIdPart());
     //Convert Task
+    taskDto.setRequestName(t.getDescription());
     taskDto.setType(TaskCode.fromCode(t.getCode()
         .getCodingFirstRep()
         .getCode()));
+    taskDto.setPriority(Priority.fromText(t.getPriority()
+        .getDisplay()));
     taskDto.setCreatedAt(FhirUtil.toLocalDateTime(t.getAuthoredOnElement()));
     taskDto.setLastModified(FhirUtil.toLocalDateTime(t.getLastModifiedElement()));
     Optional.ofNullable(t.getStatus())

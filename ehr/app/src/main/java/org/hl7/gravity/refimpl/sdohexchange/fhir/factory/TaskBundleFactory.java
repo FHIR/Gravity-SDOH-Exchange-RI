@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 import org.hl7.fhir.r4.model.codesystems.V3RoleClass;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.RequestCode;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
@@ -46,10 +47,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskBundleFactory {
 
+  private final String requestName;
   private final String patientId;
   private final SDOHDomainCode category;
   private final RequestCode request;
+  private final Priority priority;
   private final String performerId;
+  private final String requesterId;
 
   @Setter
   private String details;
@@ -57,10 +61,13 @@ public class TaskBundleFactory {
   private final List<String> goalIds = new ArrayList<>();
 
   public Bundle createBundle() {
+    Assert.notNull(requestName, "Name cannot be null.");
     Assert.notNull(patientId, "Patient id cannot be null.");
     Assert.notNull(category, "SDOHDomainCode cannot be null.");
     Assert.notNull(request, "RequestCode cannot be null.");
+    Assert.notNull(priority, "Priority cannot be null.");
     Assert.notNull(performerId, "Performer (Organization) cannot be null.");
+    Assert.notNull(requesterId, "Requester (Organization) cannot be null.");
 
     Bundle bundle = new Bundle();
     bundle.setType(Bundle.BundleType.TRANSACTION);
@@ -83,6 +90,9 @@ public class TaskBundleFactory {
     serviceRequest.setId(IdType.newRandomUuid());
     serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
     serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+    serviceRequest.setPriority(priority.getServiceRequestPriority());
+    //TODO: Implement this. What types to support?
+    //    serviceRequest.setOccurrence(value)
     serviceRequest.setAuthoredOnElement(DateTimeType.now());
     // TODO implement validation using InstanceValidator to make sure invalid resources are not created.
     if (!SDOHDomainCategories.requestCodesPerDomain.containsKey(category)) {
@@ -112,6 +122,7 @@ public class TaskBundleFactory {
     Assert.notNull(consent.getId(), "Consent id cannot be null.");
     serviceRequest.addSupportingInfo(new Reference(consent.getIdElement()
         .getValue()));
+
     //Add description to both Task and ServiceRequest. To be revised.
     if (!Strings.isNullOrEmpty(details)) {
       serviceRequest.addNote()
@@ -126,13 +137,18 @@ public class TaskBundleFactory {
         .addProfile(SDOHProfiles.TASK);
     task.setStatus(Task.TaskStatus.REQUESTED);
     task.setIntent(Task.TaskIntent.ORDER);
+    task.setPriority(priority.getTaskPriority());
     DateTimeType now = DateTimeType.now();
     task.setAuthoredOnElement(now);
     task.setLastModified(now.getValue());
     TaskCode taskCode = TaskCode.FULFILL;
     task.getCode()
         .addCoding(new Coding(taskCode.getSystem(), taskCode.toCode(), taskCode.getDisplay()));
+    //TODO: To be revised after demo.
+    Assert.isTrue(!Strings.isNullOrEmpty(requestName), "Name cannot be null or empty.");
+    task.setDescription(requestName);
     Assert.notNull(serviceRequest.getId(), "ServiceRequest id cannot be null.");
+    task.setRequester(FhirUtil.toReference(Organization.class, requesterId));
     task.setFocus(new Reference(serviceRequest.getIdElement()
         .getValue()));
     task.setFor(FhirUtil.toReference(Patient.class, patientId));
