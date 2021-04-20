@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, computed, onMounted, ref } from "vue";
+import { defineComponent, computed, onMounted, ref, onUnmounted } from "vue";
 import { TasksModule } from "@/store/modules/tasks";
 import { TaskResponse } from "@/types";
 
@@ -47,13 +47,26 @@ export default defineComponent({
 			return res;
 		});
 
-		onMounted(async() => {
+		onMounted(async () => {
 			isLoading.value = true;
 			try {
 				await TasksModule.getTasks();
+				pollData();
 			} finally {
 				isLoading.value = false;
 			}
+		});
+		const pollId = ref<number>();
+		const pollData = async () => {
+			try {
+				await TasksModule.getTasks();
+			} finally {
+				// todo: should we continue polling if request failed? adjust polling time later to be in sync with BE
+				pollId.value = window.setTimeout(pollData, 15000);
+			}
+		};
+		onUnmounted(() => {
+			clearTimeout(pollId.value);
 		});
 
 		return {
