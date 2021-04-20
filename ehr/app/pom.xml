@@ -150,9 +150,11 @@
                 <resource>
                   <directory>${project.parent.basedir}/ui/dist</directory>
                   <includes>
+                    <include>favicon.*</include>
                     <include>fonts/</include>
                     <include>js/</include>
                     <include>img/</include>
+                    <include>css/</include>
                   </includes>
                 </resource>
               </resources>

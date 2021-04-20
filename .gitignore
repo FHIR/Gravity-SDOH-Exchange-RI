@@ -19,4 +19,16 @@ overlays
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# Frontend ignore rules
 node_modules/
+dist/
+npm/
+node/
+
+# npm lock files
+**/package-lock.json
+
+# Project specific ignores
+**/app/src/main/resources/static/**/*
+**/app/src/main/resources/templates/**/*
