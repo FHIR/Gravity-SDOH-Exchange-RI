@@ -1,10 +1,14 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import ActionSteps from "@/components/patients/ActionSteps.vue";
 
 export default defineComponent({
 	name: "Tabs",
+	components: {
+		ActionSteps
+	},
 	setup() {
-		const activeTab = ref("actionSteps");
+		const activeTab = ref<string>("actionSteps");
 
 		return {
 			activeTab
@@ -37,7 +41,7 @@ export default defineComponent({
 			label="Action Steps"
 			name="actionSteps"
 		>
-			Action Steps
+			<ActionSteps />
 		</el-tab-pane>
 		<el-tab-pane
 			label="Social Risk Assessments"

@@ -1,0 +1,11 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-button--primary.is-plain {
+	color: $global-text-color;
+	border-color: $global-primary-color;
+	background: $global-background;
+}
+
+.el-button--text {
+	text-decoration: underline;
+}

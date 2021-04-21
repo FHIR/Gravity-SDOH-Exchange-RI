@@ -13,7 +13,14 @@ import {
 	ElBreadcrumb,
 	ElBreadcrumbItem,
 	ElTabs,
-	ElTabPane
+	ElTabPane,
+	ElRadio,
+	ElRadioGroup,
+	ElRadioButton,
+	ElTable,
+	ElTableColumn,
+	ElLoading,
+	ElButton
 } from "element-plus";
 
 export default (app: App) => {
@@ -29,4 +36,11 @@ export default (app: App) => {
 	app.use(ElBreadcrumbItem);
 	app.use(ElTabs);
 	app.use(ElTabPane);
+	app.use(ElRadio);
+	app.use(ElRadioGroup);
+	app.use(ElRadioButton);
+	app.use(ElTable);
+	app.use(ElTableColumn);
+	app.use(ElLoading);
+	app.use(ElButton);
 };

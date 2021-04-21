@@ -207,6 +207,7 @@ export default defineComponent({
 	.label {
 		width: 155px;
 		color: $grey;
+		flex-shrink: 0;
 	}
 }
 

@@ -3,6 +3,7 @@
 /* Font
 -------------------------- */
 $--font-path: '~element-plus/lib/theme-chalk/fonts';
+$--font-weight-primary: $global-font-weight-normal;
 
 /* Color
 -------------------------- */
@@ -11,6 +12,7 @@ $--color-text-primary: $global-text-color;
 $--color-text-regular: $global-text-color;
 $--border-color-light: $global-base-border-color;
 $--background-color-base: $global-background;
+$--border-color-base: $global-base-border-color;
 
 /* Header
   -------------------------- */
