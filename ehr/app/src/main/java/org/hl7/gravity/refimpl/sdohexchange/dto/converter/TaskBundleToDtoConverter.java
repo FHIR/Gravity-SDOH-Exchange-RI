@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.TaskCode;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
@@ -14,6 +15,7 @@ import org.springframework.core.convert.converter.Converter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,13 +30,13 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
     Map<String, ServiceRequest> srMap = FhirUtil.getFromBundle(bundle, ServiceRequest.class)
         .stream()
         .collect(Collectors.toMap(r -> r.getIdElement()
-            .getIdPart(), r -> r));
+            .getIdPart(), Function.identity()));
 
     // Retrieve all Task.owner Organization instances
     Map<String, Organization> orgMap = FhirUtil.getFromBundle(bundle, Organization.class)
         .stream()
         .collect(Collectors.toMap(r -> r.getIdElement()
-            .getIdPart(), r -> r));
+            .getIdPart(), Function.identity()));
 
     return FhirUtil.getFromBundle(bundle, Task.class)
         .stream()
@@ -46,9 +48,12 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
     TaskDto taskDto = new TaskDto(t.getIdElement()
         .getIdPart());
     //Convert Task
+    taskDto.setRequestName(t.getDescription());
     taskDto.setType(TaskCode.fromCode(t.getCode()
         .getCodingFirstRep()
         .getCode()));
+    taskDto.setPriority(Priority.fromText(t.getPriority()
+        .getDisplay()));
     taskDto.setCreatedAt(FhirUtil.toLocalDateTime(t.getAuthoredOnElement()));
     taskDto.setLastModified(FhirUtil.toLocalDateTime(t.getLastModifiedElement()));
     Optional.ofNullable(t.getStatus())
