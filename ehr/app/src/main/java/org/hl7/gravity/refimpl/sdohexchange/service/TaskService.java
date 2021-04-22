@@ -39,6 +39,7 @@ public class TaskService {
   private final SmartOnFhirContextProvider smartProvider;
   private final CbroTaskCreateService cbroTaskCreateService;
   private final OrganizationService organizationService;
+  private final ContextService contextService;
 
   public String newTask(NewTaskRequestDto taskRequest) {
     if (taskRequest.getConsent() != Boolean.TRUE) {
@@ -47,10 +48,11 @@ public class TaskService {
     // Create a Task Bundle
 
     //TODO: We need to take requester organization id - how? TBD
-    TaskBundleFactory taskBundleFactory = new TaskBundleFactory(taskRequest.getRequestName(), smartProvider.context()
+    TaskBundleFactory taskBundleFactory = new TaskBundleFactory(taskRequest.getName(), smartProvider.context()
         .getPatient(), taskRequest.getCategory(), taskRequest.getRequest(), taskRequest.getPriority(),
         taskRequest.getPerformerId(), organizationService.getRequesterId());
-    taskBundleFactory.setDetails(taskRequest.getDetails());
+    taskBundleFactory.setComment(taskRequest.getComment());
+    taskBundleFactory.setUser(contextService.getUser(smartProvider.context()));
 
     // TODO check conditions and goals are of SDOHCC profile?
     if (taskRequest.getConditionIds() != null) {

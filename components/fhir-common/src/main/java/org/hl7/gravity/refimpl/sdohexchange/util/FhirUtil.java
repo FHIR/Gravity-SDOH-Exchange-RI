@@ -36,7 +36,14 @@ public class FhirUtil {
    * Compose a {@link Reference} object out of a resource Id.
    */
   public Reference toReference(Class<? extends IBaseResource> resourceClass, String id) {
-    return new Reference(new IdType(resourceClass.getSimpleName(), id).getValue());
+    return new Reference(new IdType(resourceClass.getSimpleName(), id));
+  }
+
+  /**
+   * Compose a {@link Reference} object out of a resource Id.
+   */
+  public Reference toReference(Class<? extends IBaseResource> resourceClass, String id, String display) {
+    return toReference(resourceClass, id).setDisplay(display);
   }
 
   /**

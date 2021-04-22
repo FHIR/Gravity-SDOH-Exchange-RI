@@ -82,9 +82,10 @@ public class TaskReferenceResourcesLoader {
 
     // Link CBRO Task with Patient, Organization and ServiceRequest
     task.setFor(FhirUtil.toReference(Patient.class, patient.getIdElement()
-        .getIdPart()));
+        .getIdPart(), patient.getNameFirstRep()
+        .getNameAsSingleString()));
     task.setRequester(FhirUtil.toReference(Organization.class, requester.getIdElement()
-        .getIdPart()));
+        .getIdPart(), requester.getName()));
     task.setFocus(FhirUtil.toReference(ServiceRequest.class, serviceRequest.getIdElement()
         .getIdPart()));
     return new TaskReferencesHolder(patient, requester, serviceRequest);

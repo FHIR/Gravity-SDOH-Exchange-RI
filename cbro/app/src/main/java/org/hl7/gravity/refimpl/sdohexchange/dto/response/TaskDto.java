@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.codesystems.TaskCode;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,16 +11,18 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
-//TODO: To be implemented
 public class TaskDto {
 
   private String id;
-  private Task.TaskPriority priority;
-  private Task.TaskStatus status;
+  private String name;
   private LocalDateTime createdAt;
   private LocalDateTime lastModified;
-  private String outcome;
-
+  private Task.TaskPriority priority;
+  private Task.TaskStatus status;
   private ServiceRequestDto serviceRequest;
-  private OrganizationDto organization;
+  private TypeDto requester;
+  private TypeDto patient;
+  private String consent;
+  private List<CommentDto> comments;
+  private String outcome;
 }

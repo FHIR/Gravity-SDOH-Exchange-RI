@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +29,9 @@ public class TaskController {
 
   @GetMapping("/{taskId}")
   @ApiOperation(value = "Read Task resource by id.")
-  public TaskDto task(@PathVariable String taskId) {
-    return taskService.readTask(taskId);
+  public ResponseEntity<TaskDto> task(@PathVariable String taskId) {
+    TaskDto taskDto = taskService.readTask(taskId);
+    return taskDto == null ? ResponseEntity.notFound()
+        .build() : ResponseEntity.ok(taskDto);
   }
 }

@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.codesystems.V3RoleClass;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.RequestCode;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
@@ -47,7 +48,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskBundleFactory {
 
-  private final String requestName;
+  private final String name;
   private final String patientId;
   private final SDOHDomainCode category;
   private final RequestCode request;
@@ -56,12 +57,14 @@ public class TaskBundleFactory {
   private final String requesterId;
 
   @Setter
-  private String details;
+  private String comment;
+  @Setter
+  private UserDto user;
   private final List<String> conditionIds = new ArrayList<>();
   private final List<String> goalIds = new ArrayList<>();
 
   public Bundle createBundle() {
-    Assert.notNull(requestName, "Name cannot be null.");
+    Assert.notNull(name, "Name cannot be null.");
     Assert.notNull(patientId, "Patient id cannot be null.");
     Assert.notNull(category, "SDOHDomainCode cannot be null.");
     Assert.notNull(request, "RequestCode cannot be null.");
@@ -124,9 +127,11 @@ public class TaskBundleFactory {
         .getValue()));
 
     //Add description to both Task and ServiceRequest. To be revised.
-    if (!Strings.isNullOrEmpty(details)) {
+    if (!Strings.isNullOrEmpty(comment)) {
       serviceRequest.addNote()
-          .setText(details);
+          .setText(comment)
+          .setTimeElement(DateTimeType.now())
+          .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
     }
     return serviceRequest;
   }
@@ -144,19 +149,20 @@ public class TaskBundleFactory {
     TaskCode taskCode = TaskCode.FULFILL;
     task.getCode()
         .addCoding(new Coding(taskCode.getSystem(), taskCode.toCode(), taskCode.getDisplay()));
-    //TODO: To be revised after demo.
-    Assert.isTrue(!Strings.isNullOrEmpty(requestName), "Name cannot be null or empty.");
-    task.setDescription(requestName);
+    task.setDescription(name);
     Assert.notNull(serviceRequest.getId(), "ServiceRequest id cannot be null.");
-    task.setRequester(FhirUtil.toReference(Organization.class, requesterId));
     task.setFocus(new Reference(serviceRequest.getIdElement()
         .getValue()));
     task.setFor(FhirUtil.toReference(Patient.class, patientId));
     task.setOwner(FhirUtil.toReference(Organization.class, performerId));
+    Assert.notNull(requesterId, "Requester Organization id cannot be null.");
+    task.setRequester(FhirUtil.toReference(Organization.class, requesterId));
     //Add description to both Task and ServiceRequest. To be revised.
-    if (!Strings.isNullOrEmpty(details)) {
+    if (!Strings.isNullOrEmpty(comment)) {
       task.addNote()
-          .setText(details);
+          .setText(comment)
+          .setTimeElement(DateTimeType.now())
+          .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
     }
     return task;
   }
