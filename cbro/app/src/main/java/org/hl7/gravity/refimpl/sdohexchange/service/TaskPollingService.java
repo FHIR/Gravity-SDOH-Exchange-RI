@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Slf4j
 public class TaskPollingService {
 
   private final IGenericClient openCbroClient;
@@ -24,13 +24,13 @@ public class TaskPollingService {
 
   @Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
   public void processTasks() {
-    log.info("Checking for received tasks from EHR...");
+    log.info("Checking for requested tasks from EHR...");
     Bundle searchBundle = openCbroClient.search()
         .forResource(Task.class)
         .where(new TokenClientParam(Constants.PARAM_PROFILE).exactly()
             .code(SDOHProfiles.TASK))
         .and(Task.STATUS.exactly()
-            .code(Task.TaskStatus.RECEIVED.toCode()))
+            .code(Task.TaskStatus.REQUESTED.toCode()))
         .returnBundle(Bundle.class)
         .execute();
 
@@ -44,12 +44,11 @@ public class TaskPollingService {
             .addAll(bundle.getEntry()));
     if (transactionBundle.getEntry()
         .size() > 0) {
-      log.info("One or more task were accepted from EHR. Storing updates to CBRO...");
+      log.info("One or more task were received from EHR. Storing updates...");
       openCbroClient.transaction()
           .withBundle(transactionBundle)
           .execute();
     }
-    log.info("Task accepting process finished.");
+    log.info("Task receiving process finished.");
   }
-
 }
