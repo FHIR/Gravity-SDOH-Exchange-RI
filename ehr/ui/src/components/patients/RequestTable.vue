@@ -2,6 +2,7 @@
 import { defineComponent, computed, onMounted, ref, onUnmounted } from "vue";
 import { TasksModule } from "@/store/modules/tasks";
 import { TaskResponse } from "@/types";
+import RequestDialog from "@/components/patients/RequestDialog.vue";
 
 export type TableData = {
 	request: string,
@@ -18,8 +19,12 @@ export type TableData = {
 
 export default defineComponent({
 	name: "RequestTable",
+	components: {
+		RequestDialog
+	},
 	setup() {
 		const isLoading = ref<boolean>(false);
+		const requestDialogVisible = ref<boolean>(false);
 
 		const tasks = computed<TaskResponse[] | null>(() => TasksModule.tasks);
 		const tableData = computed<TableData[]>(() => {
@@ -71,7 +76,8 @@ export default defineComponent({
 
 		return {
 			tableData,
-			isLoading
+			isLoading,
+			requestDialogVisible
 		};
 	}
 });
@@ -88,6 +94,7 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				@click="requestDialogVisible = true"
 			>
 				Add New Request
 			</el-button>
@@ -166,12 +173,17 @@ export default defineComponent({
 					round
 					type="primary"
 					size="mini"
+					@click="requestDialogVisible = true"
 				>
 					Add New Request
 				</el-button>
 			</div>
 		</div>
 	</div>
+	<RequestDialog
+		:visible="requestDialogVisible"
+		@close="requestDialogVisible = false"
+	/>
 </template>
 
 <style lang="scss" scoped>

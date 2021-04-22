@@ -20,7 +20,8 @@ import {
 	ElTable,
 	ElTableColumn,
 	ElLoading,
-	ElButton
+	ElButton,
+	ElDialog
 } from "element-plus";
 
 export default (app: App) => {
@@ -43,4 +44,5 @@ export default (app: App) => {
 	app.use(ElTableColumn);
 	app.use(ElLoading);
 	app.use(ElButton);
+	app.use(ElDialog);
 };

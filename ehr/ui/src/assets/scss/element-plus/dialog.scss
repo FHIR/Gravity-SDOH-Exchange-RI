@@ -1,0 +1,25 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-dialog__title {
+	font-weight: $global-font-weight-medium;
+}
+
+.el-dialog__header {
+	border-bottom: 1px solid $global-base-border-color;
+	padding: 22px 25px;
+}
+
+.el-dialog__headerbtn {
+	top: 25px;
+
+	.el-dialog__close {
+		color: $global-text-color;
+		font-weight: $global-font-weight-bold;
+		font-size: $global-large-font-size;
+	}
+}
+
+.el-dialog__footer {
+	border-top: 1px solid $global-base-border-color;
+	padding: 22px 25px;
+}
