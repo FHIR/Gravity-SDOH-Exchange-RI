@@ -63,3 +63,24 @@ export type TaskResponse = {
 export type TaskStatus = "ACCEPTED" | "CANCELLED" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "FAILED" | "INPROGRESS" | "NULL" | "ONHOLD" | "READY" | "RECEIVED" | "REJECTED" | "REQUESTED"
 
 export type TaskType = "ABORT" | "APPROVE" | "CHANGE" | "FULFILL" | "NULL" | "REPLACE" | "RESUME" | "SUSPEND"
+
+export type Condition = {
+	clinicalStatus: "ACTIVE" | "INACTIVE" | "NULL" | "RESOLVED",
+	conditionId: string,
+	dateRecorded: string,
+	//todo: it's enum in api
+	domain: string,
+	errors: string[],
+	verificationStatus: "CONFIRMED" | "DIFFERENTIAL" | "ENTEREDINERROR" | "NULL" | "PROVISIONAL" | "REFUTED" | "UNCONFIRMED"
+}
+
+export type Goal = {
+	achievementStatus: "ACHIEVED" | "IMPROVING" | "INPROGRESS" | "NOCHANGE" | "NOPROGRESS" | "NOTACHIEVED" | "NOTATTAINABLE" | "NULL" | "SUSTAINING" | "WORSENING",
+	//todo: it's enum in api
+	domain: string,
+	errors: string[],
+	goalId: string,
+	lifecycleStatus: "ACCEPTED" | "ACTIVE" | "CANCELLED" | "COMPLETED" | "ENTEREDINERROR" | "NULL" | "ONHOLD" | "PLANNED" | "PROPOSED" | "REJECTED",
+	statusDate: string
+}
+

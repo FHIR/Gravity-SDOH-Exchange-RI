@@ -179,11 +179,12 @@ export default defineComponent({
 				</el-button>
 			</div>
 		</div>
+
+		<RequestDialog
+			:visible="requestDialogVisible"
+			@close="requestDialogVisible = false"
+		/>
 	</div>
-	<RequestDialog
-		:visible="requestDialogVisible"
-		@close="requestDialogVisible = false"
-	/>
 </template>
 
 <style lang="scss" scoped>

@@ -21,7 +21,15 @@ import {
 	ElTableColumn,
 	ElLoading,
 	ElButton,
-	ElDialog
+	ElDialog,
+	ElForm,
+	ElFormItem,
+	ElInput,
+	ElSelect,
+	ElOption,
+	ElDivider,
+	ElDatePicker,
+	ElCheckbox
 } from "element-plus";
 
 export default (app: App) => {
@@ -45,4 +53,12 @@ export default (app: App) => {
 	app.use(ElLoading);
 	app.use(ElButton);
 	app.use(ElDialog);
+	app.use(ElForm);
+	app.use(ElFormItem);
+	app.use(ElInput);
+	app.use(ElSelect);
+	app.use(ElOption);
+	app.use(ElDivider);
+	app.use(ElDatePicker);
+	app.use(ElCheckbox);
 };

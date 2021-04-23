@@ -1,0 +1,9 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-form-item--mini.el-form-item {
+	margin-bottom: 10px;
+}
+
+.el-form-item__label {
+	color: $grey;
+}
