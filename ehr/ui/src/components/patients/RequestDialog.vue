@@ -13,6 +13,7 @@ export default defineComponent({
 	},
 	emits: ["close"],
 	setup() {
+		//todo: use serviceRequestCategory type as value
 		const categoryOptions = reactive([{
 			value: "EDUCATION_DOMAIN",
 			label: "Education Domain"
@@ -90,6 +91,7 @@ export default defineComponent({
 		title="New Service Request/Task"
 		:width="700"
 		:append-to-body="true"
+		:destroy-on-close="true"
 		custom-class="request-dialog"
 		@close="$emit('close')"
 	>
@@ -98,12 +100,19 @@ export default defineComponent({
 			label-width="155px"
 			label-position="left"
 			size="mini"
+			class="request-form"
 		>
 			<el-form-item label="Request Name">
-				<el-input v-model="form.request" />
+				<el-input
+					v-model="form.request"
+					placeholder="Enter Name"
+				/>
 			</el-form-item>
 			<el-form-item label="Category/Domain">
-				<el-select v-model="form.category">
+				<el-select
+					v-model="form.category"
+					placeholder="Select Category/Domain"
+				>
 					<el-option
 						v-for="item in categoryOptions"
 						:key="item.value"
@@ -113,7 +122,11 @@ export default defineComponent({
 				</el-select>
 			</el-form-item>
 			<el-form-item label="Status">
-				<el-select v-model="form.status">
+				<el-select
+					v-model="form.status"
+					placeholder="Select Status"
+					class="half"
+				>
 					<el-option
 						label="Draft"
 						value="draft"
@@ -125,6 +138,7 @@ export default defineComponent({
 					v-model="form.details"
 					type="textarea"
 					rows="2"
+					placeholder="Enter your comment here..."
 				/>
 			</el-form-item>
 
@@ -151,7 +165,9 @@ export default defineComponent({
 				</el-radio>
 			</el-form-item>
 			<el-form-item label="Occurrence">
-				<el-select>
+				<el-select
+					class="half"
+				>
 					<el-option
 						label="Until"
 						value="until"
@@ -160,7 +176,11 @@ export default defineComponent({
 				<el-date-picker v-model="form.occurrence" />
 			</el-form-item>
 			<el-form-item label="Problem(s)">
-				<el-select v-model="form.conditionIds">
+				<el-select
+					v-model="form.conditionIds"
+					multiple
+					placeholder="Select Problem"
+				>
 					<el-option
 						v-for="item in conditionOptions"
 						:key="item.conditionId"
@@ -173,6 +193,7 @@ export default defineComponent({
 				<el-select
 					v-model="form.goalIds"
 					multiple
+					placeholder="Select Goal"
 				>
 					<el-option
 						v-for="item in goalOptions"
@@ -186,7 +207,10 @@ export default defineComponent({
 			<el-divider />
 
 			<el-form-item label="Performer(s)">
-				<el-select v-model="form.performerId">
+				<el-select
+					v-model="form.performerId"
+					placeholder="Select Performer"
+				>
 					<el-option
 						v-for="item in performerOptions"
 						:key="item.organizationId"
@@ -227,6 +251,25 @@ export default defineComponent({
 		.el-button {
 			width: 155px;
 		}
+	}
+}
+
+.request-form {
+	.el-select {
+		width: 100%;
+
+		&.half {
+			width: 50%;
+			margin-right: 15px;
+		}
+	}
+
+	.el-divider {
+		margin: 20px 0;
+	}
+
+	::v-deep(.el-date-editor.el-input) {
+		width: 125px;
 	}
 }
 </style>

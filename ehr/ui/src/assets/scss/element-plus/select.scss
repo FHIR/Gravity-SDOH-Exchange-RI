@@ -1,0 +1,17 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-select .el-input .el-select__caret {
+	color: $global-text-muted-color;
+	font-size: $global-small-font-size;
+}
+
+.el-select-dropdown__item {
+	padding: 0 10px;
+	font-size: $global-intermediate-font-size;
+	height: 25px;
+	line-height: 25px;
+
+	&:hover {
+		background-color: rgba($silver, 0.15);
+	}
+}
