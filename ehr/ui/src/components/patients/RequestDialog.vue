@@ -1,7 +1,9 @@
 <script lang="ts">
 import { defineComponent, reactive, ref, onMounted } from "vue";
 import { getGoals, getConditions, getOrganizations } from "@/api";
-import { Condition, Goal, Organization } from "@/types";
+import { Condition, Goal, newTaskPayload, Organization } from "@/types";
+import _ from "@/vendors/lodash";
+import { TasksModule } from "@/store/modules/tasks";
 
 export default defineComponent({
 	name: "RequestDialog",
@@ -12,7 +14,7 @@ export default defineComponent({
 		}
 	},
 	emits: ["close"],
-	setup() {
+	setup(props, { emit }) {
 		//todo: use serviceRequestCategory type as value
 		const categoryOptions = reactive([{
 			value: "EDUCATION_DOMAIN",
@@ -51,8 +53,7 @@ export default defineComponent({
 		const conditionOptions = ref<Condition[]>([]);
 		const goalOptions = ref<Goal[]>([]);
 		const performerOptions = ref<Organization[]>([]);
-
-		const form = reactive({
+		const formModel = reactive({
 			request: "",
 			category: "",
 			//todo: we don't have status in api as param, you can't create task with specific status
@@ -67,6 +68,7 @@ export default defineComponent({
 			performerId: "",
 			consent: false
 		});
+		const occurrenceType = ref<string>("until");
 
 		onMounted(async () => {
 			conditionOptions.value = await getConditions();
@@ -74,12 +76,61 @@ export default defineComponent({
 			performerOptions.value = await getOrganizations();
 		});
 
+		//todo: use Rules type from async-validator
+		const formRules = {
+			request: {
+				required: true,
+				message: "This field is required"
+			},
+			category: {
+				required: true,
+				message: "This field is required"
+			},
+			//todo: remove for now, api doesn't support priority field
+			// priority: {
+			// 	required: true,
+			// 	trigger: "change",
+			// 	message: "This field is required"
+			// },
+			conditionIds: {
+				required: true,
+				message: "This field is required"
+			},
+			goalIds: {
+				required: true,
+				message: "This field is required"
+			},
+			performerId: {
+				required: true,
+				message: "This field is required"
+			},
+			consent: {
+				required: true,
+				message: "This field is required"
+			}
+		};
+		const formEl = ref<HTMLFormElement>();
+		const onFormSave = () => {
+			formEl.value?.validate(async (valid: boolean) => {
+				if (valid) {
+					//todo: omit this props because api doesn't support that
+					const payload: newTaskPayload = _.omit(formModel, ["status", "priority", "occurrence"]);
+					await TasksModule.createTask(payload);
+					emit("close");
+				}
+			});
+		};
+
 		return {
-			form,
+			formModel,
 			categoryOptions,
 			conditionOptions,
 			goalOptions,
-			performerOptions
+			performerOptions,
+			formRules,
+			formEl,
+			onFormSave,
+			occurrenceType
 		};
 	}
 });
@@ -96,21 +147,29 @@ export default defineComponent({
 		@close="$emit('close')"
 	>
 		<el-form
-			:model="form"
+			ref="formEl"
+			:model="formModel"
+			:rules="formRules"
 			label-width="155px"
 			label-position="left"
 			size="mini"
 			class="request-form"
 		>
-			<el-form-item label="Request Name">
+			<el-form-item
+				label="Request Name"
+				prop="request"
+			>
 				<el-input
-					v-model="form.request"
+					v-model="formModel.request"
 					placeholder="Enter Name"
 				/>
 			</el-form-item>
-			<el-form-item label="Category/Domain">
+			<el-form-item
+				label="Category/Domain"
+				prop="category"
+			>
 				<el-select
-					v-model="form.category"
+					v-model="formModel.category"
 					placeholder="Select Category/Domain"
 				>
 					<el-option
@@ -121,9 +180,12 @@ export default defineComponent({
 					/>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="Status">
+			<el-form-item
+				label="Status"
+				prop="status"
+			>
 				<el-select
-					v-model="form.status"
+					v-model="formModel.status"
 					placeholder="Select Status"
 					class="half"
 				>
@@ -133,9 +195,12 @@ export default defineComponent({
 					/>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="Comment">
+			<el-form-item
+				label="Comment"
+				prop="details"
+			>
 				<el-input
-					v-model="form.details"
+					v-model="formModel.details"
 					type="textarea"
 					rows="2"
 					placeholder="Enter your comment here..."
@@ -144,40 +209,47 @@ export default defineComponent({
 
 			<el-divider />
 
-			<el-form-item label="Priority">
-				<el-radio
-					v-model="form.priority"
-					label="routine"
-				>
-					Routine
-				</el-radio>
-				<el-radio
-					v-model="form.priority"
-					label="urgent"
-				>
-					Urgent
-				</el-radio>
-				<el-radio
-					v-model="form.priority"
-					label="asap"
-				>
-					ASAP
-				</el-radio>
+			<el-form-item
+				label="Priority"
+				prop="priority"
+			>
+				<el-radio-group v-model="formModel.priority">
+					<el-radio label="routine">
+						Routine
+					</el-radio>
+					<el-radio label="urgent">
+						Urgent
+					</el-radio>
+					<el-radio label="asap">
+						ASAP
+					</el-radio>
+				</el-radio-group>
 			</el-form-item>
-			<el-form-item label="Occurrence">
+			<el-form-item
+				label="Occurrence"
+				prop="occurrence"
+			>
 				<el-select
+					v-model="occurrenceType"
 					class="half"
 				>
 					<el-option
 						label="Until"
 						value="until"
 					/>
+					<el-option
+						label="Range"
+						value="range"
+					/>
 				</el-select>
-				<el-date-picker v-model="form.occurrence" />
+				<el-date-picker v-model="formModel.occurrence" />
 			</el-form-item>
-			<el-form-item label="Problem(s)">
+			<el-form-item
+				label="Problem(s)"
+				prop="conditionIds"
+			>
 				<el-select
-					v-model="form.conditionIds"
+					v-model="formModel.conditionIds"
 					multiple
 					placeholder="Select Problem"
 				>
@@ -189,9 +261,12 @@ export default defineComponent({
 					/>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="Goals(s)">
+			<el-form-item
+				label="Goals(s)"
+				prop="goalIds"
+			>
 				<el-select
-					v-model="form.goalIds"
+					v-model="formModel.goalIds"
 					multiple
 					placeholder="Select Goal"
 				>
@@ -206,9 +281,12 @@ export default defineComponent({
 
 			<el-divider />
 
-			<el-form-item label="Performer(s)">
+			<el-form-item
+				label="Performer(s)"
+				prop="performerId"
+			>
 				<el-select
-					v-model="form.performerId"
+					v-model="formModel.performerId"
 					placeholder="Select Performer"
 				>
 					<el-option
@@ -219,8 +297,11 @@ export default defineComponent({
 					/>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="Consent">
-				<el-checkbox v-model="form.consent" />
+			<el-form-item
+				label="Consent"
+				prop="consent"
+			>
+				<el-checkbox v-model="formModel.consent" />
 			</el-form-item>
 		</el-form>
 		<template #footer>
@@ -236,6 +317,7 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				@click="onFormSave"
 			>
 				Create & Send
 			</el-button>

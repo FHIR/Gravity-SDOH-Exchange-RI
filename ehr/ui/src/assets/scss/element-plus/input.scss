@@ -1,6 +1,8 @@
 @import "~@/assets/scss/abstracts/variables";
 
 .el-input--mini {
+	line-height: 25px;
+
 	.el-input__inner {
 		height: 25px;
 	}

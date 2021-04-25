@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ContextResponse, TaskResponse, Condition, Goal, Organization } from "@/types";
+import { ContextResponse, TaskResponse, Condition, Goal, Organization, newTaskPayload } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
 	const res = await axios.get("/api/current-context");
@@ -9,6 +9,12 @@ export const getContext = async (): Promise<ContextResponse> => {
 
 export const getTasks = async (): Promise<TaskResponse[]> => {
 	const res = await axios.get("/api/task");
+
+	return res.data;
+};
+
+export const createTask = async (payload: newTaskPayload): Promise<{ taskId: string }> => {
+	const res = await axios.post("/api/task", payload);
 
 	return res.data;
 };

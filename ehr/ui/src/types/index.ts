@@ -26,14 +26,14 @@ export type User = {
 export type ContextResponse = {
 	patient: Patient,
 	user: User
-}
+};
 
 export type Organization = {
 	errors: string[],
 	name: string,
 	organizationId: string,
 	type: "CBO" | "CBRO"
-}
+};
 
 export type ServiceRequest = {
 	category: ServiceRequestCategory,
@@ -43,7 +43,7 @@ export type ServiceRequest = {
 	request: string,
 	serviceRequestId: string,
 	status: ServiceRequestStatus
-}
+};
 
 export type ServiceRequestStatus = "ACTIVE" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "NULL" | "ONHOLD" | "REVOKED" | "UNKNOWN"
 
@@ -59,7 +59,17 @@ export type TaskResponse = {
 	status: TaskStatus,
 	taskId: string,
 	type: TaskType
-}
+};
+
+export type newTaskPayload = {
+	category: string,
+	conditionIds: string[],
+	consent: boolean,
+	details: string,
+	goalIds: string[],
+	performerId: string,
+	request: string
+};
 
 export type TaskStatus = "ACCEPTED" | "CANCELLED" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "FAILED" | "INPROGRESS" | "NULL" | "ONHOLD" | "READY" | "RECEIVED" | "REJECTED" | "REQUESTED"
 
@@ -73,7 +83,7 @@ export type Condition = {
 	domain: string,
 	errors: string[],
 	verificationStatus: "CONFIRMED" | "DIFFERENTIAL" | "ENTEREDINERROR" | "NULL" | "PROVISIONAL" | "REFUTED" | "UNCONFIRMED"
-}
+};
 
 export type Goal = {
 	achievementStatus: "ACHIEVED" | "IMPROVING" | "INPROGRESS" | "NOCHANGE" | "NOPROGRESS" | "NOTACHIEVED" | "NOTATTAINABLE" | "NULL" | "SUSTAINING" | "WORSENING",
@@ -83,5 +93,4 @@ export type Goal = {
 	goalId: string,
 	lifecycleStatus: "ACCEPTED" | "ACTIVE" | "CANCELLED" | "COMPLETED" | "ENTEREDINERROR" | "NULL" | "ONHOLD" | "PLANNED" | "PROPOSED" | "REJECTED",
 	statusDate: string
-}
-
+};

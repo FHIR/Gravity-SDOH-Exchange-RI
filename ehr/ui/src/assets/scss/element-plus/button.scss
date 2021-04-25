@@ -9,3 +9,12 @@
 .el-button--text {
 	text-decoration: underline;
 }
+
+.el-button--mini {
+	min-height: 25px;
+	padding: 5px 20px;
+
+	&.is-round {
+		padding: 5px 20px;
+	}
+}
