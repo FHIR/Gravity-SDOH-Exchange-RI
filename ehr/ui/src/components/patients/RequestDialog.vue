@@ -57,10 +57,10 @@ export default defineComponent({
 			request: "",
 			category: "",
 			//todo: we don't have status in api as param, you can't create task with specific status
-			status: "",
+			status: "draft",
 			details: "",
 			//todo: no api for that
-			priority: "",
+			priority: "routine",
 			//todo: no api for that
 			occurrence: "",
 			conditionIds: [],
@@ -68,8 +68,12 @@ export default defineComponent({
 			performerId: "",
 			consent: false
 		});
-		const occurrenceType = ref<string>("until");
+		const occurrenceType = ref<string>("");
+		const formEl = ref<HTMLFormElement>();
 
+		//
+		// On component mount fetch all options for dropdowns.
+		//
 		onMounted(async () => {
 			conditionOptions.value = await getConditions();
 			goalOptions.value = await getGoals();
@@ -106,20 +110,37 @@ export default defineComponent({
 			},
 			consent: {
 				required: true,
-				message: "This field is required"
+				message: "This field is required",
+				trigger: "change",
+				//todo: rule type from async-validator
+				validator: (rule: any, value: boolean, callback: (err?: string | Error) => void): void => {
+					value ? callback() : callback(new Error());
+				}
 			}
 		};
-		const formEl = ref<HTMLFormElement>();
+		//
+		// On save button click handler. Validate form, if everything is ok save it and close dialog.
+		//
 		const onFormSave = () => {
 			formEl.value?.validate(async (valid: boolean) => {
 				if (valid) {
 					//todo: omit this props because api doesn't support that
 					const payload: newTaskPayload = _.omit(formModel, ["status", "priority", "occurrence"]);
-					await TasksModule.createTask(payload);
-					emit("close");
+					saveInProgress.value = true;
+					try {
+						await TasksModule.createTask(payload);
+						emit("close");
+					} finally {
+						saveInProgress.value = false;
+					}
 				}
 			});
 		};
+		const saveInProgress = ref<boolean>(false);
+		//
+		// Disable all dates that are less than today. Used inside occurrence date-pickers.
+		//
+		const disabledOccurrenceDate = (time: Date): boolean => time.getTime() < Date.now();
 
 		return {
 			formModel,
@@ -130,7 +151,9 @@ export default defineComponent({
 			formRules,
 			formEl,
 			onFormSave,
-			occurrenceType
+			occurrenceType,
+			disabledOccurrenceDate,
+			saveInProgress
 		};
 	}
 });
@@ -161,7 +184,7 @@ export default defineComponent({
 			>
 				<el-input
 					v-model="formModel.request"
-					placeholder="Enter Name"
+					placeholder="Add request name"
 				/>
 			</el-form-item>
 			<el-form-item
@@ -188,6 +211,7 @@ export default defineComponent({
 					v-model="formModel.status"
 					placeholder="Select Status"
 					class="half"
+					:disabled="true"
 				>
 					<el-option
 						label="Draft"
@@ -231,7 +255,8 @@ export default defineComponent({
 			>
 				<el-select
 					v-model="occurrenceType"
-					class="half"
+					placeholder="Select"
+					class="small"
 				>
 					<el-option
 						label="Until"
@@ -242,7 +267,20 @@ export default defineComponent({
 						value="range"
 					/>
 				</el-select>
-				<el-date-picker v-model="formModel.occurrence" />
+				<el-date-picker
+					v-if="occurrenceType === 'until'"
+					v-model="formModel.occurrence"
+					:disabled-date="disabledOccurrenceDate"
+				/>
+				<el-date-picker
+					v-if="occurrenceType === 'range'"
+					v-model="formModel.occurrence"
+					type="daterange"
+					range-separator="To"
+					start-placeholder="Start date"
+					end-placeholder="End date"
+					:disabled-date="disabledOccurrenceDate"
+				/>
 			</el-form-item>
 			<el-form-item
 				label="Problem(s)"
@@ -251,7 +289,7 @@ export default defineComponent({
 				<el-select
 					v-model="formModel.conditionIds"
 					multiple
-					placeholder="Select Problem"
+					placeholder="Select Problem(s)"
 				>
 					<el-option
 						v-for="item in conditionOptions"
@@ -268,7 +306,7 @@ export default defineComponent({
 				<el-select
 					v-model="formModel.goalIds"
 					multiple
-					placeholder="Select Goal"
+					placeholder="Select Goal(s)"
 				>
 					<el-option
 						v-for="item in goalOptions"
@@ -287,7 +325,7 @@ export default defineComponent({
 			>
 				<el-select
 					v-model="formModel.performerId"
-					placeholder="Select Performer"
+					placeholder="Select Performer(s)"
 				>
 					<el-option
 						v-for="item in performerOptions"
@@ -317,6 +355,7 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				:loading="saveInProgress"
 				@click="onFormSave"
 			>
 				Create & Send
@@ -342,6 +381,11 @@ export default defineComponent({
 
 		&.half {
 			width: 50%;
+			margin-right: 15px;
+		}
+
+		&.small {
+			width: 20%;
 			margin-right: 15px;
 		}
 	}
