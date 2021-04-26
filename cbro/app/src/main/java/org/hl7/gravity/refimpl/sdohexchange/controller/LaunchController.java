@@ -10,6 +10,6 @@ public class LaunchController {
 
   @GetMapping("/")
   public String index() {
-    return "index";
+    return "index.html";
   }
 }
