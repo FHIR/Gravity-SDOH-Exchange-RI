@@ -37,10 +37,6 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-thymeleaf</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.healthlx.smartonfhir</groupId>
       <artifactId>config</artifactId>
       <version>0.3</version>
@@ -125,7 +121,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>src/main/resources/templates</outputDirectory>
+              <outputDirectory>src/main/resources/public</outputDirectory>
               <overwrite>true</overwrite>
               <resources>
                 <resource>
