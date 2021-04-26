@@ -16,7 +16,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-//TODO: To be implemented
 public class TaskService {
 
   private final IGenericClient cbroClient;

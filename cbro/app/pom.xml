@@ -121,7 +121,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>src/main/resources/templates</outputDirectory>
+              <outputDirectory>src/main/resources/public</outputDirectory>
               <overwrite>true</overwrite>
               <resources>
                 <resource>
