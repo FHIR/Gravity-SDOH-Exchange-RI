@@ -65,10 +65,11 @@ export type newTaskPayload = {
 	category: string,
 	conditionIds: string[],
 	consent: boolean,
-	details: string,
+	comment: string,
 	goalIds: string[],
 	performerId: string,
-	request: string
+	// request: string,
+	name: string
 };
 
 export type TaskStatus = "ACCEPTED" | "CANCELLED" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "FAILED" | "INPROGRESS" | "NULL" | "ONHOLD" | "READY" | "RECEIVED" | "REJECTED" | "REQUESTED"

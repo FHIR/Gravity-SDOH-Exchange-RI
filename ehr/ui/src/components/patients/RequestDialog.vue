@@ -54,13 +54,12 @@ export default defineComponent({
 		const goalOptions = ref<Goal[]>([]);
 		const performerOptions = ref<Organization[]>([]);
 		const formModel = reactive({
-			request: "",
+			name: "",
 			category: "",
 			//todo: we don't have status in api as param, you can't create task with specific status
 			status: "draft",
-			details: "",
-			//todo: no api for that
-			priority: "routine",
+			comment: "",
+			priority: "",
 			//todo: no api for that
 			occurrence: "",
 			conditionIds: [],
@@ -82,7 +81,7 @@ export default defineComponent({
 
 		//todo: use Rules type from async-validator
 		const formRules = {
-			request: {
+			name: {
 				required: true,
 				message: "This field is required"
 			},
@@ -90,20 +89,20 @@ export default defineComponent({
 				required: true,
 				message: "This field is required"
 			},
-			//todo: remove for now, api doesn't support priority field
-			// priority: {
+			priority: {
+				required: true,
+				trigger: "change",
+				message: "This field is required"
+			},
+			//todo: remove for now, api has no required for that
+			// conditionIds: {
 			// 	required: true,
-			// 	trigger: "change",
 			// 	message: "This field is required"
 			// },
-			conditionIds: {
-				required: true,
-				message: "This field is required"
-			},
-			goalIds: {
-				required: true,
-				message: "This field is required"
-			},
+			// goalIds: {
+			// 	required: true,
+			// 	message: "This field is required"
+			// },
 			performerId: {
 				required: true,
 				message: "This field is required"
@@ -125,7 +124,7 @@ export default defineComponent({
 			formEl.value?.validate(async (valid: boolean) => {
 				if (valid) {
 					//todo: omit this props because api doesn't support that
-					const payload: newTaskPayload = _.omit(formModel, ["status", "priority", "occurrence"]);
+					const payload: newTaskPayload = _.omit(formModel, ["status", "occurrence"]);
 					saveInProgress.value = true;
 					try {
 						await TasksModule.createTask(payload);
@@ -180,10 +179,10 @@ export default defineComponent({
 		>
 			<el-form-item
 				label="Request Name"
-				prop="request"
+				prop="name"
 			>
 				<el-input
-					v-model="formModel.request"
+					v-model="formModel.name"
 					placeholder="Add request name"
 				/>
 			</el-form-item>
@@ -221,10 +220,10 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="Comment"
-				prop="details"
+				prop="comment"
 			>
 				<el-input
-					v-model="formModel.details"
+					v-model="formModel.comment"
 					type="textarea"
 					rows="2"
 					placeholder="Enter your comment here..."
@@ -238,15 +237,9 @@ export default defineComponent({
 				prop="priority"
 			>
 				<el-radio-group v-model="formModel.priority">
-					<el-radio label="routine">
-						Routine
-					</el-radio>
-					<el-radio label="urgent">
-						Urgent
-					</el-radio>
-					<el-radio label="asap">
-						ASAP
-					</el-radio>
+					<el-radio label="Routine" />
+					<el-radio label="Urgent" />
+					<el-radio label="ASAP" />
 				</el-radio-group>
 			</el-form-item>
 			<el-form-item
