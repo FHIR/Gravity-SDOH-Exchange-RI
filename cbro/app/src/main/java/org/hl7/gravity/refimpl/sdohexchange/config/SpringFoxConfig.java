@@ -10,11 +10,15 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
+import springfox.documentation.service.Tag;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
 public class SpringFoxConfig {
+
+  public static final String TASK_API_TAG = "Task Controller";
+  public static final String USER_API_TAG = "User Controller";
 
   @Bean
   public Docket api(ApiInfo apiInfo) {
@@ -24,6 +28,10 @@ public class SpringFoxConfig {
         .apis(RequestHandlerSelectors.basePackage("org.hl7.gravity.refimpl.sdohexchange"))
         .paths(PathSelectors.any())
         .build()
+        .tags(new Tag(TASK_API_TAG,
+                "Perform operations on Task resources. This includes retrieving of tasks, changing task status, and "
+                    + "triggering an automatic polling mechanism for Task status synchronization."),
+            new Tag(USER_API_TAG, "Get details of a currently logged in user."))
         .apiInfo(apiInfo)
         .useDefaultResponseMessages(false);
   }

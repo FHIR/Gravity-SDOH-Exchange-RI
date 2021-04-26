@@ -50,9 +50,12 @@ public class ServiceRequestReferenceResolver implements ReferenceResolver {
       String identifierSystem) {
     Map<String, List<Reference>> references = FhirUtil.getReferences(fhirContext, serviceRequest,
         Arrays.asList(Consent.class, Condition.class, Goal.class));
-    this.consentsRef = references.get(Consent.class.getSimpleName());
-    this.conditionsRefs = references.get(Condition.class.getSimpleName());
-    this.goalsRefs = references.get(Goal.class.getSimpleName());
+    this.consentsRef = Optional.ofNullable(references.get(Consent.class.getSimpleName()))
+        .orElse(Collections.emptyList());
+    this.conditionsRefs = Optional.ofNullable(references.get(Condition.class.getSimpleName()))
+        .orElse(Collections.emptyList());
+    this.goalsRefs = Optional.ofNullable(references.get(Goal.class.getSimpleName()))
+        .orElse(Collections.emptyList());
     this.identifierSystem = identifierSystem;
   }
 
