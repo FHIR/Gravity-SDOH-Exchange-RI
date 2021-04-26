@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.TaskCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,8 +20,10 @@ public class TaskDto implements Validated {
 
   private final String taskId;
 
+  private String requestName;
   private TaskCode type;
   private Task.TaskStatus status;
+  private Priority priority;
   private LocalDateTime createdAt;
   private LocalDateTime lastModified;
   private String outcome;
@@ -30,5 +33,4 @@ public class TaskDto implements Validated {
 
   @Setter(AccessLevel.NONE)
   private List<String> errors = new ArrayList<>();
-
 }

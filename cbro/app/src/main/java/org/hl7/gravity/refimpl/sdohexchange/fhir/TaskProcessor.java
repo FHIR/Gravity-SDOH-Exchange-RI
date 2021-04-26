@@ -32,9 +32,9 @@ public class TaskProcessor {
       bundle.getEntry()
           .addAll(taskReferenceResourcesLoader.getReferenceResources(task)
               .getEntry());
-      log.info("Setting status ACCEPTED for Task '" + task.getIdElement()
+      log.info("Setting status RECEIVED for Task '" + task.getIdElement()
           .getIdPart() + "'");
-      bundle.addEntry(FhirUtil.createPutEntry(task.setStatus(Task.TaskStatus.ACCEPTED)
+      bundle.addEntry(FhirUtil.createPutEntry(task.setStatus(Task.TaskStatus.RECEIVED)
           .setLastModified(new Date())));
     } else {
       log.warn("Setting status REJECTED for Task '" + task.getIdElement()

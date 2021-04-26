@@ -36,7 +36,7 @@ public class CbroTaskCreateService {
         .setSystem(identifierSystem)
         .setValue(task.getIdElement()
             .getIdPart());
-    t.setStatus(Task.TaskStatus.RECEIVED);
+    t.setStatus(Task.TaskStatus.REQUESTED);
     try {
       cbroClient.create()
           .resource(t)
