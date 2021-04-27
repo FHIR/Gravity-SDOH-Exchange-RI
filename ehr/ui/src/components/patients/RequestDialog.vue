@@ -1,9 +1,24 @@
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted } from "vue";
+import { defineComponent, reactive, ref, onMounted, computed } from "vue";
 import { getGoals, getConditions, getOrganizations } from "@/api";
 import { Condition, Goal, newTaskPayload, Organization } from "@/types";
 import _ from "@/vendors/lodash";
 import { TasksModule } from "@/store/modules/tasks";
+import { categoryList, requestList, CategoryListItem, RequestListItem } from "@/utils/constants";
+
+export type FormModel = {
+	name: string,
+	category: string,
+	request: string,
+	status: string,
+	comment: string,
+	priority: string,
+	occurrence: string,
+	conditionIds: string[],
+	goalIds: string[],
+	performerId: string,
+	consent: boolean
+};
 
 export default defineComponent({
 	name: "RequestDialog",
@@ -15,48 +30,17 @@ export default defineComponent({
 	},
 	emits: ["close"],
 	setup(props, { emit }) {
-		//todo: use serviceRequestCategory type as value
-		const categoryOptions = reactive([{
-			value: "EDUCATION_DOMAIN",
-			label: "Education Domain"
-		}, {
-			value: "EMPLOYMENT_DOMAIN",
-			label: "Employment Domain"
-		}, {
-			value: "FINANCIAL_STRAIN_DOMAIN",
-			label: "Financial Strain Domain"
-		}, {
-			value: "FOOD_INSECURITY_DOMAIN",
-			label: "Food Insecurity Domain"
-		}, {
-			value: "HOUSING_INSTABILITY_AND_HOMELESSNESS_DOMAIN",
-			label: "Housing Instability and Homelessness Domain"
-		}, {
-			value: "INADEQUATE_HOUSING_DOMAIN",
-			label: "Inadequate Housing Domain"
-		}, {
-			value: "INTERPERSONAL_VIOLENCE_DOMAIN",
-			label: "Interpersonal Violence Domain"
-		}, {
-			value: "SDOH_RISK_RELATED_TO_VETERAN_STATUS",
-			label: "SDOH Risk Related to Veteran Status"
-		}, {
-			value: "SOCIAL_ISOLATION_DOMAIN",
-			label: "Social Isolation Domain"
-		}, {
-			value: "STRESS_DOMAIN",
-			label: "Stress Domain"
-		}, {
-			value: "TRANSPORTATION_INSECURITY_DOMAIN",
-			label: "Transportation Insecurity Domain"
-		}]);
+		const categoryOptions = ref<CategoryListItem[]>(categoryList);
+		const requestOptions = computed<RequestListItem[]>(() => requestList.filter((request: RequestListItem) => request.domain === formModel.category));
 		const conditionOptions = ref<Condition[]>([]);
 		const goalOptions = ref<Goal[]>([]);
 		const performerOptions = ref<Organization[]>([]);
-		const formModel = reactive({
+
+		const formModel = reactive<FormModel>({
 			name: "",
 			category: "",
-			//todo: we don't have status in api as param, you can't create task with specific status
+			request: "",
+			//todo: just disabled starting draft state, you cannot change it on creation
 			status: "draft",
 			comment: "",
 			priority: "",
@@ -86,6 +70,10 @@ export default defineComponent({
 				message: "This field is required"
 			},
 			category: {
+				required: true,
+				message: "This field is required"
+			},
+			request: {
 				required: true,
 				message: "This field is required"
 			},
@@ -140,10 +128,17 @@ export default defineComponent({
 		// Disable all dates that are less than today. Used inside occurrence date-pickers.
 		//
 		const disabledOccurrenceDate = (time: Date): boolean => time.getTime() < Date.now();
+		//
+		// Clear request field on every category change because they are connected.
+		//
+		const onCategoryChange = (): void => {
+			formModel.request = "";
+		};
 
 		return {
 			formModel,
 			categoryOptions,
+			requestOptions,
 			conditionOptions,
 			goalOptions,
 			performerOptions,
@@ -152,7 +147,8 @@ export default defineComponent({
 			onFormSave,
 			occurrenceType,
 			disabledOccurrenceDate,
-			saveInProgress
+			saveInProgress,
+			onCategoryChange
 		};
 	}
 });
@@ -193,11 +189,29 @@ export default defineComponent({
 				<el-select
 					v-model="formModel.category"
 					placeholder="Select Category/Domain"
+					@change="onCategoryChange"
 				>
 					<el-option
 						v-for="item in categoryOptions"
 						:key="item.value"
-						:label="item.label"
+						:label="item.name"
+						:value="item.value"
+					/>
+				</el-select>
+			</el-form-item>
+			<el-form-item
+				label="Request"
+				prop="request"
+			>
+				<el-select
+					v-model="formModel.request"
+					placeholder="Select Request"
+					no-data-text="Select Category/Domain first"
+				>
+					<el-option
+						v-for="item in requestOptions"
+						:key="item.value"
+						:label="item.name"
 						:value="item.value"
 					/>
 				</el-select>
@@ -264,6 +278,7 @@ export default defineComponent({
 					v-if="occurrenceType === 'until'"
 					v-model="formModel.occurrence"
 					:disabled-date="disabledOccurrenceDate"
+					placeholder="Select date"
 				/>
 				<el-date-picker
 					v-if="occurrenceType === 'range'"
