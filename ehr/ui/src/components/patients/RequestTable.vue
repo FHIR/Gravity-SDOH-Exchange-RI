@@ -5,7 +5,7 @@ import { TaskResponse } from "@/types";
 import RequestDialog from "@/components/patients/RequestDialog.vue";
 
 export type TableData = {
-	request: string,
+	name: string,
 	status: string,
 	category: string,
 	problems: string,
@@ -32,7 +32,7 @@ export default defineComponent({
 
 			tasks.value && tasks.value.forEach((task: TaskResponse) => {
 				res.push({
-					request: task.serviceRequest.request,
+					name: task.requestName,
 					status: task.status,
 					category: task.serviceRequest.category,
 					//todo: no api for that
@@ -108,12 +108,12 @@ export default defineComponent({
 				:data="tableData"
 			>
 				<el-table-column
-					prop="request"
+					prop="name"
 					label="Request/Task"
 				>
 					<template #default="scope">
 						<el-button type="text">
-							{{ scope.row.request }}
+							{{ scope.row.name }}
 						</el-button>
 					</template>
 				</el-table-column>

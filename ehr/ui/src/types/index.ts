@@ -55,6 +55,8 @@ export type TaskResponse = {
 	lastModified: string | null,
 	organization: Organization | null,
 	outcome: string | null,
+	priority: "ASAP" | "Routine" | "Urgent" | null,
+	requestName: string,
 	serviceRequest: ServiceRequest,
 	status: TaskStatus,
 	taskId: string,
