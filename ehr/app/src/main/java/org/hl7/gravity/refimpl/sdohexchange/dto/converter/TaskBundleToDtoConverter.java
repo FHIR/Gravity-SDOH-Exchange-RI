@@ -44,26 +44,26 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
         .collect(Collectors.toList());
   }
 
-  protected TaskDto composeTaskDto(Task tasl, Map<String, ServiceRequest> srMap, Map<String, Organization> orgMap) {
-    TaskDto taskDto = new TaskDto(tasl.getIdElement()
+  protected TaskDto composeTaskDto(Task task, Map<String, ServiceRequest> srMap, Map<String, Organization> orgMap) {
+    TaskDto taskDto = new TaskDto(task.getIdElement()
         .getIdPart());
     //Convert Task
-    taskDto.setName(tasl.getDescription());
-    taskDto.setPriority(Priority.fromText(tasl.getPriority()
+    taskDto.setName(task.getDescription());
+    taskDto.setPriority(Priority.fromText(task.getPriority()
         .getDisplay()));
-    taskDto.setCreatedAt(FhirUtil.toLocalDateTime(tasl.getAuthoredOnElement()));
-    taskDto.setLastModified(FhirUtil.toLocalDateTime(tasl.getLastModifiedElement()));
-    Optional.ofNullable(tasl.getStatus())
+    taskDto.setCreatedAt(FhirUtil.toLocalDateTime(task.getAuthoredOnElement()));
+    taskDto.setLastModified(FhirUtil.toLocalDateTime(task.getLastModifiedElement()));
+    Optional.ofNullable(task.getStatus())
         .ifPresent(s -> taskDto.setStatus(Task.TaskStatus.fromCode(s.toCode())));
-    taskDto.setComments(tasl.getNote()
+    taskDto.setComments(task.getNote()
         .stream()
         .map(annotationToDtoConverter::convert)
         .collect(Collectors.toList()));
-    taskDto.setOutcome(tasl.getStatusReason()
+    taskDto.setOutcome(task.getStatusReason()
         .getText());
     // TODO validate profile and other properties using InstanceValidator
     //Convert ServiceRequest
-    String srId = new IdType(tasl.getFocus()
+    String srId = new IdType(task.getFocus()
         .getReference()).toUnqualifiedVersionless()
         .getIdPart();
     ServiceRequest sr = srMap.get(srId);
@@ -74,7 +74,7 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
       taskDto.setServiceRequest(serviceRequestToDtoConverter.convert(sr));
     }
     //Convert Organization
-    Organization org = orgMap.get(new IdType(tasl.getOwner()
+    Organization org = orgMap.get(new IdType(task.getOwner()
         .getReference()).toUnqualifiedVersionless()
         .getIdPart());
     if (org == null) {
