@@ -16,7 +16,7 @@ export default defineComponent({
 		const employmentStatus = computed<string | null | undefined>(() => ContextModule.patient?.employmentStatus || "N/A");
 		const race = computed<string | null | undefined>(() => ContextModule.patient?.race || "N/A");
 		const ethnicity = computed<string | null | undefined>(() => ContextModule.patient?.ethnicity || "N/A");
-		const educationLevel = computed<string | null | undefined>(() => ContextModule.patient?.educationLevel || "N/A");
+		const educationLevel = computed<string | null | undefined>(() => ContextModule.patient?.education || "N/A");
 		const maritalStatus = computed<string | null | undefined>(() => ContextModule.patient?.maritalStatus || "N/A");
 		const insurance = computed<string | null | undefined>(() => ContextModule.patient?.insurance || "N/A");
 

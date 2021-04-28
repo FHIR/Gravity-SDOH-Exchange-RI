@@ -1,18 +1,18 @@
 import { getTasks, createTask } from "@/api";
 import { VuexModule, Module, Action, Mutation, getModule } from "vuex-module-decorators";
 import store from "@/store";
-import { TaskResponse, newTaskPayload } from "@/types";
+import { Task, newTaskPayload } from "@/types";
 
 export interface ITasks {
-	tasks: TaskResponse[] | null
+	tasks: Task[] | null
 }
 
 @Module({ dynamic: true, store, name: "tasks" })
 class Tasks extends VuexModule implements ITasks {
-	tasks: TaskResponse[] | null = null;
+	tasks: Task[] | null = null;
 
 	@Mutation
-	setTasks(payload: TaskResponse[]): void {
+	setTasks(payload: Task[]): void {
 		this.tasks = payload;
 	}
 

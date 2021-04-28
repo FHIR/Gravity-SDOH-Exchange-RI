@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, computed, onMounted, ref, onUnmounted } from "vue";
 import { TasksModule } from "@/store/modules/tasks";
-import { TaskResponse } from "@/types";
+import { Comment, Task } from "@/types";
 import RequestDialog from "@/components/patients/RequestDialog.vue";
 
 export type TableData = {
@@ -13,7 +13,7 @@ export type TableData = {
 	performer: string | null | undefined,
 	consent: string | boolean,
 	outcomes: string | null,
-	comment: string,
+	comments: Comment[],
 	lastModified: string | null
 }
 
@@ -26,13 +26,13 @@ export default defineComponent({
 		const isLoading = ref<boolean>(false);
 		const requestDialogVisible = ref<boolean>(false);
 
-		const tasks = computed<TaskResponse[] | null>(() => TasksModule.tasks);
+		const tasks = computed<Task[] | null>(() => TasksModule.tasks);
 		const tableData = computed<TableData[]>(() => {
 			const res: TableData[] = [];
 
-			tasks.value && tasks.value.forEach((task: TaskResponse) => {
+			tasks.value && tasks.value.forEach((task: Task) => {
 				res.push({
-					name: task.requestName,
+					name: task.name,
 					status: task.status,
 					category: task.serviceRequest.category,
 					//todo: no api for that
@@ -43,8 +43,7 @@ export default defineComponent({
 					//todo: no api for that
 					consent: "yes",
 					outcomes: task.outcome,
-					//todo: is it comments tho?
-					comment: task.serviceRequest.details,
+					comments: task.comments,
 					lastModified: task.lastModified
 				});
 			});
@@ -159,9 +158,13 @@ export default defineComponent({
 					label="Outcomes"
 				/>
 				<el-table-column
-					prop="comment"
-					label="Comment"
-				/>
+					prop="comments"
+					label="Comment(s)"
+				>
+					<template #default="scope">
+						{{ scope.row.comments.length > 0 ? `${scope.row.comments.length} comment${scope.row.comments.length > 1 ? 's' : ''}` : "--" }}
+					</template>
+				</el-table-column>
 			</el-table>
 			<div
 				v-if="!isLoading && !tableData.length"
