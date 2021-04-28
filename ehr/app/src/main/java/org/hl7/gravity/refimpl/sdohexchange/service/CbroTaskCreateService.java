@@ -32,11 +32,12 @@ public class CbroTaskCreateService {
 
   public void createTask(IGenericClient cbroClient, Task task) throws CbroTaskCreateException {
     Task t = externalizeResource(task.copy());
+    //TODO: Remove this after Logica bug response
+    t.setMeta(null);
     t.addIdentifier()
         .setSystem(identifierSystem)
         .setValue(task.getIdElement()
             .getIdPart());
-    t.setStatus(Task.TaskStatus.REQUESTED);
     try {
       cbroClient.create()
           .resource(t)

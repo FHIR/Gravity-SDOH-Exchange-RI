@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.codesystems.TaskCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 
@@ -18,14 +17,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskDto implements Validated {
 
-  private final String taskId;
+  private final String id;
 
-  private String requestName;
-  private TaskCode type;
-  private Task.TaskStatus status;
-  private Priority priority;
+  //TODO: Add conditions and goals
+  private String name;
   private LocalDateTime createdAt;
   private LocalDateTime lastModified;
+  private Priority priority;
+  private Task.TaskStatus status;
+  private List<CommentDto> comments;
   private String outcome;
 
   private ServiceRequestDto serviceRequest;

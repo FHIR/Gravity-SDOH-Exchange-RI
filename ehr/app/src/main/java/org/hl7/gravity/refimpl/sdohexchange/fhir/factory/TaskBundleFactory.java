@@ -17,7 +17,9 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.codesystems.ConsentAction;
 import org.hl7.fhir.r4.model.codesystems.ConsentPolicy;
 import org.hl7.fhir.r4.model.codesystems.ConsentScope;
@@ -131,7 +133,7 @@ public class TaskBundleFactory {
       serviceRequest.addNote()
           .setText(comment)
           .setTimeElement(DateTimeType.now())
-          .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
+          .setAuthor(getAuthor());
     }
     return serviceRequest;
   }
@@ -162,7 +164,7 @@ public class TaskBundleFactory {
       task.addNote()
           .setText(comment)
           .setTimeElement(DateTimeType.now())
-          .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
+          .setAuthor(getAuthor());
     }
     return task;
   }
@@ -197,6 +199,12 @@ public class TaskBundleFactory {
         .getCoding()
         .add(new Coding(consentAction.getSystem(), consentAction.toCode(), consentAction.getDisplay()));
     return consent;
+  }
+
+  private Type getAuthor() {
+    //TODO: Right now Logica sanbox when launching as a standalone app doest return provider id, remove this in future
+    return user.getId() == null ? new StringType(user.getName()) : new Reference(
+        new IdType(user.getUserType(), user.getId())).setDisplay(user.getName());
   }
 
   /**
