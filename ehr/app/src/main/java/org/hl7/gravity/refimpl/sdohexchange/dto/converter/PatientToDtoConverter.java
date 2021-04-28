@@ -21,7 +21,6 @@ import java.util.Optional;
 
 public class PatientToDtoConverter implements Converter<Patient, PatientDto> {
 
-  public static final String NOT_AVAILABLE = "N/A";
 
   @Override
   public PatientDto convert(Patient patient) {
@@ -47,14 +46,14 @@ public class PatientToDtoConverter implements Converter<Patient, PatientDto> {
             .getCodingFirstRep()
             .getDisplay())
         .findFirst()
-        .orElse(NOT_AVAILABLE));
+        .orElse(null));
     //Get Address full String. No need to compose it on UI side.
     patientDto.setAddress(patient.getAddress()
         .stream()
         .filter(a -> Address.AddressUse.HOME.equals(a.getUse()))
         .map(this::convertAddress)
         .findFirst()
-        .orElse(NOT_AVAILABLE));
+        .orElse(null));
 
     List<ContactPoint> telecom = patient.getTelecom();
     //TODO: Reimplement after clarification
@@ -63,13 +62,13 @@ public class PatientToDtoConverter implements Converter<Patient, PatientDto> {
         .filter(t -> ContactPoint.ContactPointSystem.PHONE.equals(t.getSystem()))
         .map(ContactPoint::getValue)
         .findFirst()
-        .orElse(NOT_AVAILABLE));
+        .orElse(null));
     //Get email address
     patientDto.setEmail(telecom.stream()
         .filter(t -> ContactPoint.ContactPointSystem.EMAIL.equals(t.getSystem()))
         .map(ContactPoint::getValue)
         .findFirst()
-        .orElse(NOT_AVAILABLE));
+        .orElse(null));
     //TODO: Set employment status
     //Get race
     Extension race = patient.getExtensionByUrl(UsCorePatientExtensions.RACE);
@@ -82,7 +81,7 @@ public class PatientToDtoConverter implements Converter<Patient, PatientDto> {
     patientDto.setMaritalStatus(Optional.ofNullable(patient.getMaritalStatus()
         .getCodingFirstRep()
         .getDisplay())
-        .orElse(NOT_AVAILABLE));
+        .orElse(null));
     //TODO: Set insurance
     return patientDto;
   }
@@ -98,7 +97,7 @@ public class PatientToDtoConverter implements Converter<Patient, PatientDto> {
 
   private String convertExtension(Extension extension) {
     if (extension == null) {
-      return NOT_AVAILABLE;
+      return null;
     }
     StringType extensionValue = (StringType) extension.getExtensionByUrl("text")
         .getValue();
