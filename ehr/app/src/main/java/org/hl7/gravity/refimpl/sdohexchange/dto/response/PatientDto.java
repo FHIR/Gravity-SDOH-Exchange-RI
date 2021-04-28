@@ -9,10 +9,19 @@ import java.time.LocalDate;
 @Setter
 public class PatientDto extends PersonDto {
 
-  private String gender;
   private Integer age;
   private LocalDate dob;
+  private String gender;
+  private String language;
   private String address;
+  private String phone;
+  private String email;
+  private String employmentStatus;
+  private String race;
+  private String ethnicity;
+  private String education;
+  private String maritalStatus;
+  private String insurance;
 
   public PatientDto(String id) {
     super(id);

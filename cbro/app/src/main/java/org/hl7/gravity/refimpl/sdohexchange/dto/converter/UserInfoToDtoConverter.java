@@ -1,5 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.springframework.core.convert.converter.Converter;
 
@@ -10,8 +11,11 @@ public class UserInfoToDtoConverter implements Converter<Map<String, Object>, Us
   @Override
   public UserDto convert(Map<String, Object> claims) {
     UserDto userDto = new UserDto();
-    userDto.setGivenName(getClaimValue(claims, "given_name"));
-    userDto.setFamilyName(getClaimValue(claims, "family_name"));
+    String profile = getClaimValue(claims, "profile");
+    if (profile != null) {
+      userDto.setId(StringUtils.substringAfter(profile, "/"));
+      userDto.setUserType(StringUtils.substringBefore(profile, "/"));
+    }
     userDto.setName(getClaimValue(claims, "name"));
     userDto.setPreferredUsername(getClaimValue(claims, "preferred_username"));
     return userDto;

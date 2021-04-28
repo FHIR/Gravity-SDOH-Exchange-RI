@@ -6,7 +6,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.codesystems.TaskCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
@@ -23,6 +22,7 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
 
   private final ServiceRequestToDtoConverter serviceRequestToDtoConverter = new ServiceRequestToDtoConverter();
   private final OrganizationToDtoConverter organizationToDtoConverter = new OrganizationToDtoConverter();
+  private final AnnotationToDtoConverter annotationToDtoConverter = new AnnotationToDtoConverter();
 
   @Override
   public List<TaskDto> convert(Bundle bundle) {
@@ -44,25 +44,26 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
         .collect(Collectors.toList());
   }
 
-  protected TaskDto composeTaskDto(Task t, Map<String, ServiceRequest> srMap, Map<String, Organization> orgMap) {
-    TaskDto taskDto = new TaskDto(t.getIdElement()
+  protected TaskDto composeTaskDto(Task tasl, Map<String, ServiceRequest> srMap, Map<String, Organization> orgMap) {
+    TaskDto taskDto = new TaskDto(tasl.getIdElement()
         .getIdPart());
     //Convert Task
-    taskDto.setRequestName(t.getDescription());
-    taskDto.setType(TaskCode.fromCode(t.getCode()
-        .getCodingFirstRep()
-        .getCode()));
-    taskDto.setPriority(Priority.fromText(t.getPriority()
+    taskDto.setName(tasl.getDescription());
+    taskDto.setPriority(Priority.fromText(tasl.getPriority()
         .getDisplay()));
-    taskDto.setCreatedAt(FhirUtil.toLocalDateTime(t.getAuthoredOnElement()));
-    taskDto.setLastModified(FhirUtil.toLocalDateTime(t.getLastModifiedElement()));
-    Optional.ofNullable(t.getStatus())
+    taskDto.setCreatedAt(FhirUtil.toLocalDateTime(tasl.getAuthoredOnElement()));
+    taskDto.setLastModified(FhirUtil.toLocalDateTime(tasl.getLastModifiedElement()));
+    Optional.ofNullable(tasl.getStatus())
         .ifPresent(s -> taskDto.setStatus(Task.TaskStatus.fromCode(s.toCode())));
-    taskDto.setOutcome(t.getStatusReason()
+    taskDto.setComments(tasl.getNote()
+        .stream()
+        .map(annotationToDtoConverter::convert)
+        .collect(Collectors.toList()));
+    taskDto.setOutcome(tasl.getStatusReason()
         .getText());
     // TODO validate profile and other properties using InstanceValidator
     //Convert ServiceRequest
-    String srId = new IdType(t.getFocus()
+    String srId = new IdType(tasl.getFocus()
         .getReference()).toUnqualifiedVersionless()
         .getIdPart();
     ServiceRequest sr = srMap.get(srId);
@@ -73,7 +74,7 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
       taskDto.setServiceRequest(serviceRequestToDtoConverter.convert(sr));
     }
     //Convert Organization
-    Organization org = orgMap.get(new IdType(t.getOwner()
+    Organization org = orgMap.get(new IdType(tasl.getOwner()
         .getReference()).toUnqualifiedVersionless()
         .getIdPart());
     if (org == null) {
