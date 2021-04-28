@@ -70,7 +70,7 @@ export type newTaskPayload = {
 	comment: string,
 	goalIds: string[],
 	performerId: string,
-	// request: string,
+	request: string,
 	name: string
 };
 
