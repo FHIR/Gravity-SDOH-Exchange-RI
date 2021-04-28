@@ -1,7 +1,7 @@
-import { getTasks } from "@/api";
+import { getTasks, createTask } from "@/api";
 import { VuexModule, Module, Action, Mutation, getModule } from "vuex-module-decorators";
 import store from "@/store";
-import { TaskResponse } from "@/types";
+import { TaskResponse, newTaskPayload } from "@/types";
 
 export interface ITasks {
 	tasks: TaskResponse[] | null
@@ -21,6 +21,13 @@ class Tasks extends VuexModule implements ITasks {
 		const data = await getTasks();
 
 		this.setTasks(data);
+	}
+
+	@Action
+	async createTask(payload: newTaskPayload): Promise<void> {
+		await createTask(payload);
+		//todo: on create task we don't have newly created but just id, so we need to fetch new list
+		await this.getTasks();
 	}
 }
 

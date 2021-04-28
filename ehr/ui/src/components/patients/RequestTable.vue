@@ -2,9 +2,10 @@
 import { defineComponent, computed, onMounted, ref, onUnmounted } from "vue";
 import { TasksModule } from "@/store/modules/tasks";
 import { TaskResponse } from "@/types";
+import RequestDialog from "@/components/patients/RequestDialog.vue";
 
 export type TableData = {
-	request: string,
+	name: string,
 	status: string,
 	category: string,
 	problems: string,
@@ -18,8 +19,12 @@ export type TableData = {
 
 export default defineComponent({
 	name: "RequestTable",
+	components: {
+		RequestDialog
+	},
 	setup() {
 		const isLoading = ref<boolean>(false);
+		const requestDialogVisible = ref<boolean>(false);
 
 		const tasks = computed<TaskResponse[] | null>(() => TasksModule.tasks);
 		const tableData = computed<TableData[]>(() => {
@@ -27,7 +32,7 @@ export default defineComponent({
 
 			tasks.value && tasks.value.forEach((task: TaskResponse) => {
 				res.push({
-					request: task.serviceRequest.request,
+					name: task.requestName,
 					status: task.status,
 					category: task.serviceRequest.category,
 					//todo: no api for that
@@ -71,7 +76,8 @@ export default defineComponent({
 
 		return {
 			tableData,
-			isLoading
+			isLoading,
+			requestDialogVisible
 		};
 	}
 });
@@ -88,6 +94,7 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				@click="requestDialogVisible = true"
 			>
 				Add New Request
 			</el-button>
@@ -101,12 +108,12 @@ export default defineComponent({
 				:data="tableData"
 			>
 				<el-table-column
-					prop="request"
+					prop="name"
 					label="Request/Task"
 				>
 					<template #default="scope">
 						<el-button type="text">
-							{{ scope.row.request }}
+							{{ scope.row.name }}
 						</el-button>
 					</template>
 				</el-table-column>
@@ -166,11 +173,17 @@ export default defineComponent({
 					round
 					type="primary"
 					size="mini"
+					@click="requestDialogVisible = true"
 				>
 					Add New Request
 				</el-button>
 			</div>
 		</div>
+
+		<RequestDialog
+			:visible="requestDialogVisible"
+			@close="requestDialogVisible = false"
+		/>
 	</div>
 </template>
 
@@ -195,7 +208,7 @@ export default defineComponent({
 	border-radius: 5px;
 	box-shadow: 0 2px 5px rgba(51, 51, 51, 0.25);
 	padding: 10px 20px;
-	min-height: 200px;
+	min-height: 130px;
 }
 
 .el-table {

@@ -31,4 +31,4 @@ node/
 
 # Project specific ignores
 **/app/src/main/resources/static/**/*
-**/app/src/main/resources/templates/**/*
+**/app/src/main/resources/public/**/*
