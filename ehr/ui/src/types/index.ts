@@ -5,14 +5,13 @@ export type Patient = {
 	gender: string | null,
 	id: string | null,
 	name: string | null
-	//todo: keys below we don't have in our api yet
 	language: string | null,
 	phone: string | null,
 	email: string | null,
 	employmentStatus: string | null,
 	race: string | null,
 	ethnicity: string | null,
-	educationLevel: string | null,
+	education: string | null,
 	maritalStatus: string | null,
 	insurance: string | null
 };
@@ -49,18 +48,18 @@ export type ServiceRequestStatus = "ACTIVE" | "COMPLETED" | "DRAFT" | "ENTEREDIN
 
 export type ServiceRequestCategory = "EDUCATION_DOMAIN" | "EMPLOYMENT_DOMAIN" | "FINANCIAL_STRAIN_DOMAIN" | "FOOD_INSECURITY_DOMAIN" | "HOUSING_INSTABILITY_AND_HOMELESSNESS_DOMAIN" | "INADEQUATE_HOUSING_DOMAIN" | "INTERPERSONAL_VIOLENCE_DOMAIN" | "SDOH_RISK_RELATED_TO_VETERAN_STATUS" | "SOCIAL_ISOLATION_DOMAIN" | "STRESS_DOMAIN" | "TRANSPORTATION_INSECURITY_DOMAIN"
 
-export type TaskResponse = {
+export type Task = {
+	comments: Comment[],
 	createdAt: string,
 	errors: string[],
+	id: string,
 	lastModified: string | null,
+	name: string,
 	organization: Organization | null,
 	outcome: string | null,
 	priority: "ASAP" | "Routine" | "Urgent" | null,
-	requestName: string,
 	serviceRequest: ServiceRequest,
 	status: TaskStatus,
-	taskId: string,
-	type: TaskType
 };
 
 export type newTaskPayload = {
@@ -75,8 +74,6 @@ export type newTaskPayload = {
 };
 
 export type TaskStatus = "ACCEPTED" | "CANCELLED" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "FAILED" | "INPROGRESS" | "NULL" | "ONHOLD" | "READY" | "RECEIVED" | "REJECTED" | "REQUESTED"
-
-export type TaskType = "ABORT" | "APPROVE" | "CHANGE" | "FULFILL" | "NULL" | "REPLACE" | "RESUME" | "SUSPEND"
 
 export type Condition = {
 	clinicalStatus: "ACTIVE" | "INACTIVE" | "NULL" | "RESOLVED",
@@ -96,4 +93,10 @@ export type Goal = {
 	goalId: string,
 	lifecycleStatus: "ACCEPTED" | "ACTIVE" | "CANCELLED" | "COMPLETED" | "ENTEREDINERROR" | "NULL" | "ONHOLD" | "PLANNED" | "PROPOSED" | "REJECTED",
 	statusDate: string
+};
+
+export type Comment = {
+	author: string,
+	text: string,
+	time: string
 };
