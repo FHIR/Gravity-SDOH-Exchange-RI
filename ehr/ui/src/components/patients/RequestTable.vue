@@ -208,7 +208,7 @@ export default defineComponent({
 	border-radius: 5px;
 	box-shadow: 0 2px 5px rgba(51, 51, 51, 0.25);
 	padding: 10px 20px;
-	min-height: 200px;
+	min-height: 130px;
 }
 
 .el-table {

@@ -1,10 +1,11 @@
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted, computed } from "vue";
+import { defineComponent, reactive, ref, computed } from "vue";
 import { getGoals, getConditions, getOrganizations } from "@/api";
 import { Condition, Goal, newTaskPayload, Organization } from "@/types";
 import _ from "@/vendors/lodash";
 import { TasksModule } from "@/store/modules/tasks";
 import { categoryList, requestList, CategoryListItem, RequestListItem } from "@/utils/constants";
+import { RuleItem } from "async-validator";
 
 export type FormModel = {
 	name: string,
@@ -52,19 +53,21 @@ export default defineComponent({
 			consent: false
 		});
 		const occurrenceType = ref<string>("");
+		//todo: use element-ui form type
 		const formEl = ref<HTMLFormElement>();
 
 		//
-		// On component mount fetch all options for dropdowns.
+		// On dialog open fetch all options for dropdowns and reset previous edits.
 		//
-		onMounted(async () => {
+		const onDialogOpen = async () => {
+			formEl.value?.resetFields();
 			conditionOptions.value = await getConditions();
 			goalOptions.value = await getGoals();
 			performerOptions.value = await getOrganizations();
-		});
+		};
 
-		//todo: use Rules type from async-validator
-		const formRules = {
+		//todo: seems like element-ui added few additional keys to async-validator RuleItem
+		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: {
 				required: true,
 				message: "This field is required"
@@ -82,15 +85,26 @@ export default defineComponent({
 				trigger: "change",
 				message: "This field is required"
 			},
-			//todo: remove for now, api has no required for that
-			// conditionIds: {
-			// 	required: true,
-			// 	message: "This field is required"
-			// },
-			// goalIds: {
-			// 	required: true,
-			// 	message: "This field is required"
-			// },
+			conditionIds: {
+				required: true,
+				message: "This field is required",
+				trigger: "change",
+				validator: (rule, value: string[], callback): void => {
+					const valid = value.length > 0 || formModel.goalIds.length > 0;
+
+					valid ? callback() : callback("This field is required");
+				}
+			},
+			goalIds: {
+				required: true,
+				message: "This field is required",
+				trigger: "change",
+				validator: (rule, value: string[], callback): void => {
+					const valid = value.length > 0 || formModel.conditionIds.length > 0;
+
+					valid ? callback() : callback("This field is required");
+				}
+			},
 			performerId: {
 				required: true,
 				message: "This field is required"
@@ -99,9 +113,8 @@ export default defineComponent({
 				required: true,
 				message: "This field is required",
 				trigger: "change",
-				//todo: rule type from async-validator
-				validator: (rule: any, value: boolean, callback: (err?: string | Error) => void): void => {
-					value ? callback() : callback(new Error());
+				validator: (rule, value: boolean, callback): void => {
+					value ? callback() : callback("This field is required");
 				}
 			}
 		};
@@ -148,7 +161,8 @@ export default defineComponent({
 			occurrenceType,
 			disabledOccurrenceDate,
 			saveInProgress,
-			onCategoryChange
+			onCategoryChange,
+			onDialogOpen
 		};
 	}
 });
@@ -159,12 +173,14 @@ export default defineComponent({
 		:model-value="visible"
 		title="New Service Request/Task"
 		:width="700"
-		:append-to-body="true"
-		:destroy-on-close="true"
+		append-to-body
+		destroy-on-close
 		custom-class="request-dialog"
 		@close="$emit('close')"
+		@open="onDialogOpen"
 	>
 		<el-form
+			is="form"
 			ref="formEl"
 			:model="formModel"
 			:rules="formRules"
