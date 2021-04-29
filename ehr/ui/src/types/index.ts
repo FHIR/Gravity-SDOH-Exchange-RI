@@ -96,7 +96,8 @@ export type Goal = {
 };
 
 export type Comment = {
-	author: string,
+	//todo: what kind of object, for now it's just empty
+	author: object,
 	text: string,
 	time: string
 };

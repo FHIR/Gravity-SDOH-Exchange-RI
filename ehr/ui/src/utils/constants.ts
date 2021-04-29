@@ -70,16 +70,16 @@ export const requestList: RequestListItem[] = [{
 }, {
 	value: "HOUSING_ASSESSMENT",
 	name: "Housing assessment",
-	domain: "TRANSPORTATION_INSECURITY_DOMAIN",
+	domain: "HOUSING_INSTABILITY_AND_HOMELESSNESS_DOMAIN",
 	code: "225340009"
 }, {
 	value: "REFERRAL_TO_HOUSING_SERVICE",
 	name: "Referral to housing service",
-	domain: "TRANSPORTATION_INSECURITY_DOMAIN",
+	domain: "HOUSING_INSTABILITY_AND_HOMELESSNESS_DOMAIN",
 	code: "710911006"
 }, {
 	value: "TRANSPORTATION_CASE_MANAGEMENT",
 	name: "Transportation case management",
-	domain: "HOUSING_INSTABILITY_AND_HOMELESSNESS_DOMAIN",
+	domain: "TRANSPORTATION_INSECURITY_DOMAIN",
 	code: "410365006"
 }];
