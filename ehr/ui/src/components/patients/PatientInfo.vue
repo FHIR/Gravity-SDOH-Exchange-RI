@@ -120,7 +120,7 @@ export default defineComponent({
 						Employment Status:
 					</div>
 					<div class="value">
-						{{ lang }}
+						{{ employmentStatus }}
 					</div>
 				</div>
 			</el-col>
