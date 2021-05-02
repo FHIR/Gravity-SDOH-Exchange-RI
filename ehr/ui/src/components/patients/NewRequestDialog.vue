@@ -22,7 +22,7 @@ export type FormModel = {
 };
 
 export default defineComponent({
-	name: "RequestDialog",
+	name: "NewRequestDialog",
 	props: {
 		visible: {
 			type: Boolean,
@@ -89,21 +89,13 @@ export default defineComponent({
 				required: true,
 				message: "This field is required",
 				trigger: "change",
-				validator: (rule, value: string[], callback): void => {
-					const valid = value.length > 0 || formModel.goalIds.length > 0;
-
-					valid ? callback() : callback("This field is required");
-				}
+				validator: (rule, value: string[]): boolean => value.length > 0 || formModel.goalIds.length > 0
 			},
 			goalIds: {
 				required: true,
 				message: "This field is required",
 				trigger: "change",
-				validator: (rule, value: string[], callback): void => {
-					const valid = value.length > 0 || formModel.conditionIds.length > 0;
-
-					valid ? callback() : callback("This field is required");
-				}
+				validator: (rule, value: string[]): boolean => value.length > 0 || formModel.conditionIds.length > 0
 			},
 			performerId: {
 				required: true,
@@ -113,9 +105,7 @@ export default defineComponent({
 				required: true,
 				message: "This field is required",
 				trigger: "change",
-				validator: (rule, value: boolean, callback): void => {
-					value ? callback() : callback("This field is required");
-				}
+				validator: (rule, value: boolean): boolean => value
 			}
 		};
 		//
@@ -175,19 +165,18 @@ export default defineComponent({
 		:width="700"
 		append-to-body
 		destroy-on-close
-		custom-class="request-dialog"
+		custom-class="new-request-dialog"
 		@close="$emit('close')"
 		@open="onDialogOpen"
 	>
 		<el-form
-			is="form"
 			ref="formEl"
 			:model="formModel"
 			:rules="formRules"
 			label-width="155px"
 			label-position="left"
 			size="mini"
-			class="request-form"
+			class="new-request-form"
 		>
 			<el-form-item
 				label="Request Name"
@@ -227,7 +216,7 @@ export default defineComponent({
 					<el-option
 						v-for="item in requestOptions"
 						:key="item.value"
-						:label="item.name"
+						:label="`${item.name} (${item.code})`"
 						:value="item.value"
 					/>
 				</el-select>
@@ -391,15 +380,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
 
-.request-dialog {
-	.el-dialog__footer {
-		.el-button {
-			width: 155px;
-		}
-	}
-}
-
-.request-form {
+.new-request-form {
 	.el-select {
 		width: 100%;
 

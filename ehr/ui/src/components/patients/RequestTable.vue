@@ -2,29 +2,36 @@
 import { defineComponent, computed, onMounted, ref, onUnmounted } from "vue";
 import { TasksModule } from "@/store/modules/tasks";
 import { Comment, Task } from "@/types";
-import RequestDialog from "@/components/patients/RequestDialog.vue";
+import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
+import EditRequestDialog from "@/components/patients/EditRequestDialog.vue";
 
 export type TableData = {
 	name: string,
 	status: string,
 	category: string,
-	problems: string,
-	goals: string,
+	problems: string[],
+	goals: string[],
 	performer: string | null | undefined,
 	consent: string | boolean,
 	outcomes: string | null,
 	comments: Comment[],
-	lastModified: string | null
+	lastModified: string | null,
+	request: string,
+	priority: string | null,
+	occurrence: string,
+	procedures: string[]
 }
 
 export default defineComponent({
 	name: "RequestTable",
 	components: {
-		RequestDialog
+		NewRequestDialog,
+		EditRequestDialog
 	},
 	setup() {
 		const isLoading = ref<boolean>(false);
-		const requestDialogVisible = ref<boolean>(false);
+		const newRequestDialogVisible = ref<boolean>(false);
+		const editRequestDialogVisible = ref<boolean>(false);
 
 		const tasks = computed<Task[] | null>(() => TasksModule.tasks);
 		const tableData = computed<TableData[]>(() => {
@@ -36,15 +43,20 @@ export default defineComponent({
 					status: task.status,
 					category: task.serviceRequest.category,
 					//todo: no api for that
-					problems: "",
+					problems: [],
 					//todo: no api for that
-					goals: "",
+					goals: [],
 					performer: task.organization?.name,
 					//todo: no api for that
 					consent: "yes",
 					outcomes: task.outcome,
 					comments: task.comments,
-					lastModified: task.lastModified
+					lastModified: task.lastModified,
+					request: task.serviceRequest.request,
+					priority: task.priority,
+					//todo: no api for that
+					occurrence: "",
+					procedures: []
 				});
 			});
 
@@ -72,11 +84,19 @@ export default defineComponent({
 		onUnmounted(() => {
 			clearTimeout(pollId.value);
 		});
+		const editRequest = ref<TableData>();
+		const onRequestClick = (row: TableData) => {
+			editRequestDialogVisible.value = true;
+			editRequest.value = row;
+		};
 
 		return {
 			tableData,
 			isLoading,
-			requestDialogVisible
+			newRequestDialogVisible,
+			editRequestDialogVisible,
+			onRequestClick,
+			editRequest
 		};
 	}
 });
@@ -93,7 +113,7 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
-				@click="requestDialogVisible = true"
+				@click="newRequestDialogVisible = true"
 			>
 				Add New Request
 			</el-button>
@@ -111,7 +131,10 @@ export default defineComponent({
 					label="Request/Task"
 				>
 					<template #default="scope">
-						<el-button type="text">
+						<el-button
+							type="text"
+							@click="onRequestClick(scope.row)"
+						>
 							{{ scope.row.name }}
 						</el-button>
 					</template>
@@ -176,16 +199,21 @@ export default defineComponent({
 					round
 					type="primary"
 					size="mini"
-					@click="requestDialogVisible = true"
+					@click="newRequestDialogVisible = true"
 				>
 					Add New Request
 				</el-button>
 			</div>
 		</div>
 
-		<RequestDialog
-			:visible="requestDialogVisible"
-			@close="requestDialogVisible = false"
+		<NewRequestDialog
+			:visible="newRequestDialogVisible"
+			@close="newRequestDialogVisible = false"
+		/>
+		<EditRequestDialog
+			:visible="editRequestDialogVisible"
+			:task="editRequest"
+			@close="editRequestDialogVisible = false"
 		/>
 	</div>
 </template>
