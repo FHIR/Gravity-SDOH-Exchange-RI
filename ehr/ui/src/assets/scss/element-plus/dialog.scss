@@ -26,4 +26,8 @@
 .el-dialog__footer {
 	border-top: 1px solid $global-base-border-color;
 	padding: 22px 25px;
+
+	.el-button {
+		width: 155px;
+	}
 }
