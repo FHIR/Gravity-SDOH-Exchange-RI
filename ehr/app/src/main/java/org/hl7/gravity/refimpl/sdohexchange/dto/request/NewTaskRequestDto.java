@@ -17,15 +17,17 @@ public class NewTaskRequestDto {
   private String name;
   @NotNull
   private SDOHDomainCode category;
-  private Priority priority;
-  //TODO: Add occurrence
   @NotNull
   private RequestCode request;
   private String comment;
   @NotNull
+  private Priority priority;
+  @NotNull
+  private OccurrenceRequestDto occurrence;
+  private List<String> conditionIds = new ArrayList<>();
+  private List<String> goalIds = new ArrayList<>();
+  @NotNull
   private String performerId;
   @NotNull
   private Boolean consent;
-  private List<String> conditionIds = new ArrayList<>();
-  private List<String> goalIds = new ArrayList<>();
 }

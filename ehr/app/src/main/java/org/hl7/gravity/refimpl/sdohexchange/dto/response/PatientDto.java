@@ -16,11 +16,14 @@ public class PatientDto extends PersonDto {
   private String address;
   private String phone;
   private String email;
+  //TODO: Set from Observation?
   private String employmentStatus;
   private String race;
   private String ethnicity;
+  //TODO: Set from Observation?
   private String education;
   private String maritalStatus;
+  //TODO: Set from Coverage
   private String insurance;
 
   public PatientDto(String id) {

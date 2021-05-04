@@ -4,13 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReferenceDto implements TypeDto {
 
-  private String resourceType;
   private String id;
+  private String resourceType;
   private String display;
 }

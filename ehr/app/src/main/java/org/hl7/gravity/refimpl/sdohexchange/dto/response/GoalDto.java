@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GoalDto implements Validated {
 
-  private final String goalId;
+  private final String id;
   private Goal.GoalLifecycleStatus lifecycleStatus;
   private GoalAchievement achievementStatus;
   //TODO support category

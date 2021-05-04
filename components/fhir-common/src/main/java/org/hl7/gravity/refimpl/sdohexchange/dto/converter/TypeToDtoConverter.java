@@ -17,7 +17,7 @@ public class TypeToDtoConverter implements Converter<Type, TypeDto> {
       return new StringTypeDto(((StringType) type).getValue());
     } else if (type instanceof Reference) {
       IIdType element = ((Reference) type).getReferenceElement();
-      return new ReferenceDto(element.getResourceType(), element.getIdPart(), ((Reference) type).getDisplay());
+      return new ReferenceDto(element.getIdPart(), element.getResourceType(), ((Reference) type).getDisplay());
     }
     return null;
   }
