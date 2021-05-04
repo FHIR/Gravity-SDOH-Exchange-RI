@@ -11,4 +11,6 @@ public class ServiceRequestDto {
 
   private String id;
   private String category;
+  private String requestCode;
+  private OccurrenceResponseDto occurrence;
 }

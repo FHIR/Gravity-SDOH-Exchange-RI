@@ -1,5 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import com.google.common.base.Strings;
@@ -13,10 +14,8 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
 import org.hl7.fhir.r4.model.codesystems.SearchModifierCode;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.IGenericClientProvider;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +28,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TaskPollingService {
 
-  private final IGenericClientProvider clientProvider;
+  private final IGenericClient openEhrClient;
+  private final FhirContext fhirContext;
   private final CbroTaskUpdateService cbroTaskUpdateService;
-  @Value("${ehr.open-fhir-server-uri}")
-  private String openFhirServerUri;
 
   @Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
   public void updateTasks() {
     log.info("Updating tasks from CBRO Organizations...");
-    IGenericClient client = clientProvider.client(openFhirServerUri, null);
-    Bundle bundle = client.search()
+    Bundle bundle = openEhrClient.search()
         .forResource(Task.class)
         .include(Task.INCLUDE_OWNER)
         .include(Organization.INCLUDE_ENDPOINT.setRecurse(true))
@@ -47,7 +44,7 @@ public class TaskPollingService {
             .systemAndCode(OrganizationTypeCode.CBRO.getSystem(), OrganizationTypeCode.CBRO.toCode()))
         // Get only tasks in-progress
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
-            .code(Task.TaskStatus.REQUESTED.toCode()))
+            .code(Task.TaskStatus.RECEIVED.toCode()))
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.FAILED.toCode()))
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
@@ -82,13 +79,13 @@ public class TaskPollingService {
     b.setType(Bundle.BundleType.TRANSACTION);
     for (Task t : tasks) {
       b.getEntry()
-          .addAll(getUpdateBundle(client, t, orgMap, endpointMap).getEntry());
+          .addAll(getUpdateBundle(openEhrClient, t, orgMap, endpointMap).getEntry());
     }
     //If there is at least one bundle entry - execute a transaction request.
     if (b.getEntry()
         .size() != 0) {
       log.info("One or more tasks were changed. Storing updates to EHR...");
-      client.transaction()
+      openEhrClient.transaction()
           .withBundle(b)
           .execute();
     }
@@ -122,7 +119,7 @@ public class TaskPollingService {
         return failTask(t, String.format("Endpoint resource with id '%s' does not contain an address.", epId));
       }
     }
-    IGenericClient cbroClient = clientProvider.client(ep.getAddress(), null);
+    IGenericClient cbroClient = fhirContext.newRestfulGenericClient(ep.getAddress());
     try {
       return cbroTaskUpdateService.getUpdateBundle(t, client, cbroClient);
     } catch (CbroTaskUpdateService.CbroTaskUpdateException exc) {

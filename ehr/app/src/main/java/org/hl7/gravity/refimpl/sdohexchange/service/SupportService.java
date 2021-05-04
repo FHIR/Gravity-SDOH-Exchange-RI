@@ -16,8 +16,6 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OrganizationToDtoConve
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OrganizationDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.IGenericClientProvider;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SmartOnFhirContextProvider;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,17 +28,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class SupportService {
 
-  private final IGenericClientProvider clientProvider;
-  private final SmartOnFhirContextProvider smartProvider;
+  private final IGenericClient ehrClient;
+  private final SmartOnFhirContext smartOnFhirContext;
 
   public List<ConditionDto> listConditions() {
     // TODO possibly support filtering only for problem-list-item, health-concern categories. Currently _filter is
     //  not supported by Logica sandbox.
-    SmartOnFhirContext smartOnFhirContext = smartProvider.context();
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    IGenericClient client = clientProvider.client();
-    Bundle bundle = client.search()
+    Bundle bundle = ehrClient.search()
         .forResource(Condition.class)
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
@@ -54,11 +50,9 @@ public class SupportService {
   }
 
   public List<GoalDto> listGoals() {
-    SmartOnFhirContext smartOnFhirContext = smartProvider.context();
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    IGenericClient client = clientProvider.client();
-    Bundle bundle = client.search()
+    Bundle bundle = ehrClient.search()
         .forResource(Goal.class)
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
@@ -72,8 +66,7 @@ public class SupportService {
   }
 
   public List<OrganizationDto> listOrganizations() {
-    IGenericClient client = clientProvider.client();
-    Bundle bundle = client.search()
+    Bundle bundle = ehrClient.search()
         .forResource(Organization.class)
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)

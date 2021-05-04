@@ -50,7 +50,7 @@ public class CbroTaskUpdateService {
         TaskResultingActivity.TRANSPORTATION_CASE_MANAGEMENT_PROCEDURE);
   }
 
-  @Value("${ehr.identifier-system}")
+  @Value("${ehr.open-fhir-server-uri}")
   private String identifierSystem;
 
   public Bundle getUpdateBundle(Task task, IGenericClient ehrClient, IGenericClient cbroClient)

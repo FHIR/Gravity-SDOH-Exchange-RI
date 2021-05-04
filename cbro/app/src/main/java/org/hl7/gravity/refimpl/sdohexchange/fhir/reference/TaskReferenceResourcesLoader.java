@@ -35,22 +35,17 @@ public class TaskReferenceResourcesLoader {
 
   public Bundle getReferenceResources(Task task) {
     // Get identifier system name to link with EHR
-    //TODO: Right now we support only single identifier, reimplement in future
-    String identifierSystem = task.getIdentifierFirstRep()
+    String identifier = task.getIdentifierFirstRep()
         .getSystem();
 
     // Get EHR server base from ServiceRequest reference and create EHR Client
-    //TODO: Right now we take url from Task reference, but we should take it from Organization resource and use secured
-    // client, just inject secured client
-    IGenericClient ehrClient = fhirContext.newRestfulGenericClient(task.getFocus()
-        .getReferenceElement()
-        .getBaseUrl());
+    IGenericClient ehrClient = fhirContext.newRestfulGenericClient(identifier);
 
     Bundle bundle = new Bundle();
     bundle.setType(Bundle.BundleType.TRANSACTION);
 
-    TaskReferencesHolder taskReferencesHolder = loadTaskReferences(ehrClient, task, identifierSystem, bundle);
-    processServiceRequestReferences(ehrClient, taskReferencesHolder, identifierSystem, bundle);
+    TaskReferencesHolder taskReferencesHolder = loadTaskReferences(ehrClient, task, identifier, bundle);
+    processServiceRequestReferences(ehrClient, taskReferencesHolder, identifier, bundle);
     return bundle;
   }
 

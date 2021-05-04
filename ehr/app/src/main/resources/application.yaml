@@ -1,7 +1,6 @@
 ehr:
   fhir-server-uri:
   open-fhir-server-uri:
-  identifier-system: http://hl7.org/gravity/sdoh-ri
 
 spring:
   security:

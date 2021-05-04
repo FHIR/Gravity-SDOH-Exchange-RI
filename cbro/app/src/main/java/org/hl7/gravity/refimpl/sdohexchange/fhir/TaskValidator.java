@@ -19,7 +19,6 @@ public class TaskValidator {
 
   public List<String> validate(Task task) {
     List<String> errors = new ArrayList<>();
-    //TODO: Check whether identifier system is valid - how? TBD
     if (task.hasIdentifier() && task.getIdentifier()
         .size() != 1) {
       errors.add("Task.identifier is not valid.");

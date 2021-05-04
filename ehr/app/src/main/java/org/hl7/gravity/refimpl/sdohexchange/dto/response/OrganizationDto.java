@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrganizationDto implements Validated {
 
-  private final String organizationId;
+  private final String id;
   private String name;
   private OrganizationTypeCode type;
 

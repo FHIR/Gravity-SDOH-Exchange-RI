@@ -15,11 +15,10 @@ import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.codesystems.ConsentAction;
 import org.hl7.fhir.r4.model.codesystems.ConsentPolicy;
 import org.hl7.fhir.r4.model.codesystems.ConsentScope;
@@ -28,6 +27,7 @@ import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 import org.hl7.fhir.r4.model.codesystems.V3RoleClass;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.RequestCode;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.OccurrenceRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
@@ -55,6 +55,7 @@ public class TaskBundleFactory {
   private final SDOHDomainCode category;
   private final RequestCode request;
   private final Priority priority;
+  private final OccurrenceRequestDto occurrence;
   private final String performerId;
   private final String requesterId;
 
@@ -71,6 +72,7 @@ public class TaskBundleFactory {
     Assert.notNull(category, "SDOHDomainCode cannot be null.");
     Assert.notNull(request, "RequestCode cannot be null.");
     Assert.notNull(priority, "Priority cannot be null.");
+    Assert.notNull(occurrence, "Occurrence cannot be null.");
     Assert.notNull(performerId, "Performer (Organization) cannot be null.");
     Assert.notNull(requesterId, "Requester (Organization) cannot be null.");
 
@@ -96,9 +98,14 @@ public class TaskBundleFactory {
     serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
     serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
     serviceRequest.setPriority(priority.getServiceRequestPriority());
-    //TODO: Implement this. What types to support?
-    //    serviceRequest.setOccurrence(value)
     serviceRequest.setAuthoredOnElement(DateTimeType.now());
+    if (occurrence.isPeriod()) {
+      serviceRequest.setOccurrence(new Period().setStartElement(occurrence.getStart())
+          .setEndElement(occurrence.getEnd()));
+    } else {
+      serviceRequest.setOccurrence(occurrence.getEnd());
+    }
+
     // TODO implement validation using InstanceValidator to make sure invalid resources are not created.
     if (!SDOHDomainCategories.requestCodesPerDomain.containsKey(category)) {
       throw new IllegalArgumentException(String.format(
@@ -127,14 +134,6 @@ public class TaskBundleFactory {
     Assert.notNull(consent.getId(), "Consent id cannot be null.");
     serviceRequest.addSupportingInfo(new Reference(consent.getIdElement()
         .getValue()));
-
-    //Add description to both Task and ServiceRequest. To be revised.
-    if (!Strings.isNullOrEmpty(comment)) {
-      serviceRequest.addNote()
-          .setText(comment)
-          .setTimeElement(DateTimeType.now())
-          .setAuthor(getAuthor());
-    }
     return serviceRequest;
   }
 
@@ -159,12 +158,11 @@ public class TaskBundleFactory {
     task.setOwner(FhirUtil.toReference(Organization.class, performerId));
     Assert.notNull(requesterId, "Requester Organization id cannot be null.");
     task.setRequester(FhirUtil.toReference(Organization.class, requesterId));
-    //Add description to both Task and ServiceRequest. To be revised.
     if (!Strings.isNullOrEmpty(comment)) {
       task.addNote()
           .setText(comment)
           .setTimeElement(DateTimeType.now())
-          .setAuthor(getAuthor());
+          .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
     }
     return task;
   }
@@ -199,12 +197,6 @@ public class TaskBundleFactory {
         .getCoding()
         .add(new Coding(consentAction.getSystem(), consentAction.toCode(), consentAction.getDisplay()));
     return consent;
-  }
-
-  private Type getAuthor() {
-    //TODO: Right now Logica sanbox when launching as a standalone app doest return provider id, remove this in future
-    return user.getId() == null ? new StringType(user.getName()) : new Reference(
-        new IdType(user.getUserType(), user.getId())).setDisplay(user.getName());
   }
 
   /**
