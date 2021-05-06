@@ -115,8 +115,18 @@ export default defineComponent({
 			formEl.value?.validate(async (valid: boolean) => {
 				if (valid) {
 					//todo: omit this props because api doesn't support that
-					const payload: newTaskPayload = _.omit(formModel, ["status", "occurrence"]);
+					const payload: newTaskPayload = _.omit(formModel, ["status"]);
 					saveInProgress.value = true;
+					if (formModel.occurrence.length > 1) {
+						payload.occurrence = {
+							start: new Date(formModel.occurrence[0]).toISOString().replace(/.\d+Z$/g, "Z"),
+							end: new Date(formModel.occurrence[1]).toISOString().replace(/.\d+Z$/g, "Z")
+						};
+					} else {
+						payload.occurrence = {
+							end: new Date(formModel.occurrence).toISOString().replace(/.\d+Z$/g, "Z")
+						};
+					}
 					try {
 						await TasksModule.createTask(payload);
 						emit("close");
@@ -342,9 +352,9 @@ export default defineComponent({
 				>
 					<el-option
 						v-for="item in performerOptions"
-						:key="item.organizationId"
+						:key="item.id"
 						:label="item.name"
-						:value="item.organizationId"
+						:value="item.id"
 					/>
 				</el-select>
 			</el-form-item>

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, computed, onMounted, ref, onUnmounted } from "vue";
 import { TasksModule } from "@/store/modules/tasks";
-import { Comment, Task } from "@/types";
+import { Comment, Task, Occurrence } from "@/types";
 import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
 import EditRequestDialog from "@/components/patients/EditRequestDialog.vue";
 
@@ -18,7 +18,7 @@ export type TableData = {
 	lastModified: string | null,
 	request: string,
 	priority: string | null,
-	occurrence: string,
+	occurrence: Occurrence,
 	procedures: string[]
 }
 
@@ -55,7 +55,7 @@ export default defineComponent({
 					request: task.serviceRequest.request,
 					priority: task.priority,
 					//todo: no api for that
-					occurrence: "",
+					occurrence: task.serviceRequest.occurrence,
 					procedures: []
 				});
 			});
