@@ -1,6 +1,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, reactive } from "vue";
 import { TableData } from "@/components/patients/RequestTable.vue";
+import { Occurrence } from "@/types";
 
 export type FormModel = {
 	status: string,
@@ -32,10 +33,18 @@ export default defineComponent({
 			Object.assign(formModel, { status: props.task.status });
 		};
 
+		const showOccurrence = (occurrence: Occurrence) => {
+			if (occurrence.hasOwnProperty("start")) {
+				return `from: ${new Date(occurrence.start as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" }) }, to: ${new Date(occurrence.end).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
+			}
+			return `until: ${ new Date(occurrence.end as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
+		};
+
 		return {
 			saveInProgress,
 			formModel,
-			onDialogOpen
+			onDialogOpen,
+			showOccurrence
 		};
 	}
 });
@@ -90,7 +99,7 @@ export default defineComponent({
 				{{ task.priority }}
 			</el-form-item>
 			<el-form-item label="Occurrence">
-				{{ task.occurrence }}
+				{{ showOccurrence(task.occurrence) }}
 			</el-form-item>
 			<el-form-item label="Problem(s)">
 				{{ task.problems.join(", ") }}

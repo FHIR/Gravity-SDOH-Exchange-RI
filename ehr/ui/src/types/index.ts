@@ -34,6 +34,11 @@ export type Organization = {
 	type: "CBO" | "CBRO"
 };
 
+export type Occurrence = {
+	start?: string | null,
+	end: string
+}
+
 export type ServiceRequest = {
 	category: ServiceRequestCategory,
 	details: string,
@@ -41,7 +46,8 @@ export type ServiceRequest = {
 	//todo: on be it's enum right now
 	request: string,
 	serviceRequestId: string,
-	status: ServiceRequestStatus
+	status: ServiceRequestStatus,
+	occurrence: Occurrence
 };
 
 export type ServiceRequestStatus = "ACTIVE" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "NULL" | "ONHOLD" | "REVOKED" | "UNKNOWN"
@@ -70,7 +76,8 @@ export type newTaskPayload = {
 	goalIds: string[],
 	performerId: string,
 	request: string,
-	name: string
+	name: string,
+	occurrence: Occurrence | string
 };
 
 export type TaskStatus = "ACCEPTED" | "CANCELLED" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "FAILED" | "INPROGRESS" | "NULL" | "ONHOLD" | "READY" | "RECEIVED" | "REJECTED" | "REQUESTED"
