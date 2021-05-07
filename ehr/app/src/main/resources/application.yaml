@@ -1,6 +1,6 @@
 ehr:
-  fhir-server-uri: https://api.logicahealth.org/GravityEHR/data
-  open-fhir-server-uri: https://api.logicahealth.org/GravityEHR/open
+  fhir-server-uri:
+  open-fhir-server-uri:
 
 spring:
   security:
