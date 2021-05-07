@@ -17,7 +17,7 @@ public final class ReferenceUtil {
       Class<? extends IBaseResource> resource) {
     return references.stream()
         .filter(r -> getResourceType(r).equals(resource.getSimpleName()))
-        .map(ReferenceUtil::getReferenceId)
+        .map(r -> r.getReferenceElement().getIdPart())
         .collect(Collectors.toList());
   }
 
@@ -28,9 +28,4 @@ public final class ReferenceUtil {
         .getValue() : type;
   }
 
-  public static String getReferenceId(Reference reference) {
-    return reference.getId() == null ? reference.getReference()
-        .substring(reference.getReference()
-            .indexOf('/') + 1) : reference.getId();
-  }
 }

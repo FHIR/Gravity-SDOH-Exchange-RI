@@ -1,6 +1,6 @@
 ehr:
-  fhir-server-uri:
-  open-fhir-server-uri:
+  fhir-server-uri: https://api.logicahealth.org/GravityEHR/data
+  open-fhir-server-uri: https://api.logicahealth.org/GravityEHR/open
 
 spring:
   security:
@@ -8,8 +8,8 @@ spring:
       client:
         registration:
           ehr-client:
-            client-id:
-            client-secret:
+            client-id: a254b2b5-cedc-4a00-a128-38be850cc2e0
+            client-secret: YTOEuaqLhsX69SZYc1kvRFSFLteoXgu8oSSVFphYK06eTUeLleYmVWLhsQ8b7SIJtdHqRguVQMFSYSzFtleGHw
             client-name: Gravity-SDOH-EHR-App
             provider: ehr-provider
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
