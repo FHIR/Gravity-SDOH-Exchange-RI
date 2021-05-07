@@ -18,11 +18,13 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.info.TaskInfoToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.info.TaskInfo;
+import org.hl7.gravity.refimpl.sdohexchange.info.composer.TasksInfoComposer;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ import org.springframework.util.Assert;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -137,7 +140,7 @@ public class TaskService {
 
   public List<TaskDto> listTasks() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
-
+    TaskInfoToDtoConverter taskInfoToDtoConverter = new TaskInfoToDtoConverter();
     Bundle bundle = ehrClient.search()
         .forResource(Task.class)
         .sort()
@@ -151,7 +154,10 @@ public class TaskService {
         .include(Task.INCLUDE_OWNER)
         .returnBundle(Bundle.class)
         .execute();
-    return new TaskBundleToDtoConverter().convert(bundle);
+    List<TaskInfo> taskInfos = new TasksInfoComposer(ehrClient).compose(bundle);
+    return taskInfos.stream()
+        .map(taskInfo -> taskInfoToDtoConverter.convert(taskInfo))
+        .collect(Collectors.toList());
   }
 
   protected void handleCbroTask(IGenericClient client, Task task, Endpoint endpoint) {
