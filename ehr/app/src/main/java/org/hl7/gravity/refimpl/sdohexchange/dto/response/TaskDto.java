@@ -19,15 +19,15 @@ public class TaskDto implements Validated {
 
   private final String id;
 
-  //TODO: Add conditions and goals
   private String name;
   private LocalDateTime createdAt;
   private LocalDateTime lastModified;
   private Priority priority;
   private Task.TaskStatus status;
-  private List<CommentDto> comments;
+  private List<CommentDto> comments = new ArrayList<>();
   private String outcome;
 
+  private List<ProcedureResponseDto> procedures = new ArrayList<>();
   private ServiceRequestDto serviceRequest;
   private OrganizationDto organization;
 

@@ -1,16 +1,25 @@
-package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
+package org.hl7.gravity.refimpl.sdohexchange.dto.converter.bundle;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.AnnotationToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OrganizationToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ServiceRequestToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.bundle.response.ProcedureBundleToResponseDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.util.ReferenceUtil;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,9 +29,19 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>> {
 
-  private final ServiceRequestToDtoConverter serviceRequestToDtoConverter = new ServiceRequestToDtoConverter();
-  private final OrganizationToDtoConverter organizationToDtoConverter = new OrganizationToDtoConverter();
-  private final AnnotationToDtoConverter annotationToDtoConverter = new AnnotationToDtoConverter();
+  private final ServiceRequestToDtoConverter serviceRequestToDtoConverter;
+  private final OrganizationToDtoConverter organizationToDtoConverter;
+  private final AnnotationToDtoConverter annotationToDtoConverter;
+  private final ProcedureBundleToResponseDtoConverter procedureBundleToResponseDtoConverter;
+  private final IGenericClient ehrClient;
+
+  public TaskBundleToDtoConverter(IGenericClient ehrClient) {
+    serviceRequestToDtoConverter = new ServiceRequestToDtoConverter(ehrClient);
+    organizationToDtoConverter = new OrganizationToDtoConverter();
+    annotationToDtoConverter = new AnnotationToDtoConverter();
+    procedureBundleToResponseDtoConverter = new ProcedureBundleToResponseDtoConverter();
+    this.ehrClient = ehrClient;
+  }
 
   @Override
   public List<TaskDto> convert(Bundle bundle) {
@@ -82,6 +101,22 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
           .add("Task.owner not set or is not an Organization.");
     } else {
       taskDto.setOrganization(organizationToDtoConverter.convert(org));
+    }
+
+    List<String> procedureIds = new ArrayList<>();
+    for (Task.TaskOutputComponent outputComponent : task.getOutput()) {
+      Reference procedureReference = (Reference) outputComponent.getValue();
+      if (procedureReference != null) {
+        procedureIds.add(ReferenceUtil.getReferenceId(procedureReference));
+      }
+    }
+    if (!procedureIds.isEmpty()) {
+      Bundle bundle = ehrClient.search()
+          .forResource(Procedure.class)
+          .where(Procedure.RES_ID.exactly().codes(procedureIds))
+          .returnBundle(Bundle.class)
+          .execute();
+      taskDto.getProcedures().addAll(procedureBundleToResponseDtoConverter.convert(bundle));
     }
     return taskDto;
   }

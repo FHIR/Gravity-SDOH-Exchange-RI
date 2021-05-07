@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.bundle.TaskBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
@@ -151,7 +151,8 @@ public class TaskService {
         .include(Task.INCLUDE_OWNER)
         .returnBundle(Bundle.class)
         .execute();
-    return new TaskBundleToDtoConverter().convert(bundle);
+
+    return new TaskBundleToDtoConverter(ehrClient).convert(bundle);
   }
 
   protected void handleCbroTask(IGenericClient client, Task task, Endpoint endpoint) {
