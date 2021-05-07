@@ -27,6 +27,7 @@ public class ServiceRequestInfoComposer {
   }
 
   public ServiceRequestInfo compose(ServiceRequest serviceRequest) {
+    //TODO: use transaction bundle to retrieve all resources in one request
     String consentId = ReferenceUtil.retrieveReferencedIds(serviceRequest.getSupportingInfo(), Consent.class).get(0);
     Consent consent = ehrClient.read()
         .resource(Consent.class)
