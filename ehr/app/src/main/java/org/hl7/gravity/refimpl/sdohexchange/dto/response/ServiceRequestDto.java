@@ -18,6 +18,9 @@ public class ServiceRequestDto implements Validated {
   private String category;
   private String requestCode;
   private OccurrenceResponseDto occurrence;
+  private List<ConditionResponseDto> conditions = new ArrayList<>();
+  private List<GoalResponseDto> goals = new ArrayList<>();
+  private ConsentResponseDto consent;
 
   @Setter(AccessLevel.NONE)
   private List<String> errors = new ArrayList<>();

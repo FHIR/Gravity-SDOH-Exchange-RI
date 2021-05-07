@@ -29,3 +29,13 @@ a:active,
 a:focus {
 	color: $global-primary-color;
 }
+
+::-webkit-scrollbar {
+	width: 4px;
+	height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: transparentize(#bdbdbd, 0.5);
+	border-radius: 2px;
+}
