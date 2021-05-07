@@ -18,7 +18,7 @@ export default defineComponent({
 		},
 		task: {
 			type: Object as PropType<TableData>,
-			required: true
+			default: undefined
 		}
 	},
 	emits: ["close"],
@@ -35,7 +35,7 @@ export default defineComponent({
 
 		const showOccurrence = (occurrence: Occurrence) => {
 			if (occurrence.hasOwnProperty("start")) {
-				return `from: ${new Date(occurrence.start as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" }) }, to: ${new Date(occurrence.end).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
+				return `From ${new Date(occurrence.start as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })} to  ${new Date(occurrence.end).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
 			}
 			return `until: ${ new Date(occurrence.end as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
 		};
