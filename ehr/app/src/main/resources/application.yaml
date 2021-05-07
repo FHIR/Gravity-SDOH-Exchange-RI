@@ -8,8 +8,8 @@ spring:
       client:
         registration:
           ehr-client:
-            client-id: a254b2b5-cedc-4a00-a128-38be850cc2e0
-            client-secret: YTOEuaqLhsX69SZYc1kvRFSFLteoXgu8oSSVFphYK06eTUeLleYmVWLhsQ8b7SIJtdHqRguVQMFSYSzFtleGHw
+            client-id:
+            client-secret:
             client-name: Gravity-SDOH-EHR-App
             provider: ehr-provider
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
