@@ -45,7 +45,6 @@ export default defineComponent({
 			status: "draft",
 			comment: "",
 			priority: "",
-			//todo: no api for that
 			occurrence: "",
 			conditionIds: [],
 			goalIds: [],
@@ -344,7 +343,7 @@ export default defineComponent({
 						v-for="item in goalOptions"
 						:key="item.goalId"
 						:label="item.goalId"
-						:value="item.goalId"
+						:value="item.id"
 					/>
 				</el-select>
 			</el-form-item>

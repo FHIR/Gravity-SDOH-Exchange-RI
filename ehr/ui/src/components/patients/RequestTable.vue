@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, computed, onMounted, ref, onUnmounted } from "vue";
 import { TasksModule } from "@/store/modules/tasks";
-import { Comment, Task, Occurrence } from "@/types";
+import { Comment, Task, Occurrence, Goals, Conditions } from "@/types";
 import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
 import EditRequestDialog from "@/components/patients/EditRequestDialog.vue";
 
@@ -9,10 +9,10 @@ export type TableData = {
 	name: string,
 	status: string,
 	category: string,
-	problems: string[],
-	goals: string[],
+	problems: Conditions[],
+	goals: Goals[],
 	performer: string | null | undefined,
-	consent: string | boolean,
+	consent: string
 	outcomes: string | null,
 	comments: Comment[],
 	lastModified: string | null,
@@ -43,18 +43,15 @@ export default defineComponent({
 					status: task.status,
 					category: task.serviceRequest.category,
 					//todo: no api for that
-					problems: [],
-					//todo: no api for that
-					goals: [],
+					problems: task.serviceRequest.conditions,
+					goals: task.serviceRequest.goals,
 					performer: task.organization?.name,
-					//todo: no api for that
-					consent: "yes",
+					consent: task.serviceRequest.consent.display,
 					outcomes: task.outcome,
 					comments: task.comments,
 					lastModified: task.lastModified,
 					request: task.serviceRequest.request,
 					priority: task.priority,
-					//todo: no api for that
 					occurrence: task.serviceRequest.occurrence,
 					procedures: []
 				});
