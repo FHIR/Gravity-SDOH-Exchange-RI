@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, computed, onMounted, ref, onUnmounted } from "vue";
 import { TasksModule } from "@/store/modules/tasks";
-import { Comment, Task, Occurrence, Goals, Conditions } from "@/types";
+import { Comment, Task, Occurrence, ServiceRequestGoal, ServiceRequestCondition } from "@/types";
 import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
 import EditRequestDialog from "@/components/patients/EditRequestDialog.vue";
 
@@ -9,8 +9,8 @@ export type TableData = {
 	name: string,
 	status: string,
 	category: string,
-	problems: Conditions[],
-	goals: Goals[],
+	problems: ServiceRequestCondition[],
+	goals: ServiceRequestGoal[],
 	performer: string | null | undefined,
 	consent: string
 	outcomes: string | null,
@@ -42,7 +42,6 @@ export default defineComponent({
 					name: task.name,
 					status: task.status,
 					category: task.serviceRequest.category,
-					//todo: no api for that
 					problems: task.serviceRequest.conditions,
 					goals: task.serviceRequest.goals,
 					performer: task.organization?.name,
@@ -124,7 +123,6 @@ export default defineComponent({
 				:data="tableData"
 			>
 				<el-table-column
-					prop="name"
 					label="Request/Task"
 				>
 					<template #default="scope">
@@ -137,7 +135,6 @@ export default defineComponent({
 					</template>
 				</el-table-column>
 				<el-table-column
-					prop="status"
 					label="Status"
 				>
 					<template #default="scope">
@@ -158,13 +155,31 @@ export default defineComponent({
 					label="Category"
 				/>
 				<el-table-column
-					prop="problems"
 					label="Problem(s)"
-				/>
+				>
+					<template #default="scope">
+						<div
+							v-for="(item, index) in scope.row.problems"
+							:key="index"
+							class="truncate"
+						>
+							{{ item.display }}
+						</div>
+					</template>
+				</el-table-column>
 				<el-table-column
-					prop="goals"
 					label="Goal(s)"
-				/>
+				>
+					<template #default="scope">
+						<div
+							v-for="(item, index) in scope.row.goals"
+							:key="index"
+							class="truncate"
+						>
+							{{ item.display }}
+						</div>
+					</template>
+				</el-table-column>
 				<el-table-column
 					prop="performer"
 					label="Performer"
@@ -178,7 +193,6 @@ export default defineComponent({
 					label="Outcomes"
 				/>
 				<el-table-column
-					prop="comments"
 					label="Comment(s)"
 				>
 					<template #default="scope">
@@ -359,5 +373,12 @@ export default defineComponent({
 		font-weight: $global-font-weight-normal;
 		margin-bottom: 50px;
 	}
+}
+
+.truncate {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	padding: 5px 0;
 }
 </style>

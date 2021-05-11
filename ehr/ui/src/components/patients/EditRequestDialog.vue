@@ -2,6 +2,7 @@
 import { defineComponent, PropType, ref, reactive } from "vue";
 import { TableData } from "@/components/patients/RequestTable.vue";
 import { Occurrence } from "@/types";
+import moment from "moment";
 
 export type FormModel = {
 	status: string,
@@ -35,9 +36,9 @@ export default defineComponent({
 
 		const showOccurrence = (occurrence: Occurrence) => {
 			if (occurrence.start !== null) {
-				return `From ${new Date(occurrence.start as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })} to  ${new Date(occurrence.end).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
+				return `From ${moment(occurrence.start).format("MMMM DD, YYYY")} to ${moment(occurrence.end).format("MMMM DD, YYYY")}`;
 			}
-			return `until ${ new Date(occurrence.end as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
+			return `Until ${moment(occurrence.end).format("MMMM DD, YYYY")}`;
 		};
 
 		return {

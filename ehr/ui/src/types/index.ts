@@ -30,7 +30,7 @@ export type ContextResponse = {
 export type Organization = {
 	errors: string[],
 	name: string,
-	organizationId: string,
+	id: string,
 	type: "CBO" | "CBRO"
 };
 
@@ -39,7 +39,7 @@ export type Occurrence = {
 	end: string
 }
 
-export type Goals = {
+export type ServiceRequestGoal = {
 	display: string,
 	id: string
 }
@@ -49,7 +49,7 @@ export type Consent = {
 	id: string
 }
 
-export type Conditions = {
+export type ServiceRequestCondition = {
 	display: string,
 	id: string
 }
@@ -63,9 +63,9 @@ export type ServiceRequest = {
 	serviceRequestId: string,
 	status: ServiceRequestStatus,
 	occurrence: Occurrence,
-	goals: Goals[],
+	goals: ServiceRequestGoal[],
 	consent: Consent,
-	conditions: Conditions[]
+	conditions: ServiceRequestCondition[]
 };
 
 export type ServiceRequestStatus = "ACTIVE" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "NULL" | "ONHOLD" | "REVOKED" | "UNKNOWN"
