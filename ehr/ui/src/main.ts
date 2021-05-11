@@ -5,6 +5,7 @@ import store from "./store";
 import element from "./vendors/element-plus";
 import "./vendors/normalize";
 import "./vendors/lodash";
+import moment from "moment";
 
 const app = createApp(App);
 
@@ -12,3 +13,9 @@ app.use(store);
 app.use(router);
 element(app);
 app.mount("#app");
+
+app.config.globalProperties.$filters = {
+	formatDateTime(value: string): string {
+		return moment.utc(value).format("MMM DD, YYYY, H:mm A");
+	}
+};
