@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, reactive, ref, computed } from "vue";
+import { defineComponent, reactive, ref, computed, watch } from "vue";
 import { getGoals, getConditions, getOrganizations } from "@/api";
 import { Condition, Goal, newTaskPayload, Organization } from "@/types";
 import _ from "@/vendors/lodash";
@@ -45,7 +45,6 @@ export default defineComponent({
 			status: "draft",
 			comment: "",
 			priority: "",
-			//todo: no api for that
 			occurrence: "",
 			conditionIds: [],
 			goalIds: [],
@@ -65,7 +64,16 @@ export default defineComponent({
 			goalOptions.value = await getGoals();
 			performerOptions.value = await getOrganizations();
 		};
+		//
+		// Watchers for Goals and Problems, at least one should be populated (validation)
+		//
 
+		watch(() => formModel.goalIds.length, () => {
+			formEl.value?.validateField("conditionIds");
+		});
+		watch(() => formModel.conditionIds.length, () => {
+			formEl.value?.validateField("goalIds");
+		});
 		//todo: seems like element-ui added few additional keys to async-validator RuleItem
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: {
@@ -335,7 +343,7 @@ export default defineComponent({
 						v-for="item in goalOptions"
 						:key="item.goalId"
 						:label="item.goalId"
-						:value="item.goalId"
+						:value="item.id"
 					/>
 				</el-select>
 			</el-form-item>

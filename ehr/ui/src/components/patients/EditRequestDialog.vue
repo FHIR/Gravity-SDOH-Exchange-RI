@@ -18,7 +18,7 @@ export default defineComponent({
 		},
 		task: {
 			type: Object as PropType<TableData>,
-			required: true
+			default: undefined
 		}
 	},
 	emits: ["close"],
@@ -34,10 +34,10 @@ export default defineComponent({
 		};
 
 		const showOccurrence = (occurrence: Occurrence) => {
-			if (occurrence.hasOwnProperty("start")) {
-				return `from: ${new Date(occurrence.start as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" }) }, to: ${new Date(occurrence.end).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
+			if (occurrence.start !== null) {
+				return `From ${new Date(occurrence.start as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })} to  ${new Date(occurrence.end).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
 			}
-			return `until: ${ new Date(occurrence.end as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
+			return `until ${ new Date(occurrence.end as string).toLocaleDateString("en-US", { day: "numeric", year: "numeric", month: "long" })}`;
 		};
 
 		return {
@@ -102,10 +102,24 @@ export default defineComponent({
 				{{ showOccurrence(task.occurrence) }}
 			</el-form-item>
 			<el-form-item label="Problem(s)">
-				{{ task.problems.join(", ") }}
+				<div
+					v-for="(item, index) in task.problems"
+					:key="index"
+					class="wrapper"
+				>
+					<span class="item">{{ item.display }}</span>
+				</div>
 			</el-form-item>
-			<el-form-item label="Goal(s)">
-				{{ task.goals.join(", ") }}
+			<el-form-item
+				label="Goal(s)"
+			>
+				<div
+					v-for="(item, index) in task.goals"
+					:key="index"
+					class="wrapper"
+				>
+					<span class="item">{{ item.display }}</span>
+				</div>
 			</el-form-item>
 
 			<el-divider />
@@ -163,5 +177,11 @@ export default defineComponent({
 	.el-divider {
 		margin: 20px 0;
 	}
+}
+
+.item {
+	background-color: $alice-blue;
+	border-radius: 5px;
+	padding: 0 7px 0 5px;
 }
 </style>

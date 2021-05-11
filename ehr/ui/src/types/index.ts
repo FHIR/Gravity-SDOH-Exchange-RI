@@ -39,6 +39,21 @@ export type Occurrence = {
 	end: string
 }
 
+export type Goals = {
+	display: string,
+	id: string
+}
+
+export type Consent = {
+	display: string,
+	id: string
+}
+
+export type Conditions = {
+	display: string,
+	id: string
+}
+
 export type ServiceRequest = {
 	category: ServiceRequestCategory,
 	details: string,
@@ -47,7 +62,10 @@ export type ServiceRequest = {
 	request: string,
 	serviceRequestId: string,
 	status: ServiceRequestStatus,
-	occurrence: Occurrence
+	occurrence: Occurrence,
+	goals: Goals[],
+	consent: Consent,
+	conditions: Conditions[]
 };
 
 export type ServiceRequestStatus = "ACTIVE" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "NULL" | "ONHOLD" | "REVOKED" | "UNKNOWN"
