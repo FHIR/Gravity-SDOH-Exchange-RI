@@ -2,7 +2,8 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.Task;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * @author Mykhailo Stefantsiv
@@ -10,7 +11,7 @@ import org.hl7.fhir.r4.model.Task;
 @Getter
 @Setter
 public class UpdateTaskRequestDto {
-  private String id;
-  private Task.TaskStatus status;
-  //TODO: support comments
+  @NotNull
+  private TaskStatus status;
+  private String comment;
 }
