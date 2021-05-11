@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,7 +49,7 @@ public class TaskController {
     return taskService.listTasks();
   }
 
-  @PostMapping("/update/{id}")
+  @PutMapping("/update/{id}")
   @ApiOperation(value = "Update Task resource.",
       notes = "Only STATUS and COMMENT fields can be updated in the resource.")
   public TaskDto update(@PathVariable String id, @RequestBody @Valid UpdateTaskRequestDto updateTaskRequestDto) {
