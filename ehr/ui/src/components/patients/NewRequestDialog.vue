@@ -6,6 +6,7 @@ import _ from "@/vendors/lodash";
 import { TasksModule } from "@/store/modules/tasks";
 import { categoryList, requestList, CategoryListItem, RequestListItem } from "@/utils/constants";
 import { RuleItem } from "async-validator";
+import moment from "moment";
 
 export type FormModel = {
 	name: string,
@@ -127,12 +128,12 @@ export default defineComponent({
 					saveInProgress.value = true;
 					if (formModel.occurrence.length > 1) {
 						payload.occurrence = {
-							start: new Date(formModel.occurrence[0]).toISOString().replace(/.\d+Z$/g, "Z"),
-							end: new Date(formModel.occurrence[1]).toISOString().replace(/.\d+Z$/g, "Z")
+							start: moment(formModel.occurrence[0]).format("YYYY-MM-DD[T]HH:mm:ss"),
+							end: moment(formModel.occurrence[1]).format("YYYY-MM-DD[T]HH:mm:ss")
 						};
 					} else {
 						payload.occurrence = {
-							end: new Date(formModel.occurrence).toISOString().replace(/.\d+Z$/g, "Z")
+							end: moment(formModel.occurrence).format("YYYY-MM-DD[T]HH:mm:ss")
 						};
 					}
 					try {
