@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, reactive } from "vue";
-import { TableData } from "@/components/patients/RequestTable.vue";
+import { TableData } from "@/components/patients/ActionSteps.vue";
 import { Occurrence } from "@/types";
 import moment from "moment";
 
