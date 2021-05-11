@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Mykhailo Stefantsiv
@@ -31,11 +32,12 @@ public class ServiceRequestInfoComposer {
   public ServiceRequestInfo compose(ServiceRequest serviceRequest) {
     //TODO: we can use transaction bundle to retrieve all resources in one request
     String consentId = ReferenceUtil.retrieveReferencedIds(serviceRequest.getSupportingInfo(), Consent.class).get(0);
-    Consent consent = consentRepository.findById(consentId);
+    Optional<Consent> consentResult = consentRepository.find(consentId);
+    Consent consent = consentResult.isPresent() ? consentResult.get() : null;
     List<String> goals = ReferenceUtil.retrieveReferencedIds(serviceRequest.getSupportingInfo(), Goal.class);
     List<String> conditions = ReferenceUtil.retrieveReferencedIds(serviceRequest.getReasonReference(), Condition.class);
-    Bundle goalsBundle = goalRepository.findAllByIds(goals);
-    Bundle conditionsBundle = conditionRepository.findAllByIds(conditions);
+    Bundle goalsBundle = goalRepository.find(goals);
+    Bundle conditionsBundle = conditionRepository.find(conditions);
     List<Goal> goalsList = FhirUtil.getFromBundle(goalsBundle, Goal.class);
     List<Condition> conditionsList = FhirUtil.getFromBundle(conditionsBundle, Condition.class);
     return new ServiceRequestInfo(serviceRequest, goalsList, conditionsList, consent);

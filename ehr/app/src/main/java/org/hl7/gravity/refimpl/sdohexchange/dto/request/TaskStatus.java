@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Task;
 
 /**
- * Possible values for {@link jdk.tools.jimage.JImageTask.Task} status change.
+ * Possible values for {@link org.hl7.fhir.r4.model.Task} status change.
  * @author Mykhailo Stefantsiv
  */
 @Getter

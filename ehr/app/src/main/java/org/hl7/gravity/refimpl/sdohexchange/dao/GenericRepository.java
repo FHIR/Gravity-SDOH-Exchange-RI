@@ -6,15 +6,16 @@ import org.hl7.fhir.r4.model.Bundle;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Mykhailo Stefantsiv
  */
 public interface GenericRepository<T extends IBaseResource> {
 
-  T findById(String id);
+  Optional<T> find(String id);
 
-  Bundle findByIdWithIncludes(String id, Collection<Include> includes);
+  Bundle find(String id, Collection<Include> includes);
 
-  Bundle findAllByIds(List<String> ids);
+  Bundle find(List<String> ids);
 }

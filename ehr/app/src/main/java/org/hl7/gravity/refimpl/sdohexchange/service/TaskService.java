@@ -3,6 +3,7 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.base.Strings;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,7 +88,7 @@ public class TaskService {
     // Verify References
     // Performer Id is set - assert is present in TaskBundleFactory.
     // Fetch it and related Endpoint in case an Organization is a CBRO.
-    Bundle bundle = organizationRepository.findByIdWithIncludes(taskRequest.getPerformerId(),
+    Bundle bundle = organizationRepository.find(taskRequest.getPerformerId(),
         Arrays.asList(Organization.INCLUDE_ENDPOINT));
     List<Organization> orgs = FhirUtil.getFromBundle(bundle, Organization.class);
     if (orgs.size() == 0) {
@@ -134,8 +136,12 @@ public class TaskService {
 
     //If endpoint!=null - this is a CBRO use case. Manage a task additionally.
     if (endpoint != null) {
-      Task task = taskRepository.findById(taskId.getIdPart());
-      handleCbroTask(task, endpoint);
+      Optional<Task> task = taskRepository.find(taskId.getIdPart());
+      if(task.isPresent()){
+        handleCbroTask(task.get(), endpoint);
+      } else {
+        throw new ResourceNotFoundException(taskId);
+      }
     }
     return taskId.getIdPart();
   }
@@ -151,18 +157,23 @@ public class TaskService {
   }
 
   public TaskDto updateTask(String taskId, UpdateTaskRequestDto updateTaskDto) {
-    Task task = taskRepository.findById(taskId);
+    Optional<Task> foundTask = taskRepository.find(taskId);
+    if(!foundTask.isPresent()){
+      throw new ResourceNotFoundException(new IdType(taskId));
+    }
+    Task task = foundTask.get();
     if (!Objects.equals(updateTaskDto.getStatus().getValue(), task.getStatus())) {
       task.setStatus(updateTaskDto.getStatus().getValue());
     }
     if (!Strings.isNullOrEmpty(updateTaskDto.getComment())) {
+      UserDto user = contextService.getUser();
       task.addNote()
           .setText(updateTaskDto.getComment())
           .setTimeElement(DateTimeType.now())
-          .setAuthor(new Reference(smartOnFhirContext.getProfile()));
+          .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
     }
     MethodOutcome methodOutcome = ehrClient.update().resource(task).execute();
-    Bundle updatedTask = taskRepository.findByIdWithIncludes(methodOutcome.getResource().getIdElement()
+    Bundle updatedTask = taskRepository.find(methodOutcome.getResource().getIdElement()
         .getIdPart(), Arrays.asList(Task.INCLUDE_FOCUS, Task.INCLUDE_OWNER));
     TaskInfo taskInfo = tasksInfoComposer.compose(updatedTask).get(0);
     return new TaskInfoToDtoConverter().convert(taskInfo);
@@ -172,7 +183,6 @@ public class TaskService {
     try {
       // Create task in CBRO.
       cbroTaskCreateService.createTask(fhirContext.newRestfulGenericClient(endpoint.getAddress()), task);
-
       //TODO: Change task to received after CBRO receive it
       //      b.addEntry(FhirUtil.createPutEntry(task.setStatus(Task.TaskStatus.RECEIVED)
       //          .setLastModified(new Date())));

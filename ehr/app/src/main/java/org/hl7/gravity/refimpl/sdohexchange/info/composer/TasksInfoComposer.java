@@ -65,7 +65,7 @@ public class TasksInfoComposer {
       }
     }
     if (!procedureIds.isEmpty()) {
-      Bundle bundle = procedureRepository.findAllByIds(procedureIds);
+      Bundle bundle = procedureRepository.find(procedureIds);
       procedures.addAll(FhirUtil.getFromBundle(bundle, Procedure.class));
     }
     return procedures;
