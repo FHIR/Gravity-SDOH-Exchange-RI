@@ -4,13 +4,13 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PatientToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PractitionerToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CurrentContextDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.PatientDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
+import org.hl7.gravity.refimpl.sdohexchange.info.composer.PatientInfoComposer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -21,6 +21,7 @@ public class ContextService {
 
   private final IGenericClient ehrClient;
   private final SmartOnFhirContext smartOnFhirContext;
+  private final PatientInfoComposer patientInfoComposer;
 
   public CurrentContextDto getCurrentContext() {
     return new CurrentContextDto(getPatient(), getUser());
@@ -29,11 +30,7 @@ public class ContextService {
   protected PatientDto getPatient() {
     String patientId = smartOnFhirContext.getPatient();
     Assert.notNull(patientId, "Patient id cannot be null.");
-    Patient patient = ehrClient.read()
-        .resource(Patient.class)
-        .withId(patientId)
-        .execute();
-    return new PatientToDtoConverter().convert(patient);
+    return new PatientToDtoConverter().convert(patientInfoComposer.compose(patientId));
   }
 
   protected UserDto getUser() {
