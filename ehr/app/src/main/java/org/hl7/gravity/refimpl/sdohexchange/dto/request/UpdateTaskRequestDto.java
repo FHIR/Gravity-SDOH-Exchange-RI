@@ -10,7 +10,10 @@ import org.hl7.fhir.r4.model.Task;
 @Getter
 @Setter
 public class UpdateTaskRequestDto {
-  private String id;
-  private Task.TaskStatus status;
-  //TODO: support comments
+  private TaskStatus status;
+  private String comment;
+
+  public Task.TaskStatus getStatus(){
+    return status == null ? null : status.getTaskStatus();
+  }
 }

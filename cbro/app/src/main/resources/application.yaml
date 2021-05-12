@@ -34,3 +34,74 @@ swagger:
     url: https://www.hl7.org/gravity/
 scheduling:
   task-polling-delay-millis: 30000
+
+
+sdoh-mappings:
+  system: "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes"
+  categories:
+    - code: "food-insecurity"
+      display: "Food Insecurity"
+      resources:
+        - resource: "Procedure"
+          systems:
+            - system: "http://snomed.info/sct"
+              codings:
+                - display: "Assessment of health and social care needs (procedure)"
+                  code: "710824005"
+                - display: "Assessment of nutritional status (procedure)"
+                  code: "1759002"
+                - display: "Counseling about nutrition (procedure)"
+                  code: "441041000124100"
+                - display: "Meals on wheels provision education (procedure)"
+                  code: "385767005"
+                - display: "Nutrition education (procedure)"
+                  code: "61310001"
+                - display: "Patient referral to dietitian (procedure)"
+                  code: "103699006"
+                - display: "Provision of food (procedure)"
+                  code: "710925007"
+                - display: "Referral to social worker (procedure)"
+                  code: "308440001"
+            - system: "http://www.ama-assn.org/go/cpt"
+              codings:
+                - display: "Administration of caregiver-focused health risk assessment instrument (eg, depression inventory) for the benefit of the patient, with scoring
+                    and documentation, per standardized instrument"
+                  code: "96161"
+                - display: "Administration of patient-focused health risk assessment instrument (eg, health hazard appraisal) with scoring and documentation, per
+                    standardized instrument"
+                  code: "96160"
+                - display: "Health behavior assessment, or re-assessment (ie, health-focused clinical interview, behavioral observations, clinical decision making)"
+                  code: "96156"
+                - display: "Medical nutrition therapy: group (2 or more individual(s)), each 30 minutes"
+                  code: "97804"
+                - display: "Medical nutrition therapy: initial assessment and intervention, individual, face-to-face with the patient, each 15 minutes"
+                  code: "97802"
+                - display: "Medical nutrition therapy: re-assessment and intervention, individual, face-to-face with the patient, each 15 minutes"
+                  code: "97803"
+        - resource: "ServiceRequest"
+          systems:
+            - system: "http://snomed.info/sct"
+              codings:
+                - display: "Assessment of health and social care needs (procedure)"
+                  code: "710824005"
+                - display: "Assessment of nutritional status (procedure)"
+                  code: "1759002"
+                - display: "Counseling about nutrition (procedure)"
+                  code: "441041000124100"
+                - display: "Meals on wheels provision education (procedure)"
+                  code: "385767005"
+                - display: "Nutrition education (procedure)"
+                  code: "61310001"
+                - display: "Patient referral to dietitian (procedure)"
+                  code: "103699006"
+                - display: "Provision of food (procedure)"
+                  code: "710925007"
+                - display: "Referral to community meals service (procedure)"
+                  code: "713109004"
+                - display: "Referral to social worker (procedure)"
+                  code: "308440001"
+    - code: "housing-instability-homelessness"
+      display: "Housing Instability Homelessness"
+    - code: "transportation-insecurity"
+      display: "Transportation Insecurity"
+

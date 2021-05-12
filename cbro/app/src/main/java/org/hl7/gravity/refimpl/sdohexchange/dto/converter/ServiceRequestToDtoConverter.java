@@ -22,13 +22,11 @@ public class ServiceRequestToDtoConverter implements Converter<ServiceRequest, S
         .getIdPart();
     ServiceRequestDto serviceRequestDto = new ServiceRequestDto();
     serviceRequestDto.setId(id);
-    serviceRequestDto.setCategory(SDOHDomainCode.fromCode(
-        FhirUtil.findCoding(serviceRequest.getCategory(), SDOHDomainCode.SYSTEM)
-            .getCode())
-        .getDisplay());
-    serviceRequestDto.setRequestCode(RequestCode.fromCode(serviceRequest.getCode()
+    serviceRequestDto.setCategory(serviceRequest.getCategoryFirstRep()
         .getCodingFirstRep()
-        .getCode())
+        .getDisplay());
+    serviceRequestDto.setRequestCode(serviceRequest.getCode()
+        .getCodingFirstRep()
         .getDisplay());
     Type occurrence = serviceRequest.getOccurrence();
     if (occurrence instanceof DateTimeType) {

@@ -21,8 +21,10 @@ public class TaskToDtoConverter implements Converter<Task, TaskDto> {
     taskDto.setName(task.getDescription());
     taskDto.setCreatedAt(toLocalDateTime(task.getAuthoredOnElement()));
     taskDto.setLastModified(toLocalDateTime(task.getLastModifiedElement()));
-    taskDto.setPriority(task.getPriority());
-    taskDto.setStatus(task.getStatus());
+    taskDto.setPriority(task.getPriority()
+        .getDisplay());
+    taskDto.setStatus(task.getStatus()
+        .getDisplay());
     taskDto.setRequester(typeToDtoConverter.convert(task.getRequester()));
     taskDto.setPatient(typeToDtoConverter.convert(task.getFor()));
     //TODO: Change to consent id in future

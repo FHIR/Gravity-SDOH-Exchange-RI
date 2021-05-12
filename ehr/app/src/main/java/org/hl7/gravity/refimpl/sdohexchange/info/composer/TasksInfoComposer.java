@@ -1,15 +1,18 @@
 package org.hl7.gravity.refimpl.sdohexchange.info.composer;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.gravity.refimpl.sdohexchange.dao.impl.ProcedureRepository;
 import org.hl7.gravity.refimpl.sdohexchange.info.ServiceRequestInfo;
 import org.hl7.gravity.refimpl.sdohexchange.info.TaskInfo;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,21 +26,18 @@ import java.util.stream.Collectors;
  *
  * @author Mykhailo Stefantsiv
  */
+@Component
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TasksInfoComposer {
 
-  private final IGenericClient ehrClient;
+  private final ProcedureRepository procedureRepository;
   private final ServiceRequestInfoComposer serviceRequestInfoComposer;
-
-  public TasksInfoComposer(IGenericClient ehrClient) {
-    this.ehrClient = ehrClient;
-    this.serviceRequestInfoComposer = new ServiceRequestInfoComposer(ehrClient);
-  }
 
   public List<TaskInfo> compose(Bundle tasksBundle) {
     // Retrieve all Task.focus ServiceRequest instances
     Map<String, ServiceRequestInfo> srMap = FhirUtil.getFromBundle(tasksBundle, ServiceRequest.class)
         .stream()
-        .map(sr -> serviceRequestInfoComposer.compose(sr))
+        .map(serviceRequestInfoComposer::compose)
         .collect(Collectors.toMap(r -> r.getServiceRequest()
             .getIdElement()
             .getIdPart(), Function.identity()));
@@ -65,12 +65,7 @@ public class TasksInfoComposer {
       }
     }
     if (!procedureIds.isEmpty()) {
-      Bundle bundle = ehrClient.search()
-          .forResource(Procedure.class)
-          .where(Procedure.RES_ID.exactly()
-              .codes(procedureIds))
-          .returnBundle(Bundle.class)
-          .execute();
+      Bundle bundle = procedureRepository.find(procedureIds);
       procedures.addAll(FhirUtil.getFromBundle(bundle, Procedure.class));
     }
     return procedures;
