@@ -36,9 +36,9 @@ export default defineComponent({
 
 		const showOccurrence = (occurrence: Occurrence) => {
 			if (occurrence.start !== null) {
-				return `From ${moment(occurrence.start).format("MMMM DD, YYYY")} to ${moment(occurrence.end).format("MMMM DD, YYYY")}`;
+				return `From ${moment(occurrence.start).format("MMM DD, YYYY")} to ${moment(occurrence.end).format("MMM DD, YYYY")}`;
 			}
-			return `Until ${moment(occurrence.end).format("MMMM DD, YYYY")}`;
+			return `Until ${moment(occurrence.end).format("MMM DD, YYYY")}`;
 		};
 
 		return {
