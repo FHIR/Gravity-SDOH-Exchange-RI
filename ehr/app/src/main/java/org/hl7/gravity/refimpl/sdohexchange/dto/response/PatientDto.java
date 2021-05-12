@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,17 +16,15 @@ public class PatientDto extends PersonDto {
   private String gender;
   private String language;
   private String address;
-  private String phone;
-  private String email;
-  //TODO: Set from Observation?
   private String employmentStatus;
   private String race;
   private String ethnicity;
-  //TODO: Set from Observation?
   private String education;
   private String maritalStatus;
-  //TODO: Set from Coverage
-  private String insurance;
+
+  private List<String> insurances = new ArrayList<>();
+  private List<PhoneDto> phones = new ArrayList<>();
+  private List<EmailDto> emails = new ArrayList<>();
 
   public PatientDto(String id) {
     super(id);
