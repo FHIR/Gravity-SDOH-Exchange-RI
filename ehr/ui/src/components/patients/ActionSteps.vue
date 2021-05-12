@@ -2,12 +2,12 @@
 import { computed, defineComponent, onMounted, onUnmounted, ref } from "vue";
 import RequestTable from "@/components/patients/RequestTable.vue";
 import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
-import { Comment, Occurrence, Task, ServiceRequestCondition, ServiceRequestGoal } from "@/types";
+import { Comment, Occurrence, Task, ServiceRequestCondition, ServiceRequestGoal, Procedure, TaskStatus } from "@/types";
 import { TasksModule } from "@/store/modules/tasks";
 
 export type TableData = {
 	name: string,
-	status: string,
+	status: TaskStatus,
 	category: string,
 	problems: ServiceRequestCondition[],
 	goals: ServiceRequestGoal[],
@@ -19,7 +19,8 @@ export type TableData = {
 	request: string,
 	priority: string | null,
 	occurrence: Occurrence,
-	procedures: string[]
+	procedures: Procedure[],
+	id: string
 }
 
 export default defineComponent({
@@ -48,11 +49,11 @@ export default defineComponent({
 					outcomes: task.outcome,
 					comments: task.comments,
 					lastModified: task.lastModified,
-					request: task.serviceRequest.request,
+					request: task.serviceRequest.requestCode,
 					priority: task.priority,
 					occurrence: task.serviceRequest.occurrence,
-					//todo: no api
-					procedures: []
+					procedures: task.procedures,
+					id: task.id
 				});
 			});
 

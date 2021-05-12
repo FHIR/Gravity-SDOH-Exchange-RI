@@ -1,8 +1,9 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, reactive } from "vue";
 import { TableData } from "@/components/patients/ActionSteps.vue";
-import { Occurrence } from "@/types";
+import { Occurrence, TaskStatus, updateTaskPayload } from "@/types";
 import moment from "moment";
+import { TasksModule } from "@/store/modules/tasks";
 
 export type FormModel = {
 	status: string,
@@ -23,7 +24,7 @@ export default defineComponent({
 		}
 	},
 	emits: ["close"],
-	setup(props) {
+	setup(props, { emit }) {
 		const saveInProgress = ref<boolean>(false);
 		const formModel = reactive<FormModel>({
 			status: "",
@@ -41,11 +42,56 @@ export default defineComponent({
 			return `Until ${moment(occurrence.end).format("MMM DD, YYYY")}`;
 		};
 
+		const getStatusOptions = (status: TaskStatus): { name: string, value: string }[] => {
+			if (status === "REJECTED" || status === "FAILED") {
+				return [{
+					name: "REQUESTED",
+					value: "REQUESTED"
+				}, {
+					name: "CANCELLED",
+					value: "CANCELLED"
+				}];
+			}
+
+			if (status === "CANCELLED") {
+				return [{
+					name: "REQUESTED",
+					value: "REQUESTED"
+				}];
+			}
+
+			if (status === "COMPLETED") {
+				return [];
+			}
+
+			return [{
+				name: "CANCELLED",
+				value: "CANCELLED"
+			}];
+		};
+
+		const onFormSave = async () => {
+			const payload: updateTaskPayload = {
+				id: props.task.id,
+				comment: formModel.comment,
+				status: formModel.status === props.task.status ? null : formModel.status as TaskStatus
+			};
+			saveInProgress.value = true;
+			try {
+				await TasksModule.updateTask(payload);
+				emit("close");
+			} finally {
+				saveInProgress.value = false;
+			}
+		};
+
 		return {
 			saveInProgress,
 			formModel,
 			onDialogOpen,
-			showOccurrence
+			showOccurrence,
+			getStatusOptions,
+			onFormSave
 		};
 	}
 });
@@ -83,7 +129,28 @@ export default defineComponent({
 				<el-select
 					v-model="formModel.status"
 					placeholder="Select Status"
-				/>
+				>
+					<template #prefix>
+						<span
+							class="icon"
+							:class="formModel.status.toLocaleLowerCase()"
+						></span>
+					</template>
+
+					<el-option
+						v-for="item in getStatusOptions(task.status)"
+						:key="item.value"
+						:label="item.name"
+						:value="item.value"
+					>
+						<span
+							class="icon"
+							:class="item.value.toLocaleLowerCase()"
+						></span>
+						{{ item.name }}
+					</el-option>
+				</el-select>
+				<span class="date">{{ $filters.formatDateTime(task.lastModified) }}</span>
 			</el-form-item>
 			<el-form-item label="Comment">
 				<el-input
@@ -164,6 +231,7 @@ export default defineComponent({
 				type="primary"
 				size="mini"
 				:loading="saveInProgress"
+				@click="onFormSave"
 			>
 				Save Changes
 			</el-button>
@@ -173,6 +241,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+@import "~@/assets/scss/abstracts/mixins";
 
 .edit-request-form {
 	.el-divider {
@@ -180,9 +249,65 @@ export default defineComponent({
 	}
 }
 
+.wrapper {
+	line-height: 15px;
+	margin-bottom: 10px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
 .item {
 	background-color: $alice-blue;
 	border-radius: 5px;
-	padding: 0 7px 0 5px;
+	padding: 0 5px;
+
+	@include dont-break-out();
+}
+
+.date {
+	margin-left: 10px;
+}
+
+//todo: extract to separate icon component, reuse in table also
+.icon {
+	margin-right: 5px;
+
+	&.completed {
+		@include icon("~@/assets/images/status-completed.svg", 14px);
+	}
+
+	&.accepted {
+		@include icon("~@/assets/images/status-accepted.svg", 14px);
+	}
+
+	&.cancelled {
+		@include icon("~@/assets/images/status-cancelled.svg", 14px);
+	}
+
+	&.failed {
+		@include icon("~@/assets/images/status-failed.svg", 14px);
+	}
+
+	&.inprogress {
+		@include icon("~@/assets/images/status-in-progress.svg", 14px);
+	}
+
+	&.onhold {
+		@include icon("~@/assets/images/status-on-hold.svg", 14px);
+	}
+
+	&.received {
+		@include icon("~@/assets/images/status-received.svg", 14px);
+	}
+
+	&.rejected {
+		@include icon("~@/assets/images/status-rejected.svg", 14px);
+	}
+
+	&.requested {
+		@include icon("~@/assets/images/status-requested.svg", 14px);
+	}
 }
 </style>
