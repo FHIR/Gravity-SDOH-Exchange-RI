@@ -126,3 +126,13 @@ export type Comment = {
 	text: string,
 	time: string
 };
+
+export type Category = {
+	code: string,
+	display: string
+};
+
+export type Request = {
+	code: string,
+	display: string
+};

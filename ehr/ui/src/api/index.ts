@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ContextResponse, Task, Condition, Goal, Organization, newTaskPayload } from "@/types";
+import { ContextResponse, Task, Condition, Goal, Organization, newTaskPayload, Category, Request } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
 	const res = await axios.get("/current-context");
@@ -33,6 +33,18 @@ export const getGoals = async (): Promise<Goal[]> => {
 
 export const getOrganizations = async (): Promise<Organization[]> => {
 	const res = await axios.get("/support/organizations");
+
+	return res.data;
+};
+
+export const getCategories = async (): Promise<Category[]> => {
+	const res = await axios.get("/mappings/categories");
+
+	return res.data;
+};
+
+export const getRequests = async (code: string): Promise<Request[]> => {
+	const res = await axios.get(`/mappings/categories/${code}/servicerequest/codings`);
 
 	return res.data;
 };

@@ -1,10 +1,9 @@
 <script lang="ts">
-import { defineComponent, reactive, ref, computed, watch } from "vue";
-import { getGoals, getConditions, getOrganizations } from "@/api";
-import { Condition, Goal, newTaskPayload, Organization } from "@/types";
+import { defineComponent, reactive, ref, watch } from "vue";
+import { getGoals, getConditions, getOrganizations, getCategories, getRequests } from "@/api";
+import { Category, Condition, Goal, newTaskPayload, Organization, Request } from "@/types";
 import _ from "@/vendors/lodash";
 import { TasksModule } from "@/store/modules/tasks";
-import { categoryList, requestList, CategoryListItem, RequestListItem } from "@/utils/constants";
 import { RuleItem } from "async-validator";
 import moment from "moment";
 
@@ -32,8 +31,8 @@ export default defineComponent({
 	},
 	emits: ["close"],
 	setup(props, { emit }) {
-		const categoryOptions = ref<CategoryListItem[]>(categoryList);
-		const requestOptions = computed<RequestListItem[]>(() => requestList.filter((request: RequestListItem) => request.domain === formModel.category));
+		const categoryOptions = ref<Category[]>([]);
+		const requestOptions = ref<Request[]>([]);
 		const conditionOptions = ref<Condition[]>([]);
 		const goalOptions = ref<Goal[]>([]);
 		const performerOptions = ref<Organization[]>([]);
@@ -61,6 +60,7 @@ export default defineComponent({
 		//
 		const onDialogOpen = async () => {
 			formEl.value?.resetFields();
+			categoryOptions.value = await getCategories();
 			conditionOptions.value = await getConditions();
 			goalOptions.value = await getGoals();
 			performerOptions.value = await getOrganizations();
@@ -153,8 +153,9 @@ export default defineComponent({
 		//
 		// Clear request field on every category change because they are connected.
 		//
-		const onCategoryChange = (): void => {
+		const onCategoryChange = async (code: string) => {
 			formModel.request = "";
+			requestOptions.value = await getRequests(code);
 		};
 
 		return {
@@ -213,13 +214,13 @@ export default defineComponent({
 				<el-select
 					v-model="formModel.category"
 					placeholder="Select Category/Domain"
-					@change="onCategoryChange"
+					@change="onCategoryChange($event)"
 				>
 					<el-option
 						v-for="item in categoryOptions"
-						:key="item.value"
-						:label="item.name"
-						:value="item.value"
+						:key="item.code"
+						:label="item.display"
+						:value="item.code"
 					/>
 				</el-select>
 			</el-form-item>
@@ -234,9 +235,9 @@ export default defineComponent({
 				>
 					<el-option
 						v-for="item in requestOptions"
-						:key="item.value"
-						:label="`${item.name} (${item.code})`"
-						:value="item.value"
+						:key="item.code"
+						:label="`${item.display} (${item.code})`"
+						:value="item.code"
 					/>
 				</el-select>
 			</el-form-item>
