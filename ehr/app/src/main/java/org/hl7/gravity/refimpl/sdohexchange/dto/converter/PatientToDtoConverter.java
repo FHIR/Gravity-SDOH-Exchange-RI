@@ -79,8 +79,8 @@ public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto>
             .map(cp -> new EmailDto(cp.getUse()
                 .getDisplay(), cp.getValue()))
             .collect(Collectors.toList()));
-    if(patientInfo.getEmploymentObservation() != null) {
-      String employmentStatus = patientInfo.getEmploymentObservation()
+    if(patientInfo.getEmployment() != null) {
+      String employmentStatus = patientInfo.getEmployment()
           .getValueCodeableConcept()
           .getCodingFirstRep()
           .getDisplay();
@@ -118,7 +118,7 @@ public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto>
       } else if(resource instanceof RelatedPerson){
         payorsNames.add(((RelatedPerson) resource).getNameFirstRep().getNameAsSingleString());
       } else {
-        throw new IllegalStateException("Not valid Coverage.payor resource type : " + resource.getClass());
+        throw new IllegalStateException("Not valid payor resource type : " + resource.getClass());
       }
     }
     return payorsNames;

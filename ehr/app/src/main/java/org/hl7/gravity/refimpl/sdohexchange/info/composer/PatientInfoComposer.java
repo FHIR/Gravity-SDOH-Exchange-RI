@@ -42,17 +42,18 @@ public class PatientInfoComposer {
         .stream()
         .findFirst()
         .orElse(null);
+
+    Observation educationObservation = FhirUtil.getFromBundle(observationRepository.findPatientEducationLevel(patientId),
+        Observation.class)
+        .stream()
+        .findFirst()
+        .orElse(null);
+
     Bundle payorsBundle = coverageRepository.findPatientPayors(patientId);
     List<IBaseResource> payors = new ArrayList<>();
     payors.addAll(FhirUtil.getFromBundle(payorsBundle, Organization.class));
     payors.addAll(FhirUtil.getFromBundle(payorsBundle, Patient.class));
     payors.addAll(FhirUtil.getFromBundle(payorsBundle, RelatedPerson.class));
-
-    Observation educationObservation = FhirUtil.getFromBundle(observationRepository.findPatientEducation(patientId),
-        Observation.class)
-        .stream()
-        .findFirst()
-        .orElse(null);
 
     return new PatientInfo(patient, employmentStatus, educationObservation, payors);
   }
