@@ -162,7 +162,7 @@ public class TaskService {
       throw new ResourceNotFoundException(new IdType(taskId));
     }
     Task task = foundTask.get();
-    if (!Objects.equals(updateTaskDto.getStatus().getValue(), task.getStatus())) {
+    if (updateTaskDto.getStatus() != null && !Objects.equals(updateTaskDto.getStatus().getValue(), task.getStatus())) {
       task.setStatus(updateTaskDto.getStatus().getValue());
     }
     if (!Strings.isNullOrEmpty(updateTaskDto.getComment())) {

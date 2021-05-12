@@ -49,10 +49,10 @@ public class TaskController {
     return taskService.listTasks();
   }
 
-  @PutMapping("/update/{id}")
+  @PutMapping("{id}")
   @ApiOperation(value = "Update Task resource.",
       notes = "Only STATUS and COMMENT fields can be updated in the resource.")
-  public TaskDto update(@PathVariable String id, @RequestBody @Valid UpdateTaskRequestDto updateTaskRequestDto) {
+  public TaskDto update(@PathVariable String id, @RequestBody UpdateTaskRequestDto updateTaskRequestDto) {
     return taskService.updateTask(id, updateTaskRequestDto);
   }
 }
