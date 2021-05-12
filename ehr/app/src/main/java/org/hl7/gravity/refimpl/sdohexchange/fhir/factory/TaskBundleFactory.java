@@ -1,7 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.factory;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -25,8 +24,6 @@ import org.hl7.fhir.r4.model.codesystems.ConsentScope;
 import org.hl7.fhir.r4.model.codesystems.TaskCode;
 import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 import org.hl7.fhir.r4.model.codesystems.V3RoleClass;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.RequestCode;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.OccurrenceRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
@@ -36,11 +33,7 @@ import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Class that holds a logic for creation of a new Task with required referenced resources during a "Create Task" flow.
@@ -52,8 +45,8 @@ public class TaskBundleFactory {
 
   private final String name;
   private final String patientId;
-  private final SDOHDomainCode category;
-  private final RequestCode request;
+  private final Coding category;
+  private final Coding requestCode;
   private final Priority priority;
   private final OccurrenceRequestDto occurrence;
   private final String performerId;
@@ -70,7 +63,7 @@ public class TaskBundleFactory {
     Assert.notNull(name, "Name cannot be null.");
     Assert.notNull(patientId, "Patient id cannot be null.");
     Assert.notNull(category, "SDOHDomainCode cannot be null.");
-    Assert.notNull(request, "RequestCode cannot be null.");
+    Assert.notNull(requestCode, "RequestCode cannot be null.");
     Assert.notNull(priority, "Priority cannot be null.");
     Assert.notNull(occurrence, "Occurrence cannot be null.");
     Assert.notNull(performerId, "Performer (Organization) cannot be null.");
@@ -105,29 +98,9 @@ public class TaskBundleFactory {
     } else {
       serviceRequest.setOccurrence(occurrence.getEnd());
     }
-
-    // TODO implement validation using InstanceValidator to make sure invalid resources are not created.
-    if (!SDOHDomainCategories.requestCodesPerDomain.containsKey(category)) {
-      throw new IllegalArgumentException(String.format(
-          "Category %s not supported. There are no Request codes available for this value. Supported Categories: [%s]",
-          category, SDOHDomainCategories.requestCodesPerDomain.keySet()
-              .stream()
-              .map(Enum::name)
-              .collect(Collectors.joining(", "))));
-    }
-    if (!SDOHDomainCategories.requestCodesPerDomain.get(category)
-        .contains(request)) {
-      throw new IllegalArgumentException(
-          String.format("Request code %s cannot be used with category %s. Suitable codes are [%s]", request, category,
-              SDOHDomainCategories.requestCodesPerDomain.get(category)
-                  .stream()
-                  .map(Enum::name)
-                  .collect(Collectors.joining(", "))));
-    }
-    serviceRequest.addCategory(
-        new CodeableConcept().addCoding(new Coding(category.getSystem(), category.toCode(), category.getDisplay())));
+    serviceRequest.addCategory(new CodeableConcept().addCoding(category));
     serviceRequest.getCode()
-        .addCoding(new Coding(request.getSystem(), request.toCode(), request.getDisplay()));
+        .addCoding(requestCode);
     serviceRequest.setSubject(FhirUtil.toReference(Patient.class, patientId));
     conditionIds.forEach(id -> serviceRequest.addReasonReference(FhirUtil.toReference(Condition.class, id)));
     goalIds.forEach(id -> serviceRequest.addSupportingInfo(FhirUtil.toReference(Goal.class, id)));
@@ -197,32 +170,5 @@ public class TaskBundleFactory {
         .getCoding()
         .add(new Coding(consentAction.getSystem(), consentAction.toCode(), consentAction.getDisplay()));
     return consent;
-  }
-
-  /**
-   * This class holds mappings between a {@link SDOHDomainCode} and other codes for other resources. Currently only
-   * {@link RequestCode} mappings are available. But there are also mappings for Conditions, Procedures, etc. For
-   * example, you cannot reference a condition with code 32911000 (Homeless (finding)) to a task from
-   * food-insecurity-domain
-   */
-  private static class SDOHDomainCategories {
-
-    static Map<SDOHDomainCode, Set<RequestCode>> requestCodesPerDomain;
-
-    static {
-      requestCodesPerDomain = new HashMap<>();
-      requestCodesPerDomain.put(SDOHDomainCode.FOOD_INSECURITY_DOMAIN,
-          Sets.newHashSet(RequestCode.ASSESSMENT_OF_HEALTH_AND_SOCIAL_CARE_NEEDS,
-              RequestCode.ASSESSMENT_OF_NUTRITIONAL_STATUS, RequestCode.COUNSELING_ABOUT_NUTRITION,
-              RequestCode.MEALS_ON_WHEELS_PROVISION_EDUCATION, RequestCode.NUTRITION_EDUCATION,
-              RequestCode.PATIENT_REFERRAL_TO_DIETITIAN, RequestCode.PROVISION_OF_FOOD,
-              RequestCode.REFERRAL_TO_COMMUNITY_MEALS_SERVICE, RequestCode.REFERRAL_TO_SOCIAL_WORKER));
-
-      requestCodesPerDomain.put(SDOHDomainCode.HOUSING_INSTABILITY_AND_HOMELESSNESS_DOMAIN,
-          Sets.newHashSet(RequestCode.HOUSING_ASSESSMENT, RequestCode.REFERRAL_TO_HOUSING_SERVICE));
-
-      requestCodesPerDomain.put(SDOHDomainCode.TRANSPORTATION_INSECURITY_DOMAIN,
-          Sets.newHashSet(RequestCode.TRANSPORTATION_CASE_MANAGEMENT));
-    }
   }
 }

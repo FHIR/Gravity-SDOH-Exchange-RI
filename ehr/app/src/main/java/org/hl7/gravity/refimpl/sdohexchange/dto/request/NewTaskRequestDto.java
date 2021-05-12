@@ -16,9 +16,9 @@ public class NewTaskRequestDto {
   @NotNull
   private String name;
   @NotNull
-  private SDOHDomainCode category;
+  private String category;
   @NotNull
-  private RequestCode request;
+  private String code;
   private String comment;
   @NotNull
   private Priority priority;

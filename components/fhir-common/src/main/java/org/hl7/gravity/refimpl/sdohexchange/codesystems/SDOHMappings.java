@@ -29,6 +29,15 @@ public class SDOHMappings {
         .getSystems();
   }
 
+  public Coding findCategory(String code) {
+    return categories.stream()
+        .filter(category -> category.getCode()
+            .equals(code))
+        .map(category -> new Coding(system, category.getCode(), category.getDisplay()))
+        .findFirst()
+        .orElseThrow(() -> new FHIRException("Unknown SDOHDomainCode code '" + code + "'"));
+  }
+
   public Coding findCoding(Class<? extends Resource> resource, String code) {
     return categories.stream()
         .map(c -> c.getResource(resource)

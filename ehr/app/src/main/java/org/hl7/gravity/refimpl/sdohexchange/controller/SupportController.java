@@ -9,12 +9,16 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OrganizationDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.SupportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("support")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -29,8 +33,8 @@ public class SupportController {
           + "field references a code from a code system 'http://hl7"
           + ".org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes'. Other Conditions are ignored! "
           + "Consider looking at 'errors' response field which holds additional conformance and validation checks.")
-  public List<ConditionDto> listConditions() {
-    return supportService.listConditions();
+  public List<ConditionDto> listConditions(@RequestParam @NotBlank String category) {
+    return supportService.listConditions(category);
   }
 
   @GetMapping("goals")
@@ -39,8 +43,8 @@ public class SupportController {
           + "field references a code from a code system 'http://hl7"
           + ".org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes'. Other Goals are ignored! Consider "
           + "looking at 'errors' response field which holds additional conformance and validation checks.")
-  public List<GoalDto> listGoals() {
-    return supportService.listGoals();
+  public List<GoalDto> listGoals(@RequestParam @NotBlank String category) {
+    return supportService.listGoals(category);
   }
 
   @GetMapping("organizations")

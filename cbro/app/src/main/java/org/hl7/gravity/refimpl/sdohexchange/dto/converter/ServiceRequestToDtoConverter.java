@@ -6,8 +6,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.RequestCode;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OccurrenceResponseDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ServiceRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
@@ -22,12 +21,12 @@ public class ServiceRequestToDtoConverter implements Converter<ServiceRequest, S
         .getIdPart();
     ServiceRequestDto serviceRequestDto = new ServiceRequestDto();
     serviceRequestDto.setId(id);
-    serviceRequestDto.setCategory(serviceRequest.getCategoryFirstRep()
-        .getCodingFirstRep()
-        .getDisplay());
-    serviceRequestDto.setRequestCode(serviceRequest.getCode()
-        .getCodingFirstRep()
-        .getDisplay());
+    Coding categoryCode = serviceRequest.getCategoryFirstRep()
+        .getCodingFirstRep();
+    serviceRequestDto.setCategory(new CodingDto(categoryCode.getCode(), categoryCode.getDisplay()));
+    Coding requestCode = serviceRequest.getCode()
+        .getCodingFirstRep();
+    serviceRequestDto.setCode(new CodingDto(requestCode.getCode(), requestCode.getDisplay()));
     Type occurrence = serviceRequest.getOccurrence();
     if (occurrence instanceof DateTimeType) {
       serviceRequestDto.setOccurrence(
