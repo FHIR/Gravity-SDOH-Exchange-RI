@@ -10,7 +10,7 @@ import lombok.Setter;
 public class ServiceRequestDto {
 
   private String id;
-  private String category;
-  private String requestCode;
+  private CodingDto category;
+  private CodingDto code;
   private OccurrenceResponseDto occurrence;
 }
