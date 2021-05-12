@@ -4,6 +4,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +24,10 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
-@Getter
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public abstract class FhirRepository<T extends IBaseResource> implements GenericRepository<T> {
 
+  @Getter(AccessLevel.PROTECTED)
   private final IGenericClient ehrClient;
 
   @Override
