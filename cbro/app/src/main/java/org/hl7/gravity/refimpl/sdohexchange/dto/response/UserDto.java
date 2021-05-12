@@ -7,5 +7,5 @@ public class UserDto {
   private String id;
   private String userType;
   private String name;
-  private String preferredUsername;
+  private String email;
 }

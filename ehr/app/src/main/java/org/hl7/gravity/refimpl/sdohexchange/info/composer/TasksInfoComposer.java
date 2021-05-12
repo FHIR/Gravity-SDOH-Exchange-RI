@@ -37,7 +37,7 @@ public class TasksInfoComposer {
     // Retrieve all Task.focus ServiceRequest instances
     Map<String, ServiceRequestInfo> srMap = FhirUtil.getFromBundle(tasksBundle, ServiceRequest.class)
         .stream()
-        .map(sr -> serviceRequestInfoComposer.compose(sr))
+        .map(serviceRequestInfoComposer::compose)
         .collect(Collectors.toMap(r -> r.getServiceRequest()
             .getIdElement()
             .getIdPart(), Function.identity()));

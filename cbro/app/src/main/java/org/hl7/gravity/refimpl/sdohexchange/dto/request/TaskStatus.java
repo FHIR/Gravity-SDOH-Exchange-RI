@@ -8,14 +8,13 @@ import org.hl7.fhir.r4.model.Task;
 
 import java.util.stream.Stream;
 
-/**
- * Possible values for {@link org.hl7.fhir.r4.model.Task} status change.
- *
- * @author Mykhailo Stefantsiv
- */
 @AllArgsConstructor
 public enum TaskStatus {
-  CANCELLED(Task.TaskStatus.CANCELLED.getDisplay(), Task.TaskStatus.CANCELLED);
+  ACCEPTED(Task.TaskStatus.ACCEPTED.getDisplay(), Task.TaskStatus.ACCEPTED),
+  REJECTED(Task.TaskStatus.REJECTED.getDisplay(), Task.TaskStatus.REJECTED),
+  ONHOLD(Task.TaskStatus.ONHOLD.getDisplay(), Task.TaskStatus.ONHOLD),
+  INPROGRESS(Task.TaskStatus.INPROGRESS.getDisplay(), Task.TaskStatus.INPROGRESS),
+  COMPLETED(Task.TaskStatus.COMPLETED.getDisplay(), Task.TaskStatus.COMPLETED);
 
   private final String status;
   @Getter
@@ -26,7 +25,7 @@ public enum TaskStatus {
     return Stream.of(TaskStatus.values())
         .filter(targetEnum -> targetEnum.status.equals(status))
         .findFirst()
-        .orElseThrow(IllegalAccessError::new);
+        .orElseThrow(IllegalArgumentException::new);
   }
 
   @JsonValue

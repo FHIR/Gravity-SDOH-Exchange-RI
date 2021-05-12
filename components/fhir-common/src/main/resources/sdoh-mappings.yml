@@ -1,41 +1,3 @@
-cbro:
-  fhir-server-uri:
-  open-fhir-server-uri:
-
-spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          cbro-client:
-            client-id:
-            client-secret:
-            client-name: Gravity-SDOH-CBRO-App
-            provider: cbro-provider
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            client-authentication-method: basic
-            authorization-grant-type: authorization_code
-            # scope 'launch/patient' for a standalone launch if needed.
-            # user/*.* will give us full access to resources in Logica sendbox (might be a bug), should be system/*.*
-            scope: 'user/*.*,profile,openid,launch'
-        provider:
-          cbro-provider:
-            token-uri: https://auth.logicahealth.org/token
-            # We need to explicitly set the 'aud' query param to enable standalone launch.
-            authorization-uri: https://auth.logicahealth.org/authorize?aud=${cbro.fhir-server-uri}
-            user-info-uri: https://auth.logicahealth.org/userinfo
-            jwk-set-uri: https://auth.logicahealth.org/jwk
-            userNameAttribute: sub
-
-swagger:
-  title: SDOH Exchange CBRO App API
-  contact:
-    name: Gravity Project
-    url: https://www.hl7.org/gravity/
-scheduling:
-  task-polling-delay-millis: 30000
-
-
 sdoh-mappings:
   system: "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes"
   categories:
@@ -78,6 +40,10 @@ sdoh-mappings:
                   code: "97802"
                 - display: "Medical nutrition therapy: re-assessment and intervention, individual, face-to-face with the patient, each 15 minutes"
                   code: "97803"
+            - system: "urn:oid:2.16.840.1.113883.6.285"
+              codings:
+                - display: "Nutritional counseling, dietitian visit"
+                  code: "S9470"
         - resource: "ServiceRequest"
           systems:
             - system: "http://snomed.info/sct"
@@ -102,6 +68,39 @@ sdoh-mappings:
                   code: "308440001"
     - code: "housing-instability-homelessness"
       display: "Housing Instability Homelessness"
+      resources:
+        - resource: "Procedure"
+          systems:
+            - system: "http://snomed.info/sct"
+              codings:
+                - display: "Housing assessment (procedure)"
+                  code: "225340009"
+                - display: "Housing case management (procedure)"
+                  code: "410341008"
+                - display: "Referral to housing service (procedure)"
+                  code: "710911006"
+        - resource: "ServiceRequest"
+          systems:
+            - system: "http://snomed.info/sct"
+              codings:
+                - display: "Housing assessment (procedure)"
+                  code: "225340009"
+                - display: "Referral to housing service (procedure)"
+                  code: "710911006"
     - code: "transportation-insecurity"
       display: "Transportation Insecurity"
-
+      resources:
+        - resource: "Procedure"
+          systems:
+            - system: "http://snomed.info/sct"
+              codings:
+                - display: "Provision of taxi (procedure)"
+                  code: "716730006"
+                - display: "Provision of transport (procedure)"
+                  code: "228615008"
+        - resource: "ServiceRequest"
+          systems:
+            - system: "http://snomed.info/sct"
+              codings:
+                - display: "Transportation case management (procedure)"
+                  code: "410365006"

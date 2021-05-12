@@ -23,7 +23,7 @@ public class TaskDto implements Validated {
   private LocalDateTime createdAt;
   private LocalDateTime lastModified;
   private Priority priority;
-  private Task.TaskStatus status;
+  private String status;
   private List<CommentDto> comments = new ArrayList<>();
   private String outcome;
 

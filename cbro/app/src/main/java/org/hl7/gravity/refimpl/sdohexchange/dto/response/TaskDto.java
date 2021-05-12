@@ -17,8 +17,8 @@ public class TaskDto {
   private String name;
   private LocalDateTime createdAt;
   private LocalDateTime lastModified;
-  private Task.TaskPriority priority;
-  private Task.TaskStatus status;
+  private String priority;
+  private String status;
   private ServiceRequestDto serviceRequest;
   private TypeDto requester;
   private TypeDto patient;
