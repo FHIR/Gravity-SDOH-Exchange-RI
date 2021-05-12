@@ -2,15 +2,7 @@
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-	name: "Login",
-	setup() {
-		const active = ref<string>("");
-		const setActive = (item: string) => active.value = item;
-		return {
-			active,
-			setActive
-		};
-	}
+	name: "Login"
 });
 </script>
 
@@ -28,42 +20,26 @@ export default defineComponent({
 			<ul class="menu">
 				<li
 					class="menu-item"
-					:class="{ active: active === 'provider' }"
-					@click="setActive('provider')"
 				>
-					<div class="circle circle-logan">
-						<span class="icon"></span>
-					</div>
+					<span class="icon icon-provider"></span>
 					Provider/EHR
 				</li>
 				<li
 					class="menu-item"
-					:class="{ active: active === 'payer' }"
-					@click="setActive('payer')"
 				>
-					<div class="circle circle-blue">
-						<span class="icon"></span>
-					</div>
+					<span class="icon icon-payer"></span>
 					Payer
 				</li>
 				<li
 					class="menu-item"
-					:class="{ active: active === 'platform-originating' }"
-					@click="setActive('platform-originating')"
 				>
-					<div class="circle circle-cerise">
-						<span class="icon"></span>
-					</div>
+					<span class="icon icon-originating"></span>
 					Coordination Platform &nbsp; <span class="description">(originating tasks)</span>
 				</li>
 				<li
 					class="menu-item"
-					:class="{ active: active === 'platform-receiving' }"
-					@click="setActive('platform-receiving')"
 				>
-					<div class="circle circle-golden">
-						<span class="icon"></span>
-					</div>
+					<span class="icon icon-receiving"></span>
 					Coordination Platform &nbsp; <span class="description">(receiving tasks)</span>
 				</li>
 			</ul>
@@ -82,7 +58,7 @@ export default defineComponent({
 	justify-content: center;
 	align-items: center;
 
-	& .login-menu {
+	.login-menu {
 		width: 700px;
 		height: 615px;
 		background-color: white;
@@ -115,6 +91,10 @@ export default defineComponent({
 		font-weight: $global-font-weight-medium;
 		cursor: pointer;
 
+		&:active {
+			border-color: $dodger-blue;
+		}
+
 		&:hover {
 			box-shadow: 0 2px 5px rgba(51, 51, 51, 0.25);
 		}
@@ -122,56 +102,26 @@ export default defineComponent({
 		.description {
 			color: $grey;
 		}
-	}
-
-	.circle {
-		width: 28px;
-		height: 28px;
-		border-radius: 50%;
-		margin: 0 10px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-
-		&-logan {
-			background-color: $logan;
-
-			.icon {
-				@include icon("~@/assets/images/provider-icon.svg", 13px);
-			}
-		}
-
-		&-blue {
-			background-color: $bright-blue;
-
-			.icon {
-				@include icon("~@/assets/images/payer-icon.svg", 14px);
-			}
-		}
-
-		&-cerise {
-			background-color: $cerise;
-
-			.icon {
-				@include icon("~@/assets/images/originaiting-icon.svg", 14px);
-			}
-		}
-
-		&-golden {
-			background-color: $golden-tainoi;
-
-			.icon {
-				@include icon("~@/assets/images/receiving-icon.svg", 14px);
-			}
-		}
 
 		.icon {
-			height: 16px;
-		}
-	}
+			margin: 0 10px;
 
-	.active {
-		border-color: $dodger-blue;
+			&-provider {
+				@include icon("~@/assets/images/provider-icon.svg", 28px);
+			}
+
+			&-payer {
+				@include icon("~@/assets/images/payer-icon.svg", 28px);
+			}
+
+			&-originating {
+				@include icon("~@/assets/images/originating-icon.svg", 28px);
+			}
+
+			&-receiving {
+				@include icon("~@/assets/images/receiving-icon.svg", 28px);
+			}
+		}
 	}
 }
 </style>
