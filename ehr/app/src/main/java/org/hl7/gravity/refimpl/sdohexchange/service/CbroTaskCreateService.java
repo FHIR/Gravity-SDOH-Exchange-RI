@@ -33,7 +33,7 @@ public class CbroTaskCreateService {
     //TODO: Remove this after Logica bug response
     t.setMeta(null);
     t.addIdentifier()
-        .setSystem(openFhirServerUri)
+        .setSystem(cbroClient.getServerBase())
         .setValue(task.getIdElement()
             .getIdPart());
     try {
@@ -43,7 +43,7 @@ public class CbroTaskCreateService {
     } catch (BaseServerResponseException exc) {
       throw new CbroTaskCreateException(
           String.format("Could not create a Task with identifier '%s' in CBRO at '%s'. Reason: %s.",
-              openFhirServerUri + "|" + task.getIdElement()
+              cbroClient.getServerBase() + "|" + task.getIdElement()
                   .getIdPart(), cbroClient.getServerBase(), exc.getMessage()), exc);
     }
   }

@@ -94,24 +94,24 @@ public class CbroTaskUpdateService {
       cbroBundle = cbroClient.search()
           .forResource(Task.class)
           .where(Task.IDENTIFIER.exactly()
-              .systemAndValues(identifierSystem, taskId))
+              .systemAndValues(cbroClient.getServerBase(), taskId))
           .returnBundle(Bundle.class)
           .execute();
     } catch (BaseServerResponseException exc) {
       throw new CbroTaskUpdateException(
           String.format("Task retrieval failed for identifier '%s' at CBRO location '%s'. Reason: %s.",
-              identifierSystem + "|" + taskId, cbroClient.getServerBase(), exc.getMessage()), exc);
+              cbroClient.getServerBase() + "|" + taskId, cbroClient.getServerBase(), exc.getMessage()), exc);
     }
     if (cbroBundle.getEntry()
         .size() == 0) {
       throw new CbroTaskUpdateException(
           String.format("No Task is present at '%s' for identifier '%s'.", cbroClient.getServerBase(),
-              identifierSystem + "|" + taskId));
+              cbroClient.getServerBase() + "|" + taskId));
     } else if (cbroBundle.getEntry()
         .size() > 1) {
       throw new CbroTaskUpdateException(
           String.format("More than one Task is present at '%s' for identifier '%s'.", cbroClient.getServerBase(),
-              identifierSystem + "|" + taskId));
+              cbroClient.getServerBase() + "|" + taskId));
     }
     return FhirUtil.getFromBundle(cbroBundle, Task.class)
         .get(0);
@@ -178,8 +178,7 @@ public class CbroTaskUpdateService {
           Procedure resultProc = copyProcedure(cbroProc, ehrTask.getFor(), srId);
           resultProc.setId(IdType.newRandomUuid());
           resultProc.addIdentifier()
-              //TODO set a proper system identifier for a CBRO
-              .setSystem("test-cbro-system")
+              .setSystem(cbroClient.getServerBase())
               .setValue(cbroProcId);
           // Add Procedure to result bundle
           resultBundle.addEntry(FhirUtil.createPostEntry(resultProc));

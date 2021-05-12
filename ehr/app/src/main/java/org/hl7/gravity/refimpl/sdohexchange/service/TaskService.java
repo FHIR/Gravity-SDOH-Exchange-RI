@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -89,7 +90,7 @@ public class TaskService {
     // Performer Id is set - assert is present in TaskBundleFactory.
     // Fetch it and related Endpoint in case an Organization is a CBRO.
     Bundle bundle = organizationRepository.find(taskRequest.getPerformerId(),
-        Arrays.asList(Organization.INCLUDE_ENDPOINT));
+        Collections.singletonList(Organization.INCLUDE_ENDPOINT));
     List<Organization> orgs = FhirUtil.getFromBundle(bundle, Organization.class);
     if (orgs.size() == 0) {
       throw new IllegalStateException("Organization with id '" + taskRequest.getPerformerId() + "' does not exist.");
@@ -162,8 +163,8 @@ public class TaskService {
       throw new ResourceNotFoundException(new IdType(taskId));
     }
     Task task = foundTask.get();
-    if (updateTaskDto.getStatus() != null && !Objects.equals(updateTaskDto.getStatus().getValue(), task.getStatus())) {
-      task.setStatus(updateTaskDto.getStatus().getValue());
+    if (updateTaskDto.getStatus() != null && !Objects.equals(updateTaskDto.getStatus(), task.getStatus())) {
+      task.setStatus(updateTaskDto.getStatus());
     }
     if (!Strings.isNullOrEmpty(updateTaskDto.getComment())) {
       UserDto user = contextService.getUser();

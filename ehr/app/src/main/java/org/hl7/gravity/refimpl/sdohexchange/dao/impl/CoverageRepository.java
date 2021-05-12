@@ -16,8 +16,8 @@ public class CoverageRepository extends FhirRepository<Coverage> {
     super(ehrClient);
   }
 
-  public Bundle findPatientPayors(String patientId){
-    return getEhrClient().search()
+  public Bundle findPatientPayors(String patientId) {
+    return getClient().search()
         .forResource(getResourceType())
         .where(Coverage.BENEFICIARY.hasId(patientId))
         .include(Coverage.INCLUDE_PAYOR)

@@ -19,6 +19,7 @@ public class SpringFoxConfig {
 
   public static final String TASK_API_TAG = "Task Controller";
   public static final String USER_API_TAG = "User Controller";
+  public static final String MAPPINGS_API_TAG = "Mappings Controller";
 
   @Bean
   public Docket api(ApiInfo apiInfo) {
@@ -31,7 +32,8 @@ public class SpringFoxConfig {
         .tags(new Tag(TASK_API_TAG,
                 "Perform operations on Task resources. This includes retrieving of tasks, changing task status, and "
                     + "triggering an automatic polling mechanism for Task status synchronization."),
-            new Tag(USER_API_TAG, "Get details of a currently logged in user."))
+            new Tag(USER_API_TAG, "Get details of a currently logged in user."),
+            new Tag(MAPPINGS_API_TAG, "Get details of SDOH categories and codes."))
         .apiInfo(apiInfo)
         .useDefaultResponseMessages(false);
   }

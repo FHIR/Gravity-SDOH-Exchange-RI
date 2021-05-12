@@ -31,9 +31,10 @@ public class ServiceRequestInfoComposer {
 
   public ServiceRequestInfo compose(ServiceRequest serviceRequest) {
     //TODO: we can use transaction bundle to retrieve all resources in one request
-    String consentId = ReferenceUtil.retrieveReferencedIds(serviceRequest.getSupportingInfo(), Consent.class).get(0);
-    Optional<Consent> consentResult = consentRepository.find(consentId);
-    Consent consent = consentResult.isPresent() ? consentResult.get() : null;
+    String consentId = ReferenceUtil.retrieveReferencedIds(serviceRequest.getSupportingInfo(), Consent.class)
+        .get(0);
+    Consent consent = consentRepository.find(consentId)
+        .orElse(null);
     List<String> goals = ReferenceUtil.retrieveReferencedIds(serviceRequest.getSupportingInfo(), Goal.class);
     List<String> conditions = ReferenceUtil.retrieveReferencedIds(serviceRequest.getReasonReference(), Condition.class);
     Bundle goalsBundle = goalRepository.find(goals);
@@ -42,5 +43,4 @@ public class ServiceRequestInfoComposer {
     List<Condition> conditionsList = FhirUtil.getFromBundle(conditionsBundle, Condition.class);
     return new ServiceRequestInfo(serviceRequest, goalsList, conditionsList, consent);
   }
-
 }
