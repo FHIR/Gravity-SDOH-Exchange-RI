@@ -4,9 +4,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +16,6 @@ import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.TaskResultingActivity;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,18 +33,6 @@ public class CbroTaskUpdateService {
 
   public static final ArrayList<Task.TaskStatus> FINISHED_TASK_STATUSES = Lists.newArrayList(Task.TaskStatus.FAILED,
       Task.TaskStatus.REJECTED, Task.TaskStatus.COMPLETED, Task.TaskStatus.CANCELLED);
-
-  private static Map<SDOHDomainCode, TaskResultingActivity> domainToResultingActivityMap;
-
-  static {
-    domainToResultingActivityMap = new HashMap<>();
-    domainToResultingActivityMap.put(SDOHDomainCode.FOOD_INSECURITY_DOMAIN,
-        TaskResultingActivity.REFERRAL_TO_COMMUNITY_MEALS_SERVICE_PROCEDURE);
-    domainToResultingActivityMap.put(SDOHDomainCode.HOUSING_INSTABILITY_AND_HOMELESSNESS_DOMAIN,
-        TaskResultingActivity.REFERRAL_TO_HOUSING_SERVICE_PROCEDURE);
-    domainToResultingActivityMap.put(SDOHDomainCode.TRANSPORTATION_INSECURITY_DOMAIN,
-        TaskResultingActivity.TRANSPORTATION_CASE_MANAGEMENT_PROCEDURE);
-  }
 
   @Value("${ehr.open-fhir-server-uri}")
   private String identifierSystem;
@@ -153,7 +137,7 @@ public class CbroTaskUpdateService {
       List<Task.TaskOutputComponent> cbroOutputs = cbroTask.getOutput()
           .stream()
           //We only copy outputs which reference a Code and a Reference
-          .filter(t -> CodeableConcept.class.isInstance(t.getValue()) || (Reference.class.isInstance(t.getValue())
+          .filter(t -> t.getValue() instanceof CodeableConcept || (Reference.class.isInstance(t.getValue())
               && ((Reference) t.getValue()).getReferenceElement()
               .getResourceType()
               .equals(Procedure.class.getSimpleName())))
@@ -171,7 +155,7 @@ public class CbroTaskUpdateService {
 
         //TODO: Set patient id and update condition references
         Task.TaskOutputComponent newOut = cbroOutput.copy();
-        if (Reference.class.isInstance(cbroOutput.getValue())) {
+        if (cbroOutput.getValue() instanceof Reference) {
           Reference cbroProcedureReference = (Reference) cbroOutput.getValue();
 
           String cbroProcedureId = cbroProcedureReference.getReferenceElement()

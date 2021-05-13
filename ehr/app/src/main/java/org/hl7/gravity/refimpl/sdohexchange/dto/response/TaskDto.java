@@ -17,15 +17,13 @@ import java.util.List;
 public class TaskDto implements Validated {
 
   private final String id;
-
   private String name;
   private LocalDateTime createdAt;
   private LocalDateTime lastModified;
-  private Priority priority;
+  private String priority;
   private String status;
-  private List<CommentDto> comments = new ArrayList<>();
   private String outcome;
-
+  private List<CommentDto> comments = new ArrayList<>();
   private List<ProcedureDto> procedures = new ArrayList<>();
   private ServiceRequestDto serviceRequest;
   private OrganizationDto organization;
