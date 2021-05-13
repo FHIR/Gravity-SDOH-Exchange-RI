@@ -2,8 +2,6 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.RequestCode;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHDomainCode;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;

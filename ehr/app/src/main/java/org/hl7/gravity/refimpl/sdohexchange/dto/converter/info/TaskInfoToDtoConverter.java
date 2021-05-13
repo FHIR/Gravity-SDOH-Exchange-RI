@@ -1,6 +1,5 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter.info;
 
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -12,7 +11,6 @@ import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.AnnotationToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OrganizationToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProcedureDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.info.ServiceRequestInfo;
@@ -35,22 +33,17 @@ public class TaskInfoToDtoConverter implements Converter<TaskInfo, TaskDto> {
 
   @Override
   public TaskDto convert(TaskInfo taskInfo) {
-    return composeTaskDto(taskInfo);
-  }
-
-  protected TaskDto composeTaskDto(TaskInfo taskInfo) {
     Task task = taskInfo.getTask();
     TaskDto taskDto = new TaskDto(task.getIdElement()
         .getIdPart());
     //Convert Task
     taskDto.setName(task.getDescription());
-    taskDto.setPriority(Priority.fromText(task.getPriority()
-        .getDisplay()));
     taskDto.setCreatedAt(FhirUtil.toLocalDateTime(task.getAuthoredOnElement()));
     taskDto.setLastModified(FhirUtil.toLocalDateTime(task.getLastModifiedElement()));
-    Optional.ofNullable(task.getStatus())
-        .ifPresent(s -> taskDto.setStatus(Task.TaskStatus.fromCode(s.toCode())
-            .getDisplay()));
+    taskDto.setPriority(task.getPriority()
+        .getDisplay());
+    taskDto.setStatus(task.getStatus()
+        .getDisplay());
     taskDto.setComments(task.getNote()
         .stream()
         .map(annotationToDtoConverter::convert)
@@ -59,37 +52,37 @@ public class TaskInfoToDtoConverter implements Converter<TaskInfo, TaskDto> {
         .getText());
     // TODO validate profile and other properties using InstanceValidator
     //Convert ServiceRequest
-    String srId = new IdType(task.getFocus()
+    String serviceRequestId = new IdType(task.getFocus()
         .getReference()).toUnqualifiedVersionless()
         .getIdPart();
-    ServiceRequestInfo srInfo = taskInfo.getServiceRequests()
-        .get(srId);
-    if (srInfo == null) {
+    ServiceRequestInfo serviceRequestInfo = taskInfo.getServiceRequests()
+        .get(serviceRequestId);
+    if (serviceRequestInfo == null) {
       taskDto.getErrors()
           .add("Task.focus not set or is not a ServiceRequest.");
     } else {
-      taskDto.setServiceRequest(serviceRequestInfoToDtoConverter.convert(srInfo));
+      taskDto.setServiceRequest(serviceRequestInfoToDtoConverter.convert(serviceRequestInfo));
     }
     //Convert Organization
-    Organization org = taskInfo.getOrganizations()
+    Organization organization = taskInfo.getOrganizations()
         .get(new IdType(taskInfo.getTask()
             .getOwner()
             .getReference()).toUnqualifiedVersionless()
             .getIdPart());
-    if (org == null) {
+    if (organization == null) {
       taskDto.getErrors()
           .add("Task.owner not set or is not an Organization.");
     } else {
-      taskDto.setOrganization(organizationToDtoConverter.convert(org));
+      taskDto.setOrganization(organizationToDtoConverter.convert(organization));
     }
     for (TaskOutputComponent outputComponent : task.getOutput()) {
       Type componentValue = outputComponent.getValue();
-      if (Reference.class.isInstance(componentValue)) {
+      if (componentValue instanceof Reference) {
         Reference procedureReference = (Reference) componentValue;
         taskDto.getProcedures()
             .add(new ProcedureDto(procedureReference.getReferenceElement()
                 .getIdPart(), procedureReference.getDisplay()));
-      } else if (CodeableConcept.class.isInstance(componentValue)) {
+      } else if (componentValue instanceof CodeableConcept) {
         CodeableConcept outcome = (CodeableConcept) componentValue;
         taskDto.setOutcome(outcome.getText());
       }

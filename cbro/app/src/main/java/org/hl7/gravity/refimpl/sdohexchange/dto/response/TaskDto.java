@@ -1,5 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.response;
 
+import java.util.ArrayList;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -23,6 +24,7 @@ public class TaskDto {
   private TypeDto requester;
   private TypeDto patient;
   private String consent;
-  private List<CommentDto> comments;
   private String outcome;
+  private List<CommentDto> comments = new ArrayList<>();
+  private List<ProcedureDto> procedures = new ArrayList<>();
 }
