@@ -43,30 +43,13 @@ export default defineComponent({
 		};
 
 		const getStatusOptions = (status: TaskStatus): { name: string, value: string }[] => {
-			if (status === "REJECTED" || status === "FAILED") {
-				return [{
-					name: "REQUESTED",
-					value: "REQUESTED"
-				}, {
-					name: "CANCELLED",
-					value: "CANCELLED"
-				}];
-			}
-
-			if (status === "CANCELLED") {
-				return [{
-					name: "REQUESTED",
-					value: "REQUESTED"
-				}];
-			}
-
-			if (status === "COMPLETED") {
+			if (status === "Completed" || status === "Cancelled") {
 				return [];
 			}
 
 			return [{
-				name: "CANCELLED",
-				value: "CANCELLED"
+				name: "Cancelled",
+				value: "Cancelled"
 			}];
 		};
 

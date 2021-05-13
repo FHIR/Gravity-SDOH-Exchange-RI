@@ -42,7 +42,7 @@ export default defineComponent({
 			category: "",
 			code: "",
 			//todo: just disabled starting draft state, you cannot change it on creation
-			status: "draft",
+			status: "Draft",
 			comment: "",
 			priority: "",
 			occurrence: "",

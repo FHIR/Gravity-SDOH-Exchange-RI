@@ -59,8 +59,8 @@ export default defineComponent({
 
 			return res;
 		});
-		const activeRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status !== "COMPLETED"));
-		const completedRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status === "COMPLETED"));
+		const activeRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status !== "Completed"));
+		const completedRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status === "Completed"));
 
 		onMounted(async () => {
 			isRequestLoading.value = true;
