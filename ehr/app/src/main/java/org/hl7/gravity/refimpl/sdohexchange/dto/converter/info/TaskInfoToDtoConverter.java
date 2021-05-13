@@ -1,22 +1,24 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter.info;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.AnnotationToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OrganizationToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.bundle.response.ProcedureToResponseDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProcedureDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.info.ServiceRequestInfo;
 import org.hl7.gravity.refimpl.sdohexchange.info.TaskInfo;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
-
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class TaskInfoToDtoConverter implements Converter<TaskInfo, TaskDto> {
@@ -24,13 +26,11 @@ public class TaskInfoToDtoConverter implements Converter<TaskInfo, TaskDto> {
   private final ServiceRequestInfoToDtoConverter serviceRequestInfoToDtoConverter;
   private final OrganizationToDtoConverter organizationToDtoConverter;
   private final AnnotationToDtoConverter annotationToDtoConverter;
-  private final ProcedureToResponseDtoConverter procedureToResponseDtoConverter;
 
   public TaskInfoToDtoConverter() {
     serviceRequestInfoToDtoConverter = new ServiceRequestInfoToDtoConverter();
     organizationToDtoConverter = new OrganizationToDtoConverter();
     annotationToDtoConverter = new AnnotationToDtoConverter();
-    procedureToResponseDtoConverter = new ProcedureToResponseDtoConverter();
   }
 
   @Override
@@ -82,10 +82,17 @@ public class TaskInfoToDtoConverter implements Converter<TaskInfo, TaskDto> {
     } else {
       taskDto.setOrganization(organizationToDtoConverter.convert(org));
     }
-
-    for (Procedure procedure : taskInfo.getProcedures()) {
-      taskDto.getProcedures()
-          .add(procedureToResponseDtoConverter.convert(procedure));
+    for (TaskOutputComponent outputComponent : task.getOutput()) {
+      Type componentValue = outputComponent.getValue();
+      if (Reference.class.isInstance(componentValue)) {
+        Reference procedureReference = (Reference) componentValue;
+        taskDto.getProcedures()
+            .add(new ProcedureDto(procedureReference.getReferenceElement()
+                .getIdPart(), procedureReference.getDisplay()));
+      } else if (CodeableConcept.class.isInstance(componentValue)) {
+        CodeableConcept outcome = (CodeableConcept) componentValue;
+        taskDto.setOutcome(outcome.getText());
+      }
     }
     return taskDto;
   }

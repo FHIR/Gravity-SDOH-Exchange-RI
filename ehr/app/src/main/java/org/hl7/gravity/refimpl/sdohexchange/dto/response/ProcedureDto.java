@@ -8,7 +8,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public class ProcedureResponseDto {
+public class ProcedureDto {
 
   private String id;
   private String display;

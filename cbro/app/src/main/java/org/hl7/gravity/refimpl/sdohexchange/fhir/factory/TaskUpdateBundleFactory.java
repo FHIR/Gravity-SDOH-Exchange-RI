@@ -1,5 +1,7 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.factory;
 
+import java.util.List;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -19,9 +21,6 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import java.util.List;
-import java.util.Objects;
 
 @Getter
 @RequiredArgsConstructor
@@ -70,14 +69,13 @@ public class TaskUpdateBundleFactory {
     if (status == Task.TaskStatus.COMPLETED) {
       Assert.notNull(outcome, "Outcome cannot be null.");
       Assert.isTrue(procedureCodes.size() > 0, "Procedures can't be empty.");
-      for (Coding procedureCode : procedureCodes) {
-        Procedure procedure = createProcedure(procedureCode);
+      for (Coding code : procedureCodes) {
+        Procedure procedure = createProcedure(code);
         bundle.addEntry(FhirUtil.createPostEntry(procedure));
+
         Task.TaskOutputComponent taskOutput = createTaskOutput(FhirUtil.toReference(Procedure.class,
             procedure.getIdElement()
-                .getIdPart(), procedure.getCode()
-                .getCodingFirstRep()
-                .getDisplay()));
+                .getIdPart(), String.format("%s (%s)", code.getDisplay(), code.getCode())));
         task.getOutput()
             .add(taskOutput);
       }

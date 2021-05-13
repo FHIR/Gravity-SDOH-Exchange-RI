@@ -3,10 +3,16 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
@@ -19,12 +25,6 @@ import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Service for CBRO interaction. This logic definitely should not have been a service class, but, for simplicity,
@@ -74,6 +74,7 @@ public class CbroTaskUpdateService {
     resultTask.setStatus(cbroTask.getStatus());
     resultTask.setStatusReason(cbroTask.getStatusReason());
     resultTask.setLastModified(cbroTask.getLastModified());
+    resultTask.setNote(cbroTask.getNote());
     resultBundle.addEntry(FhirUtil.createPutEntry(resultTask));
 
     if (FINISHED_TASK_STATUSES.contains(cbroTask.getStatus())) {
@@ -130,12 +131,12 @@ public class CbroTaskUpdateService {
               .getIdPart()));
     }
 
-    String srId = ehrTask.getFocus()
+    String serviceRequestId = ehrTask.getFocus()
         .getReferenceElement()
         .getIdPart();
     ServiceRequest serviceRequest = ehrClient.read()
         .resource(ServiceRequest.class)
-        .withId(srId)
+        .withId(serviceRequestId)
         .execute();
     //Update ServiceRequest status to COMPLETED if Task status is COMPLETED
     if (Task.TaskStatus.COMPLETED.equals(cbroTask.getStatus())) {
@@ -167,42 +168,63 @@ public class CbroTaskUpdateService {
       }
       for (Task.TaskOutputComponent cbroOutput : cbroOutputs) {
         //TODO fix the conditions check.
+
+        //TODO: Set patient id and update condition references
         Task.TaskOutputComponent newOut = cbroOutput.copy();
         if (Reference.class.isInstance(cbroOutput.getValue())) {
-          String cbroProcId = ((Reference) cbroOutput.getValue()).getReferenceElement()
+          Reference cbroProcedureReference = (Reference) cbroOutput.getValue();
+
+          String cbroProcedureId = cbroProcedureReference.getReferenceElement()
               .getIdPart();
-          Procedure cbroProc = cbroClient.read()
+          Procedure cbroProcedure = cbroClient.read()
               .resource(Procedure.class)
-              .withId(cbroProcId)
+              .withId(cbroProcedureId)
               .execute();
-          Procedure resultProc = copyProcedure(cbroProc, ehrTask.getFor(), srId);
-          resultProc.setId(IdType.newRandomUuid());
-          resultProc.addIdentifier()
+
+          Procedure resultProcedure = copyProcedure(cbroClient, cbroProcedure, ehrTask.getFor(), serviceRequestId);
+          resultProcedure.setId(IdType.newRandomUuid());
+          resultProcedure.addIdentifier()
               .setSystem(cbroClient.getServerBase())
-              .setValue(cbroProcId);
+              .setValue(cbroProcedureId);
           // Add Procedure to result bundle
-          resultBundle.addEntry(FhirUtil.createPostEntry(resultProc));
-          newOut.setValue(new Reference(resultProc.getIdElement()
-              .getValue()));
+          resultBundle.addEntry(FhirUtil.createPostEntry(resultProcedure));
+          newOut.setValue(FhirUtil.toReference(Procedure.class, resultProcedure.getIdElement()
+              .getIdPart(), cbroProcedureReference.getDisplay()));
         }
         ehrTask.addOutput(newOut);
       }
     }
   }
 
-  protected Procedure copyProcedure(Procedure cbroProc, Reference patientReference, String srId) {
+  protected Procedure copyProcedure(IGenericClient cbroClient, Procedure cbroProcedure, Reference patientReference,
+      String serviceRequestId) {
     Procedure resultProc = new Procedure();
     resultProc.getMeta()
         .addProfile(SDOHProfiles.PROCEDURE);
-    resultProc.addBasedOn(new Reference(new IdType(ServiceRequest.class.getSimpleName(), srId)));
-    resultProc.setStatus(cbroProc.getStatus());
-    resultProc.setStatusReason(cbroProc.getStatusReason());
-    resultProc.setCategory(cbroProc.getCategory());
-    resultProc.setCode(cbroProc.getCode());
+    resultProc.addBasedOn(FhirUtil.toReference(ServiceRequest.class, serviceRequestId));
+    resultProc.setStatus(cbroProcedure.getStatus());
+    resultProc.setStatusReason(cbroProcedure.getStatusReason());
+    resultProc.setCategory(cbroProcedure.getCategory());
+    resultProc.setCode(cbroProcedure.getCode());
     resultProc.setSubject(patientReference);
-    resultProc.setPerformed(cbroProc.getPerformed());
-    resultProc.getReasonReference()
-        .addAll(cbroProc.getReasonReference());
+    resultProc.setPerformed(cbroProcedure.getPerformed());
+    //TODO: Use one query
+    List<Reference> reasonReferences = cbroProcedure.getReasonReference()
+        .stream()
+        .filter(reference -> reference.getReferenceElement()
+            .getResourceType()
+            .equals(Condition.class.getSimpleName()))
+        .map(reference -> cbroClient.read()
+            .resource(Condition.class)
+            .withId(reference.getReferenceElement()
+                .getIdPart())
+            .execute())
+        .map(condition -> FhirUtil.toReference(Condition.class, condition.getIdentifierFirstRep()
+            .getValue(), condition.getCode()
+            .getCodingFirstRep()
+            .getDisplay()))
+        .collect(Collectors.toList());
+    resultProc.setReasonReference(reasonReferences);
     return resultProc;
   }
 

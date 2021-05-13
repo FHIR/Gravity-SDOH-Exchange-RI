@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.dto.converter.bundle;
+package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
