@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 
@@ -27,7 +26,7 @@ public class TaskDto implements Validated {
   private List<CommentDto> comments = new ArrayList<>();
   private String outcome;
 
-  private List<ProcedureResponseDto> procedures = new ArrayList<>();
+  private List<ProcedureDto> procedures = new ArrayList<>();
   private ServiceRequestDto serviceRequest;
   private OrganizationDto organization;
 

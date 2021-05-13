@@ -50,24 +50,7 @@ public class TasksInfoComposer {
 
     return FhirUtil.getFromBundle(tasksBundle, Task.class)
         .stream()
-        .map(t -> new TaskInfo(t, srMap, orgMap, composeProceduresList(t)))
+        .map(t -> new TaskInfo(t, srMap, orgMap))
         .collect(Collectors.toList());
-  }
-
-  private List<Procedure> composeProceduresList(Task task) {
-    List<Procedure> procedures = new ArrayList<>();
-    List<String> procedureIds = new ArrayList<>();
-    for (Task.TaskOutputComponent outputComponent : task.getOutput()) {
-      Reference procedureReference = (Reference) outputComponent.getValue();
-      if (procedureReference != null) {
-        procedureIds.add(procedureReference.getReferenceElement()
-            .getIdPart());
-      }
-    }
-    if (!procedureIds.isEmpty()) {
-      Bundle bundle = procedureRepository.find(procedureIds);
-      procedures.addAll(FhirUtil.getFromBundle(bundle, Procedure.class));
-    }
-    return procedures;
   }
 }
