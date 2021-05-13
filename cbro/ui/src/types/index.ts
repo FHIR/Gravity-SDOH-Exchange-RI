@@ -5,9 +5,21 @@ export type User = {
 	userType: string | null
 }
 
-export type TaskStatus = "ACCEPTED" | "CANCELLED" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "FAILED" | "INPROGRESS" | "NULL" | "ONHOLD" | "READY" | "RECEIVED" | "REJECTED" | "REQUESTED"
+export type TaskStatus =
+	| "Received"
+	| "Accepted"
+	| "Rejected"
+	| "In Progress"
+	| "On Hold"
+	| "Completed"
+	| "Cancelled"
+	| "Draft"
+	| "Entered In Error"
+	| "Failed"
+	| "Ready"
+	| "Requested"
 
-export type TaskPriority = "ASAP" | "NULL" | "ROUTINE" | "STAT" | "URGENT"
+export type TaskPriority = "ASAP" | "ROUTINE" | "URGENT"
 
 export type Comment = {
 	author: {
@@ -19,16 +31,29 @@ export type Comment = {
 	text: string
 }
 
+export type Occurrence = {
+	end: string,
+	start?: string
+}
+
 export type Task = {
 	id: string,
 	name: string,
 	createdAt: string,
 	lastModified: string,
-	priority: TaskPriority,
+	priority: string,
 	status: TaskStatus,
 	serviceRequest: {
-		category: string,
-		id: string
+		id: string,
+		occurrence: Occurrence,
+		category: {
+			code: string,
+			display: string
+		},
+		code: {
+			code: string,
+			display: string
+		}
 	},
 	requester: {
 		resourceType: string,
@@ -42,5 +67,30 @@ export type Task = {
 	},
 	consent: string,
 	comments: Comment[],
-	outcome: string | null
+	outcome: string | null,
+	procedures: {
+		id: string
+		display: string,
+	}[]
+}
+
+
+export type UpdatedStatus =
+	| "Accepted"
+	| "In Progress"
+	| "On Hold"
+	| "Rejected"
+	| "Completed"
+
+export type UpdateTaskPayload = {
+	comment?: string,
+	outcome?: string,
+	procedureCodes?: string[],
+	status: UpdatedStatus
+}
+
+
+export type Procedure = {
+	code: string,
+	display: string
 }
