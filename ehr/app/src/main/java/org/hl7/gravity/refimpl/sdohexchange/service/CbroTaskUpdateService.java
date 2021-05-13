@@ -94,24 +94,24 @@ public class CbroTaskUpdateService {
       cbroBundle = cbroClient.search()
           .forResource(Task.class)
           .where(Task.IDENTIFIER.exactly()
-              .systemAndValues(cbroClient.getServerBase(), taskId))
+              .systemAndValues(identifierSystem, taskId))
           .returnBundle(Bundle.class)
           .execute();
     } catch (BaseServerResponseException exc) {
       throw new CbroTaskUpdateException(
           String.format("Task retrieval failed for identifier '%s' at CBRO location '%s'. Reason: %s.",
-              cbroClient.getServerBase() + "|" + taskId, cbroClient.getServerBase(), exc.getMessage()), exc);
+              identifierSystem + "|" + taskId, cbroClient.getServerBase(), exc.getMessage()), exc);
     }
     if (cbroBundle.getEntry()
         .size() == 0) {
       throw new CbroTaskUpdateException(
           String.format("No Task is present at '%s' for identifier '%s'.", cbroClient.getServerBase(),
-              cbroClient.getServerBase() + "|" + taskId));
+              identifierSystem + "|" + taskId));
     } else if (cbroBundle.getEntry()
         .size() > 1) {
       throw new CbroTaskUpdateException(
           String.format("More than one Task is present at '%s' for identifier '%s'.", cbroClient.getServerBase(),
-              cbroClient.getServerBase() + "|" + taskId));
+              identifierSystem + "|" + taskId));
     }
     return FhirUtil.getFromBundle(cbroBundle, Task.class)
         .get(0);
