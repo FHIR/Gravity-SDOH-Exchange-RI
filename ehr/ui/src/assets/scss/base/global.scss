@@ -6,6 +6,8 @@ html {
 	box-sizing: border-box;
 	font-size: 16px;
 	color: $global-text-color;
+
+	@include scrollbar(5px, $silver);
 }
 
 img,

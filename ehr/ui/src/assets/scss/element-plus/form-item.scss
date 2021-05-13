@@ -1,3 +1,5 @@
+@import "~@/assets/scss/abstracts/mixins";
+
 .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label,
 .el-form-item.is-required:not(.is-no-asterisk) .el-form-item__label-wrap > .el-form-item__label {
 	&::before {
@@ -10,4 +12,8 @@
 		margin-left: 4px;
 		color: #f56c6c;
 	}
+}
+
+.el-form-item__content {
+	@include dont-break-out();
 }

@@ -1,5 +1,14 @@
 import axios from "axios";
-import { ContextResponse, Task, Condition, Goal, Organization, newTaskPayload, Category, Request } from "@/types";
+import {
+	ContextResponse,
+	Task,
+	Condition,
+	Goal,
+	Organization,
+	newTaskPayload,
+	updateTaskPayload,
+	Coding
+} from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
 	const res = await axios.get("/current-context");
@@ -15,6 +24,12 @@ export const getTasks = async (): Promise<Task[]> => {
 
 export const createTask = async (payload: newTaskPayload): Promise<{ taskId: string }> => {
 	const res = await axios.post("/task", payload);
+
+	return res.data;
+};
+
+export const updateTask = async ({ id, ...data }: updateTaskPayload): Promise<Task> => {
+	const res = await axios.put(`/task/${id}`, data);
 
 	return res.data;
 };
@@ -37,13 +52,13 @@ export const getOrganizations = async (): Promise<Organization[]> => {
 	return res.data;
 };
 
-export const getCategories = async (): Promise<Category[]> => {
+export const getCategories = async (): Promise<Coding[]> => {
 	const res = await axios.get("/mappings/categories");
 
 	return res.data;
 };
 
-export const getRequests = async (code: string): Promise<Request[]> => {
+export const getRequests = async (code: string): Promise<Coding[]> => {
 	const res = await axios.get(`/mappings/categories/${code}/servicerequest/codings`);
 
 	return res.data;

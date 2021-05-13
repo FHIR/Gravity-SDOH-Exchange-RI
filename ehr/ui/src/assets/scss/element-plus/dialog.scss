@@ -21,6 +21,8 @@
 
 .el-dialog__body {
 	padding: 25px 25px 10px;
+	max-height: 60vh;
+	overflow: auto;
 }
 
 .el-dialog__footer {

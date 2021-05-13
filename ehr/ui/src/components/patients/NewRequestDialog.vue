@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, reactive, ref, watch } from "vue";
 import { getGoals, getConditions, getOrganizations, getCategories, getRequests } from "@/api";
-import { Category, Condition, Goal, newTaskPayload, Organization, Request } from "@/types";
+import { Condition, Goal, newTaskPayload, Organization, Coding } from "@/types";
 import _ from "@/vendors/lodash";
 import { TasksModule } from "@/store/modules/tasks";
 import { RuleItem } from "async-validator";
@@ -31,8 +31,8 @@ export default defineComponent({
 	},
 	emits: ["close"],
 	setup(props, { emit }) {
-		const categoryOptions = ref<Category[]>([]);
-		const requestOptions = ref<Request[]>([]);
+		const categoryOptions = ref<Coding[]>([]);
+		const requestOptions = ref<Coding[]>([]);
 		const conditionOptions = ref<Condition[]>([]);
 		const goalOptions = ref<Goal[]>([]);
 		const performerOptions = ref<Organization[]>([]);
@@ -42,7 +42,7 @@ export default defineComponent({
 			category: "",
 			code: "",
 			//todo: just disabled starting draft state, you cannot change it on creation
-			status: "draft",
+			status: "Draft",
 			comment: "",
 			priority: "",
 			occurrence: "",

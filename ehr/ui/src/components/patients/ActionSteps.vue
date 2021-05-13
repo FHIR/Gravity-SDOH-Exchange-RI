@@ -2,24 +2,25 @@
 import { computed, defineComponent, onMounted, onUnmounted, ref } from "vue";
 import RequestTable from "@/components/patients/RequestTable.vue";
 import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
-import { Comment, Occurrence, Task, ServiceRequestCondition, ServiceRequestGoal } from "@/types";
+import { Comment, Occurrence, Task, Condition, Goal, Procedure, TaskStatus, Coding } from "@/types";
 import { TasksModule } from "@/store/modules/tasks";
 
 export type TableData = {
 	name: string,
-	status: string,
-	category: string,
-	problems: ServiceRequestCondition[],
-	goals: ServiceRequestGoal[],
+	status: TaskStatus,
+	category: Coding,
+	problems: Condition[],
+	goals: Goal[],
 	performer: string | null | undefined,
 	consent: string
 	outcomes: string | null,
 	comments: Comment[],
 	lastModified: string | null,
-	request: string,
+	request: Coding,
 	priority: string | null,
 	occurrence: Occurrence,
-	procedures: string[]
+	procedures: Procedure[],
+	id: string
 }
 
 export default defineComponent({
@@ -51,15 +52,15 @@ export default defineComponent({
 					request: task.serviceRequest.code,
 					priority: task.priority,
 					occurrence: task.serviceRequest.occurrence,
-					//todo: no api
-					procedures: []
+					procedures: task.procedures,
+					id: task.id
 				});
 			});
 
 			return res;
 		});
-		const activeRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status !== "COMPLETED"));
-		const completedRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status === "COMPLETED"));
+		const activeRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status !== "Completed"));
+		const completedRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status === "Completed"));
 
 		onMounted(async () => {
 			isRequestLoading.value = true;

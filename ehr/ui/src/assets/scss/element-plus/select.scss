@@ -27,7 +27,8 @@
 	padding: 0 10px;
 	font-size: $global-small-font-size;
 	height: 25px;
-	line-height: 25px;
+	display: flex;
+	align-items: center;
 
 	&:hover {
 		background-color: rgba($silver, 0.15);

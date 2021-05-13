@@ -1,8 +1,4 @@
 @mixin scrollbar($width, $thumb-color, $track-color: transparent) {
-	// mozilla specific styles
-	scrollbar-color: $thumb-color $track-color;
-	scrollbar-width: thin;
-
 	// webkit specific styles
 	::-webkit-scrollbar {
 		width: $width;
