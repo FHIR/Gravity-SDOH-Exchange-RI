@@ -19,7 +19,8 @@ export default defineComponent({
 				src="~@/assets/images/gravity-logo.png"
 			>
 			<div class="title">
-				CBRO SDOH Exchange
+				Coordination Platform
+				<span class="secondary">(receiving tasks)</span>
 			</div>
 		</div>
 
@@ -97,7 +98,7 @@ export default defineComponent({
 
 	.cbro {
 		border-right: $global-border;
-		padding: 9px 45px 0;
+		padding: 10px 15px 0 45px;
 		height: 100%;
 
 		.gravity-logo {
@@ -105,10 +106,14 @@ export default defineComponent({
 		}
 
 		.title {
-			margin-top: 6px;
+			margin-top: 4px;
 			font-size: $global-font-size;
-			font-weight: 700;
+			font-weight: 500;
 			line-height: 16px;
+
+			.secondary {
+				color: $grey;
+			}
 		}
 	}
 

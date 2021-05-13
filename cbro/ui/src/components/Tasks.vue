@@ -3,6 +3,8 @@ import { defineComponent, ref, computed } from "vue";
 import { Task } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
+import Dialog from "./Dialog.vue";
+import { ElNotification } from "element-plus";
 
 
 type TaskState = {
@@ -30,7 +32,7 @@ const poll = <T>(
 
 export default defineComponent({
 	props: {},
-	components: { TaskTable },
+	components: { TaskTable, Dialog },
 	setup() {
 		const tasks = ref<TaskState[]>([]);
 
@@ -50,17 +52,60 @@ export default defineComponent({
 			}));
 		};
 
+		const findUpdates = (newList: Task[]): string[] =>
+			newList.flatMap(task => {
+				const existingTask = tasks.value.find(ts => ts.task.id === task.id);
+				if (!existingTask) {
+					return [];
+				}
+				const oldStatus = existingTask.task.status;
+				const newStatus = task.status;
+				if (oldStatus === newStatus) {
+					return [];
+				}
+				return [`EHR changed status of task "${task.name}" from ${oldStatus} to ${newStatus}.`];
+			});
+
+		const showUpdates = (newList: Task[]) => {
+			findUpdates(newList).forEach(update => {
+				ElNotification({
+					title: "Update",
+					type: "info",
+					message: update
+				});
+			});
+		};
+
+		const markTaskAsNotNew = (taskId: string) => {
+			tasks.value = tasks.value.map(taskState => taskState.task.id === taskId ? { ...taskState, isNew: false } : taskState);
+		};
+
+		const updateTaskFromDialog = (task: Task) => {
+			tasks.value = tasks.value.map(taskState => taskState.task.id === task.id ? { ...taskState, task } : taskState);
+		};
+
 		poll(
 			getTasks,
 			newResp => {
+				showUpdates(newResp);
 				updateTasks(newResp);
 				return true;
 			},
-			10000
+			5000
 		);
 
+		const taskInEdit = ref<Task | null>(null);
+
+		const editTask = (taskToEdit: TaskState) => {
+			markTaskAsNotNew(taskToEdit.task.id);
+			taskInEdit.value = taskToEdit.task;
+		};
+
 		return {
-			tasks
+			tasks,
+			taskInEdit,
+			editTask,
+			updateTaskFromDialog
 		};
 	}
 });
@@ -68,6 +113,12 @@ export default defineComponent({
 
 <template>
 	<div class="tasks">
+		<Dialog
+			:task="taskInEdit"
+			@close="taskInEdit = null"
+			@task-updated="updateTaskFromDialog"
+		/>
+
 		<div class="filters">
 			<label>Search:</label>
 			<el-input
@@ -82,7 +133,10 @@ export default defineComponent({
 		</div>
 
 		<div class="table-card">
-			<TaskTable :tasks="tasks" />
+			<TaskTable
+				:tasks="tasks"
+				@task-name-click="editTask"
+			/>
 		</div>
 	</div>
 </template>
