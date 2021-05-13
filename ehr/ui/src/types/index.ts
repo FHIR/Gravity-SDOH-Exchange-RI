@@ -59,7 +59,7 @@ export type ServiceRequest = {
 	details: string,
 	errors: string[],
 	//todo: on be it's enum right now
-	request: string,
+	code: string,
 	serviceRequestId: string,
 	status: ServiceRequestStatus,
 	occurrence: Occurrence,
@@ -93,7 +93,7 @@ export type newTaskPayload = {
 	comment: string,
 	goalIds: string[],
 	performerId: string,
-	request: string,
+	code: string,
 	name: string,
 	occurrence: Occurrence | string
 };

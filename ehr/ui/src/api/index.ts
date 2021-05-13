@@ -19,14 +19,14 @@ export const createTask = async (payload: newTaskPayload): Promise<{ taskId: str
 	return res.data;
 };
 
-export const getConditions = async (): Promise<Condition[]> => {
-	const res = await axios.get("/support/conditions");
+export const getConditions = async (category: string): Promise<Condition[]> => {
+	const res = await axios.get("/support/conditions", { params: { category } });
 
 	return res.data;
 };
 
-export const getGoals = async (): Promise<Goal[]> => {
-	const res = await axios.get("/support/goals");
+export const getGoals = async (category: string): Promise<Goal[]> => {
+	const res = await axios.get("/support/goals", { params: { category } });
 
 	return res.data;
 };

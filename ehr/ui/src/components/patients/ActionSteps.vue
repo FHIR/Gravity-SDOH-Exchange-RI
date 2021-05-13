@@ -48,7 +48,7 @@ export default defineComponent({
 					outcomes: task.outcome,
 					comments: task.comments,
 					lastModified: task.lastModified,
-					request: task.serviceRequest.request,
+					request: task.serviceRequest.code,
 					priority: task.priority,
 					occurrence: task.serviceRequest.occurrence,
 					//todo: no api
