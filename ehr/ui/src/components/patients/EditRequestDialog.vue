@@ -120,10 +120,10 @@ export default defineComponent({
 				{{ task.name }}
 			</el-form-item>
 			<el-form-item label="Category/Domain">
-				{{ task.category }}
+				{{ task.category.display }}
 			</el-form-item>
 			<el-form-item label="Request">
-				{{ task.request }}
+				{{ `${task.request.display} (${task.request.code})` }}
 			</el-form-item>
 			<el-form-item label="Status">
 				<el-select

@@ -7,7 +7,6 @@ import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.AnnotationToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OrganizationToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.info.ServiceRequestInfoToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.bundle.response.ProcedureToResponseDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
@@ -50,7 +49,8 @@ public class TaskInfoToDtoConverter implements Converter<TaskInfo, TaskDto> {
     taskDto.setCreatedAt(FhirUtil.toLocalDateTime(task.getAuthoredOnElement()));
     taskDto.setLastModified(FhirUtil.toLocalDateTime(task.getLastModifiedElement()));
     Optional.ofNullable(task.getStatus())
-        .ifPresent(s -> taskDto.setStatus(Task.TaskStatus.fromCode(s.toCode())));
+        .ifPresent(s -> taskDto.setStatus(Task.TaskStatus.fromCode(s.toCode())
+            .getDisplay()));
     taskDto.setComments(task.getNote()
         .stream()
         .map(annotationToDtoConverter::convert)
@@ -62,7 +62,8 @@ public class TaskInfoToDtoConverter implements Converter<TaskInfo, TaskDto> {
     String srId = new IdType(task.getFocus()
         .getReference()).toUnqualifiedVersionless()
         .getIdPart();
-    ServiceRequestInfo srInfo = taskInfo.getServiceRequests().get(srId);
+    ServiceRequestInfo srInfo = taskInfo.getServiceRequests()
+        .get(srId);
     if (srInfo == null) {
       taskDto.getErrors()
           .add("Task.focus not set or is not a ServiceRequest.");
@@ -84,7 +85,7 @@ public class TaskInfoToDtoConverter implements Converter<TaskInfo, TaskDto> {
 
     for (Procedure procedure : taskInfo.getProcedures()) {
       taskDto.getProcedures()
-          .addAll(procedureToResponseDtoConverter.convert(procedure));
+          .add(procedureToResponseDtoConverter.convert(procedure));
     }
     return taskDto;
   }

@@ -1,15 +1,12 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 
-/**
- * @author Mykhailo Stefantsiv
- */
-@Getter
+@Data
 @AllArgsConstructor
-public class ConditionResponseDto {
+public class CodingDto {
 
-  private String id;
+  private String code;
   private String display;
 }

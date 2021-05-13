@@ -19,7 +19,7 @@ public class ObservationRepository extends FhirRepository<Observation> {
   }
 
   public Bundle findPatientEmploymentStatus(String patientId){
-    return getEhrClient().search()
+    return getClient().search()
         .forResource(getResourceType())
         .where(Observation.PATIENT.hasId(patientId))
         .where(Observation.CATEGORY.exactly()
@@ -30,7 +30,7 @@ public class ObservationRepository extends FhirRepository<Observation> {
   }
 
   public Bundle findPatientEducationLevel(String patientId){
-    return getEhrClient().search()
+    return getClient().search()
         .forResource(getResourceType())
         .where(Observation.PATIENT.hasId(patientId))
         .where(Observation.CODE.exactly().code(LoincCode.HIGHEST_EDUCATION_LEVEL.getCode()))

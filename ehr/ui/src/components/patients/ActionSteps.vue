@@ -49,7 +49,7 @@ export default defineComponent({
 					outcomes: task.outcome,
 					comments: task.comments,
 					lastModified: task.lastModified,
-					request: task.serviceRequest.requestCode,
+					request: task.serviceRequest.code,
 					priority: task.priority,
 					occurrence: task.serviceRequest.occurrence,
 					procedures: task.procedures,

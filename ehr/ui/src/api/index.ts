@@ -6,7 +6,9 @@ import {
 	Goal,
 	Organization,
 	newTaskPayload,
-	updateTaskPayload
+	updateTaskPayload,
+	Category,
+	Request
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -33,20 +35,32 @@ export const updateTask = async ({ id, ...data }: updateTaskPayload): Promise<Ta
 	return res.data;
 };
 
-export const getConditions = async (): Promise<Condition[]> => {
-	const res = await axios.get("/support/conditions");
+export const getConditions = async (category: string): Promise<Condition[]> => {
+	const res = await axios.get("/support/conditions", { params: { category } });
 
 	return res.data;
 };
 
-export const getGoals = async (): Promise<Goal[]> => {
-	const res = await axios.get("/support/goals");
+export const getGoals = async (category: string): Promise<Goal[]> => {
+	const res = await axios.get("/support/goals", { params: { category } });
 
 	return res.data;
 };
 
 export const getOrganizations = async (): Promise<Organization[]> => {
 	const res = await axios.get("/support/organizations");
+
+	return res.data;
+};
+
+export const getCategories = async (): Promise<Category[]> => {
+	const res = await axios.get("/mappings/categories");
+
+	return res.data;
+};
+
+export const getRequests = async (code: string): Promise<Request[]> => {
+	const res = await axios.get(`/mappings/categories/${code}/servicerequest/codings`);
 
 	return res.data;
 };

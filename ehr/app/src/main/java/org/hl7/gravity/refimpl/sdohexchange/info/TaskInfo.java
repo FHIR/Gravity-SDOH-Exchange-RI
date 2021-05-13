@@ -17,8 +17,8 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor
 public class TaskInfo {
-  private Task task;
-  private Map<String, ServiceRequestInfo> serviceRequests;
-  private Map<String, Organization> organizations;
-  private List<Procedure> procedures;
+  private final Task task;
+  private final Map<String, ServiceRequestInfo> serviceRequests;
+  private final Map<String, Organization> organizations;
+  private final List<Procedure> procedures;
 }

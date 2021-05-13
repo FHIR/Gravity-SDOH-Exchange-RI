@@ -178,8 +178,7 @@ public class CbroTaskUpdateService {
           Procedure resultProc = copyProcedure(cbroProc, ehrTask.getFor(), srId);
           resultProc.setId(IdType.newRandomUuid());
           resultProc.addIdentifier()
-              //TODO set a proper system identifier for a CBRO
-              .setSystem("test-cbro-system")
+              .setSystem(cbroClient.getServerBase())
               .setValue(cbroProcId);
           // Add Procedure to result bundle
           resultBundle.addEntry(FhirUtil.createPostEntry(resultProc));

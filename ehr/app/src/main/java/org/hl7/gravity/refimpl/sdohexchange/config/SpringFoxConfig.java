@@ -20,6 +20,7 @@ public class SpringFoxConfig {
   public static final String CONTEXT_API_TAG = "Context Controller";
   public static final String SUPPORT_API_TAG = "Support Controller";
   public static final String TASK_API_TAG = "Task Controller";
+  public static final String MAPPINGS_API_TAG = "Mappings Controller";
 
   @Bean
   public Docket api(ApiInfo apiInfo) {
@@ -30,10 +31,11 @@ public class SpringFoxConfig {
         .paths(PathSelectors.any())
         .build()
         .tags(new Tag(CONTEXT_API_TAG, "Get context details of a currently logged in user."), new Tag(SUPPORT_API_TAG,
-            "Fetch lists of available FHIR resources to reference from Task/ServiceRequest instances being "
-                + "created."), new Tag(TASK_API_TAG,
-            "Perform operations on Task resources. This includes creation of tasks in CBRO organizations and "
-                + "triggering an automatic polling mechanism for Task status synchronization."))
+                "Fetch lists of available FHIR resources to reference from Task/ServiceRequest instances being "
+                    + "created."), new Tag(TASK_API_TAG,
+                "Perform operations on Task resources. This includes creation of tasks in CBRO organizations and "
+                    + "triggering an automatic polling mechanism for Task status synchronization."),
+            new Tag(MAPPINGS_API_TAG, "Get details of SDOH categories and codes."))
         .apiInfo(apiInfo)
         .useDefaultResponseMessages(false);
   }

@@ -8,7 +8,6 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -17,10 +16,8 @@ import springfox.documentation.annotations.ApiIgnore;
 public class UserController {
 
   @GetMapping("/user-info")
-  @ResponseBody
   @ApiOperation(value = "Info of a currently logged in user.")
   public UserDto userInfo(@ApiIgnore @AuthenticationPrincipal OidcUser user) {
-    return new UserInfoToDtoConverter().convert(user.getUserInfo()
-        .getClaims());
+    return new UserInfoToDtoConverter().convert(user.getClaims());
   }
 }

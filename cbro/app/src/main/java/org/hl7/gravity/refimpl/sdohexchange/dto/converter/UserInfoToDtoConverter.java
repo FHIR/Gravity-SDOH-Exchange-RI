@@ -11,13 +11,13 @@ public class UserInfoToDtoConverter implements Converter<Map<String, Object>, Us
   @Override
   public UserDto convert(Map<String, Object> claims) {
     UserDto userDto = new UserDto();
-    String profile = getClaimValue(claims, "profile");
-    if (profile != null) {
-      userDto.setId(StringUtils.substringAfter(profile, "/"));
-      userDto.setUserType(StringUtils.substringBefore(profile, "/"));
+    String fhirUser = getClaimValue(claims, "fhirUser");
+    if (fhirUser != null) {
+      userDto.setId(StringUtils.substringAfter(fhirUser, "/"));
+      userDto.setUserType(StringUtils.substringBefore(fhirUser, "/"));
     }
-    userDto.setName(getClaimValue(claims, "name"));
-    userDto.setPreferredUsername(getClaimValue(claims, "preferred_username"));
+    userDto.setName(getClaimValue(claims, "displayName"));
+    userDto.setEmail(getClaimValue(claims, "email"));
     return userDto;
   }
 

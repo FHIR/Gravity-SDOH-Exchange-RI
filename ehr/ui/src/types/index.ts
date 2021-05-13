@@ -62,7 +62,7 @@ export type ServiceRequest = {
 	goals: ServiceRequestGoal[],
 	id: string,
 	occurrence: Occurrence,
-	requestCode: string
+	code: string
 };
 
 export type ServiceRequestCategory = "EDUCATION_DOMAIN" | "EMPLOYMENT_DOMAIN" | "FINANCIAL_STRAIN_DOMAIN" | "FOOD_INSECURITY_DOMAIN" | "HOUSING_INSTABILITY_AND_HOMELESSNESS_DOMAIN" | "INADEQUATE_HOUSING_DOMAIN" | "INTERPERSONAL_VIOLENCE_DOMAIN" | "SDOH_RISK_RELATED_TO_VETERAN_STATUS" | "SOCIAL_ISOLATION_DOMAIN" | "STRESS_DOMAIN" | "TRANSPORTATION_INSECURITY_DOMAIN"
@@ -94,7 +94,7 @@ export type newTaskPayload = {
 	comment: string,
 	goalIds: string[],
 	performerId: string,
-	request: string,
+	code: string,
 	name: string,
 	occurrence: Occurrence | string
 };
@@ -132,4 +132,14 @@ export type Comment = {
 	author: object,
 	text: string,
 	time: string
+};
+
+export type Category = {
+	code: string,
+	display: string
+};
+
+export type Request = {
+	code: string,
+	display: string
 };
