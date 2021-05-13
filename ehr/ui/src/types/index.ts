@@ -6,14 +6,24 @@ export type Patient = {
 	id: string | null,
 	name: string | null
 	language: string | null,
-	phone: string | null,
-	email: string | null,
+	phones: Phone[],
+	emails: Email[],
 	employmentStatus: string | null,
 	race: string | null,
 	ethnicity: string | null,
 	education: string | null,
 	maritalStatus: string | null,
-	insurance: string | null
+	insurances: string[]
+};
+
+export type Email = {
+	email: string,
+	use: string
+};
+
+export type Phone = {
+	phone: string,
+	use: string
 };
 
 export type User = {
