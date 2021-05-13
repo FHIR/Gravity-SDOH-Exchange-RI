@@ -75,9 +75,12 @@ export default defineComponent({
 					</template>
 				</el-table-column>
 				<el-table-column
-					prop="category"
 					label="Category"
-				/>
+				>
+					<template #default="scope">
+						{{ scope.row.category.display }}
+					</template>
+				</el-table-column>
 				<el-table-column
 					label="Problem(s)"
 				>

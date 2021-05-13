@@ -29,3 +29,9 @@ a:active,
 a:focus {
 	color: $global-primary-color;
 }
+
+ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
