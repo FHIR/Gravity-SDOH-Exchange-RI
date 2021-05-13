@@ -7,8 +7,7 @@ import {
 	Organization,
 	newTaskPayload,
 	updateTaskPayload,
-	Category,
-	Request
+	Coding
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -53,13 +52,13 @@ export const getOrganizations = async (): Promise<Organization[]> => {
 	return res.data;
 };
 
-export const getCategories = async (): Promise<Category[]> => {
+export const getCategories = async (): Promise<Coding[]> => {
 	const res = await axios.get("/mappings/categories");
 
 	return res.data;
 };
 
-export const getRequests = async (code: string): Promise<Request[]> => {
+export const getRequests = async (code: string): Promise<Coding[]> => {
 	const res = await axios.get(`/mappings/categories/${code}/servicerequest/codings`);
 
 	return res.data;

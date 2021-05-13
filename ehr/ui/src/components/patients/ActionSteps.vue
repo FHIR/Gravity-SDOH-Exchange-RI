@@ -2,21 +2,21 @@
 import { computed, defineComponent, onMounted, onUnmounted, ref } from "vue";
 import RequestTable from "@/components/patients/RequestTable.vue";
 import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
-import { Comment, Occurrence, Task, ServiceRequestCondition, ServiceRequestGoal, Procedure, TaskStatus } from "@/types";
+import { Comment, Occurrence, Task, Condition, Goal, Procedure, TaskStatus, Coding } from "@/types";
 import { TasksModule } from "@/store/modules/tasks";
 
 export type TableData = {
 	name: string,
 	status: TaskStatus,
-	category: string,
-	problems: ServiceRequestCondition[],
-	goals: ServiceRequestGoal[],
+	category: Coding,
+	problems: Condition[],
+	goals: Goal[],
 	performer: string | null | undefined,
 	consent: string
 	outcomes: string | null,
 	comments: Comment[],
 	lastModified: string | null,
-	request: string,
+	request: Coding,
 	priority: string | null,
 	occurrence: Occurrence,
 	procedures: Procedure[],
