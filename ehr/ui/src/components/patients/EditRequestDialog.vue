@@ -266,6 +266,7 @@ export default defineComponent({
 	background-color: $alice-blue;
 	border-radius: 5px;
 	padding: 0 5px;
+	font-size: $global-small-font-size;
 
 	@include dont-break-out();
 }
