@@ -182,23 +182,43 @@ export default defineComponent({
 				{{ task.consent }}
 			</el-form-item>
 
-			<el-divider />
+			<div
+				v-if="task.outcomes || task.procedures.length > 0 || task.comments.length > 0"
+				class="outcome-section"
+			>
+				<el-divider />
 
-			<el-form-item
-				v-if="task.outcomes"
-				label="Outcome"
-			>
-				{{ task.outcomes }}
-			</el-form-item>
-			<el-form-item
-				v-if="task.procedures.length > 0"
-				label="Procedure(s)"
-			>
-				{{ task.procedures }}
-			</el-form-item>
-			<el-form-item label="Comment">
-				{{ task.comments.reduce((acc, comment) => acc += `\t${comment.text}`, "") }}
-			</el-form-item>
+				<el-form-item
+					v-if="task.outcomes"
+					label="Outcome"
+				>
+					{{ task.outcomes }}
+				</el-form-item>
+				<el-form-item
+					v-if="task.procedures.length > 0"
+					label="Procedure(s)"
+				>
+					<div
+						v-for="(item, index) in task.procedures"
+						:key="index"
+						class="wrapper"
+					>
+						<span class="item">{{ item.display }}</span>
+					</div>
+				</el-form-item>
+				<el-form-item
+					v-if="task.comments.length > 0"
+					label="Comment(s)"
+				>
+					<div
+						v-for="(item, index) in task.comments"
+						:key="index"
+						class="wrapper"
+					>
+						{{ item.text }}
+					</div>
+				</el-form-item>
+			</div>
 		</el-form>
 		<template #footer>
 			<el-button
@@ -234,6 +254,7 @@ export default defineComponent({
 
 .wrapper {
 	line-height: 15px;
+	margin-top: 5px;
 	margin-bottom: 10px;
 
 	&:last-child {
