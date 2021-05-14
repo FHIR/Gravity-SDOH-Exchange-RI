@@ -7,7 +7,6 @@ import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CurrentContextDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.ContextService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,8 +17,6 @@ public class ContextController {
 
   private final ContextService contextService;
 
-  //TODO: check this CORS solution
-  @CrossOrigin(origins = "*", allowedHeaders = "*")
   @GetMapping("/current-context")
   @ApiOperation(value = "Details about a logged in user and selected Patient instance.", notes =
       "Get currently logged in user (usually a Practitioner) and a Patient selected during a launch. All operations "

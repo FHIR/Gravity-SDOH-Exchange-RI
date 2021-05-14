@@ -22,6 +22,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dao.impl.QuestionnaireRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.StructureMapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -39,9 +40,12 @@ import java.util.Optional;
 @Component
 public class ConvertService {
 
+  private static final String PACKAGE_VERSION = "4.0.1";
+  private static final String SDOH_CLINICAL_CARE_VERSION = "0.1.0";
+  private static final String SDOH_CLINICAL_CARE_PACKAGE = "hl7.fhir.us.sdoh-clinicalcare";
+  private static final String CUSTOM_STRUCTURE_DEFINITIONS_LOCATION = "implementaion-guides";
   private static final String MAP_EXTENSION =
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-targetStructureMap";
-  private static final String PACKAGE_VERSION = "4.0.1";
 
   private final IParser resourceParser;
   private final ValidationEngine validationEngine;
@@ -57,6 +61,10 @@ public class ConvertService {
     String definitions = VersionUtilities.packageForVersion(PACKAGE_VERSION) + "#" + VersionUtilities.getCurrentVersion(
         PACKAGE_VERSION);
     this.validationEngine = new ValidationEngine(definitions, FhirPublication.R4, PACKAGE_VERSION, new TimeTracker());
+    //Loading structure definitions from official package and uploading custom definitions if needed from resources
+    this.validationEngine.loadPackage(SDOH_CLINICAL_CARE_PACKAGE,SDOH_CLINICAL_CARE_VERSION);
+    this.validationEngine.loadIg(ResourceUtils.getURL("classpath:" + CUSTOM_STRUCTURE_DEFINITIONS_LOCATION)
+        .getPath(), false);
   }
 
   public Map<String, Object> convert(JSONObject questionnaireResponse) throws IOException {
@@ -72,8 +80,7 @@ public class ConvertService {
     boolean mapExists = validationEngine.getContext()
         .listTransforms()
         .stream()
-        .anyMatch(map -> map.getUrl()
-            .equals(mapUri));
+        .anyMatch(map -> map.getUrl().equals(mapUri));
     if (!mapExists) {
       loadMapIg(mapUri);
     }
