@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, PropType, ref, reactive } from "vue";
+import { defineComponent, PropType, ref, reactive, computed } from "vue";
 import { TableData } from "@/components/patients/ActionSteps.vue";
 import { Occurrence, TaskStatus, updateTaskPayload } from "@/types";
 import moment from "moment";
@@ -30,9 +30,15 @@ export default defineComponent({
 			status: "",
 			comment: ""
 		});
+		//todo: use element-ui form type
+		const formEl = ref<HTMLFormElement>();
 
 		const onDialogOpen = () => {
 			Object.assign(formModel, { status: props.task.status });
+		};
+		const onDialogClose = () => {
+			formEl.value?.resetFields();
+			emit("close");
 		};
 
 		const showOccurrence = (occurrence: Occurrence) => {
@@ -68,13 +74,18 @@ export default defineComponent({
 			}
 		};
 
+		const hasChanges = computed<boolean>(() => (formModel.comment !== "" || formModel.status !== props.task?.status));
+
 		return {
 			saveInProgress,
 			formModel,
 			onDialogOpen,
+			onDialogClose,
 			showOccurrence,
 			getStatusOptions,
-			onFormSave
+			onFormSave,
+			hasChanges,
+			formEl
 		};
 	}
 });
@@ -88,8 +99,8 @@ export default defineComponent({
 		append-to-body
 		destroy-on-close
 		custom-class="edit-request-dialog"
-		@close="$emit('close')"
-		@open="onDialogOpen"
+		@close="onDialogClose"
+		@opened="onDialogOpen"
 	>
 		<el-form
 			ref="formEl"
@@ -108,7 +119,10 @@ export default defineComponent({
 			<el-form-item label="Request">
 				{{ `${task.request.display} (${task.request.code})` }}
 			</el-form-item>
-			<el-form-item label="Status">
+			<el-form-item
+				label="Status"
+				prop="status"
+			>
 				<el-select
 					v-model="formModel.status"
 					placeholder="Select Status"
@@ -116,7 +130,7 @@ export default defineComponent({
 					<template #prefix>
 						<span
 							class="icon"
-							:class="formModel.status.toLocaleLowerCase()"
+							:class="formModel.status.toLowerCase().replace(/ /g, '')"
 						></span>
 					</template>
 
@@ -128,14 +142,17 @@ export default defineComponent({
 					>
 						<span
 							class="icon"
-							:class="item.value.toLocaleLowerCase()"
+							:class="item.value.toLowerCase().replace(/ /g, '')"
 						></span>
 						{{ item.name }}
 					</el-option>
 				</el-select>
 				<span class="date">{{ $filters.formatDateTime(task.lastModified) }}</span>
 			</el-form-item>
-			<el-form-item label="Comment">
+			<el-form-item
+				label="Comment"
+				prop="comment"
+			>
 				<el-input
 					v-model="formModel.comment"
 					type="textarea"
@@ -234,6 +251,7 @@ export default defineComponent({
 				type="primary"
 				size="mini"
 				:loading="saveInProgress"
+				:disabled="!hasChanges"
 				@click="onFormSave"
 			>
 				Save Changes

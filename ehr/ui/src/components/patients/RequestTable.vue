@@ -65,7 +65,7 @@ export default defineComponent({
 						<div class="status-cell">
 							<span
 								class="icon"
-								:class="scope.row.status.toLocaleLowerCase()"
+								:class="scope.row.status.toLowerCase().replace(/ /g, '')"
 							></span>
 							<div class="info">
 								<span class="status">{{ scope.row.status }}</span>

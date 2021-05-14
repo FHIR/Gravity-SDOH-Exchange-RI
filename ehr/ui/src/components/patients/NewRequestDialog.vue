@@ -59,14 +59,18 @@ export default defineComponent({
 		// On dialog open fetch all options for dropdowns and reset previous edits.
 		//
 		const onDialogOpen = async () => {
-			formEl.value?.resetFields();
 			categoryOptions.value = await getCategories();
 			performerOptions.value = await getOrganizations();
 		};
+
+		const onDialogClose = () => {
+			formEl.value?.resetFields();
+			emit("close");
+		};
+
 		//
 		// Watchers for Goals and Problems, at least one should be populated (validation)
 		//
-
 		watch(() => formModel.goalIds.length, () => {
 			formEl.value?.validateField("conditionIds");
 		});
@@ -172,7 +176,8 @@ export default defineComponent({
 			disabledOccurrenceDate,
 			saveInProgress,
 			onCategoryChange,
-			onDialogOpen
+			onDialogOpen,
+			onDialogClose
 		};
 	}
 });
@@ -186,7 +191,7 @@ export default defineComponent({
 		append-to-body
 		destroy-on-close
 		custom-class="new-request-dialog"
-		@close="$emit('close')"
+		@close="onDialogClose"
 		@open="onDialogOpen"
 	>
 		<el-form
