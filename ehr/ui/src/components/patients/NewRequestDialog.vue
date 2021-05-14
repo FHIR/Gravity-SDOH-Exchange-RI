@@ -1,11 +1,12 @@
 <script lang="ts">
-import { defineComponent, reactive, ref, computed } from "vue";
+import { defineComponent, reactive, ref, computed, watch } from "vue";
 import { getGoals, getConditions, getOrganizations } from "@/api";
 import { Condition, Goal, newTaskPayload, Organization } from "@/types";
 import _ from "@/vendors/lodash";
 import { TasksModule } from "@/store/modules/tasks";
 import { categoryList, requestList, CategoryListItem, RequestListItem } from "@/utils/constants";
 import { RuleItem } from "async-validator";
+import moment from "moment";
 
 export type FormModel = {
 	name: string,
@@ -45,7 +46,6 @@ export default defineComponent({
 			status: "draft",
 			comment: "",
 			priority: "",
-			//todo: no api for that
 			occurrence: "",
 			conditionIds: [],
 			goalIds: [],
@@ -65,7 +65,16 @@ export default defineComponent({
 			goalOptions.value = await getGoals();
 			performerOptions.value = await getOrganizations();
 		};
+		//
+		// Watchers for Goals and Problems, at least one should be populated (validation)
+		//
 
+		watch(() => formModel.goalIds.length, () => {
+			formEl.value?.validateField("conditionIds");
+		});
+		watch(() => formModel.conditionIds.length, () => {
+			formEl.value?.validateField("goalIds");
+		});
 		//todo: seems like element-ui added few additional keys to async-validator RuleItem
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: {
@@ -115,8 +124,18 @@ export default defineComponent({
 			formEl.value?.validate(async (valid: boolean) => {
 				if (valid) {
 					//todo: omit this props because api doesn't support that
-					const payload: newTaskPayload = _.omit(formModel, ["status", "occurrence"]);
+					const payload: newTaskPayload = _.omit(formModel, ["status"]);
 					saveInProgress.value = true;
+					if (formModel.occurrence.length > 1) {
+						payload.occurrence = {
+							start: moment(formModel.occurrence[0]).format("YYYY-MM-DD[T]HH:mm:ss"),
+							end: moment(formModel.occurrence[1]).format("YYYY-MM-DD[T]HH:mm:ss")
+						};
+					} else {
+						payload.occurrence = {
+							end: moment(formModel.occurrence).format("YYYY-MM-DD[T]HH:mm:ss")
+						};
+					}
 					try {
 						await TasksModule.createTask(payload);
 						emit("close");
@@ -325,7 +344,7 @@ export default defineComponent({
 						v-for="item in goalOptions"
 						:key="item.goalId"
 						:label="item.goalId"
-						:value="item.goalId"
+						:value="item.id"
 					/>
 				</el-select>
 			</el-form-item>
@@ -342,9 +361,9 @@ export default defineComponent({
 				>
 					<el-option
 						v-for="item in performerOptions"
-						:key="item.organizationId"
+						:key="item.id"
 						:label="item.name"
-						:value="item.organizationId"
+						:value="item.id"
 					/>
 				</el-select>
 			</el-form-item>

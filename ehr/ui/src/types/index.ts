@@ -30,9 +30,29 @@ export type ContextResponse = {
 export type Organization = {
 	errors: string[],
 	name: string,
-	organizationId: string,
+	id: string,
 	type: "CBO" | "CBRO"
 };
+
+export type Occurrence = {
+	start?: string | null,
+	end: string
+}
+
+export type ServiceRequestGoal = {
+	display: string,
+	id: string
+}
+
+export type Consent = {
+	display: string,
+	id: string
+}
+
+export type ServiceRequestCondition = {
+	display: string,
+	id: string
+}
 
 export type ServiceRequest = {
 	category: ServiceRequestCategory,
@@ -41,7 +61,11 @@ export type ServiceRequest = {
 	//todo: on be it's enum right now
 	request: string,
 	serviceRequestId: string,
-	status: ServiceRequestStatus
+	status: ServiceRequestStatus,
+	occurrence: Occurrence,
+	goals: ServiceRequestGoal[],
+	consent: Consent,
+	conditions: ServiceRequestCondition[]
 };
 
 export type ServiceRequestStatus = "ACTIVE" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "NULL" | "ONHOLD" | "REVOKED" | "UNKNOWN"
@@ -70,7 +94,8 @@ export type newTaskPayload = {
 	goalIds: string[],
 	performerId: string,
 	request: string,
-	name: string
+	name: string,
+	occurrence: Occurrence | string
 };
 
 export type TaskStatus = "ACCEPTED" | "CANCELLED" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "FAILED" | "INPROGRESS" | "NULL" | "ONHOLD" | "READY" | "RECEIVED" | "REJECTED" | "REQUESTED"

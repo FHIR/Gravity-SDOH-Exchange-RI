@@ -1,6 +1,8 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, reactive } from "vue";
-import { TableData } from "@/components/patients/RequestTable.vue";
+import { TableData } from "@/components/patients/ActionSteps.vue";
+import { Occurrence } from "@/types";
+import moment from "moment";
 
 export type FormModel = {
 	status: string,
@@ -17,7 +19,7 @@ export default defineComponent({
 		},
 		task: {
 			type: Object as PropType<TableData>,
-			required: true
+			default: undefined
 		}
 	},
 	emits: ["close"],
@@ -32,10 +34,18 @@ export default defineComponent({
 			Object.assign(formModel, { status: props.task.status });
 		};
 
+		const showOccurrence = (occurrence: Occurrence) => {
+			if (occurrence.start !== null) {
+				return `From ${moment(occurrence.start).format("MMMM DD, YYYY")} to ${moment(occurrence.end).format("MMMM DD, YYYY")}`;
+			}
+			return `Until ${moment(occurrence.end).format("MMMM DD, YYYY")}`;
+		};
+
 		return {
 			saveInProgress,
 			formModel,
-			onDialogOpen
+			onDialogOpen,
+			showOccurrence
 		};
 	}
 });
@@ -90,13 +100,27 @@ export default defineComponent({
 				{{ task.priority }}
 			</el-form-item>
 			<el-form-item label="Occurrence">
-				{{ task.occurrence }}
+				{{ showOccurrence(task.occurrence) }}
 			</el-form-item>
 			<el-form-item label="Problem(s)">
-				{{ task.problems.join(", ") }}
+				<div
+					v-for="(item, index) in task.problems"
+					:key="index"
+					class="wrapper"
+				>
+					<span class="item">{{ item.display }}</span>
+				</div>
 			</el-form-item>
-			<el-form-item label="Goal(s)">
-				{{ task.goals.join(", ") }}
+			<el-form-item
+				label="Goal(s)"
+			>
+				<div
+					v-for="(item, index) in task.goals"
+					:key="index"
+					class="wrapper"
+				>
+					<span class="item">{{ item.display }}</span>
+				</div>
 			</el-form-item>
 
 			<el-divider />
@@ -154,5 +178,11 @@ export default defineComponent({
 	.el-divider {
 		margin: 20px 0;
 	}
+}
+
+.item {
+	background-color: $alice-blue;
+	border-radius: 5px;
+	padding: 0 7px 0 5px;
 }
 </style>

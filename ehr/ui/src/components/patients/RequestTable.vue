@@ -1,89 +1,25 @@
 <script lang="ts">
-import { defineComponent, computed, onMounted, ref, onUnmounted } from "vue";
-import { TasksModule } from "@/store/modules/tasks";
-import { Comment, Task } from "@/types";
-import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
+import { defineComponent, PropType, ref } from "vue";
 import EditRequestDialog from "@/components/patients/EditRequestDialog.vue";
-
-export type TableData = {
-	name: string,
-	status: string,
-	category: string,
-	problems: string[],
-	goals: string[],
-	performer: string | null | undefined,
-	consent: string | boolean,
-	outcomes: string | null,
-	comments: Comment[],
-	lastModified: string | null,
-	request: string,
-	priority: string | null,
-	occurrence: string,
-	procedures: string[]
-}
+import { TableData } from "@/components/patients/ActionSteps.vue";
 
 export default defineComponent({
 	name: "RequestTable",
 	components: {
-		NewRequestDialog,
 		EditRequestDialog
 	},
+	props: {
+		data: {
+			type: Array as PropType<TableData[]>,
+			required: true
+		},
+		title: {
+			type: String,
+			default: "Active Requests"
+		}
+	},
 	setup() {
-		const isLoading = ref<boolean>(false);
-		const newRequestDialogVisible = ref<boolean>(false);
 		const editRequestDialogVisible = ref<boolean>(false);
-
-		const tasks = computed<Task[] | null>(() => TasksModule.tasks);
-		const tableData = computed<TableData[]>(() => {
-			const res: TableData[] = [];
-
-			tasks.value && tasks.value.forEach((task: Task) => {
-				res.push({
-					name: task.name,
-					status: task.status,
-					category: task.serviceRequest.category,
-					//todo: no api for that
-					problems: [],
-					//todo: no api for that
-					goals: [],
-					performer: task.organization?.name,
-					//todo: no api for that
-					consent: "yes",
-					outcomes: task.outcome,
-					comments: task.comments,
-					lastModified: task.lastModified,
-					request: task.serviceRequest.request,
-					priority: task.priority,
-					//todo: no api for that
-					occurrence: "",
-					procedures: []
-				});
-			});
-
-			return res;
-		});
-
-		onMounted(async () => {
-			isLoading.value = true;
-			try {
-				await TasksModule.getTasks();
-				pollData();
-			} finally {
-				isLoading.value = false;
-			}
-		});
-		const pollId = ref<number>();
-		const pollData = async () => {
-			try {
-				await TasksModule.getTasks();
-			} finally {
-				// todo: should we continue polling if request failed? adjust polling time later to be in sync with BE
-				pollId.value = window.setTimeout(pollData, 15000);
-			}
-		};
-		onUnmounted(() => {
-			clearTimeout(pollId.value);
-		});
 		const editRequest = ref<TableData>();
 		const onRequestClick = (row: TableData) => {
 			editRequestDialogVisible.value = true;
@@ -91,9 +27,6 @@ export default defineComponent({
 		};
 
 		return {
-			tableData,
-			isLoading,
-			newRequestDialogVisible,
 			editRequestDialogVisible,
 			onRequestClick,
 			editRequest
@@ -106,28 +39,14 @@ export default defineComponent({
 	<div>
 		<div class="title">
 			<h4>
-				Request Table
+				{{ title }}
 			</h4>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				@click="newRequestDialogVisible = true"
-			>
-				Add New Request
-			</el-button>
 		</div>
 		<div
-			v-loading="isLoading"
 			class="table-wrapper"
 		>
-			<el-table
-				v-if="!isLoading && tableData.length > 0"
-				:data="tableData"
-			>
+			<el-table :data="data">
 				<el-table-column
-					prop="name"
 					label="Request/Task"
 				>
 					<template #default="scope">
@@ -140,7 +59,6 @@ export default defineComponent({
 					</template>
 				</el-table-column>
 				<el-table-column
-					prop="status"
 					label="Status"
 				>
 					<template #default="scope">
@@ -151,7 +69,7 @@ export default defineComponent({
 							></span>
 							<div class="info">
 								<span class="status">{{ scope.row.status }}</span>
-								<span class="date">{{ scope.row.lastModified }}</span>
+								<span class="date">{{ $filters.formatDateTime(scope.row.lastModified) }}</span>
 							</div>
 						</div>
 					</template>
@@ -161,13 +79,19 @@ export default defineComponent({
 					label="Category"
 				/>
 				<el-table-column
-					prop="problems"
 					label="Problem(s)"
-				/>
+				>
+					<template #default="scope">
+						{{ scope.row.problems.map(i => i.display).join(", ") }}
+					</template>
+				</el-table-column>
 				<el-table-column
-					prop="goals"
 					label="Goal(s)"
-				/>
+				>
+					<template #default="scope">
+						{{ scope.row.goals.map(i => i.display).join(", ") }}
+					</template>
+				</el-table-column>
 				<el-table-column
 					prop="performer"
 					label="Performer"
@@ -181,7 +105,6 @@ export default defineComponent({
 					label="Outcomes"
 				/>
 				<el-table-column
-					prop="comments"
 					label="Comment(s)"
 				>
 					<template #default="scope">
@@ -189,27 +112,8 @@ export default defineComponent({
 					</template>
 				</el-table-column>
 			</el-table>
-			<div
-				v-if="!isLoading && !tableData.length"
-				class="no-data"
-			>
-				<h2>No Referral Requests Yet</h2>
-				<el-button
-					plain
-					round
-					type="primary"
-					size="mini"
-					@click="newRequestDialogVisible = true"
-				>
-					Add New Request
-				</el-button>
-			</div>
 		</div>
 
-		<NewRequestDialog
-			:visible="newRequestDialogVisible"
-			@close="newRequestDialogVisible = false"
-		/>
 		<EditRequestDialog
 			:visible="editRequestDialogVisible"
 			:task="editRequest"
@@ -223,9 +127,6 @@ export default defineComponent({
 @import "~@/assets/scss/abstracts/mixins";
 
 .title {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
 	margin: 20px 0;
 
 	h4 {
@@ -346,21 +247,6 @@ export default defineComponent({
 			font-size: $global-small-font-size;
 			color: $grey;
 		}
-	}
-}
-
-.no-data {
-	height: 350px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-
-	h2 {
-		color: $whisper;
-		font-size: $global-xxxlarge-font-size;
-		font-weight: $global-font-weight-normal;
-		margin-bottom: 50px;
 	}
 }
 </style>
