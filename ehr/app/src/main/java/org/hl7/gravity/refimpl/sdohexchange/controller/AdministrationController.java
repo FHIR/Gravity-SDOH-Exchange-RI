@@ -22,12 +22,12 @@ import java.util.Map;
 @RequestMapping("administration")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Api(tags = {SpringFoxConfig.ADMINISTRATION_API_TAG})
+//TODO: check this CORS solution
+@CrossOrigin(origins = "*")
 public class AdministrationController {
 
   private final ConvertService convertService;
 
-  //TODO: check this CORS solution
-  @CrossOrigin
   @PostMapping("/convert")
   @ApiOperation(value = "Converts QuestionnaireResponse resource to Observation and Conditions",
       notes = "Converts QuestionnaireResponse resource to Observation and Conditions based on StructureMap, and "
