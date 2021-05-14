@@ -43,7 +43,7 @@ public class ConvertService {
   private static final String PACKAGE_VERSION = "4.0.1";
   private static final String SDOH_CLINICAL_CARE_VERSION = "0.1.0";
   private static final String SDOH_CLINICAL_CARE_PACKAGE = "hl7.fhir.us.sdoh-clinicalcare";
-  private static final String CUSTOM_STRUCTURE_DEFINITIONS_LOCATION = "implementaion-guides";
+  private static final String CUSTOM_STRUCTURE_DEFINITIONS_LOCATION = "structure-definitions";
   private static final String MAP_EXTENSION =
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-targetStructureMap";
 
