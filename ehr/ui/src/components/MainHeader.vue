@@ -1,12 +1,28 @@
 <script lang="ts">
 import "@/assets/scss/styles.scss";
-import { defineComponent } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import UserInfo from "@/components/UserInfo.vue";
+import { LocationQueryValue, useRoute } from "vue-router";
 
 export default defineComponent({
 	name: "MainHeader",
 	components: {
 		UserInfo
+	},
+	setup() {
+		const route = useRoute();
+		const app = ref<LocationQueryValue | LocationQueryValue[]>();
+		const secondName = ref<LocationQueryValue | LocationQueryValue[]>();
+
+		watch(() => route.query.app, () => {
+			app.value = route.query.app;
+			secondName.value = route.query.secondName;
+		},{ immediate: true });
+
+		return {
+			app,
+			secondName
+		};
 	}
 });
 </script>
@@ -22,7 +38,10 @@ export default defineComponent({
 				src="~@/assets/images/logo.svg"
 				alt="logo"
 			>
-			<span class="name">EHR SDOH Exchange</span>
+			<span class="name">{{ app }} <span
+				v-if="secondName"
+				class="grey"
+			>({{ secondName }})</span></span>
 		</div>
 		<el-menu
 			mode="horizontal"
@@ -62,9 +81,10 @@ export default defineComponent({
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	width: 155px;
+	min-width: 155px;
 	border-right: 1px solid $global-base-border-color;
 	margin-right: 45px;
+	padding-right: 10px;
 
 	.name {
 		font-size: $global-font-size;
@@ -80,5 +100,10 @@ export default defineComponent({
 
 .right-container {
 	margin-left: auto;
+}
+
+.grey {
+	color: $grey;
+	font-weight: 500;
 }
 </style>

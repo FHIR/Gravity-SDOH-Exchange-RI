@@ -29,7 +29,8 @@ import {
 	ElOption,
 	ElDivider,
 	ElDatePicker,
-	ElCheckbox
+	ElCheckbox,
+	ElPopover
 } from "element-plus";
 
 export default (app: App) => {
@@ -61,4 +62,5 @@ export default (app: App) => {
 	app.use(ElDivider);
 	app.use(ElDatePicker);
 	app.use(ElCheckbox);
+	app.use(ElPopover);
 };

@@ -26,10 +26,24 @@ export default defineComponent({
 				class="image"
 			>
 		</div>
-		<div class="details">
-			<span class="name">{{ userName }}</span>
-			<span class="type">{{ userType }}</span>
-		</div>
+		<el-popover
+			placement="bottom"
+			:width="140"
+			:offset="-10"
+			trigger="click"
+			:append-to-body="false"
+		>
+			<a
+				class="logout"
+				href="http://localhost:8081/"
+			>Logout</a>
+			<template #reference>
+				<div class="details">
+					<span class="name">{{ userName }}</span>
+					<span class="type">{{ userType }}</span>
+				</div>
+			</template>
+		</el-popover>
 	</div>
 </template>
 
@@ -46,6 +60,7 @@ export default defineComponent({
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	cursor: pointer;
 
 	.name {
 		font-size: $global-font-size;
@@ -67,5 +82,12 @@ export default defineComponent({
 		width: 42px;
 		height: 42px;
 	}
+}
+
+::v-deep(.el-popper.is-light) {
+	text-align: center;
+	font-size: $global-font-size;
+	font-weight: $global-font-weight-normal;
+	cursor: pointer;
 }
 </style>
