@@ -20,7 +20,7 @@ public class QuestionnaireRepository extends FhirRepository<Questionnaire> {
   }
 
   public Optional<Questionnaire> findByCanonnicalUri(String uri){
-    Bundle bundle = getEhrClient().search()
+    Bundle bundle = getClient().search()
         .forResource(Questionnaire.class)
         .where(Questionnaire.URL.matches()
             .value(uri))
