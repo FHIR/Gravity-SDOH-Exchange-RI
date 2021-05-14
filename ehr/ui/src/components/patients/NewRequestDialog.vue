@@ -66,7 +66,7 @@ export default defineComponent({
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
 			emit("close");
-		}
+		};
 
 		//
 		// Watchers for Goals and Problems, at least one should be populated (validation)

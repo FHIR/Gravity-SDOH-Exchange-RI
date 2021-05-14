@@ -39,7 +39,7 @@ export default defineComponent({
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
 			emit("close");
-		}
+		};
 
 		const showOccurrence = (occurrence: Occurrence) => {
 			if (occurrence.start !== null) {
