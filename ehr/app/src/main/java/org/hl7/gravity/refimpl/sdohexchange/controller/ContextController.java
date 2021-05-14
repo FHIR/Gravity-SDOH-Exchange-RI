@@ -17,6 +17,8 @@ public class ContextController {
 
   private final ContextService contextService;
 
+  //TODO: check this CORS solution
+  @CrossOrigin(origins = "*", allowedHeaders = "*")
   @GetMapping("/current-context")
   @ApiOperation(value = "Details about a logged in user and selected Patient instance.", notes =
       "Get currently logged in user (usually a Practitioner) and a Patient selected during a launch. All operations "
