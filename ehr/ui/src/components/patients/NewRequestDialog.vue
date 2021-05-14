@@ -1,17 +1,16 @@
 <script lang="ts">
-import { defineComponent, reactive, ref, computed, watch } from "vue";
-import { getGoals, getConditions, getOrganizations } from "@/api";
-import { Condition, Goal, newTaskPayload, Organization } from "@/types";
+import { defineComponent, reactive, ref, watch } from "vue";
+import { getGoals, getConditions, getOrganizations, getCategories, getRequests } from "@/api";
+import { Condition, Goal, newTaskPayload, Organization, Coding } from "@/types";
 import _ from "@/vendors/lodash";
 import { TasksModule } from "@/store/modules/tasks";
-import { categoryList, requestList, CategoryListItem, RequestListItem } from "@/utils/constants";
 import { RuleItem } from "async-validator";
 import moment from "moment";
 
 export type FormModel = {
 	name: string,
 	category: string,
-	request: string,
+	code: string,
 	status: string,
 	comment: string,
 	priority: string,
@@ -32,8 +31,8 @@ export default defineComponent({
 	},
 	emits: ["close"],
 	setup(props, { emit }) {
-		const categoryOptions = ref<CategoryListItem[]>(categoryList);
-		const requestOptions = computed<RequestListItem[]>(() => requestList.filter((request: RequestListItem) => request.domain === formModel.category));
+		const categoryOptions = ref<Coding[]>([]);
+		const requestOptions = ref<Coding[]>([]);
 		const conditionOptions = ref<Condition[]>([]);
 		const goalOptions = ref<Goal[]>([]);
 		const performerOptions = ref<Organization[]>([]);
@@ -41,9 +40,9 @@ export default defineComponent({
 		const formModel = reactive<FormModel>({
 			name: "",
 			category: "",
-			request: "",
+			code: "",
 			//todo: just disabled starting draft state, you cannot change it on creation
-			status: "draft",
+			status: "Draft",
 			comment: "",
 			priority: "",
 			occurrence: "",
@@ -61,8 +60,7 @@ export default defineComponent({
 		//
 		const onDialogOpen = async () => {
 			formEl.value?.resetFields();
-			conditionOptions.value = await getConditions();
-			goalOptions.value = await getGoals();
+			categoryOptions.value = await getCategories();
 			performerOptions.value = await getOrganizations();
 		};
 		//
@@ -85,7 +83,7 @@ export default defineComponent({
 				required: true,
 				message: "This field is required"
 			},
-			request: {
+			code: {
 				required: true,
 				message: "This field is required"
 			},
@@ -153,8 +151,11 @@ export default defineComponent({
 		//
 		// Clear request field on every category change because they are connected.
 		//
-		const onCategoryChange = (): void => {
-			formModel.request = "";
+		const onCategoryChange = async (code: string) => {
+			formModel.code = "";
+			requestOptions.value = await getRequests(code);
+			conditionOptions.value = await getConditions(code);
+			goalOptions.value = await getGoals(code);
 		};
 
 		return {
@@ -213,30 +214,30 @@ export default defineComponent({
 				<el-select
 					v-model="formModel.category"
 					placeholder="Select Category/Domain"
-					@change="onCategoryChange"
+					@change="onCategoryChange($event)"
 				>
 					<el-option
 						v-for="item in categoryOptions"
-						:key="item.value"
-						:label="item.name"
-						:value="item.value"
+						:key="item.code"
+						:label="item.display"
+						:value="item.code"
 					/>
 				</el-select>
 			</el-form-item>
 			<el-form-item
 				label="Request"
-				prop="request"
+				prop="code"
 			>
 				<el-select
-					v-model="formModel.request"
+					v-model="formModel.code"
 					placeholder="Select Request"
 					no-data-text="Select Category/Domain first"
 				>
 					<el-option
 						v-for="item in requestOptions"
-						:key="item.value"
-						:label="`${item.name} (${item.code})`"
-						:value="item.value"
+						:key="item.code"
+						:label="`${item.display} (${item.code})`"
+						:value="item.code"
 					/>
 				</el-select>
 			</el-form-item>
@@ -325,9 +326,9 @@ export default defineComponent({
 				>
 					<el-option
 						v-for="item in conditionOptions"
-						:key="item.conditionId"
-						:label="item.conditionId"
-						:value="item.conditionId"
+						:key="item.id"
+						:label="item.display"
+						:value="item.id"
 					/>
 				</el-select>
 			</el-form-item>
@@ -342,8 +343,8 @@ export default defineComponent({
 				>
 					<el-option
 						v-for="item in goalOptions"
-						:key="item.goalId"
-						:label="item.goalId"
+						:key="item.id"
+						:label="item.display"
 						:value="item.id"
 					/>
 				</el-select>

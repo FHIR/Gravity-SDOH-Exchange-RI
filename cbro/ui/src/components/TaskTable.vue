@@ -9,7 +9,9 @@ type TaskState = {
 	isNew: boolean
 }
 
+
 type TaskDisplayFields = {
+	id: string,
 	taskName: string,
 	isNew: boolean,
 	requestDate: string,
@@ -25,13 +27,15 @@ type TaskDisplayFields = {
 	outcome: string
 }
 
+
 const displayTask = ({ task, isNew }: TaskState): TaskDisplayFields => ({
+	id: task.id,
 	taskName: task.name,
 	isNew,
 	requestDate: task.createdAt.replace(/T.*$/, ""),
-	priority: task.priority.toLowerCase(),
+	priority: task.priority,
 	status: task.status,
-	category: task.serviceRequest.category,
+	category: task.serviceRequest.category.display,
 	requestor: task.requester.display,
 	patient: task.patient.display,
 	consent: task.consent,
@@ -42,19 +46,38 @@ const displayTask = ({ task, isNew }: TaskState): TaskDisplayFields => ({
 });
 
 
+const orderOnTasks = (left: TaskState, right: TaskState): number => {
+	if (left.isNew !== right.isNew) {
+		return left.isNew ? -1 : 1;
+	}
+	if (left.task.createdAt !== right.task.createdAt) {
+		return new Date(left.task.createdAt) >= new Date(right.task.createdAt) ? -1 : 1;
+	}
+	return 0;
+};
+
+
 export default defineComponent({
 	components: { TaskStatusDisplay },
+	emits: ["task-name-click"],
 	props: {
 		tasks: {
 			type: Array as PropType<TaskState[]>,
 			required: true
 		}
 	},
-	setup(props) {
-		const tableData = computed(() => props.tasks.map(displayTask));
+	setup(props, ctx) {
+		const tasksInOrder = computed(() => [...props.tasks].sort(orderOnTasks));
+		const tableData = computed(() => tasksInOrder.value.map(displayTask));
+
+		const taskNameClick = (taskId: string) => {
+			const task: TaskState = props.tasks.find(taskState => taskState.task.id === taskId)!;
+			ctx.emit("task-name-click", task);
+		};
 
 		return {
-			tableData
+			tableData,
+			taskNameClick
 		};
 	}
 });
@@ -71,7 +94,9 @@ export default defineComponent({
 				width="290"
 			>
 				<template #default="{ row }">
-					<div class="task-name-cell">
+					<div class="task-name-cell"
+						@click="taskNameClick(row.id)"
+					>
 						<span class="name">
 							{{ row.taskName }}
 						</span>
@@ -179,7 +204,7 @@ export default defineComponent({
 		flex-direction: column;
 		font-size: $global-medium-font-size;
 		font-weight: 400;
-		color: #000;
+		color: $global-text-color;
 
 		.el-table__header-wrapper {
 			flex-shrink: 0;
@@ -251,6 +276,7 @@ export default defineComponent({
 			width: 100%;
 			display: flex;
 			justify-content: space-between;
+			cursor: pointer;
 
 			.name {
 				flex-shrink: 1;
@@ -258,7 +284,6 @@ export default defineComponent({
 				text-overflow: ellipsis;
 				color: $global-primary-color;
 				text-decoration: underline;
-				cursor: pointer;
 			}
 
 			.new-mark {

@@ -7,9 +7,7 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.ServiceRequest;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Mykhailo Stefantsiv
@@ -17,8 +15,9 @@ import java.util.Map;
 @AllArgsConstructor
 @Getter
 public class ServiceRequestInfo {
-  private ServiceRequest serviceRequest;
-  private List<Goal> goals;
-  private List<Condition> conditions;
-  private Consent consent;
+
+  private final ServiceRequest serviceRequest;
+  private final List<Goal> goals;
+  private final List<Condition> conditions;
+  private final Consent consent;
 }

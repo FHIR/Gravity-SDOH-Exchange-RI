@@ -44,8 +44,6 @@ public class TaskPollingService {
             .systemAndCode(OrganizationTypeCode.CBRO.getSystem(), OrganizationTypeCode.CBRO.toCode()))
         // Get only tasks in-progress
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
-            .code(Task.TaskStatus.RECEIVED.toCode()))
-        .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.FAILED.toCode()))
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.REJECTED.toCode()))

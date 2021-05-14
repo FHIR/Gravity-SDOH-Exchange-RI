@@ -6,14 +6,24 @@ export type Patient = {
 	id: string | null,
 	name: string | null
 	language: string | null,
-	phone: string | null,
-	email: string | null,
+	phones: Phone[],
+	emails: Email[],
 	employmentStatus: string | null,
 	race: string | null,
 	ethnicity: string | null,
 	education: string | null,
 	maritalStatus: string | null,
-	insurance: string | null
+	insurances: string[]
+};
+
+export type Email = {
+	email: string,
+	use: string
+};
+
+export type Phone = {
+	phone: string,
+	use: string
 };
 
 export type User = {
@@ -25,6 +35,21 @@ export type User = {
 export type ContextResponse = {
 	patient: Patient,
 	user: User
+};
+
+export type Task = {
+	comments: Comment[],
+	createdAt: string,
+	errors: string[],
+	id: string,
+	lastModified: string | null,
+	name: string,
+	organization: Organization | null,
+	outcome: string | null,
+	priority: "ASAP" | "Routine" | "Urgent" | null,
+	procedures: Procedure[]
+	serviceRequest: ServiceRequest,
+	status: TaskStatus,
 };
 
 export type Organization = {
@@ -39,7 +64,7 @@ export type Occurrence = {
 	end: string
 }
 
-export type ServiceRequestGoal = {
+export type Goal = {
 	display: string,
 	id: string
 }
@@ -49,41 +74,30 @@ export type Consent = {
 	id: string
 }
 
-export type ServiceRequestCondition = {
+export type Coding = {
+	code: string,
+	display: string
+}
+
+export type Condition = {
+	display: string,
+	id: string
+};
+
+export type Procedure = {
 	display: string,
 	id: string
 }
 
 export type ServiceRequest = {
-	category: ServiceRequestCategory,
-	details: string,
-	errors: string[],
-	//todo: on be it's enum right now
-	request: string,
-	serviceRequestId: string,
-	status: ServiceRequestStatus,
-	occurrence: Occurrence,
-	goals: ServiceRequestGoal[],
+	category: Coding,
+	code: Coding,
+	conditions: Condition[],
 	consent: Consent,
-	conditions: ServiceRequestCondition[]
-};
-
-export type ServiceRequestStatus = "ACTIVE" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "NULL" | "ONHOLD" | "REVOKED" | "UNKNOWN"
-
-export type ServiceRequestCategory = "EDUCATION_DOMAIN" | "EMPLOYMENT_DOMAIN" | "FINANCIAL_STRAIN_DOMAIN" | "FOOD_INSECURITY_DOMAIN" | "HOUSING_INSTABILITY_AND_HOMELESSNESS_DOMAIN" | "INADEQUATE_HOUSING_DOMAIN" | "INTERPERSONAL_VIOLENCE_DOMAIN" | "SDOH_RISK_RELATED_TO_VETERAN_STATUS" | "SOCIAL_ISOLATION_DOMAIN" | "STRESS_DOMAIN" | "TRANSPORTATION_INSECURITY_DOMAIN"
-
-export type Task = {
-	comments: Comment[],
-	createdAt: string,
 	errors: string[],
+	goals: Goal[],
 	id: string,
-	lastModified: string | null,
-	name: string,
-	organization: Organization | null,
-	outcome: string | null,
-	priority: "ASAP" | "Routine" | "Urgent" | null,
-	serviceRequest: ServiceRequest,
-	status: TaskStatus,
+	occurrence: Occurrence
 };
 
 export type newTaskPayload = {
@@ -93,36 +107,25 @@ export type newTaskPayload = {
 	comment: string,
 	goalIds: string[],
 	performerId: string,
-	request: string,
+	code: string,
 	name: string,
 	occurrence: Occurrence | string
 };
 
-export type TaskStatus = "ACCEPTED" | "CANCELLED" | "COMPLETED" | "DRAFT" | "ENTEREDINERROR" | "FAILED" | "INPROGRESS" | "NULL" | "ONHOLD" | "READY" | "RECEIVED" | "REJECTED" | "REQUESTED"
+export type updateTaskPayload = {
+	comment?: string,
+	status: TaskStatus | null,
+	id: string
+}
 
-export type Condition = {
-	clinicalStatus: "ACTIVE" | "INACTIVE" | "NULL" | "RESOLVED",
-	conditionId: string,
-	dateRecorded: string,
-	//todo: it's enum in api
-	domain: string,
-	errors: string[],
-	verificationStatus: "CONFIRMED" | "DIFFERENTIAL" | "ENTEREDINERROR" | "NULL" | "PROVISIONAL" | "REFUTED" | "UNCONFIRMED"
-};
-
-export type Goal = {
-	achievementStatus: "ACHIEVED" | "IMPROVING" | "INPROGRESS" | "NOCHANGE" | "NOPROGRESS" | "NOTACHIEVED" | "NOTATTAINABLE" | "NULL" | "SUSTAINING" | "WORSENING",
-	//todo: it's enum in api
-	domain: string,
-	errors: string[],
-	goalId: string,
-	lifecycleStatus: "ACCEPTED" | "ACTIVE" | "CANCELLED" | "COMPLETED" | "ENTEREDINERROR" | "NULL" | "ONHOLD" | "PLANNED" | "PROPOSED" | "REJECTED",
-	statusDate: string
-};
+export type TaskStatus = "Accepted" | "Cancelled" | "Completed" | "Draft" | "Entered In Error" | "Failed" | "In Progress" | "Null" | "On Hold" | "Ready" | "Received" | "Rejected" | "Requested"
 
 export type Comment = {
-	//todo: what kind of object, for now it's just empty
-	author: object,
+	author: {
+		display: string,
+		id: string,
+		resourceType: string
+	},
 	text: string,
 	time: string
 };

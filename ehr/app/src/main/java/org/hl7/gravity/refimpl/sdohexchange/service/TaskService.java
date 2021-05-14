@@ -14,14 +14,11 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
-import org.hl7.gravity.refimpl.sdohexchange.dao.impl.OrganizationRepository;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.info.TaskInfoToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewTaskRequestDto;
@@ -29,6 +26,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.info.OrganizationInfo;
 import org.hl7.gravity.refimpl.sdohexchange.info.TaskInfo;
 import org.hl7.gravity.refimpl.sdohexchange.info.composer.TasksInfoComposer;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
@@ -55,8 +53,9 @@ public class TaskService {
   private final PractitionerRoleService practitionerRoleService;
   private final ContextService contextService;
   private final TaskRepository taskRepository;
-  private final OrganizationRepository organizationRepository;
   private final TasksInfoComposer tasksInfoComposer;
+  private final OrganizationService organizationService;
+  private final SDOHMappings sdohMappings;
 
   public String newTask(NewTaskRequestDto taskRequest) {
     if (taskRequest.getConsent() != Boolean.TRUE) {
@@ -69,9 +68,12 @@ public class TaskService {
         .getReferenceElement()
         .getIdPart();
 
+    Coding category = sdohMappings.findCategory(taskRequest.getCategory());
+    Coding requestCode = sdohMappings.findCoding(ServiceRequest.class, taskRequest.getCode());
+
     TaskBundleFactory taskBundleFactory = new TaskBundleFactory(taskRequest.getName(), smartOnFhirContext.getPatient(),
-        taskRequest.getCategory(), taskRequest.getRequest(), taskRequest.getPriority(), taskRequest.getOccurrence(),
-        taskRequest.getPerformerId(), requesterId);
+        category, requestCode, taskRequest.getPriority(), taskRequest.getOccurrence(), taskRequest.getPerformerId(),
+        requesterId);
     taskBundleFactory.setComment(taskRequest.getComment());
     taskBundleFactory.setUser(user);
 
@@ -84,60 +86,20 @@ public class TaskService {
       taskBundleFactory.getGoalIds()
           .addAll(taskRequest.getGoalIds());
     }
-
     // Verify References
     // Performer Id is set - assert is present in TaskBundleFactory.
     // Fetch it and related Endpoint in case an Organization is a CBRO.
-    Bundle bundle = organizationRepository.find(taskRequest.getPerformerId(),
-        Arrays.asList(Organization.INCLUDE_ENDPOINT));
-    List<Organization> orgs = FhirUtil.getFromBundle(bundle, Organization.class);
-    if (orgs.size() == 0) {
-      throw new IllegalStateException("Organization with id '" + taskRequest.getPerformerId() + "' does not exist.");
-    }
-
-    Organization org = orgs.get(0);
-    Endpoint endpoint = null;
-    //TODO valdiate Organization using InstanceValidator. This will validate Organization type as well.
-    Coding orgCoding = FhirUtil.findCoding(org.getType(), OrganizationTypeCode.SYSTEM);
-    if (orgCoding != null && OrganizationTypeCode.CBRO.toCode()
-        .equals(orgCoding.getCode())) {
-      // Retrieve FHIR Endpoint instance
-      endpoint = FhirUtil.getFromBundle(bundle, Endpoint.class)
-          .stream()
-          .filter(e -> e.getConnectionType()
-              .getCode()
-              .equals(EndpointConnectionType.HL7FHIRREST.toCode()))
-          .findFirst()
-          .orElse(null);
-
-      if (endpoint == null) {
-        throw new IllegalStateException(
-            String.format("CBRO Organization resource with id '%s' does not contain endpoint of type '%s'.",
-                org.getIdElement()
-                    .getIdPart(), EndpointConnectionType.HL7FHIRREST));
-      } else {
-        if (Strings.isNullOrEmpty(endpoint.getAddress())) {
-          throw new IllegalStateException(
-              String.format("Endpoint resource with id '%s' for a CBRO organization '' does not contain an address.",
-                  endpoint.getIdElement()
-                      .getIdPart(), org.getIdElement()
-                      .getIdPart()));
-        }
-      }
-    }
+    OrganizationInfo organizationInfo = organizationService.getOrganizationInfo(taskRequest.getPerformerId());
 
     // Store a task
-    Bundle taskCreateBundle = taskBundleFactory.createBundle();
-    Bundle respBundle = ehrClient.transaction()
-        .withBundle(taskCreateBundle)
-        .execute();
-
+    Bundle respBundle = taskRepository.transaction(taskBundleFactory.createBundle());
     IdType taskId = FhirUtil.getFromResponseBundle(respBundle, Task.class);
 
+    Endpoint endpoint = organizationInfo.getEndpoint();
     //If endpoint!=null - this is a CBRO use case. Manage a task additionally.
     if (endpoint != null) {
       Optional<Task> task = taskRepository.find(taskId.getIdPart());
-      if(task.isPresent()){
+      if (task.isPresent()) {
         handleCbroTask(task.get(), endpoint);
       } else {
         throw new ResourceNotFoundException(taskId);
@@ -152,18 +114,18 @@ public class TaskService {
     Bundle bundle = taskRepository.findByPatientId(smartOnFhirContext.getPatient());
     List<TaskInfo> taskInfos = tasksInfoComposer.compose(bundle);
     return taskInfos.stream()
-        .map(taskInfo -> taskInfoToDtoConverter.convert(taskInfo))
+        .map(taskInfoToDtoConverter::convert)
         .collect(Collectors.toList());
   }
 
   public TaskDto updateTask(String taskId, UpdateTaskRequestDto updateTaskDto) {
     Optional<Task> foundTask = taskRepository.find(taskId);
-    if(!foundTask.isPresent()){
+    if (!foundTask.isPresent()) {
       throw new ResourceNotFoundException(new IdType(taskId));
     }
     Task task = foundTask.get();
-    if (updateTaskDto.getStatus() != null && !Objects.equals(updateTaskDto.getStatus().getValue(), task.getStatus())) {
-      task.setStatus(updateTaskDto.getStatus().getValue());
+    if (updateTaskDto.getStatus() != null && !Objects.equals(updateTaskDto.getStatus(), task.getStatus())) {
+      task.setStatus(updateTaskDto.getStatus());
     }
     if (!Strings.isNullOrEmpty(updateTaskDto.getComment())) {
       UserDto user = contextService.getUser();
@@ -172,10 +134,14 @@ public class TaskService {
           .setTimeElement(DateTimeType.now())
           .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
     }
-    MethodOutcome methodOutcome = ehrClient.update().resource(task).execute();
-    Bundle updatedTask = taskRepository.find(methodOutcome.getResource().getIdElement()
+    MethodOutcome methodOutcome = ehrClient.update()
+        .resource(task)
+        .execute();
+    Bundle updatedTask = taskRepository.find(methodOutcome.getResource()
+        .getIdElement()
         .getIdPart(), Arrays.asList(Task.INCLUDE_FOCUS, Task.INCLUDE_OWNER));
-    TaskInfo taskInfo = tasksInfoComposer.compose(updatedTask).get(0);
+    TaskInfo taskInfo = tasksInfoComposer.compose(updatedTask)
+        .get(0);
     return new TaskInfoToDtoConverter().convert(taskInfo);
   }
 
@@ -183,9 +149,6 @@ public class TaskService {
     try {
       // Create task in CBRO.
       cbroTaskCreateService.createTask(fhirContext.newRestfulGenericClient(endpoint.getAddress()), task);
-      //TODO: Change task to received after CBRO receive it
-      //      b.addEntry(FhirUtil.createPutEntry(task.setStatus(Task.TaskStatus.RECEIVED)
-      //          .setLastModified(new Date())));
     } catch (CbroTaskCreateService.CbroTaskCreateException exc) {
       Bundle b = new Bundle();
       b.setType(Bundle.BundleType.TRANSACTION);

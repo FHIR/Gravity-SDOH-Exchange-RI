@@ -17,7 +17,7 @@ spring:
             authorization-grant-type: authorization_code
             # scope 'launch/patient' for a standalone launch if needed.
             # user/*.* will give us full access to resources in Logica sendbox (might be a bug), should be system/*.*
-            scope: 'user/*.*,profile,openid,launch'
+            scope: 'user/*.*,fhirUser,openid,launch'
         provider:
           cbro-provider:
             token-uri: https://auth.logicahealth.org/token
@@ -33,4 +33,4 @@ swagger:
     name: Gravity Project
     url: https://www.hl7.org/gravity/
 scheduling:
-  task-polling-delay-millis: 30000
+  task-polling-delay-millis: 10000

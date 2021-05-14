@@ -14,16 +14,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaskRepository extends FhirRepository<Task> {
 
-  private final IGenericClient ehrClient;
-
   @Autowired
   public TaskRepository(IGenericClient ehrClient) {
     super(ehrClient);
-    this.ehrClient = ehrClient;
   }
 
-  public Bundle findByPatientId(String patientId){
-    return ehrClient.search()
+  public Bundle findByPatientId(String patientId) {
+    return getClient().search()
         .forResource(getResourceType())
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)

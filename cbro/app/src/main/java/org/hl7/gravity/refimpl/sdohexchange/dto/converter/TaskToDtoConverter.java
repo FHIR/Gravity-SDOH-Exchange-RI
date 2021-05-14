@@ -1,6 +1,11 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProcedureDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.springframework.core.convert.converter.Converter;
 
@@ -21,8 +26,10 @@ public class TaskToDtoConverter implements Converter<Task, TaskDto> {
     taskDto.setName(task.getDescription());
     taskDto.setCreatedAt(toLocalDateTime(task.getAuthoredOnElement()));
     taskDto.setLastModified(toLocalDateTime(task.getLastModifiedElement()));
-    taskDto.setPriority(task.getPriority());
-    taskDto.setStatus(task.getStatus());
+    taskDto.setPriority(task.getPriority()
+        .getDisplay());
+    taskDto.setStatus(task.getStatus()
+        .getDisplay());
     taskDto.setRequester(typeToDtoConverter.convert(task.getRequester()));
     taskDto.setPatient(typeToDtoConverter.convert(task.getFor()));
     //TODO: Change to consent id in future
@@ -33,6 +40,19 @@ public class TaskToDtoConverter implements Converter<Task, TaskDto> {
         .collect(Collectors.toList()));
     taskDto.setOutcome(task.getStatusReason()
         .getText());
+
+    for (TaskOutputComponent outputComponent : task.getOutput()) {
+      Type componentValue = outputComponent.getValue();
+      if (componentValue instanceof Reference) {
+        Reference procedureReference = (Reference) componentValue;
+        taskDto.getProcedures()
+            .add(new ProcedureDto(procedureReference.getReferenceElement()
+                .getIdPart(), procedureReference.getDisplay()));
+      } else if (componentValue instanceof CodeableConcept) {
+        CodeableConcept outcome = (CodeableConcept) componentValue;
+        taskDto.setOutcome(outcome.getText());
+      }
+    }
     return taskDto;
   }
 }

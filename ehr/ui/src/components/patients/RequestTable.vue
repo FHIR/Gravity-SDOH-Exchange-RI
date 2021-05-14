@@ -75,21 +75,28 @@ export default defineComponent({
 					</template>
 				</el-table-column>
 				<el-table-column
-					prop="category"
 					label="Category"
-				/>
+				>
+					<template #default="scope">
+						{{ scope.row.category.display }}
+					</template>
+				</el-table-column>
 				<el-table-column
 					label="Problem(s)"
 				>
 					<template #default="scope">
-						{{ scope.row.problems.map(i => i.display).join(", ") }}
+						<a :class="{underline: scope.row.problems.length}">
+							{{ scope.row.problems.length > 1 ? `${scope.row.problems.length} Problems` : scope.row.problems.length === 1 ? scope.row.problems[0].display : "--" }}
+						</a>
 					</template>
 				</el-table-column>
 				<el-table-column
 					label="Goal(s)"
 				>
 					<template #default="scope">
-						{{ scope.row.goals.map(i => i.display).join(", ") }}
+						<a :class="{underline: scope.row.goals.length}">
+							{{ scope.row.goals.length > 1 ? `${scope.row.goals.length} Goals` : scope.row.goals.length === 1 ? scope.row.goals[0].display : "--" }}
+						</a>
 					</template>
 				</el-table-column>
 				<el-table-column
@@ -108,7 +115,7 @@ export default defineComponent({
 					label="Comment(s)"
 				>
 					<template #default="scope">
-						{{ scope.row.comments.length > 0 ? `${scope.row.comments.length} comment${scope.row.comments.length > 1 ? 's' : ''}` : "--" }}
+						{{ scope.row.comments.length > 1 ? `${scope.row.comments.length} comments` : scope.row.comments.length === 1 ? scope.row.comments[0].text : "--" }}
 					</template>
 				</el-table-column>
 			</el-table>
@@ -141,6 +148,10 @@ export default defineComponent({
 	box-shadow: 0 2px 5px rgba(51, 51, 51, 0.25);
 	padding: 10px 20px;
 	min-height: 130px;
+}
+
+.underline {
+	text-decoration: underline;
 }
 
 .el-table {

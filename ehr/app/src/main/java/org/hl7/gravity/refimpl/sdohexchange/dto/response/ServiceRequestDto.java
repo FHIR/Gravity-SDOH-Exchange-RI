@@ -15,11 +15,11 @@ import java.util.List;
 public class ServiceRequestDto implements Validated {
 
   private final String id;
-  private String category;
-  private String requestCode;
+  private CodingDto category;
+  private CodingDto code;
   private OccurrenceResponseDto occurrence;
-  private List<ConditionResponseDto> conditions = new ArrayList<>();
-  private List<GoalResponseDto> goals = new ArrayList<>();
+  private List<ConditionDto> conditions = new ArrayList<>();
+  private List<GoalDto> goals = new ArrayList<>();
   private ConsentResponseDto consent;
 
   @Setter(AccessLevel.NONE)

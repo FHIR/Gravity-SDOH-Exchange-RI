@@ -11,14 +11,14 @@ export default defineComponent({
 		const gender = computed<string | null | undefined>(() => ContextModule.patient?.gender || "N/A");
 		const lang = computed<string | null | undefined>(() => ContextModule.patient?.language || "N/A");
 		const address = computed<string | null | undefined>(() => ContextModule.patient?.address || "N/A");
-		const phone = computed<string | null | undefined>(() => ContextModule.patient?.phone || "N/A");
-		const email = computed<string | null | undefined>(() => ContextModule.patient?.email || "N/A");
+		const phone = computed<string | null | undefined>(() => ContextModule.patient?.phones[0]?.phone || "N/A");
+		const email = computed<string | null | undefined>(() => ContextModule.patient?.emails[0]?.email || "N/A");
 		const employmentStatus = computed<string | null | undefined>(() => ContextModule.patient?.employmentStatus || "N/A");
 		const race = computed<string | null | undefined>(() => ContextModule.patient?.race || "N/A");
 		const ethnicity = computed<string | null | undefined>(() => ContextModule.patient?.ethnicity || "N/A");
 		const educationLevel = computed<string | null | undefined>(() => ContextModule.patient?.education || "N/A");
 		const maritalStatus = computed<string | null | undefined>(() => ContextModule.patient?.maritalStatus || "N/A");
-		const insurance = computed<string | null | undefined>(() => ContextModule.patient?.insurance || "N/A");
+		const insurance = computed<string | null | undefined>(() => ContextModule.patient?.insurances.join(", ") || "N/A");
 
 		return {
 			name,
