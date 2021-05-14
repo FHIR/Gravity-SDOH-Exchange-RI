@@ -1,0 +1,9 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-date-editor .el-range-separator {
+	width: 10%;
+}
+
+.el-range-editor--mini.el-input__inner {
+	height: 25px;
+}

@@ -1,0 +1,13 @@
+@import "~@/assets/scss/abstracts/variables";
+
+/* Font
+-------------------------- */
+$--font-path: '~element-plus/lib/theme-chalk/fonts';
+
+/* Color
+-------------------------- */
+$--color-primary: $global-primary-color;
+$--color-text-primary: $global-text-color;
+$--color-text-regular: $global-text-color;
+$--border-color-light: $global-base-border-color;
+$--background-color-base: $global-background;

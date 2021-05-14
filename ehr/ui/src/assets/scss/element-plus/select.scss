@@ -1,0 +1,45 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-select {
+	.el-input .el-select__caret {
+		color: $global-text-muted-color;
+		font-size: $global-small-font-size;
+	}
+
+	.el-select__tags .el-tag {
+		background-color: $pattens-blue;
+		color: $global-text-color;
+
+		.el-icon-close {
+			background-color: $pattens-blue;
+			color: $global-text-color;
+			right: -5px;
+			font-size: $global-font-size;
+
+			&:hover {
+				background-color: $pattens-blue;
+			}
+		}
+	}
+}
+
+.el-select-dropdown__item {
+	padding: 0 10px;
+	font-size: $global-small-font-size;
+	height: 25px;
+	display: flex;
+	align-items: center;
+
+	&:hover {
+		background-color: rgba($silver, 0.15);
+	}
+}
+
+.el-select-dropdown.is-multiple .el-select-dropdown__item.selected {
+	color: $global-text-color;
+	font-weight: $global-font-weight-normal;
+
+	&::after {
+		right: 10px;
+	}
+}

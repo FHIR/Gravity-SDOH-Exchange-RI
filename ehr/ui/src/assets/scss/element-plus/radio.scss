@@ -1,0 +1,18 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-radio {
+	margin-right: 15px;
+}
+
+.el-radio-button__inner {
+	font-weight: $global-font-weight-normal;
+}
+
+.el-radio-button--mini .el-radio-button__inner {
+	padding: 5px 15px;
+	width: 215px;
+}
+
+.el-radio__label {
+	padding-left: 5px;
+}

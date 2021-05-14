@@ -7,6 +7,7 @@
   <groupId>org.hl7.gravity.refimpl.sdohexchange</groupId>
   <artifactId>sdoh-exchange</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <name>SDOH Exchange</name>
   <packaging>pom</packaging>
 
   <properties>
@@ -16,7 +17,9 @@
   </properties>
 
   <modules>
-    <module>ehr-app</module>
+    <module>components</module>
+    <module>ehr</module>
+    <module>cbro</module>
   </modules>
 
 </project>
