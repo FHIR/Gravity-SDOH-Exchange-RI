@@ -20,7 +20,7 @@ public class StructureMapRepository extends FhirRepository<StructureMap> {
   }
 
   public Optional<StructureMap> findByUrl(String mapUrl) {
-    Bundle bundle = getEhrClient().search()
+    Bundle bundle = getClient().search()
         .forResource(StructureMap.class)
         .where(StructureMap.URL.matches()
             .value(mapUrl))
