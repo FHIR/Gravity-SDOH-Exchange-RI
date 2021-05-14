@@ -7,6 +7,7 @@ import net.minidev.json.JSONObject;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.service.ConvertService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,8 @@ public class AdministrationController {
 
   private final ConvertService convertService;
 
+  //TODO: check this CORS solution
+  @CrossOrigin
   @PostMapping("/convert")
   @ApiOperation(value = "Converts QuestionnaireResponse resource to Observation and Conditions",
       notes = "Converts QuestionnaireResponse resource to Observation and Conditions based on StructureMap, and "
