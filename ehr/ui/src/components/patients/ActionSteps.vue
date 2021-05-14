@@ -1,9 +1,11 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, ref } from "vue";
+import { computed, defineComponent, onMounted, onUnmounted, ref, watch, h } from "vue";
 import RequestTable from "@/components/patients/RequestTable.vue";
 import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
 import { Comment, Occurrence, Task, Condition, Goal, Procedure, TaskStatus, Coding } from "@/types";
 import { TasksModule } from "@/store/modules/tasks";
+import { ElNotification } from "element-plus";
+import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
 
 export type TableData = {
 	name: string,
@@ -23,6 +25,12 @@ export type TableData = {
 	id: string
 }
 
+export type taskStatusDiff = {
+	name: string,
+	oldStatus: TaskStatus,
+	newStatus: TaskStatus
+};
+
 export default defineComponent({
 	name: "ActionSteps",
 	components: {
@@ -33,7 +41,7 @@ export default defineComponent({
 		const activeGroup = ref<string>("referrals");
 		const newRequestDialogVisible = ref<boolean>(false);
 		const isRequestLoading = ref<boolean>(false);
-		const tasks = computed<Task[] | null>(() => TasksModule.tasks);
+		const tasks = computed<Task[]>(() => TasksModule.tasks);
 		const tableData = computed<TableData[]>(() => {
 			const res: TableData[] = [];
 
@@ -82,6 +90,57 @@ export default defineComponent({
 		};
 		onUnmounted(() => {
 			clearTimeout(pollId.value);
+		});
+
+		//
+		// Find diffs in tasks statuses.
+		//
+		const findDiff = (val: Task[], oldVal: Task[]): taskStatusDiff[] =>
+			val.flatMap((task: Task) => {
+				const existingTask = oldVal.find(t => t.id === task.id);
+				if (!existingTask) {
+					return [];
+				}
+
+				const oldStatus = existingTask.status;
+				const newStatus = task.status;
+				if (oldStatus === newStatus) {
+					return [];
+				}
+
+				return [{
+					name: task.name,
+					oldStatus,
+					newStatus
+				}];
+			});
+
+		watch(() => tasks.value, (val, oldVal) => {
+			const diff = findDiff(val, oldVal);
+
+			diff.forEach(update => {
+				const message = h("p", [
+					`CP changed status of task "${update.name}" from `,
+					h(TaskStatusIcon, {
+						status: update.oldStatus,
+						small: true,
+						showLabel: true
+					}),
+					" to ",
+					h(TaskStatusIcon,{
+						status: update.newStatus,
+						small: true,
+						showLabel: true
+					})
+				]);
+
+				ElNotification({
+					title: "Update",
+					iconClass: "notification-bell",
+					duration: 10000,
+					message
+				});
+			});
 		});
 
 		return {
