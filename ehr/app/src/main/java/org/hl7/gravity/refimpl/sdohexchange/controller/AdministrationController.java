@@ -23,8 +23,6 @@ import java.util.Map;
 @RequestMapping("administration")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Api(tags = {SpringFoxConfig.ADMINISTRATION_API_TAG})
-//TODO: check this CORS solution
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.POST})
 public class AdministrationController {
 
   private final ConvertService convertService;

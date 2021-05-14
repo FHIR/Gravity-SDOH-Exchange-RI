@@ -3,6 +3,7 @@ package org.hl7.gravity.refimpl.sdohexchange.config;
 import com.healthlx.smartonfhir.config.EnableSmartOnFhir;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -12,4 +13,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableScheduling
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/**");
+  }
 }
