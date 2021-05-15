@@ -4,6 +4,7 @@ import { TableData } from "@/components/patients/ActionSteps.vue";
 import { Occurrence, TaskStatus, updateTaskPayload } from "@/types";
 import moment from "moment";
 import { TasksModule } from "@/store/modules/tasks";
+import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
 
 export type FormModel = {
 	status: string,
@@ -13,6 +14,9 @@ export type FormModel = {
 
 export default defineComponent({
 	name: "EditRequestDialog",
+	components: {
+		TaskStatusIcon
+	},
 	props: {
 		visible: {
 			type: Boolean,
@@ -128,10 +132,10 @@ export default defineComponent({
 					placeholder="Select Status"
 				>
 					<template #prefix>
-						<span
-							class="icon"
-							:class="formModel.status.toLowerCase().replace(/ /g, '')"
-						></span>
+						<TaskStatusIcon
+							:status="formModel.status"
+							:small="true"
+						/>
 					</template>
 
 					<el-option
@@ -140,10 +144,10 @@ export default defineComponent({
 						:label="item.name"
 						:value="item.value"
 					>
-						<span
-							class="icon"
-							:class="item.value.toLowerCase().replace(/ /g, '')"
-						></span>
+						<TaskStatusIcon
+							:status="item.value"
+							:small="true"
+						/>
 						{{ item.name }}
 					</el-option>
 				</el-select>
@@ -291,46 +295,5 @@ export default defineComponent({
 
 .date {
 	margin-left: 10px;
-}
-
-//todo: extract to separate icon component, reuse in table also
-.icon {
-	margin-right: 5px;
-
-	&.completed {
-		@include icon("~@/assets/images/status-completed.svg", 14px);
-	}
-
-	&.accepted {
-		@include icon("~@/assets/images/status-accepted.svg", 14px);
-	}
-
-	&.cancelled {
-		@include icon("~@/assets/images/status-cancelled.svg", 14px);
-	}
-
-	&.failed {
-		@include icon("~@/assets/images/status-failed.svg", 14px);
-	}
-
-	&.inprogress {
-		@include icon("~@/assets/images/status-in-progress.svg", 14px);
-	}
-
-	&.onhold {
-		@include icon("~@/assets/images/status-on-hold.svg", 14px);
-	}
-
-	&.received {
-		@include icon("~@/assets/images/status-received.svg", 14px);
-	}
-
-	&.rejected {
-		@include icon("~@/assets/images/status-rejected.svg", 14px);
-	}
-
-	&.requested {
-		@include icon("~@/assets/images/status-requested.svg", 14px);
-	}
 }
 </style>

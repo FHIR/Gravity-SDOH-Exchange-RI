@@ -4,6 +4,16 @@
 	width: 10%;
 }
 
-.el-range-editor--mini.el-input__inner {
-	height: 25px;
+.el-range-editor.el-input__inner {
+	padding: 1px 10px;
+}
+
+.el-range-editor--mini {
+	.el-range-input {
+		font-size: $global-font-size;
+	}
+
+	&.el-input__inner {
+		height: 25px;
+	}
 }
