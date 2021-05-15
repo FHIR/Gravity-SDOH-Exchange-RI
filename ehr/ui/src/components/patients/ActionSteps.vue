@@ -42,31 +42,25 @@ export default defineComponent({
 		const newRequestDialogVisible = ref<boolean>(false);
 		const isRequestLoading = ref<boolean>(false);
 		const tasks = computed<Task[]>(() => TasksModule.tasks);
-		const tableData = computed<TableData[]>(() => {
-			const res: TableData[] = [];
-
-			tasks.value && tasks.value.forEach((task: Task) => {
-				res.push({
-					name: task.name,
-					status: task.status,
-					category: task.serviceRequest.category,
-					problems: task.serviceRequest.conditions,
-					goals: task.serviceRequest.goals,
-					performer: task.organization?.name,
-					consent: task.serviceRequest.consent.display,
-					outcomes: task.outcome,
-					comments: task.comments,
-					lastModified: task.lastModified,
-					request: task.serviceRequest.code,
-					priority: task.priority,
-					occurrence: task.serviceRequest.occurrence,
-					procedures: task.procedures,
-					id: task.id
-				});
-			});
-
-			return res;
-		});
+		const tableData = computed<TableData[]>(() =>
+			tasks.value.map((task: Task) => ({
+				name: task.name,
+				status: task.status,
+				category: task.serviceRequest.category,
+				problems: task.serviceRequest.conditions,
+				goals: task.serviceRequest.goals,
+				performer: task.organization?.name,
+				consent: task.serviceRequest.consent.display,
+				outcomes: task.outcome,
+				comments: task.comments,
+				lastModified: task.lastModified,
+				request: task.serviceRequest.code,
+				priority: task.priority,
+				occurrence: task.serviceRequest.occurrence,
+				procedures: task.procedures,
+				id: task.id
+			}))
+		);
 		const activeRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status !== "Completed"));
 		const completedRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status === "Completed"));
 
@@ -85,7 +79,7 @@ export default defineComponent({
 				await TasksModule.getTasks();
 			} finally {
 				// todo: should we continue polling if request failed? adjust polling time later to be in sync with BE
-				pollId.value = window.setTimeout(pollData, 15000);
+				pollId.value = window.setTimeout(pollData, 5000);
 			}
 		};
 		onUnmounted(() => {
@@ -94,6 +88,7 @@ export default defineComponent({
 
 		//
 		// Find diffs in tasks statuses.
+		// Skip new tasks, we don't need to show notifications on that, cause we are the only one who creates tasks.
 		//
 		const findDiff = (val: Task[], oldVal: Task[]): taskStatusDiff[] =>
 			val.flatMap((task: Task) => {
