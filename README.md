@@ -36,4 +36,19 @@ java -Dserver.port=8082 -jar cbro/app/target/app-1.0-SNAPSHOT.jar
 
 Change port `8080` to any other port you want an application to listen to. Specify varaibles before the `-jar` flag in format `-Dvariable=value`. 
 
-**MORE DETAILS WILL BE PROVIDED SOON!**
+## Prepare a Sandbox
+### Delete data from the previous runs
+Run the following command to delete all data for a specific Resource type:
+```sh
+DELETE https://{server base}/Task?_profile:contains={SDOH Profile or no string to match all}&_cascade=delete
+```
+Reource types to delete:
+- Task
+- ServiceRequest
+- Procedure
+- Consent
+
+### Create Organization resources with Endpoints
+TODO
+### Create Goals and Conditions
+TODO
