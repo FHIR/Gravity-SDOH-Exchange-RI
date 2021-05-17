@@ -3,7 +3,6 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.converter.info;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
@@ -48,15 +47,11 @@ public class TaskInfoToDtoConverter implements Converter<TaskInfo, TaskDto> {
         .stream()
         .map(annotationToDtoConverter::convert)
         .collect(Collectors.toList()));
-    taskDto.setOutcome(task.getStatusReason()
+    taskDto.setStatusReason(task.getStatusReason()
         .getText());
     // TODO validate profile and other properties using InstanceValidator
     //Convert ServiceRequest
-    String serviceRequestId = new IdType(task.getFocus()
-        .getReference()).toUnqualifiedVersionless()
-        .getIdPart();
-    ServiceRequestInfo serviceRequestInfo = taskInfo.getServiceRequests()
-        .get(serviceRequestId);
+    ServiceRequestInfo serviceRequestInfo = taskInfo.getServiceRequestInfo();
     if (serviceRequestInfo == null) {
       taskDto.getErrors()
           .add("Task.focus not set or is not a ServiceRequest.");
@@ -64,11 +59,7 @@ public class TaskInfoToDtoConverter implements Converter<TaskInfo, TaskDto> {
       taskDto.setServiceRequest(serviceRequestInfoToDtoConverter.convert(serviceRequestInfo));
     }
     //Convert Organization
-    Organization organization = taskInfo.getOrganizations()
-        .get(new IdType(taskInfo.getTask()
-            .getOwner()
-            .getReference()).toUnqualifiedVersionless()
-            .getIdPart());
+    Organization organization = taskInfo.getOwner();
     if (organization == null) {
       taskDto.getErrors()
           .add("Task.owner not set or is not an Organization.");

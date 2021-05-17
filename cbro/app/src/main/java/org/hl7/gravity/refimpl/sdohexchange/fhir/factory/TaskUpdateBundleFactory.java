@@ -13,7 +13,9 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestStatus;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.InvalidTaskStatusException;
@@ -32,6 +34,7 @@ public class TaskUpdateBundleFactory {
 
   private final Task task;
   private final Task.TaskStatus status;
+  private final String statusReason;
   private final String comment;
   private final String outcome;
   private final List<Coding> procedureCodes;
@@ -66,26 +69,36 @@ public class TaskUpdateBundleFactory {
           .setTimeElement(DateTimeType.now())
           .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
     }
+    if (status == TaskStatus.REJECTED || status == TaskStatus.CANCELLED) {
+      Assert.notNull(statusReason, "Reason cannot be null.");
+      task.setStatusReason(new CodeableConcept().setText(statusReason));
+      addProceduresOutput(bundle);
+
+      serviceRequest.setStatus(ServiceRequestStatus.REVOKED);
+      bundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
+    }
     if (status == Task.TaskStatus.COMPLETED) {
       Assert.notNull(outcome, "Outcome cannot be null.");
       Assert.isTrue(procedureCodes.size() > 0, "Procedures can't be empty.");
-      for (Coding code : procedureCodes) {
-        Procedure procedure = createProcedure(code);
-        bundle.addEntry(FhirUtil.createPostEntry(procedure));
-
-        Task.TaskOutputComponent taskOutput = createTaskOutput(FhirUtil.toReference(Procedure.class,
-            procedure.getIdElement()
-                .getIdPart(), String.format("%s (%s)", code.getDisplay(), code.getCode())));
-        task.getOutput()
-            .add(taskOutput);
-      }
+      addProceduresOutput(bundle);
       task.getOutput()
           .add(createTaskOutput(new CodeableConcept().setText(outcome)));
-    } else {
-      //TODO: Review this.
-      if (StringUtils.hasText(outcome)) {
-        task.setStatusReason(new CodeableConcept().setText(outcome));
-      }
+
+      serviceRequest.setStatus(ServiceRequestStatus.COMPLETED);
+      bundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
+    }
+  }
+
+  private void addProceduresOutput(Bundle bundle) {
+    for (Coding code : procedureCodes) {
+      Procedure procedure = createProcedure(code);
+      bundle.addEntry(FhirUtil.createPostEntry(procedure));
+
+      Task.TaskOutputComponent taskOutput = createTaskOutput(FhirUtil.toReference(Procedure.class,
+          procedure.getIdElement()
+              .getIdPart(), String.format("%s (%s)", code.getDisplay(), code.getCode())));
+      task.getOutput()
+          .add(taskOutput);
     }
   }
 

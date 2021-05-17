@@ -1,6 +1,9 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -15,18 +18,17 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.info.TaskInfo;
+import org.hl7.gravity.refimpl.sdohexchange.info.composer.TasksInfoComposer;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TaskService {
 
+  private final TasksInfoComposer tasksInfoComposer;
   private final TaskRepository taskRepository;
   private final SDOHMappings sdohMappings;
   private final FhirContext fhirContext;
@@ -38,8 +40,8 @@ public class TaskService {
 
   public TaskDto read(String id) {
     Bundle taskBundle = taskRepository.find(id, Collections.singleton(Task.INCLUDE_FOCUS));
-    if (taskBundle.getEntry()
-        .isEmpty()) {
+    List<TaskInfo> taskInfos = tasksInfoComposer.compose(taskBundle);
+    if (taskInfos.isEmpty()) {
       return null;
     }
     return new TaskBundleToDtoConverter().convert(taskBundle)
@@ -56,17 +58,18 @@ public class TaskService {
         .collect(Collectors.toList());
 
     Bundle taskBundle = taskRepository.find(id, Collections.singleton(Task.INCLUDE_FOCUS));
-    if (taskBundle.getEntry()
-        .isEmpty()) {
+    List<TaskInfo> taskInfos = tasksInfoComposer.compose(taskBundle);
+    if (taskInfos.isEmpty()) {
       return null;
     }
-    Task task = FhirUtil.getFromBundle(taskBundle, Task.class)
-        .get(0);
-    ServiceRequest serviceRequest = FhirUtil.getFromBundle(taskBundle, ServiceRequest.class)
-        .get(0);
+    TaskInfo taskInfo = taskInfos.get(0);
+    Task task = taskInfo.getTask();
+    ServiceRequest serviceRequest = taskInfo.getServiceRequestInfo()
+        .getServiceRequest();
 
-    TaskUpdateBundleFactory bundleFactory = new TaskUpdateBundleFactory(task, update.getStatus(), update.getComment(),
-        update.getOutcome(), procedureCodes);
+    TaskUpdateBundleFactory bundleFactory =
+        new TaskUpdateBundleFactory(task, update.getStatus(), update.getStatusReason(), update.getComment(),
+            update.getOutcome(), procedureCodes);
     bundleFactory.setUser(user);
     bundleFactory.setServiceRequest(serviceRequest);
     bundleFactory.setConditions(FhirUtil.getReferences(fhirContext, serviceRequest, Condition.class));
