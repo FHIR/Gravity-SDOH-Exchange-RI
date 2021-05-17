@@ -56,7 +56,7 @@ public class ConvertService {
   private ValidationEngine validationEngine;
 
   @EventListener(ApplicationReadyEvent.class)
-  public void initValidationEngine() throws IOException, URISyntaxException {
+  protected void initValidationEngine() throws IOException, URISyntaxException {
     String definitions = VersionUtilities.packageForVersion(PACKAGE_VERSION) + "#" + VersionUtilities.getCurrentVersion(
         PACKAGE_VERSION);
     this.validationEngine = new ValidationEngine(definitions, FhirPublication.R4, PACKAGE_VERSION, new TimeTracker());
