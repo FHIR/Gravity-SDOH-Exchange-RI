@@ -1,8 +1,6 @@
 <script lang="ts">
-import "@/assets/scss/styles.scss";
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref } from "vue";
 import UserInfo from "@/components/UserInfo.vue";
-import { LocationQueryValue, useRoute } from "vue-router";
 
 export default defineComponent({
 	name: "MainHeader",
@@ -10,18 +8,10 @@ export default defineComponent({
 		UserInfo
 	},
 	setup() {
-		const route = useRoute();
-		const app = ref<LocationQueryValue | LocationQueryValue[]>();
-		const secondName = ref<LocationQueryValue | LocationQueryValue[]>();
-
-		watch(() => route.query.app, () => {
-			app.value = route.query.app;
-			secondName.value = route.query.secondName;
-		},{ immediate: true });
+		const appName = ref<string>("Task Initiation Application");
 
 		return {
-			app,
-			secondName
+			appName
 		};
 	}
 });
@@ -38,10 +28,7 @@ export default defineComponent({
 				src="~@/assets/images/logo.svg"
 				alt="logo"
 			>
-			<span class="name">{{ app }} <span
-				v-if="secondName"
-				class="second-name"
-			>({{ secondName }})</span></span>
+			<span class="name">{{ appName }}</span>
 		</div>
 		<el-menu
 			mode="horizontal"
@@ -100,10 +87,5 @@ export default defineComponent({
 
 .right-container {
 	margin-left: auto;
-}
-
-.second-name {
-	color: $grey;
-	font-weight: 500;
 }
 </style>
