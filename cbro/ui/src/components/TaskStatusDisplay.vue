@@ -46,7 +46,7 @@ export default defineComponent({
 .task-status {
 	white-space: nowrap;
 	display: inline-flex;
-	align-items: baseline;
+	align-items: center;
 
 	.icon {
 		width: 20px;
@@ -88,6 +88,7 @@ export default defineComponent({
 
 	.label {
 		margin-left: 5px;
+		align-self: baseline;
 	}
 }
 </style>
