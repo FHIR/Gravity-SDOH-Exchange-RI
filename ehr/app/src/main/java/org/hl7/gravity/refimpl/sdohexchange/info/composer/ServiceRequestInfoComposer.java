@@ -3,8 +3,10 @@ package org.hl7.gravity.refimpl.sdohexchange.info.composer;
 import ca.uhn.fhir.context.FhirContext;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -66,29 +68,31 @@ public class ServiceRequestInfoComposer {
         .collect(Collectors.toMap(serviceRequest -> serviceRequest.getIdElement()
             .getIdPart(), serviceRequest -> {
           Map<String, List<Reference>> serviceRequestReferences = FhirUtil.getReferences(fhirContext, serviceRequest,
-              Arrays.asList(Consent.class, Goal.class,
-                  Condition.class));
-          Reference consentRef = serviceRequestReferences.get(Consent.class.getSimpleName())
-              .get(0);
-          Consent consent = (Consent) serviceRequestsResources.get(toResourcePath(consentRef));
-          List<Goal> goals = serviceRequestReferences.get(Goal.class.getSimpleName())
-              .stream()
-              .map(this::toResourcePath)
-              .map(serviceRequestsResources::get)
-              .map(Goal.class::cast)
-              .collect(Collectors.toList());
-          List<Condition> conditions = serviceRequestReferences.get(Condition.class.getSimpleName())
-              .stream()
-              .map(this::toResourcePath)
-              .map(serviceRequestsResources::get)
-              .map(Condition.class::cast)
-              .collect(Collectors.toList());
-          return new ServiceRequestInfo(serviceRequest, consent, goals, conditions);
+              Arrays.asList(Consent.class, Goal.class, Condition.class));
+          List<Consent> consents = collectReferences(serviceRequestsResources, serviceRequestReferences, Consent.class);
+          List<Goal> goals = collectReferences(serviceRequestsResources, serviceRequestReferences, Goal.class);
+          List<Condition> conditions =
+              collectReferences(serviceRequestsResources, serviceRequestReferences, Condition.class);
+          return new ServiceRequestInfo(serviceRequest, consents.stream()
+              .findFirst()
+              .orElse(null), goals, conditions);
         }));
   }
 
   private String toResourcePath(Reference reference) {
     IIdType idType = reference.getReferenceElement();
     return idType.getResourceType() + "/" + idType.getIdPart();
+  }
+
+  private <T extends Resource> List<T> collectReferences(
+      Map<String, Resource> serviceRequestsResources,
+      Map<String, List<Reference>> serviceRequestReferences, Class<T> resourceClass) {
+    return Optional.ofNullable(serviceRequestReferences.get(resourceClass.getSimpleName()))
+        .orElse(Collections.emptyList())
+        .stream()
+        .map(this::toResourcePath)
+        .map(serviceRequestsResources::get)
+        .map(resourceClass::cast)
+        .collect(Collectors.toList());
   }
 }
