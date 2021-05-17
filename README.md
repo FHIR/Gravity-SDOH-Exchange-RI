@@ -299,73 +299,73 @@ Goals and Conditios must be pre-created manually for now. In future they will be
 Goal resource example:
 ```yaml
 {
-  "resourceType" : "Goal",
-  "meta" : {
-    "profile" : [
-      "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Goal-Base-1"
-    ]
-  },
-  "lifecycleStatus" : "active",
-  "achievementStatus" : {
-    "coding" : [
-      {
-        "system" : "http://terminology.hl7.org/CodeSystem/goal-achievement",
-        "code" : "improving",
-        "display" : "Improving"
-      }
-    ]
-  },
-  "category" : [
-    {
-      "coding" : [
+    "resourceType": "Goal",
+    "meta": {
+        "profile": [
+            "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Goal-Base-1"
+        ]
+    },
+    "lifecycleStatus": "active",
+    "achievementStatus": {
+        "coding": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/goal-achievement",
+                "code": "improving",
+                "display": "Improving"
+            }
+        ]
+    },
+    "category": [
         {
-          "system" : "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes",
-          "code" : "food-insecurity",
-          "display" : "Food Insecurity"
+            "coding": [
+                {
+                    "system": "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes",
+                    "code": "food-insecurity",
+                    "display": "Food Insecurity"
+                }
+            ]
         }
-      ]
-    }
-  ],
-  "description" : {
-    "coding" : [
-      {
-        "system" : "http://snomed.info/sct",
-        "code" : "1078229009",
-        "display" : "Food security"
-      }
+    ],
+    "description": {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "1078229009",
+                "display": "Food security"
+            }
+        ]
+    },
+    "subject": {
+        "reference": "Patient/smart-1288992"
+    },
+    "target": [
+        {
+            "measure": {
+                "coding": [
+                    {
+                        "system": "http://loinc.org",
+                        "code": "88124-3",
+                        "display": "Food insecurity risk [HVS]"
+                    }
+                ]
+            },
+            "detailCodeableConcept": {
+                "coding": [
+                    {
+                        "system": "http://loinc.org",
+                        "code": "LA19983-8",
+                        "display": "No risk"
+                    }
+                ]
+            },
+            "dueDate": "2021-08-01"
+        }
+    ],
+    "statusDate": "2021-05-01",
+    "addresses": [
+        {
+            "reference": "Condition/15350"
+        }
     ]
-  },
-  "subject" : {
-    "reference" : "Patient/smart-1288992"
-  },
-  "target" : [
-    {
-      "measure" : {
-        "coding" : [
-          {
-            "system" : "http://loinc.org",
-            "code" : "88124-3",
-            "display" : "Food insecurity risk [HVS]"
-          }
-        ]
-      },
-      "detailCodeableConcept" : {
-        "coding" : [
-          {
-            "system" : "http://loinc.org",
-            "code" : "LA19983-8",
-            "display" : "No risk"
-          }
-        ]
-      },
-      "dueDate" : "2021-08-01"
-    }
-  ],
-  "statusDate" : "2021-05-01",
-  "addresses" : [
-    {
-      "reference" : "Condition/15350"
-    }
-  ]
 }
 ```
