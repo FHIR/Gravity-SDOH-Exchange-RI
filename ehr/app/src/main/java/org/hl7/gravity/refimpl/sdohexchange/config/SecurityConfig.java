@@ -21,4 +21,5 @@ public class SecurityConfig {
             new OidcIdTokenValidator(clientRegistration), new JwtProfileValidator()));
     return decoderFactory;
   }
+
 }

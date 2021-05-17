@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,22 +33,22 @@ public class SupportService {
   private final ConditionRepository conditionRepository;
   private final OrganizationRepository organizationRepository;
 
-  public List<ConditionDto> listConditions(@NotBlank String category) {
+  public List<ConditionDto> listConditions() {
     // TODO possibly support filtering only for problem-list-item, health-concern categories. Currently _filter is
     //  not supported by Logica sandbox.
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle bundle = conditionRepository.findByPatientAndCategoryCode(smartOnFhirContext.getPatient(), category);
+    Bundle bundle = conditionRepository.findByPatient(smartOnFhirContext.getPatient());
     return FhirUtil.getFromBundle(bundle, Condition.class)
         .stream()
         .map(condition -> new ConditionToDtoConverter().convert(condition))
         .collect(Collectors.toList());
   }
 
-  public List<GoalDto> listGoals(@NotBlank String category) {
+  public List<GoalDto> listGoals() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle bundle = goalRepository.findByPatientAndCategoryCode(smartOnFhirContext.getPatient(), category);
+    Bundle bundle = goalRepository.findByPatient(smartOnFhirContext.getPatient());
     return FhirUtil.getFromBundle(bundle, Goal.class)
         .stream()
         .map(goal -> new GoalToDtoConverter().convert(goal))

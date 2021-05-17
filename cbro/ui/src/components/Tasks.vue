@@ -1,5 +1,6 @@
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
+import { defineComponent, ref, computed, h } from "vue";
 import { Task } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
@@ -52,7 +53,7 @@ export default defineComponent({
 			}));
 		};
 
-		const findUpdates = (newList: Task[]): string[] =>
+		const findUpdates = (newList: Task[]): { name: string, oldStatus: string, newStatus: string }[] =>
 			newList.flatMap(task => {
 				const existingTask = tasks.value.find(ts => ts.task.id === task.id);
 				if (!existingTask) {
@@ -63,15 +64,36 @@ export default defineComponent({
 				if (oldStatus === newStatus) {
 					return [];
 				}
-				return [`EHR changed status of task "${task.name}" from ${oldStatus} to ${newStatus}.`];
+				return [{
+					name: task.name,
+					oldStatus,
+					newStatus
+				}];
 			});
 
 		const showUpdates = (newList: Task[]) => {
 			findUpdates(newList).forEach(update => {
+				const message = h("p", [
+					`EHR changed status of task "${update.name}" from `,
+					//todo: for some reason ts pops up error about incorrect import
+					// @ts-ignore
+					h(TaskStatusDisplay, {
+						status: update.oldStatus,
+						small: true
+					}),
+					" to ",
+					// @ts-ignore
+					h(TaskStatusDisplay,{
+						status: update.newStatus,
+						small: true
+					})
+				]);
+
 				ElNotification({
 					title: "Update",
-					type: "info",
-					message: update
+					iconClass: "notification-bell",
+					duration: 10000,
+					message
 				});
 			});
 		};
