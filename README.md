@@ -211,7 +211,7 @@ Send a `POST` request to `https://{EHR server base}/` with the following content
                 "period": {
                     "start": "2014-09-01"
                 },
-                "address": "https://sandbox.logicahealth.org/GravitySDOHCBRO/open"
+                "address": "https://api.logicahealth.org/GravitySDOHCBRO/open"
             },
             "request": {
                 "method": "POST",
