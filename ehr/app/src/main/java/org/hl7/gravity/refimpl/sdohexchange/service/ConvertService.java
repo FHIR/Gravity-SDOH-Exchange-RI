@@ -64,10 +64,10 @@ public class ConvertService {
         PACKAGE_VERSION);
     this.validationEngine = new ValidationEngine(definitions, FhirPublication.R4, PACKAGE_VERSION, new TimeTracker());
     //Loading structure definitions from official package and uploading custom definitions if needed from resources
-    //this.validationEngine.loadPackage(SDOH_CLINICAL_CARE_PACKAGE,SDOH_CLINICAL_CARE_VERSION);
+    this.validationEngine.loadPackage(SDOH_CLINICAL_CARE_PACKAGE,SDOH_CLINICAL_CARE_VERSION);
     //Loading  custom structure definitions, copying all resources from jar to local folder to be able for HAPI to
     // upload them. Just passing resources folder is not working for "in jar"  files.
-    //loadStructureDefinitions();
+    loadStructureDefinitions();
   }
 
   public Map<String, Object> convert(JSONObject questionnaireResponse) throws IOException {
