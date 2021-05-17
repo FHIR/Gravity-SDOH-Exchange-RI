@@ -33,8 +33,8 @@ public class SupportController {
           + "field references a code from a code system 'http://hl7"
           + ".org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes'. Other Conditions are ignored! "
           + "Consider looking at 'errors' response field which holds additional conformance and validation checks.")
-  public List<ConditionDto> listConditions(@RequestParam @NotBlank String category) {
-    return supportService.listConditions(category);
+  public List<ConditionDto> listConditions() {
+    return supportService.listConditions();
   }
 
   @GetMapping("goals")
@@ -43,8 +43,8 @@ public class SupportController {
           + "field references a code from a code system 'http://hl7"
           + ".org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes'. Other Goals are ignored! Consider "
           + "looking at 'errors' response field which holds additional conformance and validation checks.")
-  public List<GoalDto> listGoals(@RequestParam @NotBlank String category) {
-    return supportService.listGoals(category);
+  public List<GoalDto> listGoals() {
+    return supportService.listGoals();
   }
 
   @GetMapping("organizations")

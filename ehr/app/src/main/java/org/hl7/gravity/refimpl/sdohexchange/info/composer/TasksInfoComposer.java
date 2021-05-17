@@ -1,24 +1,19 @@
 package org.hl7.gravity.refimpl.sdohexchange.info.composer;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.dao.impl.ProcedureRepository;
 import org.hl7.gravity.refimpl.sdohexchange.info.ServiceRequestInfo;
 import org.hl7.gravity.refimpl.sdohexchange.info.TaskInfo;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Composes list of {@link TaskInfo} objects, which contains all info (all needed resources retrieved) for each
@@ -30,7 +25,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TasksInfoComposer {
 
-  private final ProcedureRepository procedureRepository;
   private final ServiceRequestInfoComposer serviceRequestInfoComposer;
 
   public List<TaskInfo> compose(Bundle tasksBundle) {
