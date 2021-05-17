@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -26,8 +27,6 @@ public class AdministrationController {
 
   private final ConvertService convertService;
 
-  //TODO: check this CORS solution
-  @CrossOrigin
   @PostMapping("/convert")
   @ApiOperation(value = "Converts QuestionnaireResponse resource to Observation and Conditions",
       notes = "Converts QuestionnaireResponse resource to Observation and Conditions based on StructureMap, and "

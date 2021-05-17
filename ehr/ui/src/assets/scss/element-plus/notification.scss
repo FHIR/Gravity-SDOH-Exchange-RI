@@ -1,0 +1,11 @@
+@import "~@/assets/scss/abstracts/mixins";
+
+.el-notification__icon.notification-bell {
+	flex-shrink: 0;
+
+	@include icon("~@/assets/images/notification-bell.svg", 20px, 20px);
+}
+
+.el-notification__content {
+	text-align: left;
+}
