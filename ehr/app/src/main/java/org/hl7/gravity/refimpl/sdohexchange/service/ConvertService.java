@@ -20,8 +20,6 @@ import org.hl7.fhir.validation.ValidationEngine;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.QuestionnaireRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.StructureMapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
@@ -55,7 +53,7 @@ public class ConvertService {
   private final StructureMapRepository structureMapRepository;
   private ValidationEngine validationEngine;
 
-  @EventListener(ApplicationReadyEvent.class)
+  //@EventListener(ApplicationReadyEvent.class)
   public void initValidationEngine() throws IOException, URISyntaxException {
     String definitions = VersionUtilities.packageForVersion(PACKAGE_VERSION) + "#" + VersionUtilities.getCurrentVersion(
         PACKAGE_VERSION);
@@ -81,7 +79,8 @@ public class ConvertService {
     boolean mapExists = validationEngine.getContext()
         .listTransforms()
         .stream()
-        .anyMatch(map -> map.getUrl().equals(mapUri));
+        .anyMatch(map -> map.getUrl()
+            .equals(mapUri));
     if (!mapExists) {
       loadMapIg(mapUri);
     }
@@ -106,7 +105,7 @@ public class ConvertService {
     org.springframework.core.io.Resource[] resources = new PathMatchingResourcePatternResolver().getResources(
         CUSTOM_STRUCTURE_DEFINITIONS_LOCATION + "/*.xml");
     Path sdIg = Files.createTempDirectory("sdIg");
-    for(org.springframework.core.io.Resource r : resources){
+    for (org.springframework.core.io.Resource r : resources) {
       Path localPath = Files.createFile(Paths.get(String.valueOf(sdIg), r.getFilename()));
       FileUtils.copyToFile(r.getInputStream(), localPath.toFile());
     }
@@ -124,7 +123,8 @@ public class ConvertService {
     File jsonMap = new File(mapIg.toString() + "/map.json");
     jsonMap.createNewFile();
     try (FileWriter fileWriter = new FileWriter(jsonMap);) {
-      fileWriter.write(fhirContext.newJsonParser().encodeResourceToString(structureMap));
+      fileWriter.write(fhirContext.newJsonParser()
+          .encodeResourceToString(structureMap));
       fileWriter.flush();
     }
     validationEngine.loadIg(mapIg.toString(), false);
