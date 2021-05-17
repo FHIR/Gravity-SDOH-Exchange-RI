@@ -2,6 +2,8 @@ package org.hl7.gravity.refimpl.sdohexchange.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewTaskRequestDto;
@@ -10,6 +12,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.NewTaskResponseDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,9 +20,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("task")
@@ -50,9 +50,11 @@ public class TaskController {
   }
 
   @PutMapping("{id}")
-  @ApiOperation(value = "Update Task resource.",
-      notes = "Only STATUS and COMMENT fields can be updated in the resource.")
-  public TaskDto update(@PathVariable String id, @RequestBody UpdateTaskRequestDto updateTaskRequestDto) {
-    return taskService.updateTask(id, updateTaskRequestDto);
+  @ApiOperation(value = "Update Task resource.")
+  public ResponseEntity<TaskDto> update(@PathVariable String id,
+      @RequestBody UpdateTaskRequestDto update) {
+    TaskDto taskDto = taskService.update(id, update);
+    return taskDto == null ? ResponseEntity.notFound()
+        .build() : ResponseEntity.ok(taskDto);
   }
 }
