@@ -154,7 +154,7 @@ Send a `POST` request to `https://{EHR server base}/` with the following content
 ```
 
 ### Create Organization resources with Endpoints
-Send a `POST` request to `https://{server base}/` with the following content. This will create a CP Organization entry with a corresponding Endpoint. Please take into account that currently **only OPEN FHIR endpoints are supported**.
+Send a `POST` request to `https://{EHR server base}/` with the following content. This will create a CP Organization entry with a corresponding Endpoint. Please take into account that currently **only OPEN FHIR endpoints are supported**.
 ```yaml
 {
     "resourceType": "Bundle",
@@ -222,4 +222,150 @@ Send a `POST` request to `https://{server base}/` with the following content. Th
 }
 ```
 ### Create Goals and Conditions
-TODO
+Goals and Conditios must be pre-created manually for now. In future they will be promoted from the Questionnaire results. All examples can be found at http://build.fhir.org/ig/HL7/fhir-sdoh-clinicalcare/artifacts.html#examples. To create a Condition resource for a specific Patient and Food Insecurity category - run the following POST request to `https://{EHR server base}/{Resource Type}`. Please notice, `the profile should be set to  "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Condition-Base-1"`:
+```yaml
+{
+    "resourceType": "Condition",
+    "meta": {
+        "profile": [
+            "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Condition-Base-1"
+        ]
+    },
+    "clinicalStatus": {
+        "coding": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active",
+                "display": "Active"
+            }
+        ]
+    },
+    "verificationStatus": {
+        "coding": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "unconfirmed",
+                "display": "Unconfirmed"
+            }
+        ]
+    },
+    "category": [
+        {
+            "coding": [
+                {
+                    "system": "http://hl7.org/fhir/us/core/CodeSystem/condition-category",
+                    "code": "problem-list-item",
+                    "display": "Problem List Item"
+                }
+            ]
+        },
+        {
+            "coding": [
+                {
+                    "system": "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes",
+                    "code": "food-insecurity",
+                    "display": "Food Insecurity"
+                }
+            ]
+        }
+    ],
+    "code": {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "733423003",
+                "display": "Food insecurity"
+            }
+        ]
+    },
+    "subject": {
+        "reference": "Patient/smart-1288992"
+    },
+    "onsetPeriod": {
+        "start": "2019-08-18T12:31:35.123Z"
+    },
+    "evidence": [
+        {
+            "detail": [
+                {
+                    "reference": "Observation/15349"
+                }
+            ]
+        }
+    ]
+}
+```
+
+Goal resource example:
+```yaml
+{
+  "resourceType" : "Goal",
+  "meta" : {
+    "profile" : [
+      "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Goal-Base-1"
+    ]
+  },
+  "lifecycleStatus" : "active",
+  "achievementStatus" : {
+    "coding" : [
+      {
+        "system" : "http://terminology.hl7.org/CodeSystem/goal-achievement",
+        "code" : "improving",
+        "display" : "Improving"
+      }
+    ]
+  },
+  "category" : [
+    {
+      "coding" : [
+        {
+          "system" : "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes",
+          "code" : "food-insecurity",
+          "display" : "Food Insecurity"
+        }
+      ]
+    }
+  ],
+  "description" : {
+    "coding" : [
+      {
+        "system" : "http://snomed.info/sct",
+        "code" : "1078229009",
+        "display" : "Food security"
+      }
+    ]
+  },
+  "subject" : {
+    "reference" : "Patient/smart-1288992"
+  },
+  "target" : [
+    {
+      "measure" : {
+        "coding" : [
+          {
+            "system" : "http://loinc.org",
+            "code" : "88124-3",
+            "display" : "Food insecurity risk [HVS]"
+          }
+        ]
+      },
+      "detailCodeableConcept" : {
+        "coding" : [
+          {
+            "system" : "http://loinc.org",
+            "code" : "LA19983-8",
+            "display" : "No risk"
+          }
+        ]
+      },
+      "dueDate" : "2021-08-01"
+    }
+  ],
+  "statusDate" : "2021-05-01",
+  "addresses" : [
+    {
+      "reference" : "Condition/15350"
+    }
+  ]
+}
+```
