@@ -22,6 +22,8 @@ import org.hl7.fhir.validation.ValidationEngine;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.QuestionnaireRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.StructureMapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
@@ -50,16 +52,20 @@ public class ConvertService {
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-targetStructureMap";
 
   private final IParser resourceParser;
-  private final ValidationEngine validationEngine;
   private final QuestionnaireRepository questionnaireRepository;
   private final StructureMapRepository structureMapRepository;
+  private ValidationEngine validationEngine;
 
   @Autowired
   public ConvertService(FhirContext fhirContext, QuestionnaireRepository questionnaireRepository,
-      StructureMapRepository structureMapRepository) throws IOException, URISyntaxException {
+      StructureMapRepository structureMapRepository) {
     this.resourceParser = fhirContext.newJsonParser();
     this.questionnaireRepository = questionnaireRepository;
     this.structureMapRepository = structureMapRepository;
+  }
+
+  @EventListener(ApplicationReadyEvent.class)
+  public void initValidationEngine() throws IOException, URISyntaxException {
     String definitions = VersionUtilities.packageForVersion(PACKAGE_VERSION) + "#" + VersionUtilities.getCurrentVersion(
         PACKAGE_VERSION);
     this.validationEngine = new ValidationEngine(definitions, FhirPublication.R4, PACKAGE_VERSION, new TimeTracker());
