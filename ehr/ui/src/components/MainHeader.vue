@@ -1,12 +1,18 @@
 <script lang="ts">
-import "@/assets/scss/styles.scss";
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import UserInfo from "@/components/UserInfo.vue";
 
 export default defineComponent({
 	name: "MainHeader",
 	components: {
 		UserInfo
+	},
+	setup() {
+		const appName = ref<string>("Task Initiation Application");
+
+		return {
+			appName
+		};
 	}
 });
 </script>
@@ -22,7 +28,7 @@ export default defineComponent({
 				src="~@/assets/images/logo.svg"
 				alt="logo"
 			>
-			<span class="name">EHR SDOH Exchange</span>
+			<span class="name">{{ appName }}</span>
 		</div>
 		<el-menu
 			mode="horizontal"
@@ -62,9 +68,10 @@ export default defineComponent({
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	width: 155px;
+	min-width: 155px;
 	border-right: 1px solid $global-base-border-color;
 	margin-right: 45px;
+	padding-right: 10px;
 
 	.name {
 		font-size: $global-font-size;

@@ -22,7 +22,8 @@ export type TableData = {
 	priority: string | null,
 	occurrence: Occurrence,
 	procedures: Procedure[],
-	id: string
+	id: string,
+	statusReason: string | null
 }
 
 export type taskStatusDiff = {
@@ -58,7 +59,8 @@ export default defineComponent({
 				priority: task.priority,
 				occurrence: task.serviceRequest.occurrence,
 				procedures: task.procedures,
-				id: task.id
+				id: task.id,
+				statusReason: task.statusReason
 			}))
 		);
 		const activeRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status !== "Completed"));
@@ -75,12 +77,8 @@ export default defineComponent({
 		});
 		const pollId = ref<number>();
 		const pollData = async () => {
-			try {
-				await TasksModule.getTasks();
-			} finally {
-				// todo: should we continue polling if request failed? adjust polling time later to be in sync with BE
-				pollId.value = window.setTimeout(pollData, 5000);
-			}
+			await TasksModule.getTasks();
+			pollId.value = window.setTimeout(pollData, 5000);
 		};
 		onUnmounted(() => {
 			clearTimeout(pollId.value);

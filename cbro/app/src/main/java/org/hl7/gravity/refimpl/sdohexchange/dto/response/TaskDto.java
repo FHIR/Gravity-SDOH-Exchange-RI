@@ -20,6 +20,7 @@ public class TaskDto {
   private LocalDateTime lastModified;
   private String priority;
   private String status;
+  private String statusReason;
   private ServiceRequestDto serviceRequest;
   private TypeDto requester;
   private TypeDto patient;

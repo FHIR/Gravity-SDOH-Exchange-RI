@@ -22,6 +22,7 @@ public class TaskDto implements Validated {
   private LocalDateTime lastModified;
   private String priority;
   private String status;
+  private String statusReason;
   private String outcome;
   private List<CommentDto> comments = new ArrayList<>();
   private List<ProcedureDto> procedures = new ArrayList<>();

@@ -37,7 +37,7 @@ public class OrganizationService {
     Endpoint endpoint = null;
     //TODO valdiate Organization using InstanceValidator. This will validate Organization type as well.
     Coding orgCoding = FhirUtil.findCoding(organization.getType(), OrganizationTypeCode.SYSTEM);
-    if (orgCoding != null && OrganizationTypeCode.CBRO.toCode()
+    if (orgCoding != null && OrganizationTypeCode.CP.toCode()
         .equals(orgCoding.getCode())) {
       // Retrieve FHIR Endpoint instance
       endpoint = FhirUtil.getFromBundle(bundle, Endpoint.class)

@@ -204,16 +204,16 @@ export default defineComponent({
 			</el-form-item>
 
 			<div
-				v-if="task.outcomes || task.procedures.length > 0 || task.comments.length > 0"
+				v-if="task.outcomes || task.statusReason || task.procedures.length > 0 || task.comments.length > 0"
 				class="outcome-section"
 			>
 				<el-divider />
 
 				<el-form-item
-					v-if="task.outcomes"
+					v-if="task.outcomes || task.statusReason"
 					label="Outcome"
 				>
-					{{ task.outcomes }}
+					{{ task.statusReason ? task.statusReason : task.outcomes }}
 				</el-form-item>
 				<el-form-item
 					v-if="task.procedures.length > 0"

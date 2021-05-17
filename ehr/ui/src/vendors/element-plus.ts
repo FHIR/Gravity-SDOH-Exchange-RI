@@ -30,6 +30,7 @@ import {
 	ElDivider,
 	ElDatePicker,
 	ElCheckbox,
+	ElPopover,
 	ElNotification
 } from "element-plus";
 
@@ -63,6 +64,8 @@ export default (app: App) => {
 	app.use(ElDatePicker);
 	app.use(ElCheckbox);
 	app.use(ElNotification);
+	app.use(ElPopover);
 
 	app.config.globalProperties.$notify = ElNotification;
+
 };

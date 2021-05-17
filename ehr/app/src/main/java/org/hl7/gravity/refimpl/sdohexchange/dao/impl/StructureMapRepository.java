@@ -15,8 +15,9 @@ import java.util.Optional;
 @Component
 public class StructureMapRepository extends FhirRepository<StructureMap> {
 
-  public StructureMapRepository(IGenericClient ehrClient) {
-    super(ehrClient);
+  //TODO: use secured ehrClient
+  public StructureMapRepository(IGenericClient openEhrClient) {
+    super(openEhrClient);
   }
 
   public Optional<StructureMap> findByUrl(String mapUrl) {

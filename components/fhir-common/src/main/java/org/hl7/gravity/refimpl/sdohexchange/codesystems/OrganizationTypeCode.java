@@ -4,7 +4,7 @@ import com.google.common.base.Strings;
 import org.hl7.fhir.exceptions.FHIRException;
 
 public enum OrganizationTypeCode {
-  CBRO,
+  CP,
   CBO;
 
   public static final String SYSTEM = "http://hl7.org/gravity/CodeSystem/sdohcc-temporary-organization-type-codes";
@@ -13,8 +13,8 @@ public enum OrganizationTypeCode {
     if (Strings.isNullOrEmpty(codeString)) {
       return null;
     }
-    if ("cbro".equals(codeString)) {
-      return CBRO;
+    if ("cp".equals(codeString)) {
+      return CP;
     } else if ("cbo".equals(codeString)) {
       return CBO;
     }
@@ -23,8 +23,8 @@ public enum OrganizationTypeCode {
 
   public String toCode() {
     switch (this) {
-      case CBRO:
-        return "cbro";
+      case CP:
+        return "cp";
       case CBO:
         return "cbo";
       default:
@@ -38,10 +38,10 @@ public enum OrganizationTypeCode {
 
   public String getDisplay() {
     switch (this) {
-      case CBRO:
-        return "Community-based organization";
+      case CP:
+        return "Coordination Platform";
       case CBO:
-        return "Community-based referral organization";
+        return "Community-based organization";
       default:
         return "?";
     }

@@ -1,10 +1,12 @@
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref, h } from "vue";
 import { Task } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
-import Dialog from "./Dialog.vue";
 import { ElNotification } from "element-plus";
+import TaskViewDialog from "@/components/TaskViewDialog.vue";
+import TaskEditDialog from "@/components/TaskEditDialog.vue";
+import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 
 
 type TaskState = {
@@ -32,7 +34,7 @@ const poll = <T>(
 
 export default defineComponent({
 	props: {},
-	components: { TaskTable, Dialog },
+	components: { TaskEditDialog, TaskViewDialog, TaskTable },
 	setup() {
 		const tasks = ref<TaskState[]>([]);
 
@@ -52,7 +54,7 @@ export default defineComponent({
 			}));
 		};
 
-		const findUpdates = (newList: Task[]): string[] =>
+		const findUpdates = (newList: Task[]): { name: string, oldStatus: string, newStatus: string }[] =>
 			newList.flatMap(task => {
 				const existingTask = tasks.value.find(ts => ts.task.id === task.id);
 				if (!existingTask) {
@@ -63,15 +65,36 @@ export default defineComponent({
 				if (oldStatus === newStatus) {
 					return [];
 				}
-				return [`EHR changed status of task "${task.name}" from ${oldStatus} to ${newStatus}.`];
+				return [{
+					name: task.name,
+					oldStatus,
+					newStatus
+				}];
 			});
 
 		const showUpdates = (newList: Task[]) => {
 			findUpdates(newList).forEach(update => {
+				const message = h("p", [
+					`EHR changed status of task "${update.name}" from `,
+					//todo: for some reason ts pops up error about incorrect import
+					// @ts-ignore
+					h(TaskStatusDisplay, {
+						status: update.oldStatus,
+						small: true
+					}),
+					" to ",
+					// @ts-ignore
+					h(TaskStatusDisplay,{
+						status: update.newStatus,
+						small: true
+					})
+				]);
+
 				ElNotification({
 					title: "Update",
-					type: "info",
-					message: update
+					iconClass: "notification-bell",
+					duration: 10000,
+					message
 				});
 			});
 		};
@@ -95,16 +118,23 @@ export default defineComponent({
 		);
 
 		const taskInEdit = ref<Task | null>(null);
+		const taskInView = ref<Task | null>(null);
 
 		const editTask = (taskToEdit: TaskState) => {
 			markTaskAsNotNew(taskToEdit.task.id);
 			taskInEdit.value = taskToEdit.task;
 		};
 
+		const viewTask = (taskToView: TaskState) => {
+			taskInView.value = taskToView.task;
+		};
+
 		return {
 			tasks,
 			taskInEdit,
+			taskInView,
 			editTask,
+			viewTask,
 			updateTaskFromDialog
 		};
 	}
@@ -113,10 +143,15 @@ export default defineComponent({
 
 <template>
 	<div class="tasks">
-		<Dialog
+		<TaskEditDialog
 			:task="taskInEdit"
 			@close="taskInEdit = null"
 			@task-updated="updateTaskFromDialog"
+		/>
+
+		<TaskViewDialog
+			:task="taskInView"
+			@close="taskInView = null"
 		/>
 
 		<div class="filters">
@@ -136,6 +171,7 @@ export default defineComponent({
 			<TaskTable
 				:tasks="tasks"
 				@task-name-click="editTask"
+				@task-view-click="viewTask"
 			/>
 		</div>
 	</div>
