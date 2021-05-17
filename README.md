@@ -48,6 +48,111 @@ Reource types to delete:
 - Procedure
 - Consent
 
+### Create an EHR Organization resource with the PractitionerRole
+Send a `POST` request to `https://{EHR server base}/` with the following content. This will create an EHR Organization entry and link it to the performing Practitioner using the PractitionerRole resource. This practtioner with corresponding PractitionerRole resource and Organization referencing the current EHR, should be launching the EHR app, in other case the launch will fail. Please take into account that **both resource should belong to the US-Core profile**.
+```yaml
+{
+    "resourceType": "Bundle",
+    "id": "bundle-transaction",
+    "type": "transaction",
+    "entry": [
+        {
+            "fullUrl": "urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0a",
+            "resource": {
+                "resourceType": "Organization",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+                    ]
+                },
+                "active": true,
+                "name": "Good EHR"
+            },
+            "request": {
+                "method": "POST",
+                "url": "Organization"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:05efabf0-4be2-4561-91ce-51548425acb9",
+            "resource": {
+                "resourceType": "PractitionerRole",
+                "id": "14604",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole"
+                    ]
+                },
+                "active": true,
+                "practitioner": {
+                    "reference": "Practitioner/smart-Practitioner-71482713",
+                    "type": "Practitioner",
+                    "display": "Susan Clark"
+                },
+                "organization": {
+                    "reference": "urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0a",
+                    "display": "Good EHR"
+                },
+                "code": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+                                "code": "doctor"
+                            }
+                        ]
+                    }
+                ],
+                "specialty": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://snomed.info/sct",
+                                "code": "408443003",
+                                "display": "General medical practice"
+                            }
+                        ]
+                    }
+                ],
+                "availableTime": [
+                    {
+                        "daysOfWeek": [
+                            "mon",
+                            "tue",
+                            "wed"
+                        ],
+                        "availableStartTime": "09:00:00",
+                        "availableEndTime": "16:30:00"
+                    },
+                    {
+                        "daysOfWeek": [
+                            "thu",
+                            "fri"
+                        ],
+                        "availableStartTime": "09:00:00",
+                        "availableEndTime": "12:00:00"
+                    }
+                ],
+                "notAvailable": [
+                    {
+                        "description": "Susan will be on extended leave during May 2021",
+                        "during": {
+                            "start": "2021-05-01",
+                            "end": "2021-05-20"
+                        }
+                    }
+                ],
+                "availabilityExceptions": "Susan is generally unavailable on public holidays and during the Christmas/New Year break"
+            },
+            "request": {
+                "method": "POST",
+                "url": "PractitionerRole"
+            }
+        }
+    ]
+}
+```
+
 ### Create Organization resources with Endpoints
 Send a `POST` request to `https://{server base}/` with the following content. This will create a CP Organization entry with a corresponding Endpoint. Please take into account the currently **only OPEN FHIR endpoints are supported**.
 ```yaml
