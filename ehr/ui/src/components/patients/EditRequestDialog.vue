@@ -210,7 +210,7 @@ export default defineComponent({
 				<el-divider />
 
 				<el-form-item
-					v-if="task.outcomes"
+					v-if="task.outcomes || task.statusReason"
 					label="Outcome"
 				>
 					{{ task.statusReason ? task.statusReason : task.outcomes }}
