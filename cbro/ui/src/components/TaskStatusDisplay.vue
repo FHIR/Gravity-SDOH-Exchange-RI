@@ -67,23 +67,13 @@ export default defineComponent({
 
 		&.completed { background-image: url("~@/assets/images/status-completed.svg"); }
 
-		&.draft { }
-
-		&.enteredinerror { }
-
-		&.failed { background-image: url("~@/assets/images/status-failed.svg"); }
-
 		&.inprogress { background-image: url("~@/assets/images/status-inprogress.svg"); }
 
 		&.onhold { background-image: url("~@/assets/images/status-onhold.svg"); }
 
-		&.ready { }
-
 		&.received { background-image: url("~@/assets/images/status-received.svg"); }
 
 		&.rejected { background-image: url("~@/assets/images/status-rejected.svg"); }
-
-		&.requested { background-image: url("~@/assets/images/status-requested.svg"); }
 	}
 
 	.label {

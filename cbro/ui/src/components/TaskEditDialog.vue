@@ -1,7 +1,8 @@
 <script lang="ts">
-import { defineComponent, PropType, ref, computed, watch } from "vue";
-import { Task, TaskPriority, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure } from "@/types";
+import { defineComponent, PropType, ref, computed, watch, reactive, toRefs } from "vue";
+import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure } from "@/types";
 import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
+import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { updateTask, getProceduresForCategory } from "@/api";
 
 
@@ -13,15 +14,11 @@ type TaskStuff = {
 	forPatient: string,
 	priority: string,
 	occurrence: string,
-	ehrComment: string,
-
+	previousComments: string[],
 	status: TaskStatus,
 	statusDate: string,
-	comment: string,
-	performer: string,
-	cboPriority: TaskPriority,
 	outcome: string,
-	procedures: string,
+	statusReason: string,
 	previouslySetProcedures: string[]
 }
 
@@ -33,25 +30,24 @@ const initTaskStuff: TaskStuff = {
 	forPatient: "",
 	priority: "",
 	occurrence: "",
-	ehrComment: "",
+	previousComments: [],
 	status: "Received",
 	statusDate: "",
-	comment: "",
-	performer: "",
-	cboPriority: "ROUTINE",
 	outcome: "",
-	procedures: "",
+	statusReason: "",
 	previouslySetProcedures: []
 };
 
-const Flow: { [status in TaskStatus]?: UpdatedStatus[] } = {
-	"Received": ["Accepted", "Rejected"],
-	"Accepted": ["In Progress", "On Hold"],
-	"In Progress": ["On Hold", "Completed"],
-	"On Hold": ["In Progress"]
+const Flow: { [status in TaskStatus]?: TaskStatus[] } = {
+	"Received":    ["Accepted", "Rejected"],
+	"Accepted":    ["In Progress", "On Hold", "Cancelled"],
+	"In Progress": ["On Hold", "Completed", "Cancelled"],
+	"On Hold":     ["In Progress", "Cancelled"]
 };
 
-const showOccurrence = (ocr: Occurrence) => ocr.start ? `From ${ocr.start} to ${ocr.end}` : `Until ${ocr.end}`;
+const showDate = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+const showOccurrence = (ocr: Occurrence) => ocr.start ? `From ${showDate(ocr.start)} to ${showDate(ocr.end)}` : `Until ${showDate(ocr.end)}`;
 
 const prepareTaskStuff = (task: Task): TaskStuff => ({
 	id: task.id,
@@ -61,28 +57,24 @@ const prepareTaskStuff = (task: Task): TaskStuff => ({
 	forPatient: task.patient.display,
 	priority: task.priority,
 	occurrence: showOccurrence(task.serviceRequest.occurrence),
-	ehrComment: task.comments[0]?.text || "",
-
+	previousComments: task.comments.map(({ text }) => text),
 	status: task.status,
-	statusDate: task.lastModified,
-	comment: "",
-	performer: "",
-	cboPriority: "ROUTINE",
+	statusDate: new Date(task.lastModified).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric" }),
 	outcome: task.outcome || "",
-	procedures: "",
+	statusReason: task.statusReason || "",
 	previouslySetProcedures: task.procedures.map(proc => proc.display)
 });
 
 
 export default defineComponent({
-	emits: ["close", "task-updated"],
-	components: { TaskStatusSelect },
+	components: { TaskStatusSelect, TaskStatusDisplay },
 	props: {
 		task: {
 			type: Object as PropType<Task | null>,
 			default: null
 		}
 	},
+	emits: ["close", "task-updated"],
 	setup(props, ctx) {
 		const opened = computed(() => props.task !== null);
 
@@ -90,25 +82,37 @@ export default defineComponent({
 
 		const status = ref<TaskStatus>("Received");
 		const comment = ref<string>("");
-		const performer = ref<string>("");
-		const cboPriority = ref<TaskPriority>("ROUTINE");
-		const outcome = ref<string>("");
-		const procedures = ref<string[]>([]);
+		const formStuff = reactive({
+			outcome: "",
+			statusReason: "",
+			procedures: [] as string[]
+		});
+		// const outcome = ref<string>("");
+		// const statusReason = ref<string>("");
+		// const procedures = ref<string[]>([]);
+		const { outcome, statusReason, procedures } = toRefs(formStuff);
 
 		const acceptedStatuses = computed(() => [taskFields.value.status].concat(Flow[taskFields.value.status] || []));
 
-		const showOuctome = computed(() => status.value === "Completed" || status.value === "Rejected");
-		const showProcedures = computed(() => status.value === "Completed");
-		const isFinalized = computed(() => taskFields.value.status === "Completed");
+		const isFinalized = computed(() => ["Rejected", "Cancelled", "Completed"].includes(taskFields.value.status));
 
-		const hasChanges = computed(() =>
-			status.value !== taskFields.value.status ||
-			comment.value !== taskFields.value.comment ||
-			outcome.value !== taskFields.value.outcome ||
-			procedures.value.length > 0
+		const showOutcomeInput = computed(() => status.value === "Completed");
+		const showStatusReasonInput = computed(() => status.value === "Rejected" || status.value === "Cancelled");
+		const showProceduresSelect = computed(() => status.value === "Completed" || status.value === "Cancelled");
+
+		const proceduresRequired = computed(() => status.value === "Completed");
+
+		const statusChanged = computed(() =>
+			status.value !== taskFields.value.status
 		);
 
-		const canSave = computed(() => status.value === "Completed" ? (procedures.value.length > 0 && outcome.value.length > 0) : hasChanges.value);
+		const isValid = computed(() =>
+			(!showOutcomeInput.value || outcome.value) &&
+			(!showStatusReasonInput.value || statusReason.value) &&
+			(!proceduresRequired.value || procedures.value.length > 0)
+		);
+
+		const canSave = computed(() => statusChanged.value && isValid.value);
 
 		const availableProcedures = ref<Procedure[]>([]);
 		const loadProcedures = async (categoryCode: string) => {
@@ -116,15 +120,13 @@ export default defineComponent({
 		};
 
 		const init = (task: Task) => {
-			console.log("init");
 			loadProcedures(task.serviceRequest.category.code);
 			const fields = prepareTaskStuff(task);
 			taskFields.value = fields;
 			status.value = fields.status;
-			comment.value = fields.comment;
-			performer.value = fields.performer;
-			cboPriority.value = fields.cboPriority;
-			outcome.value = fields.outcome;
+			comment.value = "";
+			outcome.value = "";
+			statusReason.value = "";
 			procedures.value = [];
 		};
 
@@ -144,8 +146,9 @@ export default defineComponent({
 			const payload: UpdateTaskPayload = {
 				status: status.value as UpdatedStatus,
 				comment: comment.value || undefined,
-				outcome: outcome.value || undefined,
-				procedureCodes: procedures.value
+				outcome: showOutcomeInput.value ? outcome.value : undefined,
+				statusReason: showStatusReasonInput.value ? statusReason.value : undefined,
+				procedureCodes: procedures.value.length > 0 ? procedures.value : undefined
 			};
 			saveInProgress.value = true;
 			try {
@@ -157,19 +160,40 @@ export default defineComponent({
 			}
 		};
 
+		const formRef = ref<any>(null);
+		const formRules = computed(() => ({
+			statusReason: [{ required: true, message: "This field is required" }],
+			outcome: [{ required: true, message: "This field is required" }],
+			procedures: [
+				{
+					required: proceduresRequired.value,
+					message: "This field is required",
+					trigger: "change"
+				}
+			]
+		}));
+
+		watch(status, () => {
+			formRef.value?.clearValidate();
+		});
+
 		return {
+			formRef,
+			formRules,
 			opened,
 			taskFields,
 			status,
 			comment,
-			performer,
-			cboPriority,
 			outcome,
+			statusReason,
 			procedures,
+			formStuff,
 			acceptedStatuses,
 			availableProcedures,
-			showOuctome,
-			showProcedures,
+			showOutcomeInput,
+			showStatusReasonInput,
+			showProceduresSelect,
+			statusChanged,
 			isFinalized,
 			canSave,
 			beforeClose,
@@ -243,111 +267,145 @@ export default defineComponent({
 						</el-form-item>
 
 						<el-form-item
-							label="Comment"
+							label="Comments"
 						>
-							<span>
-								{{ taskFields.ehrComment }}
-							</span>
+							<div
+								v-for="(comment, ix) in taskFields.previousComments"
+								:key="ix"
+								class="comment"
+							>
+								{{ comment }}
+							</div>
 						</el-form-item>
 					</el-form>
 				</div>
 
 				<div class="editable-part">
 					<el-form
+						ref="formRef"
+						:rules="formRules"
+						:model="formStuff"
 						label-position="left"
 					>
-						<el-form-item
-							label="Status"
-						>
-							<TaskStatusSelect
-								v-model="status"
-								:options="acceptedStatuses"
-								class="status-select"
-							/>
-							<span class="status-date">
-								{{ taskFields.statusDate }}
-							</span>
-						</el-form-item>
-
-						<el-form-item
-							v-if="!isFinalized"
-							label="Comment"
-						>
-							<el-input
-								v-model="comment"
-								type="textarea"
-								placeholder="Enter your comment here"
-							/>
-						</el-form-item>
-
-						<!-- <el-form-item
-							label="Performer"
-						>
-							<el-select
-								v-model="performer"
-								size="mini"
-								placeholder="Select CBO"
-								:popper-append-to-body="false"
-							/>
-						</el-form-item>
-
-						<el-form-item
-							label="Priority for CBO"
-						>
-							<el-radio-group v-model="cboPriority">
-								<el-radio label="ROUTINE">Routine</el-radio>
-								<el-radio label="URGENT">Urgent</el-radio>
-								<el-radio label="ASAP">ASAP</el-radio>
-							</el-radio-group>
-						</el-form-item> -->
-
-						<el-form-item
-							v-if="showOuctome"
-							label="Outcomes"
-						>
-							<el-input
-								v-model="outcome"
-								type="textarea"
-								:disabled="isFinalized"
-								placeholder="Placeholder placeholder"
-							/>
-						</el-form-item>
-
-						<el-form-item
-							v-if="showProcedures && !isFinalized"
-							label="Procedures"
-						>
-							<el-select
-								v-model="procedures"
-								multiple
-								size="mini"
-								placeholder="Select procedure code"
-								:popper-append-to-body="false"
-								class="procedures-select"
+						<template v-if="isFinalized">
+							<el-form-item
+								label="Status"
 							>
-								<el-option
-									v-for="proc in availableProcedures"
-									:key="proc.code"
-									:value="proc.code"
-									:label="`${proc.display} (${proc.code})`"
+								<TaskStatusDisplay
+									:status="status"
+									small
 								/>
-							</el-select>
-						</el-form-item>
+								<span class="status-date">
+									{{ taskFields.statusDate }}
+								</span>
+							</el-form-item>
 
-						<el-form-item
-							v-if="isFinalized"
-							label="Procedures"
-						>
-							<el-select
-								v-model="taskFields.previouslySetProcedures"
-								multiple
-								size="mini"
-								:disabled="true"
-								placeholder="Select procedure code"
-								:popper-append-to-body="false"
-								class="procedures-select"
-							/>
-						</el-form-item>
+							<el-form-item
+								v-if="taskFields.statusReason"
+								label="Reason"
+							>
+								<span>
+									{{ taskFields.statusReason }}
+								</span>
+							</el-form-item>
+
+							<el-form-item
+								v-if="taskFields.outcome"
+								label="Outcome"
+							>
+								<span>
+									{{ taskFields.outcome }}
+								</span>
+							</el-form-item>
+
+							<el-form-item
+								v-if="taskFields.previouslySetProcedures.length > 0"
+								label="Procedures"
+							>
+								<el-tag
+									v-for="(proc, ix) in taskFields.previouslySetProcedures"
+									:key="ix"
+									size="mini"
+									class="procedure-tag"
+								>
+									{{ proc }}
+								</el-tag>
+							</el-form-item>
+						</template>
+
+						<template v-if="!isFinalized">
+							<el-form-item
+								label="Status"
+							>
+								<TaskStatusSelect
+									v-model="status"
+									:options="acceptedStatuses"
+									class="status-select"
+								/>
+								<span
+									v-if="!statusChanged"
+									class="status-date"
+								>
+									{{ taskFields.statusDate }}
+								</span>
+							</el-form-item>
+
+							<el-form-item
+								v-if="showOutcomeInput"
+								label="Outcome"
+								prop="outcome"
+							>
+								<el-input
+									v-model="formStuff.outcome"
+									type="textarea"
+									placeholder="Enter outcome here"
+								/>
+							</el-form-item>
+
+							<el-form-item
+								v-if="showStatusReasonInput"
+								label="Reason"
+								prop="statusReason"
+							>
+								<el-input
+									v-model="formStuff.statusReason"
+									type="textarea"
+									placeholder="Enter reason here"
+								/>
+							</el-form-item>
+
+							<el-form-item
+								v-if="showProceduresSelect"
+								label="Procedures"
+								prop="procedures"
+							>
+								<el-select
+									v-model="formStuff.procedures"
+									multiple
+									size="mini"
+									placeholder="Select procedure code"
+									:popper-append-to-body="false"
+									class="procedures-select"
+								>
+									<el-option
+										v-for="proc in availableProcedures"
+										:key="proc.code"
+										:value="proc.code"
+										:label="`${proc.display} (${proc.code})`"
+									/>
+								</el-select>
+							</el-form-item>
+
+							<el-form-item
+								label="Comment"
+							>
+								<el-input
+									v-model="comment"
+									type="textarea"
+									placeholder="Enter your comment here"
+								/>
+							</el-form-item>
+						</template>
 					</el-form>
 				</div>
 			</div>
@@ -360,6 +418,7 @@ export default defineComponent({
 					Cancel
 				</el-button>
 				<el-button
+					v-if="!isFinalized"
 					round
 					:disabled="!canSave"
 					:loading="saveInProgress"
@@ -428,6 +487,10 @@ export default defineComponent({
 		.readonly-part {
 			padding-bottom: 30px;
 			border-bottom: $global-border;
+
+			.comment + .comment {
+				margin-top: 5px;
+			}
 		}
 
 		.editable-part {
@@ -445,6 +508,10 @@ export default defineComponent({
 				::v-deep(.el-select-dropdown) {
 					width: 485px;
 				}
+			}
+
+			.procedure-tag + .procedure-tag {
+				margin-left: 5px;
 			}
 		}
 	}
@@ -509,6 +576,23 @@ export default defineComponent({
 			font-size: $global-small-font-size;
 			height: 25px;
 			line-height: 25px;
+		}
+
+		.el-tag {
+			background-color: $alice-blue;
+			color: $global-text-color;
+			font-size: $global-font-size;
+			font-weight: 400;
+
+			.el-tag__close {
+				background: none;
+				color: $global-text-color;
+				font-weight: 1000;
+
+				&:hover {
+					background: none;
+				}
+			}
 		}
 	}
 }
