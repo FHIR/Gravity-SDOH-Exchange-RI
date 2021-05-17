@@ -22,8 +22,12 @@ const poll = <T>(
 ) => {
 	const next = () => {
 		setTimeout(async () => {
-			const resp = await makeRequest();
-			if (proceed(resp)) {
+			try {
+				const resp = await makeRequest();
+				if (proceed(resp)) {
+					next();
+				}
+			} catch {
 				next();
 			}
 		}, ms);
@@ -33,7 +37,6 @@ const poll = <T>(
 
 
 export default defineComponent({
-	props: {},
 	components: { TaskEditDialog, TaskViewDialog, TaskTable },
 	setup() {
 		const tasks = ref<TaskState[]>([]);
@@ -91,7 +94,7 @@ export default defineComponent({
 				]);
 
 				ElNotification({
-					title: "Update",
+					title: "Notification",
 					iconClass: "notification-bell",
 					duration: 10000,
 					message
@@ -103,8 +106,13 @@ export default defineComponent({
 			tasks.value = tasks.value.map(taskState => taskState.task.id === taskId ? { ...taskState, isNew: false } : taskState);
 		};
 
+		const closeDialog = () => {
+			taskInEdit.value = null;
+		};
+
 		const updateTaskFromDialog = (task: Task) => {
 			tasks.value = tasks.value.map(taskState => taskState.task.id === task.id ? { ...taskState, task } : taskState);
+			closeDialog();
 		};
 
 		poll(
@@ -135,6 +143,7 @@ export default defineComponent({
 			taskInView,
 			editTask,
 			viewTask,
+			closeDialog,
 			updateTaskFromDialog
 		};
 	}
@@ -145,7 +154,7 @@ export default defineComponent({
 	<div class="tasks">
 		<TaskEditDialog
 			:task="taskInEdit"
-			@close="taskInEdit = null"
+			@close="closeDialog"
 			@task-updated="updateTaskFromDialog"
 		/>
 

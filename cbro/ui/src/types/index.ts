@@ -13,11 +13,6 @@ export type TaskStatus =
 	| "On Hold"
 	| "Completed"
 	| "Cancelled"
-	| "Draft"
-	| "Entered In Error"
-	| "Failed"
-	| "Ready"
-	| "Requested"
 
 export type TaskPriority = "ASAP" | "ROUTINE" | "URGENT"
 
@@ -68,6 +63,7 @@ export type Task = {
 	consent: string,
 	comments: Comment[],
 	outcome: string | null,
+	statusReason: string | null,
 	procedures: {
 		id: string
 		display: string,
@@ -85,6 +81,7 @@ export type UpdatedStatus =
 export type UpdateTaskPayload = {
 	comment?: string,
 	outcome?: string,
+	statusReason?: string,
 	procedureCodes?: string[],
 	status: UpdatedStatus
 }
