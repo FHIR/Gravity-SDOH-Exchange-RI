@@ -35,7 +35,7 @@ export default defineComponent({
 		>
 			<a
 				class="logout"
-				href="http://localhost:8081/"
+				href="http://localhost:8080/logout"
 			>Logout</a>
 			<template #reference>
 				<div class="details">

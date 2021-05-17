@@ -34,14 +34,14 @@ export const updateTask = async ({ id, ...data }: updateTaskPayload): Promise<Ta
 	return res.data;
 };
 
-export const getConditions = async (category: string): Promise<Condition[]> => {
-	const res = await axios.get("/support/conditions", { params: { category } });
+export const getConditions = async (): Promise<Condition[]> => {
+	const res = await axios.get("/support/conditions");
 
 	return res.data;
 };
 
-export const getGoals = async (category: string): Promise<Goal[]> => {
-	const res = await axios.get("/support/goals", { params: { category } });
+export const getGoals = async (): Promise<Goal[]> => {
+	const res = await axios.get("/support/goals");
 
 	return res.data;
 };

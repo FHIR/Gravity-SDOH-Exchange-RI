@@ -40,7 +40,7 @@ export default defineComponent({
 			>
 			<span class="name">{{ app }} <span
 				v-if="secondName"
-				class="grey"
+				class="second-name"
 			>({{ secondName }})</span></span>
 		</div>
 		<el-menu
@@ -102,7 +102,7 @@ export default defineComponent({
 	margin-left: auto;
 }
 
-.grey {
+.second-name {
 	color: $grey;
 	font-weight: 500;
 }
