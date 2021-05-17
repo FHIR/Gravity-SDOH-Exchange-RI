@@ -22,7 +22,8 @@ export type TableData = {
 	priority: string | null,
 	occurrence: Occurrence,
 	procedures: Procedure[],
-	id: string
+	id: string,
+	statusReason: string | null
 }
 
 export type taskStatusDiff = {
@@ -58,7 +59,8 @@ export default defineComponent({
 				priority: task.priority,
 				occurrence: task.serviceRequest.occurrence,
 				procedures: task.procedures,
-				id: task.id
+				id: task.id,
+				statusReason: task.statusReason
 			}))
 		);
 		const activeRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status !== "Completed"));
