@@ -3,36 +3,20 @@ import { defineComponent, PropType, computed } from "vue";
 import { TaskStatus } from "@/types";
 
 
-const StatusDisplayText: { [status in TaskStatus]: string } = {
-	"ACCEPTED":       "Accepted",
-	"CANCELLED":      "Cancelled",
-	"COMPLETED":      "Completed",
-	"DRAFT":          "Draft",
-	"ENTEREDINERROR": "Entered in Error",
-	"FAILED":         "Failed",
-	"INPROGRESS":     "In Progress",
-	"NULL":           "Null",
-	"ONHOLD":         "On Hold",
-	"READY":          "Ready",
-	"RECEIVED":       "Received",
-	"REJECTED":       "Rejected",
-	"REQUESTED":      "Requested"
-};
-
-
 export default defineComponent({
 	props: {
 		status: {
 			type: String as PropType<TaskStatus>,
 			required: true
+		},
+		iconOnly: {
+			type: Boolean,
+			default: false
+		},
+		small: {
+			type: Boolean,
+			default: false
 		}
-	},
-	setup(props) {
-		const displayText = computed<string>(() => StatusDisplayText[props.status]);
-
-		return {
-			displayText
-		};
 	}
 });
 </script>
@@ -40,12 +24,18 @@ export default defineComponent({
 <template>
 	<div class="task-status">
 		<div
-			:class="status.toLowerCase()"
+			:class="{
+				[status.toLowerCase().replace(/\ /g, '')]: true,
+				small: small
+			}"
 			class="icon"
 		>
 		</div>
-		<div class="label">
-			{{ displayText }}
+		<div
+			v-if="!iconOnly"
+			class="label"
+		>
+			{{ status }}
 		</div>
 	</div>
 </template>
@@ -65,6 +55,11 @@ export default defineComponent({
 		background-repeat: no-repeat;
 		background-position: center;
 
+		&.small {
+			width: 14px;
+			height: 14px;
+		}
+
 		&.accepted { background-image: url("~@/assets/images/status-accepted.svg"); }
 
 		&.cancelled { background-image: url("~@/assets/images/status-cancelled.svg"); }
@@ -78,8 +73,6 @@ export default defineComponent({
 		&.failed { background-image: url("~@/assets/images/status-failed.svg"); }
 
 		&.inprogress { background-image: url("~@/assets/images/status-inprogress.svg"); }
-
-		&.null { }
 
 		&.onhold { background-image: url("~@/assets/images/status-onhold.svg"); }
 

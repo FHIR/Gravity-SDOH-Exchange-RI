@@ -1,9 +1,10 @@
 <script lang="ts">
-import { defineComponent, PropType, ref, reactive } from "vue";
+import { defineComponent, PropType, ref, reactive, computed } from "vue";
 import { TableData } from "@/components/patients/ActionSteps.vue";
 import { Occurrence, TaskStatus, updateTaskPayload } from "@/types";
 import moment from "moment";
 import { TasksModule } from "@/store/modules/tasks";
+import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
 
 export type FormModel = {
 	status: string,
@@ -13,6 +14,9 @@ export type FormModel = {
 
 export default defineComponent({
 	name: "EditRequestDialog",
+	components: {
+		TaskStatusIcon
+	},
 	props: {
 		visible: {
 			type: Boolean,
@@ -30,9 +34,15 @@ export default defineComponent({
 			status: "",
 			comment: ""
 		});
+		//todo: use element-ui form type
+		const formEl = ref<HTMLFormElement>();
 
 		const onDialogOpen = () => {
 			Object.assign(formModel, { status: props.task.status });
+		};
+		const onDialogClose = () => {
+			formEl.value?.resetFields();
+			emit("close");
 		};
 
 		const showOccurrence = (occurrence: Occurrence) => {
@@ -68,13 +78,18 @@ export default defineComponent({
 			}
 		};
 
+		const hasChanges = computed<boolean>(() => (formModel.comment !== "" || formModel.status !== props.task?.status));
+
 		return {
 			saveInProgress,
 			formModel,
 			onDialogOpen,
+			onDialogClose,
 			showOccurrence,
 			getStatusOptions,
-			onFormSave
+			onFormSave,
+			hasChanges,
+			formEl
 		};
 	}
 });
@@ -88,8 +103,8 @@ export default defineComponent({
 		append-to-body
 		destroy-on-close
 		custom-class="edit-request-dialog"
-		@close="$emit('close')"
-		@open="onDialogOpen"
+		@close="onDialogClose"
+		@opened="onDialogOpen"
 	>
 		<el-form
 			ref="formEl"
@@ -108,16 +123,19 @@ export default defineComponent({
 			<el-form-item label="Request">
 				{{ `${task.request.display} (${task.request.code})` }}
 			</el-form-item>
-			<el-form-item label="Status">
+			<el-form-item
+				label="Status"
+				prop="status"
+			>
 				<el-select
 					v-model="formModel.status"
 					placeholder="Select Status"
 				>
 					<template #prefix>
-						<span
-							class="icon"
-							:class="formModel.status.toLocaleLowerCase()"
-						></span>
+						<TaskStatusIcon
+							:status="formModel.status"
+							:small="true"
+						/>
 					</template>
 
 					<el-option
@@ -126,16 +144,19 @@ export default defineComponent({
 						:label="item.name"
 						:value="item.value"
 					>
-						<span
-							class="icon"
-							:class="item.value.toLocaleLowerCase()"
-						></span>
+						<TaskStatusIcon
+							:status="item.value"
+							:small="true"
+						/>
 						{{ item.name }}
 					</el-option>
 				</el-select>
 				<span class="date">{{ $filters.formatDateTime(task.lastModified) }}</span>
 			</el-form-item>
-			<el-form-item label="Comment">
+			<el-form-item
+				label="Comment"
+				prop="comment"
+			>
 				<el-input
 					v-model="formModel.comment"
 					type="textarea"
@@ -234,6 +255,7 @@ export default defineComponent({
 				type="primary"
 				size="mini"
 				:loading="saveInProgress"
+				:disabled="!hasChanges"
 				@click="onFormSave"
 			>
 				Save Changes
@@ -273,46 +295,5 @@ export default defineComponent({
 
 .date {
 	margin-left: 10px;
-}
-
-//todo: extract to separate icon component, reuse in table also
-.icon {
-	margin-right: 5px;
-
-	&.completed {
-		@include icon("~@/assets/images/status-completed.svg", 14px);
-	}
-
-	&.accepted {
-		@include icon("~@/assets/images/status-accepted.svg", 14px);
-	}
-
-	&.cancelled {
-		@include icon("~@/assets/images/status-cancelled.svg", 14px);
-	}
-
-	&.failed {
-		@include icon("~@/assets/images/status-failed.svg", 14px);
-	}
-
-	&.inprogress {
-		@include icon("~@/assets/images/status-in-progress.svg", 14px);
-	}
-
-	&.onhold {
-		@include icon("~@/assets/images/status-on-hold.svg", 14px);
-	}
-
-	&.received {
-		@include icon("~@/assets/images/status-received.svg", 14px);
-	}
-
-	&.rejected {
-		@include icon("~@/assets/images/status-rejected.svg", 14px);
-	}
-
-	&.requested {
-		@include icon("~@/assets/images/status-requested.svg", 14px);
-	}
 }
 </style>

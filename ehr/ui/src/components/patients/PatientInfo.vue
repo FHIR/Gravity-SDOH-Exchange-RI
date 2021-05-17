@@ -167,6 +167,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+@import "~@/assets/scss/abstracts/mixins";
 
 .patient-info {
 	height: 100%;
@@ -186,9 +187,11 @@ export default defineComponent({
 .info-block {
 	border-right: 1px solid $global-base-border-color;
 	padding-left: 20px;
+	padding-right: 20px;
 
 	&:last-child {
 		border-right: 0;
+		padding-right: 0;
 	}
 
 	&:first-child {
@@ -208,6 +211,10 @@ export default defineComponent({
 		width: 155px;
 		color: $grey;
 		flex-shrink: 0;
+	}
+
+	.value {
+		@include dont-break-out();
 	}
 }
 

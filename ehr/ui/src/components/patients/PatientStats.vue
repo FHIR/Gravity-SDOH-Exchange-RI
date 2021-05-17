@@ -11,7 +11,7 @@ export default defineComponent({
 		<div class="info-block">
 			<div class="info-item">
 				<div class="value">
-					0
+					2
 				</div>
 				<div class="label">
 					Health Concerns
@@ -19,7 +19,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					0
+					4
 				</div>
 				<div class="label">
 					Active Problems
@@ -27,7 +27,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					0
+					3
 				</div>
 				<div class="label">
 					Active Goals
@@ -35,7 +35,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					0
+					5
 				</div>
 				<div class="label">
 					Active Interventions
@@ -55,6 +55,7 @@ export default defineComponent({
 .info-block {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	height: 100%;
 }
 
