@@ -61,6 +61,8 @@ export default defineComponent({
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
 			performerOptions.value = await getOrganizations();
+			conditionOptions.value = await getConditions();
+			goalOptions.value = await getGoals();
 		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
@@ -111,6 +113,10 @@ export default defineComponent({
 				required: true,
 				message: "This field is required"
 			},
+			occurrence: {
+				required: true,
+				message: "This field is required"
+			},
 			consent: {
 				required: true,
 				message: "This field is required",
@@ -157,8 +163,6 @@ export default defineComponent({
 		const onCategoryChange = async (code: string) => {
 			formModel.code = "";
 			requestOptions.value = await getRequests(code);
-			conditionOptions.value = await getConditions(code);
-			goalOptions.value = await getGoals(code);
 		};
 		//
 		// On every until/from...to change clear model, element-ui can't work with array or date in both datepicker and range datepicker.
