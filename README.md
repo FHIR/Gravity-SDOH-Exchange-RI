@@ -49,7 +49,7 @@ Reource types to delete:
 - Consent
 
 ### Create an EHR Organization resource with the PractitionerRole
-Send a `POST` request to `https://{EHR server base}/` with the following content. This will create an EHR Organization entry and link it to the performing Practitioner using the PractitionerRole resource. This practtioner with corresponding PractitionerRole resource and Organization referencing the current EHR, should be launching the EHR app, in other case the launch will fail. Please take into account that **both resource should belong to the US-Core profile**.
+Send a `POST` request to `https://{EHR server base}/` with the following content. This will create an EHR Organization entry and link it to the performing Practitioner using the PractitionerRole resource. This practtioner with corresponding PractitionerRole resource and Organization referencing the current EHR, should be launching the EHR app, in other case the launch will fail. Please take into account that **both resources should belong to the US-Core profile**.
 ```yaml
 {
     "resourceType": "Bundle",
@@ -154,7 +154,7 @@ Send a `POST` request to `https://{EHR server base}/` with the following content
 ```
 
 ### Create Organization resources with Endpoints
-Send a `POST` request to `https://{server base}/` with the following content. This will create a CP Organization entry with a corresponding Endpoint. Please take into account the currently **only OPEN FHIR endpoints are supported**.
+Send a `POST` request to `https://{server base}/` with the following content. This will create a CP Organization entry with a corresponding Endpoint. Please take into account that currently **only OPEN FHIR endpoints are supported**.
 ```yaml
 {
     "resourceType": "Bundle",
