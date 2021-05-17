@@ -32,7 +32,7 @@ const displayTask = ({ task, isNew }: TaskState): TaskDisplayFields => ({
 	id: task.id,
 	taskName: task.name,
 	isNew,
-	requestDate: task.createdAt.replace(/T.*$/, ""),
+	requestDate: new Date(task.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
 	priority: task.priority,
 	status: task.status,
 	category: task.serviceRequest.category.display,

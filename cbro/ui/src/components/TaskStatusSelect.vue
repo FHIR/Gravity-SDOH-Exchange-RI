@@ -16,7 +16,13 @@ export default defineComponent({
 			required: true
 		}
 	},
-	emits: ["update:model-value"]
+	emits: ["update:model-value"],
+	setup(props) {
+		const dropdownOptions = computed(() => props.options.filter(option => option !== props.modelValue));
+		return {
+			dropdownOptions
+		};
+	}
 });
 </script>
 
@@ -36,7 +42,7 @@ export default defineComponent({
 				/>
 			</template>
 			<el-option
-				v-for="item in options"
+				v-for="item in dropdownOptions"
 				:key="item"
 				:value="item"
 			>
@@ -71,10 +77,6 @@ export default defineComponent({
 			font-size: $global-small-font-size;
 			font-weight: 400;
 			color: #333;
-		}
-
-		.el-select-dropdown__item.selected {
-			display: none;
 		}
 	}
 }

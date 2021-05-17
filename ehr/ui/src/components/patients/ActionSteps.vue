@@ -126,7 +126,7 @@ export default defineComponent({
 				]);
 
 				ElNotification({
-					title: "Update",
+					title: "Notification",
 					iconClass: "notification-bell",
 					duration: 10000,
 					message
