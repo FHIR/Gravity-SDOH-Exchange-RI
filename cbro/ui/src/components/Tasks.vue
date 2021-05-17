@@ -1,10 +1,11 @@
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref } from "vue";
 import { Task } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
-import Dialog from "./Dialog.vue";
 import { ElNotification } from "element-plus";
+import TaskViewDialog from "@/components/TaskViewDialog.vue";
+import TaskEditDialog from "@/components/TaskEditDialog.vue";
 
 
 type TaskState = {
@@ -32,7 +33,7 @@ const poll = <T>(
 
 export default defineComponent({
 	props: {},
-	components: { TaskTable, Dialog },
+	components: { TaskEditDialog, TaskViewDialog, TaskTable },
 	setup() {
 		const tasks = ref<TaskState[]>([]);
 
@@ -95,16 +96,23 @@ export default defineComponent({
 		);
 
 		const taskInEdit = ref<Task | null>(null);
+		const taskInView = ref<Task | null>(null);
 
 		const editTask = (taskToEdit: TaskState) => {
 			markTaskAsNotNew(taskToEdit.task.id);
 			taskInEdit.value = taskToEdit.task;
 		};
 
+		const viewTask = (taskToView: TaskState) => {
+			taskInView.value = taskToView.task;
+		};
+
 		return {
 			tasks,
 			taskInEdit,
+			taskInView,
 			editTask,
+			viewTask,
 			updateTaskFromDialog
 		};
 	}
@@ -113,10 +121,15 @@ export default defineComponent({
 
 <template>
 	<div class="tasks">
-		<Dialog
+		<TaskEditDialog
 			:task="taskInEdit"
 			@close="taskInEdit = null"
 			@task-updated="updateTaskFromDialog"
+		/>
+
+		<TaskViewDialog
+			:task="taskInView"
+			@close="taskInView = null"
 		/>
 
 		<div class="filters">
@@ -136,6 +149,7 @@ export default defineComponent({
 			<TaskTable
 				:tasks="tasks"
 				@task-name-click="editTask"
+				@task-view-click="viewTask"
 			/>
 		</div>
 	</div>
