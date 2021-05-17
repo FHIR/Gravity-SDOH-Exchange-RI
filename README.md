@@ -49,6 +49,72 @@ Reource types to delete:
 - Consent
 
 ### Create Organization resources with Endpoints
-TODO
+Send a `POST` request to `https://{server base}/` with the following content. This will create a CP Organization entry with a corresponding Endpoint. Please take into account the currently **only OPEN FHIR endpoints are supported**.
+```yaml
+{
+    "resourceType": "Bundle",
+    "id": "bundle-transaction",
+    "type": "transaction",
+    "entry": [
+        {
+            "fullUrl": "urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0a",
+            "resource": {
+                "resourceType": "Organization",
+                "type": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://hl7.org/gravity/CodeSystem/sdohcc-temporary-organization-type-codes",
+                                "code": "cp",
+                                "display": "Coordination Platform"
+                            }
+                        ]
+                    }
+                ],
+                "name": "Good Health Clinic",
+                "endpoint": [
+                    {
+                        "reference": "urn:uuid:05efabf0-4be2-4561-91ce-51548425acb9"
+                    }
+                ]
+            },
+            "request": {
+                "method": "POST",
+                "url": "Organization"
+            }
+        },
+        {
+            "fullUrl": "urn:uuid:05efabf0-4be2-4561-91ce-51548425acb9",
+            "resource": {
+                "resourceType": "Endpoint",
+                "status": "active",
+                "connectionType": {
+                    "system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
+                    "code": "hl7-fhir-rest"
+                },
+                "name": "Health Intersections CarePlan Hub",
+                "managingOrganization": {
+                    "reference": "urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0a"
+                },
+                "contact": [
+                    {
+                        "system": "email",
+                        "value": "endpointmanager@example.org",
+                        "use": "work"
+                    }
+                ],
+                "period": {
+                    "start": "2014-09-01"
+                },
+                "address": "https://sandbox.logicahealth.org/GravitySDOHCBRO/open"
+            },
+            "request": {
+                "method": "POST",
+                "url": "Endpoint"
+            }
+        }
+    ]
+}
+```
 ### Create Goals and Conditions
 TODO
