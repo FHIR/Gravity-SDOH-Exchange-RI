@@ -5,6 +5,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
+import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -21,6 +22,7 @@ import org.hl7.fhir.validation.ValidationEngine;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.QuestionnaireRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.StructureMapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,9 +42,12 @@ import java.util.Optional;
 @Component
 public class ConvertService {
 
+  private static final String PACKAGE_VERSION = "4.0.1";
+  private static final String SDOH_CLINICAL_CARE_VERSION = "0.1.0";
+  private static final String SDOH_CLINICAL_CARE_PACKAGE = "hl7.fhir.us.sdoh-clinicalcare";
+  private static final String CUSTOM_STRUCTURE_DEFINITIONS_LOCATION = "structure-definitions";
   private static final String MAP_EXTENSION =
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-targetStructureMap";
-  private static final String PACKAGE_VERSION = "4.0.1";
 
   private final IParser resourceParser;
   private final ValidationEngine validationEngine;
@@ -57,6 +63,11 @@ public class ConvertService {
     String definitions = VersionUtilities.packageForVersion(PACKAGE_VERSION) + "#" + VersionUtilities.getCurrentVersion(
         PACKAGE_VERSION);
     this.validationEngine = new ValidationEngine(definitions, FhirPublication.R4, PACKAGE_VERSION, new TimeTracker());
+    //Loading structure definitions from official package and uploading custom definitions if needed from resources
+    this.validationEngine.loadPackage(SDOH_CLINICAL_CARE_PACKAGE,SDOH_CLINICAL_CARE_VERSION);
+    //Loading  custom structure definitions, copying all resources from jar to local folder to be able for HAPI to
+    // upload them. Just passing resources folder is not working for "in jar"  files.
+    loadStructureDefinitions();
   }
 
   public Map<String, Object> convert(JSONObject questionnaireResponse) throws IOException {
@@ -72,8 +83,7 @@ public class ConvertService {
     boolean mapExists = validationEngine.getContext()
         .listTransforms()
         .stream()
-        .anyMatch(map -> map.getUrl()
-            .equals(mapUri));
+        .anyMatch(map -> map.getUrl().equals(mapUri));
     if (!mapExists) {
       loadMapIg(mapUri);
     }
@@ -93,6 +103,18 @@ public class ConvertService {
     } catch (IOException e) {
       throw new IllegalStateException(String.format("QuestionnaireReponse with id cannot be parsed."), e.getCause());
     } return (Bundle) resourceParser.parseResource(map);
+  }
+
+  private void loadStructureDefinitions() throws IOException {
+    org.springframework.core.io.Resource[] resources = new PathMatchingResourcePatternResolver().getResources(
+        CUSTOM_STRUCTURE_DEFINITIONS_LOCATION + "/*.xml");
+    Path sdIg = Files.createTempDirectory("sdIg");
+    for(org.springframework.core.io.Resource r : resources){
+      Path localPath = Files.createFile(Paths.get(String.valueOf(sdIg), r.getFilename()));
+      FileUtils.copyToFile(r.getInputStream(), localPath.toFile());
+    }
+    this.validationEngine.loadIg(sdIg.toString(), true);
+    FileUtils.deleteDirectory(sdIg.toFile());
   }
 
   private void loadMapIg(String mapUri) throws IOException {

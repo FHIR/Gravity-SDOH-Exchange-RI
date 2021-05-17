@@ -2,11 +2,13 @@
 import { defineComponent, PropType, ref } from "vue";
 import EditRequestDialog from "@/components/patients/EditRequestDialog.vue";
 import { TableData } from "@/components/patients/ActionSteps.vue";
+import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
 
 export default defineComponent({
 	name: "RequestTable",
 	components: {
-		EditRequestDialog
+		EditRequestDialog,
+		TaskStatusIcon
 	},
 	props: {
 		data: {
@@ -63,10 +65,7 @@ export default defineComponent({
 				>
 					<template #default="scope">
 						<div class="status-cell">
-							<span
-								class="icon"
-								:class="scope.row.status.toLowerCase().replace(/ /g, '')"
-							></span>
+							<TaskStatusIcon :status="scope.row.status" />
 							<div class="info">
 								<span class="status">{{ scope.row.status }}</span>
 								<span class="date">{{ $filters.formatDateTime(scope.row.lastModified) }}</span>
@@ -131,7 +130,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
-@import "~@/assets/scss/abstracts/mixins";
 
 .title {
 	margin: 20px 0;
@@ -212,46 +210,6 @@ export default defineComponent({
 		.info {
 			display: flex;
 			flex-direction: column;
-		}
-
-		.icon {
-			margin-right: 5px;
-
-			&.completed {
-				@include icon("~@/assets/images/status-completed.svg", 20px);
-			}
-
-			&.accepted {
-				@include icon("~@/assets/images/status-accepted.svg", 20px);
-			}
-
-			&.cancelled {
-				@include icon("~@/assets/images/status-cancelled.svg", 20px);
-			}
-
-			&.failed {
-				@include icon("~@/assets/images/status-failed.svg", 20px);
-			}
-
-			&.inprogress {
-				@include icon("~@/assets/images/status-in-progress.svg", 20px);
-			}
-
-			&.onhold {
-				@include icon("~@/assets/images/status-on-hold.svg", 20px);
-			}
-
-			&.received {
-				@include icon("~@/assets/images/status-received.svg", 20px);
-			}
-
-			&.rejected {
-				@include icon("~@/assets/images/status-rejected.svg", 20px);
-			}
-
-			&.requested {
-				@include icon("~@/assets/images/status-requested.svg", 20px);
-			}
 		}
 
 		.date {
