@@ -41,7 +41,7 @@ public class TaskPollingService {
         .include(Organization.INCLUDE_ENDPOINT.setRecurse(true))
         // Get only tasks sent to CBRO
         .where(new TokenClientParam("owner:Organization.type").exactly()
-            .systemAndCode(OrganizationTypeCode.CBRO.getSystem(), OrganizationTypeCode.CBRO.toCode()))
+            .systemAndCode(OrganizationTypeCode.CP.getSystem(), OrganizationTypeCode.CP.toCode()))
         // Get only tasks in-progress
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.FAILED.toCode()))

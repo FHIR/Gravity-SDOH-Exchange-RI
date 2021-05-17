@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.info.ServiceRequestInfo;
@@ -15,10 +16,6 @@ import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * Composes list of {@link TaskInfo} objects, which contains all info (all needed resources retrieved) for each
- * particular {@link Task}.
- */
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TasksInfoComposer {
@@ -34,19 +31,33 @@ public class TasksInfoComposer {
     Map<String, ServiceRequestInfo> serviceRequestInfoMap =
         serviceRequestInfoComposer.compose(serviceRequestMap.values());
 
-    // Retrieve all Task.owner Organization instances
-    Map<String, Organization> organizationMap = FhirUtil.getFromBundle(tasksBundle, Organization.class)
+    // Retrieve all Task.for ServiceRequest instances
+    Map<String, Patient> patientMap = FhirUtil.getFromBundle(tasksBundle, Patient.class)
         .stream()
-        .collect(Collectors.toMap(r -> r.getIdElement()
+        .collect(Collectors.toMap(patient -> patient.getIdElement()
+            .getIdPart(), Function.identity()));
+
+    // Retrieve all Task.requester ServiceRequest instances
+    Map<String, Organization> requesterMap = FhirUtil.getFromBundle(tasksBundle, Organization.class)
+        .stream()
+        .collect(Collectors.toMap(organization -> organization.getIdElement()
             .getIdPart(), Function.identity()));
 
     return FhirUtil.getFromBundle(tasksBundle, Task.class)
         .stream()
-        .map(task -> new TaskInfo(task, serviceRequestInfoMap.get(task.getFocus()
-            .getReferenceElement()
-            .getIdPart()), organizationMap.get(task.getOwner()
-            .getReferenceElement()
-            .getIdPart())))
+        .map(task -> {
+          ServiceRequestInfo serviceRequestInfo = serviceRequestInfoMap.get(task.getFocus()
+              .getReferenceElement()
+              .getIdPart());
+
+          Patient patient = patientMap.get(task.getFor()
+              .getReferenceElement()
+              .getIdPart());
+          Organization requester = requesterMap.get(task.getRequester()
+              .getReferenceElement()
+              .getIdPart());
+          return new TaskInfo(task, serviceRequestInfo, patient, requester);
+        })
         .collect(Collectors.toList());
   }
 }

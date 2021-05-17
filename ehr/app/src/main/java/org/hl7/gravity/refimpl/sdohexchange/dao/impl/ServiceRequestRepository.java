@@ -5,13 +5,10 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.gravity.refimpl.sdohexchange.dao.FhirRepository;
 import org.springframework.stereotype.Component;
 
-/**
- * @author Mykhailo Stefantsiv
- */
 @Component
-public class ConsentRepository extends FhirRepository<Consent> {
+public class ServiceRequestRepository extends FhirRepository<Consent> {
 
-  public ConsentRepository(IGenericClient ehrClient) {
+  public ServiceRequestRepository(IGenericClient ehrClient) {
     super(ehrClient);
   }
 
