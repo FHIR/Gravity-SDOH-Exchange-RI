@@ -1,1 +1,14 @@
 @import "./common/var";
+
+.el-notification__icon.notification-bell {
+	flex-shrink: 0;
+	width: 20px;
+	height: 20px;
+	background-image: url("~@/assets/images/bell.svg");
+	background-repeat: no-repeat;
+	background-size: 100%;
+}
+
+.el-notification__content {
+	text-align: left;
+}
