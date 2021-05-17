@@ -107,9 +107,12 @@ export default defineComponent({
 					label="Consent"
 				/>
 				<el-table-column
-					prop="outcomes"
 					label="Outcomes"
-				/>
+				>
+					<template #default="scope">
+						{{ scope.row.statusReason ? scope.row.statusReason : scope.row.outcomes }}
+					</template>
+				</el-table-column>
 				<el-table-column
 					label="Comment(s)"
 				>

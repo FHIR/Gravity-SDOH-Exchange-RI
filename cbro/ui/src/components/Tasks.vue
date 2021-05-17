@@ -6,6 +6,7 @@ import { getTasks } from "@/api";
 import { ElNotification } from "element-plus";
 import TaskViewDialog from "@/components/TaskViewDialog.vue";
 import TaskEditDialog from "@/components/TaskEditDialog.vue";
+import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 
 
 type TaskState = {
