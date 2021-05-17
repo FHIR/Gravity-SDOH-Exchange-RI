@@ -91,3 +91,14 @@ export type Procedure = {
 	code: string,
 	display: string
 }
+
+
+export type Resources = {
+	task: string,
+	serviceRequest: string,
+	requester: string,
+	patient: string,
+	consent: string,
+	conditions: string[],
+	goals: string[]
+}

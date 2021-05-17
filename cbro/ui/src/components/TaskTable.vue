@@ -59,13 +59,13 @@ const orderOnTasks = (left: TaskState, right: TaskState): number => {
 
 export default defineComponent({
 	components: { TaskStatusDisplay },
-	emits: ["task-name-click", "task-view-click"],
 	props: {
 		tasks: {
 			type: Array as PropType<TaskState[]>,
 			required: true
 		}
 	},
+	emits: ["task-name-click", "view-resources"],
 	setup(props, ctx) {
 		const tasksInOrder = computed(() => [...props.tasks].sort(orderOnTasks));
 		const tableData = computed(() => tasksInOrder.value.map(displayTask));
@@ -75,15 +75,14 @@ export default defineComponent({
 			ctx.emit("task-name-click", task);
 		};
 
-		const taskViewClick = (taskId: string) => {
-			const task: TaskState = props.tasks.find(taskState => taskState.task.id === taskId)!;
-			ctx.emit("task-view-click", task);
+		const taskViewResourcesClick = (taskId: string) => {
+			ctx.emit("view-resources", taskId);
 		};
 
 		return {
 			tableData,
 			taskNameClick,
-			taskViewClick
+			taskViewResourcesClick
 		};
 	}
 });
@@ -188,13 +187,12 @@ export default defineComponent({
 
 			<el-table-column
 				label="Resource"
-				class-name="column-interactive"
 				:width="90"
 			>
 				<template #default="{ row }">
 					<el-button
 						type="text"
-						@click="taskViewClick(row.id)"
+						@click="taskViewResourcesClick(row.id)"
 					>
 						view
 					</el-button>
@@ -274,6 +272,7 @@ export default defineComponent({
 			}
 
 			.el-button--text {
+				color: $global-primary-color;
 				text-decoration: underline;
 			}
 

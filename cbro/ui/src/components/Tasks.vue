@@ -4,7 +4,7 @@ import { Task } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
 import { ElNotification } from "element-plus";
-import TaskViewDialog from "@/components/TaskViewDialog.vue";
+import TaskResourcesDialog from "@/components/TaskResourcesDialog.vue";
 import TaskEditDialog from "@/components/TaskEditDialog.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 
@@ -37,7 +37,7 @@ const poll = <T>(
 
 
 export default defineComponent({
-	components: { TaskEditDialog, TaskViewDialog, TaskTable },
+	components: { TaskEditDialog, TaskResourcesDialog, TaskTable },
 	setup() {
 		const tasks = ref<TaskState[]>([]);
 
@@ -126,23 +126,23 @@ export default defineComponent({
 		);
 
 		const taskInEdit = ref<Task | null>(null);
-		const taskInView = ref<Task | null>(null);
 
 		const editTask = (taskToEdit: TaskState) => {
 			markTaskAsNotNew(taskToEdit.task.id);
 			taskInEdit.value = taskToEdit.task;
 		};
 
-		const viewTask = (taskToView: TaskState) => {
-			taskInView.value = taskToView.task;
+		const taskIdToViewResources = ref<string | null>(null);
+		const viewTaskResources = (taskId: string) => {
+			taskIdToViewResources.value = taskId;
 		};
 
 		return {
 			tasks,
 			taskInEdit,
-			taskInView,
+			taskIdToViewResources,
 			editTask,
-			viewTask,
+			viewTaskResources,
 			closeDialog,
 			updateTaskFromDialog
 		};
@@ -158,9 +158,9 @@ export default defineComponent({
 			@task-updated="updateTaskFromDialog"
 		/>
 
-		<TaskViewDialog
-			:task="taskInView"
-			@close="taskInView = null"
+		<TaskResourcesDialog
+			:task-id="taskIdToViewResources"
+			@close="taskIdToViewResources = null"
 		/>
 
 		<div class="filters">
@@ -180,7 +180,7 @@ export default defineComponent({
 			<TaskTable
 				:tasks="tasks"
 				@task-name-click="editTask"
-				@task-view-click="viewTask"
+				@view-resources="viewTaskResources"
 			/>
 		</div>
 	</div>
