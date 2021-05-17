@@ -22,10 +22,18 @@ export default defineComponent({
 			<Breadcrumbs />
 		</el-row>
 		<el-row :gutter="45">
-			<el-col :span="17">
+			<el-col
+				:xl="17"
+				:lg="17"
+				:md="24"
+			>
 				<PatientInfo />
 			</el-col>
-			<el-col :span="7">
+			<el-col
+				:xl="7"
+				:lg="7"
+				:md="24"
+			>
 				<PatientStats />
 			</el-col>
 		</el-row>

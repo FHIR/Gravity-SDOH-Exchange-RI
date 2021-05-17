@@ -1,9 +1,11 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, ref } from "vue";
+import { computed, defineComponent, onMounted, onUnmounted, ref, watch, h } from "vue";
 import RequestTable from "@/components/patients/RequestTable.vue";
 import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
 import { Comment, Occurrence, Task, Condition, Goal, Procedure, TaskStatus, Coding } from "@/types";
 import { TasksModule } from "@/store/modules/tasks";
+import { ElNotification } from "element-plus";
+import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
 
 export type TableData = {
 	name: string,
@@ -23,6 +25,12 @@ export type TableData = {
 	id: string
 }
 
+export type taskStatusDiff = {
+	name: string,
+	oldStatus: TaskStatus,
+	newStatus: TaskStatus
+};
+
 export default defineComponent({
 	name: "ActionSteps",
 	components: {
@@ -33,32 +41,26 @@ export default defineComponent({
 		const activeGroup = ref<string>("referrals");
 		const newRequestDialogVisible = ref<boolean>(false);
 		const isRequestLoading = ref<boolean>(false);
-		const tasks = computed<Task[] | null>(() => TasksModule.tasks);
-		const tableData = computed<TableData[]>(() => {
-			const res: TableData[] = [];
-
-			tasks.value && tasks.value.forEach((task: Task) => {
-				res.push({
-					name: task.name,
-					status: task.status,
-					category: task.serviceRequest.category,
-					problems: task.serviceRequest.conditions,
-					goals: task.serviceRequest.goals,
-					performer: task.organization?.name,
-					consent: task.serviceRequest.consent.display,
-					outcomes: task.outcome,
-					comments: task.comments,
-					lastModified: task.lastModified,
-					request: task.serviceRequest.code,
-					priority: task.priority,
-					occurrence: task.serviceRequest.occurrence,
-					procedures: task.procedures,
-					id: task.id
-				});
-			});
-
-			return res;
-		});
+		const tasks = computed<Task[]>(() => TasksModule.tasks);
+		const tableData = computed<TableData[]>(() =>
+			tasks.value.map((task: Task) => ({
+				name: task.name,
+				status: task.status,
+				category: task.serviceRequest.category,
+				problems: task.serviceRequest.conditions,
+				goals: task.serviceRequest.goals,
+				performer: task.organization?.name,
+				consent: task.serviceRequest.consent.display,
+				outcomes: task.outcome,
+				comments: task.comments,
+				lastModified: task.lastModified,
+				request: task.serviceRequest.code,
+				priority: task.priority,
+				occurrence: task.serviceRequest.occurrence,
+				procedures: task.procedures,
+				id: task.id
+			}))
+		);
 		const activeRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status !== "Completed"));
 		const completedRequests = computed<TableData[]>(() => tableData.value.filter(t => t.status === "Completed"));
 
@@ -73,15 +75,63 @@ export default defineComponent({
 		});
 		const pollId = ref<number>();
 		const pollData = async () => {
-			try {
-				await TasksModule.getTasks();
-			} finally {
-				// todo: should we continue polling if request failed? adjust polling time later to be in sync with BE
-				pollId.value = window.setTimeout(pollData, 15000);
-			}
+			await TasksModule.getTasks();
+			pollId.value = window.setTimeout(pollData, 5000);
 		};
 		onUnmounted(() => {
 			clearTimeout(pollId.value);
+		});
+
+		//
+		// Find diffs in tasks statuses.
+		// Skip new tasks, we don't need to show notifications on that, cause we are the only one who creates tasks.
+		//
+		const findDiff = (val: Task[], oldVal: Task[]): taskStatusDiff[] =>
+			val.flatMap((task: Task) => {
+				const existingTask = oldVal.find(t => t.id === task.id);
+				if (!existingTask) {
+					return [];
+				}
+
+				const oldStatus = existingTask.status;
+				const newStatus = task.status;
+				if (oldStatus === newStatus) {
+					return [];
+				}
+
+				return [{
+					name: task.name,
+					oldStatus,
+					newStatus
+				}];
+			});
+
+		watch(() => tasks.value, (val, oldVal) => {
+			const diff = findDiff(val, oldVal);
+
+			diff.forEach(update => {
+				const message = h("p", [
+					`CP changed status of task "${update.name}" from `,
+					h(TaskStatusIcon, {
+						status: update.oldStatus,
+						small: true,
+						showLabel: true
+					}),
+					" to ",
+					h(TaskStatusIcon,{
+						status: update.newStatus,
+						small: true,
+						showLabel: true
+					})
+				]);
+
+				ElNotification({
+					title: "Update",
+					iconClass: "notification-bell",
+					duration: 10000,
+					message
+				});
+			});
 		});
 
 		return {

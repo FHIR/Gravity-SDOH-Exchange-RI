@@ -61,8 +61,9 @@ export default defineComponent({
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
 			performerOptions.value = await getOrganizations();
+			conditionOptions.value = await getConditions();
+			goalOptions.value = await getGoals();
 		};
-
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
 			emit("close");
@@ -112,6 +113,10 @@ export default defineComponent({
 				required: true,
 				message: "This field is required"
 			},
+			occurrence: {
+				required: true,
+				message: "This field is required"
+			},
 			consent: {
 				required: true,
 				message: "This field is required",
@@ -158,8 +163,12 @@ export default defineComponent({
 		const onCategoryChange = async (code: string) => {
 			formModel.code = "";
 			requestOptions.value = await getRequests(code);
-			conditionOptions.value = await getConditions(code);
-			goalOptions.value = await getGoals(code);
+		};
+		//
+		// On every until/from...to change clear model, element-ui can't work with array or date in both datepicker and range datepicker.
+		//
+		const onOccurrenceSelectChange = () => {
+			formModel.occurrence = "";
 		};
 
 		return {
@@ -177,7 +186,8 @@ export default defineComponent({
 			saveInProgress,
 			onCategoryChange,
 			onDialogOpen,
-			onDialogClose
+			onDialogClose,
+			onOccurrenceSelectChange
 		};
 	}
 });
@@ -294,13 +304,14 @@ export default defineComponent({
 					v-model="occurrenceType"
 					placeholder="Select"
 					class="small"
+					@change="onOccurrenceSelectChange"
 				>
 					<el-option
 						label="Until"
 						value="until"
 					/>
 					<el-option
-						label="Range"
+						label="From...to"
 						value="range"
 					/>
 				</el-select>
@@ -315,8 +326,8 @@ export default defineComponent({
 					v-model="formModel.occurrence"
 					type="daterange"
 					range-separator="To"
-					start-placeholder="Start date"
-					end-placeholder="End date"
+					start-placeholder="Select date"
+					end-placeholder="Select date"
 					:disabled-date="disabledOccurrenceDate"
 				/>
 			</el-form-item>
