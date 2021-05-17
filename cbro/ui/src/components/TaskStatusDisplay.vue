@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, PropType, computed } from "vue";
+import { defineComponent, PropType } from "vue";
 import { TaskStatus } from "@/types";
 
 
@@ -44,8 +44,9 @@ export default defineComponent({
 @import "~@/assets/scss/abstracts/variables";
 
 .task-status {
-	display: flex;
-	align-items: center;
+	white-space: nowrap;
+	display: inline-flex;
+	align-items: baseline;
 
 	.icon {
 		width: 20px;

@@ -69,15 +69,19 @@ public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto>
     patientDto.getPhones()
         .addAll(telecom.stream()
             .filter(t -> ContactPoint.ContactPointSystem.PHONE.equals(t.getSystem()))
-            .map(cp -> new PhoneDto(cp.getUse()
-                .getDisplay(), cp.getValue()))
+            .map(cp -> {
+              String display = cp.getUse() == null ? null : cp.getUse().getDisplay();
+              return new PhoneDto(display, cp.getValue());
+            })
             .collect(Collectors.toList()));
     //Get email addreses
     patientDto.getEmails()
         .addAll(telecom.stream()
             .filter(t -> ContactPoint.ContactPointSystem.EMAIL.equals(t.getSystem()))
-            .map(cp -> new EmailDto(cp.getUse()
-                .getDisplay(), cp.getValue()))
+            .map(cp -> {
+              String display = cp.getUse() == null ? null : cp.getUse().getDisplay();
+              return new EmailDto(display, cp.getValue());
+            })
             .collect(Collectors.toList()));
     if(patientInfo.getEmployment() != null) {
       String employmentStatus = patientInfo.getEmployment()

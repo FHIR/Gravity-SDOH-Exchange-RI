@@ -75,12 +75,8 @@ export default defineComponent({
 		});
 		const pollId = ref<number>();
 		const pollData = async () => {
-			try {
-				await TasksModule.getTasks();
-			} finally {
-				// todo: should we continue polling if request failed? adjust polling time later to be in sync with BE
-				pollId.value = window.setTimeout(pollData, 5000);
-			}
+			await TasksModule.getTasks();
+			pollId.value = window.setTimeout(pollData, 5000);
 		};
 		onUnmounted(() => {
 			clearTimeout(pollId.value);
