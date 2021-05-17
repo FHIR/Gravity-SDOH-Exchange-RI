@@ -20,6 +20,8 @@ import org.hl7.fhir.validation.ValidationEngine;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.QuestionnaireRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.StructureMapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
@@ -53,7 +55,7 @@ public class ConvertService {
   private final StructureMapRepository structureMapRepository;
   private ValidationEngine validationEngine;
 
-  //@EventListener(ApplicationReadyEvent.class)
+  @EventListener(ApplicationReadyEvent.class)
   public void initValidationEngine() throws IOException, URISyntaxException {
     String definitions = VersionUtilities.packageForVersion(PACKAGE_VERSION) + "#" + VersionUtilities.getCurrentVersion(
         PACKAGE_VERSION);
