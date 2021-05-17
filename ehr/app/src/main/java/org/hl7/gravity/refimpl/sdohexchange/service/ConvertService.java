@@ -87,12 +87,10 @@ public class ConvertService {
     if (!mapExists) {
       loadMapIg(mapUri);
     }
-    Bundle result = convertToBundle(questionnaireResponse, mapUri);
-    result.addEntry(toEntry(qs));
-    return new ObjectMapper().readValue(resourceParser.encodeResourceToString(result), Map.class);
+    return new ObjectMapper().readValue(convertToBundle(questionnaireResponse, mapUri), Map.class);
   }
 
-  private Bundle convertToBundle(JSONObject questionnaireResponse, String mapUri) {
+  private String convertToBundle(JSONObject questionnaireResponse, String mapUri) {
     String map;
     try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
       Element element = validationEngine.transform(questionnaireResponse.toString()
@@ -102,7 +100,8 @@ public class ConvertService {
       map = new String(byteArrayOutputStream.toByteArray());
     } catch (IOException e) {
       throw new IllegalStateException(String.format("QuestionnaireReponse with id cannot be parsed."), e.getCause());
-    } return (Bundle) resourceParser.parseResource(map);
+    }
+    return map;
   }
 
   private void loadStructureDefinitions() throws IOException {
