@@ -90,6 +90,8 @@ public class TaskReferenceResolver implements ReferenceResolver {
   public Organization getRequester() {
     if (localRequester == null) {
       Organization requester = externalRequester.copy();
+      // Remove SDOH profile, Logica does not support this.
+      // TODO Use SDOH Profiles.
       requester.setMeta(null);
       requester.addIdentifier()
           .setSystem(identifierSystem)
@@ -103,6 +105,8 @@ public class TaskReferenceResolver implements ReferenceResolver {
 
   public ServiceRequest getServiceRequest() {
     ServiceRequest serviceRequest = externalServiceRequest.copy();
+    // Remove SDOH profile, Logica does not support this.
+    // TODO Use SDOH Profiles.
     serviceRequest.setMeta(null);
     serviceRequest.addIdentifier()
         .setSystem(identifierSystem)

@@ -116,6 +116,8 @@ public class ServiceRequestReferenceResolver implements ReferenceResolver {
     if (condition == null) {
       condition = externalConditions.get(iIdType.getIdPart())
           .copy();
+      // Remove SDOH profile, Logica does not support this.
+      // TODO Use SDOH Profiles.
       condition.setMeta(null);
       // Set identifier to link resource from EHR
       condition.addIdentifier()
@@ -140,6 +142,8 @@ public class ServiceRequestReferenceResolver implements ReferenceResolver {
     if (goal == null) {
       goal = externalGoals.get(iIdType.getIdPart())
           .copy();
+      // Remove SDOH profile, Logica does not support this.
+      // TODO Use SDOH Profiles.
       goal.setMeta(null);
       // Set identifier to link resource from EHR
       goal.addIdentifier()
@@ -158,6 +162,8 @@ public class ServiceRequestReferenceResolver implements ReferenceResolver {
   public Consent getConsent(IIdType iIdType) {
     Consent consent = externalConsents.get(iIdType.getIdPart())
         .copy();
+    // Remove SDOH profile, Logica does not support this.
+    // TODO Use SDOH Profiles.
     consent.setMeta(null);
     // Set identifier to link resource from EHR
     consent.addIdentifier()
