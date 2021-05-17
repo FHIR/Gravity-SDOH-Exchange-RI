@@ -90,6 +90,7 @@ public class TaskReferenceResolver implements ReferenceResolver {
   public Organization getRequester() {
     if (localRequester == null) {
       Organization requester = externalRequester.copy();
+      requester.setMeta(null);
       requester.addIdentifier()
           .setSystem(identifierSystem)
           .setValue(requester.getIdElement()
@@ -102,6 +103,7 @@ public class TaskReferenceResolver implements ReferenceResolver {
 
   public ServiceRequest getServiceRequest() {
     ServiceRequest serviceRequest = externalServiceRequest.copy();
+    serviceRequest.setMeta(null);
     serviceRequest.addIdentifier()
         .setSystem(identifierSystem)
         .setValue(serviceRequest.getIdElement()
