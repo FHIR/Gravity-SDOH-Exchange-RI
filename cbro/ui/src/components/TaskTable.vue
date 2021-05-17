@@ -59,7 +59,7 @@ const orderOnTasks = (left: TaskState, right: TaskState): number => {
 
 export default defineComponent({
 	components: { TaskStatusDisplay },
-	emits: ["task-name-click"],
+	emits: ["task-name-click", "task-view-click"],
 	props: {
 		tasks: {
 			type: Array as PropType<TaskState[]>,
@@ -75,9 +75,15 @@ export default defineComponent({
 			ctx.emit("task-name-click", task);
 		};
 
+		const taskViewClick = (taskId: string) => {
+			const task: TaskState = props.tasks.find(taskState => taskState.task.id === taskId)!;
+			ctx.emit("task-view-click", task);
+		};
+
 		return {
 			tableData,
-			taskNameClick
+			taskNameClick,
+			taskViewClick
 		};
 	}
 });
@@ -94,7 +100,8 @@ export default defineComponent({
 				width="290"
 			>
 				<template #default="{ row }">
-					<div class="task-name-cell"
+					<div
+						class="task-name-cell"
 						@click="taskNameClick(row.id)"
 					>
 						<span class="name">
@@ -184,8 +191,13 @@ export default defineComponent({
 				class-name="column-interactive"
 				:width="90"
 			>
-				<template #default="{}">
-					view
+				<template #default="{ row }">
+					<el-button
+						type="text"
+						@click="taskViewClick(row.id)"
+					>
+						view
+					</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -259,6 +271,10 @@ export default defineComponent({
 					border-top-right-radius: 5px;
 					border-bottom-right-radius: 5px;
 				}
+			}
+
+			.el-button--text {
+				text-decoration: underline;
 			}
 
 			.cell:empty::after {
