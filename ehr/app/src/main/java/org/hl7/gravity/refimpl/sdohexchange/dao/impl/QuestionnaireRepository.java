@@ -15,8 +15,9 @@ import java.util.Optional;
 @Component
 public class QuestionnaireRepository extends FhirRepository<Questionnaire> {
 
-  public QuestionnaireRepository(IGenericClient ehrClient) {
-    super(ehrClient);
+  //TODO: use secured ehrClient
+  public QuestionnaireRepository(IGenericClient openEhrClient) {
+    super(openEhrClient);
   }
 
   public Optional<Questionnaire> findByCanonnicalUri(String uri){
