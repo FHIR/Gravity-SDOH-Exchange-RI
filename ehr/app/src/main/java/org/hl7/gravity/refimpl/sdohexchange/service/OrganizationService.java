@@ -36,9 +36,9 @@ public class OrganizationService {
         .get(0);
     Endpoint endpoint = null;
     //TODO valdiate Organization using InstanceValidator. This will validate Organization type as well.
-    Coding orgCoding = FhirUtil.findCoding(organization.getType(), OrganizationTypeCode.SYSTEM);
-    if (orgCoding != null && OrganizationTypeCode.CP.toCode()
-        .equals(orgCoding.getCode())) {
+    Coding coding = FhirUtil.findCoding(organization.getType(), OrganizationTypeCode.SYSTEM);
+    if (coding != null && OrganizationTypeCode.CP.toCode()
+        .equals(coding.getCode())) {
       // Retrieve FHIR Endpoint instance
       endpoint = FhirUtil.getFromBundle(bundle, Endpoint.class)
           .stream()
@@ -47,12 +47,12 @@ public class OrganizationService {
               .equals(EndpointConnectionType.HL7FHIRREST.toCode()))
           .findFirst()
           .orElseThrow(() -> new IllegalStateException(
-              String.format("CBRO Organization resource with id '%s' does not contain endpoint of type '%s'.",
+              String.format("CP Organization resource with id '%s' does not contain endpoint of type '%s'.",
                   organization.getIdElement()
                       .getIdPart(), EndpointConnectionType.HL7FHIRREST)));
       if (Strings.isNullOrEmpty(endpoint.getAddress())) {
         throw new IllegalStateException(
-            String.format("Endpoint resource with id '%s' for a CBRO organization '' does not contain an address.",
+            String.format("Endpoint resource with id '%s' for a CP organization '' does not contain an address.",
                 endpoint.getIdElement()
                     .getIdPart(), organization.getIdElement()
                     .getIdPart()));

@@ -10,10 +10,12 @@ import org.hl7.fhir.r4.model.Task;
 @Getter
 @Setter
 public class UpdateTaskRequestDto {
+
   private TaskStatus status;
+  private String statusReason;
   private String comment;
 
-  public Task.TaskStatus getStatus(){
+  public Task.TaskStatus getStatus() {
     return status == null ? null : status.getTaskStatus();
   }
 }

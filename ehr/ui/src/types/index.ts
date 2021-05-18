@@ -50,6 +50,7 @@ export type Task = {
 	procedures: Procedure[]
 	serviceRequest: ServiceRequest,
 	status: TaskStatus,
+	statusReason: string | null
 };
 
 export type Organization = {

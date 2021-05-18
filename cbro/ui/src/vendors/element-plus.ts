@@ -16,6 +16,7 @@ import "element-plus/packages/theme-chalk/src/form.scss";
 import "element-plus/packages/theme-chalk/src/form-item.scss";
 import "element-plus/packages/theme-chalk/src/icon.scss";
 import "element-plus/packages/theme-chalk/src/notification.scss";
+import "element-plus/packages/theme-chalk/src/tag.scss";
 
 import {
 	ElTabs,
@@ -31,7 +32,8 @@ import {
 	ElRadioGroup,
 	ElForm,
 	ElFormItem,
-	ElIcon
+	ElIcon,
+	ElTag
 } from "element-plus";
 
 export default (app: App) => {
@@ -49,4 +51,5 @@ export default (app: App) => {
 	app.use(ElForm);
 	app.use(ElFormItem);
 	app.use(ElIcon);
+	app.use(ElTag);
 };

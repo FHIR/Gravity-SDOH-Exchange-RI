@@ -1,7 +1,5 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.factory;
 
-import java.util.List;
-import java.util.Objects;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -19,10 +17,12 @@ import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.InvalidTaskStatusException;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.Objects;
 
 @Getter
 @RequiredArgsConstructor
@@ -104,8 +104,10 @@ public class TaskUpdateBundleFactory {
 
   protected Procedure createProcedure(Coding coding) {
     Procedure procedure = new Procedure();
-    procedure.getMeta()
-        .addProfile(SDOHProfiles.PROCEDURE);
+    // TODO use SDOH profiles.
+    // Logica does not support profiles. This blocks subsequent requests.
+    //    procedure.getMeta()
+    //        .addProfile(SDOHProfiles.PROCEDURE);
     procedure.setId(IdType.newRandomUuid());
     procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
     procedure.setCategory(serviceRequest.getCategoryFirstRep());

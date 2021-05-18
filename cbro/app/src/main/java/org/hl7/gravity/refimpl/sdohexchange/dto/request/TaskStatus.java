@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 public enum TaskStatus {
   ACCEPTED(Task.TaskStatus.ACCEPTED.getDisplay(), Task.TaskStatus.ACCEPTED),
   REJECTED(Task.TaskStatus.REJECTED.getDisplay(), Task.TaskStatus.REJECTED),
+  CANCELLED(Task.TaskStatus.CANCELLED.getDisplay(), Task.TaskStatus.CANCELLED),
   ONHOLD(Task.TaskStatus.ONHOLD.getDisplay(), Task.TaskStatus.ONHOLD),
   INPROGRESS(Task.TaskStatus.INPROGRESS.getDisplay(), Task.TaskStatus.INPROGRESS),
   COMPLETED(Task.TaskStatus.COMPLETED.getDisplay(), Task.TaskStatus.COMPLETED);

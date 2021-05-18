@@ -37,16 +37,21 @@ public class TasksInfoComposer {
     // Retrieve all Task.owner Organization instances
     Map<String, Organization> organizationMap = FhirUtil.getFromBundle(tasksBundle, Organization.class)
         .stream()
-        .collect(Collectors.toMap(r -> r.getIdElement()
+        .collect(Collectors.toMap(organization -> organization.getIdElement()
             .getIdPart(), Function.identity()));
 
     return FhirUtil.getFromBundle(tasksBundle, Task.class)
         .stream()
-        .map(task -> new TaskInfo(task, serviceRequestInfoMap.get(task.getFocus()
-            .getReferenceElement()
-            .getIdPart()), organizationMap.get(task.getOwner()
-            .getReferenceElement()
-            .getIdPart())))
+        .map(task -> {
+              ServiceRequestInfo serviceRequestInfo = serviceRequestInfoMap.get(task.getFocus()
+                  .getReferenceElement()
+                  .getIdPart());
+              Organization organization = organizationMap.get(task.getOwner()
+                  .getReferenceElement()
+                  .getIdPart());
+              return new TaskInfo(task, serviceRequestInfo, organization);
+            }
+        )
         .collect(Collectors.toList());
   }
 }
