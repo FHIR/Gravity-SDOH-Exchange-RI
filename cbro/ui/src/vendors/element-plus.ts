@@ -18,6 +18,7 @@ import "element-plus/packages/theme-chalk/src/icon.scss";
 import "element-plus/packages/theme-chalk/src/notification.scss";
 import "element-plus/packages/theme-chalk/src/tag.scss";
 import "element-plus/packages/theme-chalk/src/loading.scss";
+import "element-plus/packages/theme-chalk/src/popover.scss";
 
 import {
 	ElTabs,
@@ -35,7 +36,8 @@ import {
 	ElFormItem,
 	ElIcon,
 	ElTag,
-	ElLoading
+	ElLoading,
+	ElPopover
 } from "element-plus";
 
 export default (app: App) => {
@@ -55,4 +57,5 @@ export default (app: App) => {
 	app.use(ElIcon);
 	app.use(ElTag);
 	app.use(ElLoading);
+	app.use(ElPopover);
 };
