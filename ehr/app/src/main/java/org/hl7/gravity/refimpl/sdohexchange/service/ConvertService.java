@@ -70,6 +70,11 @@ public class ConvertService {
   public Map<String, Object> convert(JSONObject questionnaireResponse) throws IOException {
     QuestionnaireResponse qs = (QuestionnaireResponse) fhirContext.newJsonParser()
         .parseResource(questionnaireResponse.toString());
+    if (qs.getQuestionnaire() == null) {
+      throw new IllegalStateException(
+          String.format("QuestionnaireResponse '%s' does not contain a link to a Questionnaire.", qs.getIdElement()
+              .getIdPart()));
+    }
     Optional<Questionnaire> foundQuestionnaire = questionnaireRepository.findByCanonnicalUri(qs.getQuestionnaire());
     if (!foundQuestionnaire.isPresent()) {
       throw new ResourceNotFoundException(
