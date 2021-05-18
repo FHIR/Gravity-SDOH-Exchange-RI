@@ -76,10 +76,26 @@ export default defineComponent({
 			<div class="pic">
 				<div class="mark"></div>
 			</div>
-			<div class="name">
-				<!-- TODO: restrict its size somehow -->
-				{{ userName }}
-			</div>
+			<el-popover
+				placement="bottom"
+				:width="140"
+				:offset="15"
+				trigger="click"
+				:append-to-body="false"
+			>
+				<a
+					class="logout"
+					href="/logout"
+				>Logout</a>
+				<template #reference>
+					<div class="details">
+						<div class="name">
+							<!-- TODO: restrict its size somehow -->
+							{{ userName }}
+						</div>
+					</div>
+				</template>
+			</el-popover>
 		</div>
 	</div>
 </template>
@@ -115,6 +131,13 @@ export default defineComponent({
 				color: $grey;
 			}
 		}
+	}
+
+	::v-deep(.el-popper.is-light) {
+		text-align: center;
+		font-size: $global-font-size;
+		font-weight: $global-font-weight-normal;
+		cursor: pointer;
 	}
 
 	.nav-tabs {
@@ -234,6 +257,7 @@ export default defineComponent({
 			margin-left: 15px;
 			font-size: $global-font-size;
 			font-weight: 700;
+			cursor: pointer;
 		}
 	}
 }
