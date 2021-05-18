@@ -11,6 +11,8 @@
 	},
 	"dependencies": {
 		"axios": "0.21.1",
+		"codemirror": "5.61.0",
+		"@types/codemirror": "5.60.0",
 		"core-js": "3.10.0",
 		"element-plus": "1.0.2-beta.36",
 		"lodash": "4.17.21",
