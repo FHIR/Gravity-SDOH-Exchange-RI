@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.gravity.refimpl.sdohexchange.dao.FhirRepository;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import java.util.Optional;
 
@@ -20,7 +21,8 @@ public class QuestionnaireRepository extends FhirRepository<Questionnaire> {
     super(openEhrClient);
   }
 
-  public Optional<Questionnaire> findByCanonnicalUri(String uri){
+  public Optional<Questionnaire> findByCanonnicalUri(String uri) {
+    Assert.notNull(uri, "CannonnicalUri should be specified");
     Bundle bundle = getClient().search()
         .forResource(Questionnaire.class)
         .where(Questionnaire.URL.matches()

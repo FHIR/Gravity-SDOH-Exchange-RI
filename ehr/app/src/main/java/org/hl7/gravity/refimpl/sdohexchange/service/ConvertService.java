@@ -56,7 +56,7 @@ public class ConvertService {
   private ValidationEngine validationEngine;
 
   @EventListener(ApplicationReadyEvent.class)
-  public void initValidationEngine() throws IOException, URISyntaxException {
+  protected void initValidationEngine() throws IOException, URISyntaxException {
     String definitions = VersionUtilities.packageForVersion(PACKAGE_VERSION) + "#" + VersionUtilities.getCurrentVersion(
         PACKAGE_VERSION);
     this.validationEngine = new ValidationEngine(definitions, FhirPublication.R4, PACKAGE_VERSION, new TimeTracker());
@@ -70,6 +70,11 @@ public class ConvertService {
   public Map<String, Object> convert(JSONObject questionnaireResponse) throws IOException {
     QuestionnaireResponse qs = (QuestionnaireResponse) fhirContext.newJsonParser()
         .parseResource(questionnaireResponse.toString());
+    if (qs.getQuestionnaire() == null) {
+      throw new IllegalStateException(
+          String.format("QuestionnaireResponse '%s' does not contain a link to a Questionnaire.", qs.getIdElement()
+              .getIdPart()));
+    }
     Optional<Questionnaire> foundQuestionnaire = questionnaireRepository.findByCanonnicalUri(qs.getQuestionnaire());
     if (!foundQuestionnaire.isPresent()) {
       throw new ResourceNotFoundException(
