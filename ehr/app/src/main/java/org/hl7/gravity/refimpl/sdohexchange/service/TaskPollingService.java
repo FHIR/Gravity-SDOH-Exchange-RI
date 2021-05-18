@@ -3,6 +3,9 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import com.google.common.base.Strings;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -50,6 +53,11 @@ public class TaskPollingService {
             .code(Task.TaskStatus.COMPLETED.toCode()))
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.CANCELLED.toCode()))
+        .where(Task.AUTHORED_ON.before()
+            .millis(Date.from(LocalDateTime.now()
+                .minusSeconds(15)
+                .atZone(ZoneId.systemDefault())
+                .toInstant())))
         .returnBundle(Bundle.class)
         .execute();
 
