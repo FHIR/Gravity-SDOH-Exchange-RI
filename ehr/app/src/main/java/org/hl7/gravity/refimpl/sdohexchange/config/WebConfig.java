@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/administration/convert")
+    registry.addMapping("/administration/$extract")
         .allowedOrigins("*")
         .allowedMethods("POST", "OPTIONS")
         .allowedHeaders("Content-Type", "X-Requested-With", "accept", "Origin", "Access-Control-Request-Method",

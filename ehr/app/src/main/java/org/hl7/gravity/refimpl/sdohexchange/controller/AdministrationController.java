@@ -25,7 +25,7 @@ public class AdministrationController {
 
   private final ConvertService convertService;
 
-  @PostMapping("/convert")
+  @PostMapping("/$extract")
   @ApiOperation(value = "Converts QuestionnaireResponse resource to Observation and Conditions",
       notes = "Converts QuestionnaireResponse resource to Observation and Conditions based on StructureMap, and "
           + "returns resulted transaction bundle.")
