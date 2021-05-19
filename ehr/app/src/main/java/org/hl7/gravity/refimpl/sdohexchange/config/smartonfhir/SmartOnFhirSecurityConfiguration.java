@@ -27,7 +27,7 @@ public class SmartOnFhirSecurityConfiguration extends WebSecurityConfigurerAdapt
 
   protected void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests()
-        .antMatchers("/administration/convert")
+        .antMatchers("/administration/$extract")
         .permitAll()
         .anyRequest().authenticated()
         .and().csrf()
