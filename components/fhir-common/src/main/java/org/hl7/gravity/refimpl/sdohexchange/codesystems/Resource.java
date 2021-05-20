@@ -11,6 +11,4 @@ public class Resource {
 
   private String resource;
   private List<System> systems;
-
-
 }

@@ -3,8 +3,18 @@ package org.hl7.gravity.refimpl.sdohexchange.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import com.google.common.base.Strings;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.fluentpath.FhirPathR4;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -16,15 +26,6 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Utility class for operations on FHIR resources.
@@ -101,6 +102,19 @@ public class FhirUtil {
   }
 
   /**
+   * Get first resource of specific type from a resource bundle. Resources are retrieved from Bundle.getResource().
+   */
+  public <T extends IBaseResource> T getFirstFromBundle(Bundle bundle, Class<T> resourceType) {
+    return bundle.getEntry()
+        .stream()
+        .map(Bundle.BundleEntryComponent::getResource)
+        .filter(resourceType::isInstance)
+        .map(resourceType::cast)
+        .findFirst()
+        .orElse(null);
+  }
+
+  /**
    * Get resource id for a resource of specific type from a resource bundle. Resources are retrieved from
    * Bundle.getResponse(). If multiple resources of the same type are present - a first one will be fetched.
    */
@@ -146,6 +160,18 @@ public class FhirUtil {
           .getValue());
     }
     return entry;
+  }
+
+  /**
+   * Create a {@link org.hl7.fhir.r4.model.Bundle.BundleEntryComponent} GET entry for a search as part of a transaction
+   * Bundle.
+   */
+  public Bundle.BundleEntryComponent createGetEntry(String url) {
+    Bundle.BundleEntryComponent bundleEntryComponent = new Bundle.BundleEntryComponent();
+    bundleEntryComponent.getRequest()
+        .setMethod(Bundle.HTTPVerb.GET)
+        .setUrl(url);
+    return bundleEntryComponent;
   }
 
   /**

@@ -1,0 +1,1 @@
+web: java -Dserver.port=$PORT -Dcp.fhir-server-uri=$FHIR_SERVER_URI -Dcp.open-fhir-server-uri=$OPEN_FHIR_SERVER_URI -Dspring.security.oauth2.client.registration.cp-client.client-id=$CLIENT_ID -Dspring.security.oauth2.client.registration.cp-client.client-secret=$CLIENT_SECRET -jar $PATH_TO_JAR

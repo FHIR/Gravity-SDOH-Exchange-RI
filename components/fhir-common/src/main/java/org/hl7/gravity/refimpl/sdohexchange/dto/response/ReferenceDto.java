@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 public class ReferenceDto implements TypeDto {
 
   private String id;
-  private String resourceType;
   private String display;
 }

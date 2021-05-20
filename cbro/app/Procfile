@@ -1,1 +1,0 @@
-web: java -Dserver.port=$PORT -Dcbro.fhir-server-uri=$FHIR_SERVER_URI -Dcbro.open-fhir-server-uri=$OPEN_FHIR_SERVER_URI -Dspring.security.oauth2.client.registration.cbro-client.client-id=$CLIENT_ID -Dspring.security.oauth2.client.registration.cbro-client.client-secret=$CLIENT_SECRET -jar $PATH_TO_JAR

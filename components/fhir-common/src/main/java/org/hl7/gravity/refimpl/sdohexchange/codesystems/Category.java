@@ -1,10 +1,8 @@
 package org.hl7.gravity.refimpl.sdohexchange.codesystems;
 
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hl7.fhir.exceptions.FHIRException;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -12,11 +10,11 @@ public class Category extends Coding {
 
   private List<Resource> resources;
 
-  public Resource getResource(Class<? extends org.hl7.fhir.r4.model.Resource> resource) {
+  public Resource findResource(Class<? extends org.hl7.fhir.r4.model.Resource> resourceClass) {
     return resources.stream()
-        .filter(r -> r.getResource()
-            .equals(resource.getSimpleName()))
+        .filter(resource -> resource.getResource()
+            .equals(resourceClass.getSimpleName()))
         .findFirst()
-        .orElseThrow(() -> new FHIRException("Unknown '" + resource.getSimpleName() + "' resource."));
+        .orElse(null);
   }
 }
