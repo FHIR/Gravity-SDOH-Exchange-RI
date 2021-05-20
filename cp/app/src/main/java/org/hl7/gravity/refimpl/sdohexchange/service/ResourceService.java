@@ -31,13 +31,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ResourceService {
 
-  private final IGenericClient cbroClient;
+  private final IGenericClient cpClient;
   private final ResourceLoader resourceLoader;
   private final ResourceParser resourceParser;
 
   public TaskJsonResourcesDto getTaskResources(String id) {
     // Getting task by id with Patient, requester Organization and ServiceRequest
-    Bundle taskBundle = cbroClient.search()
+    Bundle taskBundle = cpClient.search()
         .forResource(Task.class)
         .where(Task.RES_ID.exactly()
             .code(id))
@@ -58,7 +58,7 @@ public class ResourceService {
 
     // Load all Task Procedures and ServiceRequest required resources as one transaction
     Map<Class<? extends Resource>, List<Resource>> loadedResources =
-        resourceLoader.getResources(cbroClient, collectAllReferences(task, serviceRequest));
+        resourceLoader.getResources(cpClient, collectAllReferences(task, serviceRequest));
 
     TaskJsonResourcesDto resourcesDto = new TaskJsonResourcesDto();
     resourcesDto.setTask(resourceParser.parse(task));
