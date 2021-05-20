@@ -19,7 +19,7 @@
   <modules>
     <module>components</module>
     <module>ehr</module>
-    <module>cbro</module>
+    <module>cp</module>
   </modules>
 
 </project>

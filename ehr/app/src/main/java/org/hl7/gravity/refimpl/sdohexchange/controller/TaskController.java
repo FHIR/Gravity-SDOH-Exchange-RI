@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewTaskRequestDto;
@@ -51,7 +52,7 @@ public class TaskController {
 
   @PutMapping("{id}")
   @ApiOperation(value = "Update Task resource.")
-  public ResponseEntity<TaskDto> update(@PathVariable String id,
+  public ResponseEntity<TaskDto> update(@PathVariable @NotBlank(message = "Task id can't be empty.") String id,
       @RequestBody UpdateTaskRequestDto update) {
     TaskDto taskDto = taskService.update(id, update);
     return taskDto == null ? ResponseEntity.notFound()

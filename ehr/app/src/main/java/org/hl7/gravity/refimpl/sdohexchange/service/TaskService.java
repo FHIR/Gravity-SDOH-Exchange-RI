@@ -70,8 +70,8 @@ public class TaskService {
         .getReferenceElement()
         .getIdPart();
 
-    Coding category = sdohMappings.findCategory(taskRequest.getCategory());
-    Coding requestCode = sdohMappings.findCoding(ServiceRequest.class, taskRequest.getCode());
+    Coding category = sdohMappings.findCategoryCoding(taskRequest.getCategory());
+    Coding requestCode = sdohMappings.findResourceCoding(ServiceRequest.class, taskRequest.getCode());
 
     TaskBundleFactory taskBundleFactory = new TaskBundleFactory(taskRequest.getName(), smartOnFhirContext.getPatient(),
         category, requestCode, taskRequest.getPriority(), taskRequest.getOccurrence(), taskRequest.getPerformerId(),

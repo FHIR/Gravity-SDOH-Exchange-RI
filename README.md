@@ -7,7 +7,7 @@ Reference Implementation for the Gravity use cases specified at https://confluen
 ## Local Testing
 ### Configure
 To configure both apps to use custom Sandbox URLs - set the following system variables:
-Replace **{APP}** with either `ehr` or `cbro`.
+Replace **{APP}** with either `ehr` or `cp`.
 
 | Variable | Description |
 | ------ | ------ |
@@ -31,7 +31,7 @@ java -Dserver.port=8080 -jar ehr/app/target/app-1.0-SNAPSHOT.jar
 ```
 or
 ```sh
-java -Dserver.port=8082 -jar cbro/app/target/app-1.0-SNAPSHOT.jar
+java -Dserver.port=8082 -jar cp/app/target/app-1.0-SNAPSHOT.jar
 ```
 
 Change port `8080` to any other port you want an application to listen to. Specify varaibles before the `-jar` flag in format `-Dvariable=value`. 
