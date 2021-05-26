@@ -1,13 +1,8 @@
 <script lang="ts">
 import { defineComponent, PropType, computed } from "vue";
-import { Task, TaskStatus } from "@/types";
+import { Task, TaskStatus, TaskWithState } from "@/types";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
-
-
-type TaskState = {
-	task: Task,
-	isNew: boolean
-}
+import { showDate } from "@/utils";
 
 
 type TaskDisplayFields = {
@@ -28,11 +23,11 @@ type TaskDisplayFields = {
 }
 
 
-const displayTask = ({ task, isNew }: TaskState): TaskDisplayFields => ({
+const displayTask = ({ task, isNew }: TaskWithState): TaskDisplayFields => ({
 	id: task.id,
 	taskName: task.name,
 	isNew,
-	requestDate: new Date(task.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+	requestDate: showDate(task.createdAt),
 	priority: task.priority,
 	status: task.status,
 	category: task.serviceRequest.category.display,
@@ -46,7 +41,7 @@ const displayTask = ({ task, isNew }: TaskState): TaskDisplayFields => ({
 });
 
 
-const orderOnTasks = (left: TaskState, right: TaskState): number => {
+const orderOnTasks = (left: TaskWithState, right: TaskWithState): number => {
 	if (left.isNew !== right.isNew) {
 		return left.isNew ? -1 : 1;
 	}
@@ -61,7 +56,7 @@ export default defineComponent({
 	components: { TaskStatusDisplay },
 	props: {
 		tasks: {
-			type: Array as PropType<TaskState[]>,
+			type: Array as PropType<TaskWithState[]>,
 			required: true
 		}
 	},
@@ -71,7 +66,7 @@ export default defineComponent({
 		const tableData = computed(() => tasksInOrder.value.map(displayTask));
 
 		const taskNameClick = (taskId: string) => {
-			const task: TaskState = props.tasks.find(taskState => taskState.task.id === taskId)!;
+			const task: TaskWithState = props.tasks.find(taskState => taskState.task.id === taskId)!;
 			ctx.emit("task-name-click", task);
 		};
 

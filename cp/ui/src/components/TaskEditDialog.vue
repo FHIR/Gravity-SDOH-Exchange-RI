@@ -3,7 +3,8 @@ import { defineComponent, PropType, ref, computed, watch, reactive, toRefs } fro
 import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure } from "@/types";
 import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
-import { updateTask, getProceduresForCategory } from "@/api";
+import { updateTask, getTask, getProceduresForCategory } from "@/api";
+import { showDate, showDateTime } from "@/utils";
 
 
 type TaskStuff = {
@@ -22,7 +23,7 @@ type TaskStuff = {
 	previouslySetProcedures: string[]
 }
 
-const initTaskStuff: TaskStuff = {
+const initialTaskStuff: TaskStuff = {
 	id: "",
 	requestName: "",
 	requestor: "",
@@ -45,8 +46,6 @@ const Flow: { [status in TaskStatus]?: TaskStatus[] } = {
 	"On Hold":     ["In Progress", "Cancelled"]
 };
 
-const showDate = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-
 const showOccurrence = (ocr: Occurrence) => ocr.start ? `From ${showDate(ocr.start)} to ${showDate(ocr.end)}` : `Until ${showDate(ocr.end)}`;
 
 const prepareTaskStuff = (task: Task): TaskStuff => ({
@@ -59,7 +58,7 @@ const prepareTaskStuff = (task: Task): TaskStuff => ({
 	occurrence: showOccurrence(task.serviceRequest.occurrence),
 	previousComments: task.comments.map(({ text }) => text),
 	status: task.status,
-	statusDate: new Date(task.lastModified).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric" }),
+	statusDate: showDateTime(task.lastModified),
 	outcome: task.outcome || "",
 	statusReason: task.statusReason || "",
 	previouslySetProcedures: task.procedures.map(proc => proc.display)
@@ -78,7 +77,7 @@ export default defineComponent({
 	setup(props, ctx) {
 		const opened = computed(() => props.task !== null);
 
-		const taskFields = ref<TaskStuff>(initTaskStuff);
+		const taskFields = ref<TaskStuff>(initialTaskStuff);
 
 		const status = ref<TaskStatus>("Received");
 		const comment = ref<string>("");
@@ -152,9 +151,10 @@ export default defineComponent({
 			};
 			saveInProgress.value = true;
 			try {
-				const resp = await updateTask(taskFields.value.id, payload);
-				ctx.emit("task-updated", resp);
-				init(resp);
+				await updateTask(taskFields.value.id, payload);
+				const updatedTask = await getTask(taskFields.value.id);
+				ctx.emit("task-updated", updatedTask);
+				init(updatedTask);
 			} finally {
 				saveInProgress.value = false;
 			}
@@ -415,7 +415,7 @@ export default defineComponent({
 					round
 					@click="beforeClose"
 				>
-					Cancel
+					{{ isFinalized ? "Close" : "Cancel" }}
 				</el-button>
 				<el-button
 					v-if="!isFinalized"
