@@ -223,7 +223,7 @@ export default defineComponent({
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 20px;
+	margin-bottom: 30px;
 }
 
 .referrals {
@@ -231,11 +231,11 @@ export default defineComponent({
 }
 
 .no-request-data {
-	height: 350px;
+	height: 240px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-start;
 	background-color: $global-background;
 
 	h2 {
