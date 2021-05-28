@@ -1,18 +1,12 @@
 <script lang="ts">
 import { defineComponent, ref, h } from "vue";
-import { Task } from "@/types";
+import { Task, TaskWithState } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
 import { ElNotification } from "element-plus";
 import TaskResourcesDialog from "@/components/TaskResourcesDialog.vue";
 import TaskEditDialog from "@/components/TaskEditDialog.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
-
-
-type TaskState = {
-	task: Task,
-	isNew: boolean
-}
 
 
 const poll = <T>(
@@ -39,7 +33,7 @@ const poll = <T>(
 export default defineComponent({
 	components: { TaskEditDialog, TaskResourcesDialog, TaskTable },
 	setup() {
-		const tasks = ref<TaskState[]>([]);
+		const tasks = ref<TaskWithState[]>([]);
 
 		getTasks().then(resp => {
 			tasks.value = resp.map(task => ({ task, isNew: false }));
@@ -127,7 +121,7 @@ export default defineComponent({
 
 		const taskInEdit = ref<Task | null>(null);
 
-		const editTask = (taskToEdit: TaskState) => {
+		const editTask = (taskToEdit: TaskWithState) => {
 			markTaskAsNotNew(taskToEdit.task.id);
 			taskInEdit.value = taskToEdit.task;
 		};

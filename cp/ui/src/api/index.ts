@@ -9,7 +9,9 @@ export const getUserInfo = () => axios.get<User>("/user-info").then(dataOnly);
 
 export const getTasks = () => axios.get<Task[]>("/task").then(dataOnly);
 
-export const updateTask = (taskId: string, data: UpdateTaskPayload) => axios.put<Task>(`/task/${taskId}`, data).then(dataOnly);
+export const getTask = (taskId: string) => axios.get<Task>(`/task/${taskId}`).then(dataOnly);
+
+export const updateTask = (taskId: string, data: UpdateTaskPayload) => axios.put<void>(`/task/${taskId}`, data).then(dataOnly);
 
 export const getProceduresForCategory = (categoryCode: string) => axios.get<Procedure[]>(`/mappings/categories/${categoryCode}/procedure/codings`).then(dataOnly);
 

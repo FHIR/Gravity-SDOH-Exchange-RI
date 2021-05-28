@@ -14,7 +14,8 @@ const prepareData = (data: Resources) => [
 	{ label: "Patient", data: prettyPrint(data.patient) },
 	{ label: "Consent", data: prettyPrint(data.consent) },
 	{ label: "Conditions", data: JSON.stringify(data.conditions.map(str => JSON.parse(str)), null, "\t") },
-	{ label: "Goals", data: JSON.stringify(data.goals.map(str => JSON.parse(str)), null, "\t") }
+	{ label: "Goals", data: JSON.stringify(data.goals.map(str => JSON.parse(str)), null, "\t") },
+	{ label: "Procedures", data: JSON.stringify(data.procedures.map(str => JSON.parse(str)), null, "\t") }
 ];
 
 export default defineComponent({
@@ -92,7 +93,7 @@ export default defineComponent({
 					round
 					@click="beforeClose"
 				>
-					Cancel
+					Close
 				</el-button>
 			</div>
 		</el-dialog>

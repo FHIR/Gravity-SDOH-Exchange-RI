@@ -70,12 +70,18 @@ export type Task = {
 	}[]
 }
 
+export type TaskWithState = {
+	task: Task,
+	isNew: boolean
+}
+
 
 export type UpdatedStatus =
 	| "Accepted"
 	| "In Progress"
 	| "On Hold"
 	| "Rejected"
+	| "Cancelled"
 	| "Completed"
 
 export type UpdateTaskPayload = {
@@ -100,5 +106,6 @@ export type Resources = {
 	patient: string,
 	consent: string,
 	conditions: string[],
-	goals: string[]
+	goals: string[],
+	procedures: string[]
 }
