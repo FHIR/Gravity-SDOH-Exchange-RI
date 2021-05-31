@@ -39,14 +39,14 @@ export default defineComponent({
 
 <template>
 	<div>
-		<div class="title">
-			<h4>
-				{{ title }}
-			</h4>
-		</div>
 		<div
 			class="table-wrapper"
 		>
+			<div class="title">
+				<h3>
+					{{ title }}
+				</h3>
+			</div>
 			<el-table :data="data">
 				<el-table-column
 					label="Request/Task"
@@ -135,9 +135,9 @@ export default defineComponent({
 @import "~@/assets/scss/abstracts/variables";
 
 .title {
-	margin: 20px 0;
+	margin: 10px 20px 0;
 
-	h4 {
+	h3 {
 		font-weight: $global-font-weight-medium;
 		margin: 0;
 	}
@@ -146,7 +146,7 @@ export default defineComponent({
 .table-wrapper {
 	background-color: $global-background;
 	border-radius: 5px;
-	box-shadow: 0 2px 5px rgba(51, 51, 51, 0.25);
+	border: 1px solid $global-base-border-color;
 	padding: 10px 20px;
 	min-height: 130px;
 }
@@ -165,7 +165,7 @@ export default defineComponent({
 
 		th,
 		td {
-			padding: 7px 0;
+			padding: 5px 0;
 		}
 	}
 
@@ -199,7 +199,7 @@ export default defineComponent({
 
 	::v-deep(.cell) {
 		white-space: nowrap;
-		padding: 0 15px;
+		padding: 0 20px;
 		font-size: $global-medium-font-size;
 		line-height: 19px;
 	}

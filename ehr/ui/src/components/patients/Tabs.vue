@@ -55,12 +55,6 @@ export default defineComponent({
 		>
 			Consent
 		</el-tab-pane>
-		<el-tab-pane
-			label="Other..."
-			name="other"
-		>
-			Other
-		</el-tab-pane>
 	</el-tabs>
 </template>
 
@@ -70,14 +64,16 @@ export default defineComponent({
 .el-tabs {
 	width: 100%;
 	background-color: $global-background;
+	border-radius: 5px;
+	box-shadow: $global-box-shadow;
 
 	::v-deep(.el-tabs__header) {
 		margin: 0;
 	}
 
 	::v-deep(.el-tabs__nav-wrap) {
-		border: 1px solid $global-base-border-color;
-		padding: 0 15px;
+		border-bottom: 1px solid $global-base-border-color;
+		padding: 0 25px;
 
 		&::after {
 			height: 0;
@@ -91,8 +87,7 @@ export default defineComponent({
 	}
 
 	::v-deep(.el-tab-pane) {
-		padding: 20px 0;
-		background-color: $aqua-haze;
+		padding: 20px;
 	}
 
 	::v-deep(.el-tabs__item) {
@@ -107,7 +102,7 @@ export default defineComponent({
 		}
 
 		&.is-top:nth-child(2) {
-			padding-left: 20px;
+			padding-left: 35px;
 		}
 	}
 }

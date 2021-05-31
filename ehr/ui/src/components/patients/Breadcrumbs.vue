@@ -26,7 +26,7 @@ export default defineComponent({
 	background: $global-background;
 	height: 65px;
 	width: 100%;
-	padding: 25px 35px;
-	box-shadow: 0 2px 5px rgba(51, 51, 51, 0.25);
+	padding: 25px 20px;
+	box-shadow: $global-box-shadow;
 }
 </style>
