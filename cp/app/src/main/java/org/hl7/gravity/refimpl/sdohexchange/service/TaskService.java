@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
@@ -27,7 +26,6 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskInfoBundleParser;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskInfoBundleParser.TaskInfoHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -66,57 +64,31 @@ public class TaskService {
   }
 
   public void update(String id, UpdateTaskRequestDto update, UserDto user) {
-    if (update.isOnlyAddComment()) {
-      addComment(id, update.getComment(), user);
-    } else {
-      // Validates and converts Procedure codes to Coding
-      List<Coding> procedureCodes = Optional.ofNullable(update.getProcedureCodes())
-          .orElse(Collections.emptyList())
-          .stream()
-          .map(code -> sdohMappings.findResourceCoding(Procedure.class, code))
-          .collect(Collectors.toList());
-      Bundle taskBundle = cpClient.search()
-          .forResource(Task.class)
-          .where(Task.RES_ID.exactly()
-              .code(id))
-          .include(Task.INCLUDE_FOCUS)
-          .returnBundle(Bundle.class)
-          .execute();
-      TaskInfoHolder taskInfo = new TaskInfoBundleParser().parse(taskBundle)
-          .stream()
-          .findFirst()
-          .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)));
-      TaskUpdateBundleFactory bundleFactory = new TaskUpdateBundleFactory();
-      bundleFactory.setTask(taskInfo.getTask());
-      bundleFactory.setServiceRequest(taskInfo.getServiceRequest());
-      bundleFactory.setStatus(update.getTaskStatus());
-      bundleFactory.setStatusReason(update.getStatusReason());
-      bundleFactory.setComment(update.getComment());
-      bundleFactory.setOutcome(update.getOutcome());
-      bundleFactory.setProcedureCodes(procedureCodes);
-      bundleFactory.setUser(user);
-      cpClient.transaction()
-          .withBundle(bundleFactory.createUpdateBundle())
-          .execute();
-    }
-  }
-
-  protected void addComment(String id, String comment, UserDto user) {
-    Assert.notNull(comment, "Comment cannot be null.");
+    // Validates and converts Procedure codes to Coding
+    List<Coding> procedureCodes = Optional.ofNullable(update.getProcedureCodes())
+        .orElse(Collections.emptyList())
+        .stream()
+        .map(code -> sdohMappings.findResourceCoding(Procedure.class, code))
+        .collect(Collectors.toList());
     Bundle taskBundle = cpClient.search()
         .forResource(Task.class)
-        .where(BaseResource.RES_ID.exactly()
-            .codes(id))
+        .where(Task.RES_ID.exactly()
+            .code(id))
+        .include(Task.INCLUDE_FOCUS)
         .returnBundle(Bundle.class)
         .execute();
-    Task task = new TaskInfoBundleParser().parse(taskBundle)
+    TaskInfoHolder taskInfo = new TaskInfoBundleParser().parse(taskBundle)
         .stream()
         .findFirst()
-        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)))
-        .getTask();
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)));
     TaskUpdateBundleFactory bundleFactory = new TaskUpdateBundleFactory();
-    bundleFactory.setTask(task);
-    bundleFactory.setComment(comment);
+    bundleFactory.setTask(taskInfo.getTask());
+    bundleFactory.setServiceRequest(taskInfo.getServiceRequest());
+    bundleFactory.setStatus(update.getTaskStatus());
+    bundleFactory.setStatusReason(update.getStatusReason());
+    bundleFactory.setComment(update.getComment());
+    bundleFactory.setOutcome(update.getOutcome());
+    bundleFactory.setProcedureCodes(procedureCodes);
     bundleFactory.setUser(user);
     cpClient.transaction()
         .withBundle(bundleFactory.createUpdateBundle())
