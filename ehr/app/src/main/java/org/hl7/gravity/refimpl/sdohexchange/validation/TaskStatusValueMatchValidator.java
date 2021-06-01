@@ -15,13 +15,11 @@ public class TaskStatusValueMatchValidator implements ConstraintValidator<TaskSt
   private TaskStatus updateStatus;
   private String statusField;
   private String[] requiredFields;
-  private String[] nullFields;
 
   public void initialize(TaskStatusValueMatch constraintAnnotation) {
     this.updateStatus = constraintAnnotation.updateStatus();
     this.statusField = constraintAnnotation.statusField();
     this.requiredFields = constraintAnnotation.requiredFields();
-    this.nullFields = constraintAnnotation.nullFields();
   }
 
   public boolean isValid(Object value, ConstraintValidatorContext context) {
@@ -32,14 +30,6 @@ public class TaskStatusValueMatchValidator implements ConstraintValidator<TaskSt
           return false;
         }
         if (fieldValue instanceof String && StringUtils.isEmpty(fieldValue)) {
-          return false;
-        }
-        if (fieldValue instanceof List && ((List<?>) fieldValue).isEmpty()) {
-          return false;
-        }
-      }
-      for (Object fieldValue : getFields(value, nullFields)) {
-        if (fieldValue != null) {
           return false;
         }
       }

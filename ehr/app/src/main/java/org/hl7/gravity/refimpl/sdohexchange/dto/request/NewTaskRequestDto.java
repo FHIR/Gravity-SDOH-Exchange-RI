@@ -1,21 +1,21 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
 public class NewTaskRequestDto {
 
-  @NotNull
+  @NotEmpty(message = "Task name can't be empty.")
   private String name;
-  @NotNull
+  @NotEmpty(message = "SDOH category can't be empty.")
   private String category;
-  @NotNull
+  @NotEmpty(message = "SDOH code can't be empty.")
   private String code;
   private String comment;
   @NotNull
@@ -24,7 +24,7 @@ public class NewTaskRequestDto {
   private OccurrenceRequestDto occurrence;
   private List<String> conditionIds = new ArrayList<>();
   private List<String> goalIds = new ArrayList<>();
-  @NotNull
+  @NotEmpty(message = "Performer Organization id can't be empty.")
   private String performerId;
   @NotNull
   private Boolean consent;

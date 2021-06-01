@@ -18,9 +18,9 @@ public class ServiceRequestDto implements Validated {
   private CodingDto category;
   private CodingDto code;
   private OccurrenceResponseDto occurrence;
-  private List<ConditionDto> conditions = new ArrayList<>();
-  private List<GoalDto> goals = new ArrayList<>();
-  private ConsentResponseDto consent;
+  private List<TypeDto> conditions = new ArrayList<>();
+  private List<TypeDto> goals = new ArrayList<>();
+  private TypeDto consent;
 
   @Setter(AccessLevel.NONE)
   private List<String> errors = new ArrayList<>();

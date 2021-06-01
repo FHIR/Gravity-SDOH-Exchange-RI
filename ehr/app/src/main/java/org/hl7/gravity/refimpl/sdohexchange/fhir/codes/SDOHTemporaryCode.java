@@ -13,7 +13,7 @@ public enum SDOHTemporaryCode {
     this.code = code;
   }
 
-  private String code;
+  private final String code;
 
   public static final String SYSTEM = "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes";
 }

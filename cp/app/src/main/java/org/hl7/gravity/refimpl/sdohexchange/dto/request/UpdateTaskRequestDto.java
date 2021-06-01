@@ -1,11 +1,11 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.request;
 
 import java.util.List;
-import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.annotation.TaskStatusValueMatch;
+import org.springframework.util.StringUtils;
 
 @Getter
 @Setter
@@ -25,7 +25,6 @@ import org.hl7.gravity.refimpl.sdohexchange.annotation.TaskStatusValueMatch;
 })
 public class UpdateTaskRequestDto {
 
-  @NotNull
   private TaskStatus status;
   private String comment;
   private String statusReason;
@@ -33,6 +32,11 @@ public class UpdateTaskRequestDto {
   private List<String> procedureCodes;
 
   public Task.TaskStatus getTaskStatus() {
-    return status.getTaskStatus();
+    return status == null ? null : status.getTaskStatus();
+  }
+
+  public boolean isOnlyAddComment() {
+    return (status == null && statusReason == null && outcome == null && procedureCodes == null)
+        && StringUtils.hasText(comment);
   }
 }

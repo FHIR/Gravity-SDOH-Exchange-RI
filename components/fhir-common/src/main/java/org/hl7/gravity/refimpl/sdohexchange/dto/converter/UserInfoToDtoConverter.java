@@ -1,10 +1,9 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.springframework.core.convert.converter.Converter;
-
-import java.util.Map;
 
 public class UserInfoToDtoConverter implements Converter<Map<String, Object>, UserDto> {
 

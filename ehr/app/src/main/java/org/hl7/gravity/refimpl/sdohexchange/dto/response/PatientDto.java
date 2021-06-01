@@ -25,8 +25,4 @@ public class PatientDto extends PersonDto {
   private List<String> insurances = new ArrayList<>();
   private List<PhoneDto> phones = new ArrayList<>();
   private List<EmailDto> emails = new ArrayList<>();
-
-  public PatientDto(String id) {
-    super(id);
-  }
 }

@@ -1,6 +1,13 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import com.google.common.base.Strings;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
@@ -19,21 +26,13 @@ import org.hl7.gravity.refimpl.sdohexchange.info.PatientInfo;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto> {
-
 
   @Override
   public PatientDto convert(PatientInfo patientInfo) {
     Patient patient = patientInfo.getPatient();
-    PatientDto patientDto = new PatientDto(patient.getIdElement()
+    PatientDto patientDto = new PatientDto();
+    patientDto.setId(patient.getIdElement()
         .getIdPart());
     patientDto.setName(patient.getNameFirstRep()
         .getNameAsSingleString());
@@ -70,7 +69,10 @@ public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto>
         .addAll(telecom.stream()
             .filter(t -> ContactPoint.ContactPointSystem.PHONE.equals(t.getSystem()))
             .map(cp -> {
-              String display = cp.getUse() == null ? null : cp.getUse().getDisplay();
+              String display = cp.getUse() == null
+                  ? null
+                  : cp.getUse()
+                      .getDisplay();
               return new PhoneDto(display, cp.getValue());
             })
             .collect(Collectors.toList()));
@@ -79,11 +81,14 @@ public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto>
         .addAll(telecom.stream()
             .filter(t -> ContactPoint.ContactPointSystem.EMAIL.equals(t.getSystem()))
             .map(cp -> {
-              String display = cp.getUse() == null ? null : cp.getUse().getDisplay();
+              String display = cp.getUse() == null
+                  ? null
+                  : cp.getUse()
+                      .getDisplay();
               return new EmailDto(display, cp.getValue());
             })
             .collect(Collectors.toList()));
-    if(patientInfo.getEmployment() != null) {
+    if (patientInfo.getEmployment() != null) {
       String employmentStatus = patientInfo.getEmployment()
           .getValueCodeableConcept()
           .getCodingFirstRep()
@@ -108,19 +113,22 @@ public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto>
         .getCodingFirstRep()
         .getDisplay())
         .orElse(null));
-    patientDto.getInsurances().addAll(convertPayors(patientInfo.getPayors()));
+    patientDto.getInsurances()
+        .addAll(convertPayors(patientInfo.getPayors()));
     return patientDto;
   }
 
-  private List<String> convertPayors(List<IBaseResource> payors){
+  private List<String> convertPayors(List<IBaseResource> payors) {
     List<String> payorsNames = new ArrayList<>();
-    for (IBaseResource resource : payors){
-      if(resource instanceof Patient){
-        payorsNames.add(((Patient) resource).getNameFirstRep().getNameAsSingleString());
-      } else if(resource instanceof Organization){
+    for (IBaseResource resource : payors) {
+      if (resource instanceof Patient) {
+        payorsNames.add(((Patient) resource).getNameFirstRep()
+            .getNameAsSingleString());
+      } else if (resource instanceof Organization) {
         payorsNames.add(((Organization) resource).getName());
-      } else if(resource instanceof RelatedPerson){
-        payorsNames.add(((RelatedPerson) resource).getNameFirstRep().getNameAsSingleString());
+      } else if (resource instanceof RelatedPerson) {
+        payorsNames.add(((RelatedPerson) resource).getNameFirstRep()
+            .getNameAsSingleString());
       } else {
         throw new IllegalStateException("Not valid payor resource type : " + resource.getClass());
       }
