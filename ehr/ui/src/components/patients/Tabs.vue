@@ -1,11 +1,13 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import ActionSteps from "@/components/patients/ActionSteps.vue";
+import ActionSteps from "@/components/patients/action-steps/ActionSteps.vue";
+import RiskAssessments from "@/components/patients/risk-assessments/RiskAssessments.vue";
 
 export default defineComponent({
 	name: "Tabs",
 	components: {
-		ActionSteps
+		ActionSteps,
+		RiskAssessments
 	},
 	setup() {
 		const activeTab = ref<string>("actionSteps");
@@ -47,7 +49,7 @@ export default defineComponent({
 			label="Social Risk Assessments"
 			name="socialRiskAssessments"
 		>
-			Social Risk Assessments
+			<RiskAssessments />
 		</el-tab-pane>
 		<el-tab-pane
 			label="Consent"

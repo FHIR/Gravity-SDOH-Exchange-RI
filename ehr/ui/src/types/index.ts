@@ -130,3 +130,13 @@ export type Comment = {
 	text: string,
 	time: string
 };
+
+export type Assessment = {
+	name: string,
+	createdAt: string,
+	concerns: string
+	id: string,
+	questions: string[],
+	actions: string
+	status: "Past" | "Planned"
+};
