@@ -16,8 +16,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskInfoBundleParser;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskInfoBundleParser.TaskInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,7 +71,7 @@ public class CpService {
         throw new CpClientException(String.format("More than one Task is present at '%s' for identifier '%s'.",
             endpoint.getAddress(), identifierSystem + "|" + id));
       }
-      return new TaskInfoBundleParser().parse(taskBundle)
+      return new TaskInfoBundleExtractor().extract(taskBundle)
           .stream()
           .findFirst()
           .get();

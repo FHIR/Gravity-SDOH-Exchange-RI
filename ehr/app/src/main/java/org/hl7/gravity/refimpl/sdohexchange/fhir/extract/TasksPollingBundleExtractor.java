@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.parse;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
 import com.google.common.base.Strings;
 import java.util.Collection;
@@ -17,12 +17,12 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TasksPollingBundleParser.TasksPollingInfo;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TasksPollingBundleExtractor.TasksPollingInfo;
 
-public class TasksPollingBundleParser extends BundleParser<TasksPollingInfo> {
+public class TasksPollingBundleExtractor extends BundleExtractor<TasksPollingInfo> {
 
   @Override
-  public TasksPollingInfo parse(Bundle bundle) {
+  public TasksPollingInfo extract(Bundle bundle) {
     Map<? extends Class<? extends Resource>, Map<String, Resource>> taskResources = bundle.getEntry()
         .stream()
         .map(BundleEntryComponent::getResource)

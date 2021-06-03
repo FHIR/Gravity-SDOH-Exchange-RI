@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.parse;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
 import java.util.List;
 import java.util.Map;
@@ -8,13 +8,13 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskInfoBundleParser.TaskInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 
-public class TaskInfoBundleParser extends BundleParser<List<TaskInfoHolder>> {
+public class TaskInfoBundleExtractor extends BundleExtractor<List<TaskInfoHolder>> {
 
   @Override
-  public List<TaskInfoHolder> parse(Bundle bundle) {
+  public List<TaskInfoHolder> extract(Bundle bundle) {
     Map<String, ServiceRequest> serviceRequestMap = FhirUtil.getFromBundle(bundle, ServiceRequest.class)
         .stream()
         .collect(Collectors.toMap(serviceRequest -> serviceRequest.getIdElement()

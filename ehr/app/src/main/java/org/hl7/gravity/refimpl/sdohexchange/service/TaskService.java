@@ -31,12 +31,12 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskFailBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskInfoBundleParser;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskInfoBundleParser.TaskInfoHolder;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskPrepareBundleParser;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskPrepareBundleParser.TaskPrepareInfoHolder;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskUpdateBundleParser;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskUpdateBundleParser.TaskUpdateInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskPrepareBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskPrepareBundleExtractor.TaskPrepareInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskUpdateBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskUpdateBundleExtractor.TaskUpdateInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.service.CpService.CpClientException;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,7 @@ public class TaskService {
     Bundle taskRelatedResources = ehrClient.transaction()
         .withBundle(taskPrepareBundleFactory.createPrepareBundle())
         .execute();
-    TaskPrepareInfoHolder taskPrepareInfoHolder = new TaskPrepareBundleParser().parse(taskRelatedResources);
+    TaskPrepareInfoHolder taskPrepareInfoHolder = new TaskPrepareBundleExtractor().extract(taskRelatedResources);
 
     TaskBundleFactory taskBundleFactory = new TaskBundleFactory();
     taskBundleFactory.setName(taskRequest.getName());
@@ -84,7 +84,7 @@ public class TaskService {
         .execute();
 
     IdType taskId = FhirUtil.getFromResponseBundle(taskCreateBundle, Task.class);
-    TaskInfoHolder createInfo = new TaskInfoBundleParser().parse(getTask(taskId.getIdPart(), Task.INCLUDE_FOCUS))
+    TaskInfoHolder createInfo = new TaskInfoBundleExtractor().extract(getTask(taskId.getIdPart(), Task.INCLUDE_FOCUS))
         .stream()
         .findFirst()
         .orElseThrow(() -> new TaskCreateException("Task/ServiceRequest are not found in the response bundle."));
@@ -128,7 +128,7 @@ public class TaskService {
   public void update(String id, UpdateTaskRequestDto update, UserDto user) {
     Bundle taskBundle =
         getTask(id, Task.INCLUDE_FOCUS, Task.INCLUDE_OWNER, Organization.INCLUDE_ENDPOINT.setRecurse(true));
-    TaskUpdateInfoHolder updateInfo = new TaskUpdateBundleParser(id).parse(taskBundle);
+    TaskUpdateInfoHolder updateInfo = new TaskUpdateBundleExtractor(id).extract(taskBundle);
     Task task = updateInfo.getTask();
     ServiceRequest serviceRequest = updateInfo.getServiceRequest();
 

@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.parse;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.List;
@@ -16,22 +16,22 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskUpdateException;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskUpdateBundleParser.TaskUpdateInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskUpdateBundleExtractor.TaskUpdateInfoHolder;
 import org.springframework.util.StringUtils;
 
 /**
  * Transaction bundle parser of resources required for Task update.
  */
-public class TaskUpdateBundleParser extends BundleParser<TaskUpdateInfoHolder> {
+public class TaskUpdateBundleExtractor extends BundleExtractor<TaskUpdateInfoHolder> {
 
   private final String id;
 
-  public TaskUpdateBundleParser(String id) {
+  public TaskUpdateBundleExtractor(String id) {
     this.id = id;
   }
 
   @Override
-  public TaskUpdateInfoHolder parse(Bundle bundle) {
+  public TaskUpdateInfoHolder extract(Bundle bundle) {
     Map<? extends Class<? extends Resource>, List<Resource>> taskResources = bundle.getEntry()
         .stream()
         .map(BundleEntryComponent::getResource)

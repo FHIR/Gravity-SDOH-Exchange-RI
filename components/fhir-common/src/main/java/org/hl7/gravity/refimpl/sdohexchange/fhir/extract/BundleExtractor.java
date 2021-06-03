@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.parse;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
 import java.util.Collections;
 import java.util.List;
@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 
-public abstract class BundleParser<T> {
+public abstract class BundleExtractor<T> {
 
-  public abstract T parse(Bundle bundle);
+  public abstract T extract(Bundle bundle);
 
   protected <R extends Resource> List<R> resourceList(
       Map<? extends Class<? extends Resource>, List<Resource>> resources,

@@ -29,10 +29,10 @@ import org.hl7.fhir.r4.model.codesystems.SearchModifierCode;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskFailBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskInfoBundleParser.TaskInfoHolder;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TasksPollingBundleParser;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TasksPollingBundleParser.TaskPollingUpdateException;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TasksPollingBundleParser.TasksPollingInfo;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TasksPollingBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TasksPollingBundleExtractor.TaskPollingUpdateException;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TasksPollingBundleExtractor.TasksPollingInfo;
 import org.hl7.gravity.refimpl.sdohexchange.service.CpService.CpClientException;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +78,7 @@ public class TaskPollingService {
         .returnBundle(Bundle.class)
         .execute();
 
-    TasksPollingInfo tasksPollingInfo = new TasksPollingBundleParser().parse(tasksBundle);
+    TasksPollingInfo tasksPollingInfo = new TasksPollingBundleExtractor().extract(tasksBundle);
     //Collect all entries from every Task bundle for performance considerations.
     Bundle updateBundle = new Bundle();
     updateBundle.setType(Bundle.BundleType.TRANSACTION);

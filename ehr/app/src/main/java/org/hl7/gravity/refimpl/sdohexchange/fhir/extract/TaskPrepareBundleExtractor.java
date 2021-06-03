@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.parse;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
 import com.google.common.base.Strings;
 import java.util.Collection;
@@ -20,15 +20,15 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskPrepareException;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskPrepareBundleParser.TaskPrepareInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskPrepareBundleExtractor.TaskPrepareInfoHolder;
 
 /**
  * Transaction bundle parser of resources required for Task creation.
  */
-public class TaskPrepareBundleParser extends BundleParser<TaskPrepareInfoHolder> {
+public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoHolder> {
 
   @Override
-  public TaskPrepareInfoHolder parse(Bundle bundle) {
+  public TaskPrepareInfoHolder extract(Bundle bundle) {
     Map<? extends Class<? extends Resource>, List<Resource>> taskResources = bundle.getEntry()
         .stream()
         .map(BundleEntryComponent::getResource)

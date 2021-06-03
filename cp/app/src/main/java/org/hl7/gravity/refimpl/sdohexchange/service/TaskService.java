@@ -22,8 +22,8 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskInfoBundleParser;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.parse.TaskInfoBundleParser.TaskInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +77,7 @@ public class TaskService {
         .include(Task.INCLUDE_FOCUS)
         .returnBundle(Bundle.class)
         .execute();
-    TaskInfoHolder taskInfo = new TaskInfoBundleParser().parse(taskBundle)
+    TaskInfoHolder taskInfo = new TaskInfoBundleExtractor().extract(taskBundle)
         .stream()
         .findFirst()
         .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)));
