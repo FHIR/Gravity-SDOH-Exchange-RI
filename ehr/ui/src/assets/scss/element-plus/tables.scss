@@ -1,0 +1,68 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-table {
+	&::before {
+		background-color: $global-background;
+	}
+
+	.el-table__body {
+		border-spacing: 0 10px;
+
+		th,
+		td {
+			padding: 5px 0;
+		}
+ 	}
+
+	.el-table__row {
+		td {
+			border-top: 1px solid $global-base-border-color;
+			border-bottom: 1px solid $global-base-border-color;
+
+			&:first-child {
+				border-left: 1px solid $global-base-border-color;
+				border-radius: 5px 0 0 5px;
+			}
+
+			&:last-child {
+				border-right: 1px solid $global-base-border-color;
+				border-radius: 0 5px 5px 0;
+			}
+		}
+	}
+
+	th.is-leaf {
+		border-bottom: 0;
+	}
+
+	.el-table__header-wrapper {
+		.cell {
+			color: $grey;
+			font-weight: $global-font-weight-normal;
+		}
+	}
+
+	.cell {
+		white-space: nowrap;
+		padding: 0 20px;
+		font-size: $global-medium-font-size;
+		line-height: 19px;
+	}
+
+	.status-cell {
+		display: flex;
+		align-items: center;
+		height: 35px;
+		line-height: 1;
+
+		.info {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.date {
+			font-size: $global-small-font-size;
+			color: $grey;
+		}
+	}
+}
