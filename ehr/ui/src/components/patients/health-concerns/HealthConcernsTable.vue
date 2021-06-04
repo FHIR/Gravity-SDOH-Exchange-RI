@@ -161,54 +161,6 @@ export default defineComponent({
 		@include icon("~@/assets/images/concern-remove.svg", 32px);
 	}
 
-	&::before {
-		background-color: $global-background;
-	}
-
-	::v-deep(.el-table__body) {
-		border-spacing: 0 10px;
-
-		th,
-		td {
-			padding: 5px 0;
-		}
-	}
-
-	::v-deep(.el-table__row) {
-		td {
-			border-top: 1px solid $global-base-border-color;
-			border-bottom: 1px solid $global-base-border-color;
-
-			&:first-child {
-				border-left: 1px solid $global-base-border-color;
-				border-radius: 5px 0 0 5px;
-			}
-
-			&:last-child {
-				border-right: 1px solid $global-base-border-color;
-				border-radius: 0 5px 5px 0;
-			}
-		}
-	}
-
-	::v-deep(th.is-leaf) {
-		border-bottom: 0;
-	}
-
-	::v-deep(.el-table__header-wrapper) {
-		.cell {
-			color: $grey;
-			font-weight: $global-font-weight-normal;
-		}
-	}
-
-	::v-deep(.cell) {
-		white-space: nowrap;
-		padding: 0 20px;
-		font-size: $global-medium-font-size;
-		line-height: 19px;
-	}
-
 	.status-cell {
 		display: flex;
 		align-items: center;
