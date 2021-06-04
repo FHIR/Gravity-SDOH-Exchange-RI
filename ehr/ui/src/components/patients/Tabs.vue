@@ -1,10 +1,12 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import ActionSteps from "@/components/patients/ActionSteps.vue";
+import HealthConcerns from "@/components/patients/health-concerns/HealthConcerns.vue";
 
 export default defineComponent({
 	name: "Tabs",
 	components: {
+		HealthConcerns,
 		ActionSteps
 	},
 	setup() {
@@ -23,7 +25,7 @@ export default defineComponent({
 			label="Health Concerns"
 			name="healthConcerns"
 		>
-			Health Concerns
+			<HealthConcerns />
 		</el-tab-pane>
 		<el-tab-pane
 			label="Problems"

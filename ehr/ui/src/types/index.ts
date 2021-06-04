@@ -130,3 +130,13 @@ export type Comment = {
 	text: string,
 	time: string
 };
+
+export type Concern = {
+	name: string,
+	createdAt: string,
+	category: string
+	id: string,
+	basedOn: string,
+	actions: string,
+	status: string
+};
