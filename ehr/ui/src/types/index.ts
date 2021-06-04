@@ -140,3 +140,13 @@ export type Concern = {
 	actions: string,
 	status: string
 };
+
+export type Assessment = {
+	name: string,
+	createdAt: string,
+	concerns: string
+	id: string,
+	questions: string[],
+	actions: string
+	status: "Past" | "Planned"
+};

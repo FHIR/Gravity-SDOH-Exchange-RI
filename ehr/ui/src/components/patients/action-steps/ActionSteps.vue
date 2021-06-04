@@ -1,7 +1,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, onUnmounted, ref, watch, h } from "vue";
-import RequestTable from "@/components/patients/RequestTable.vue";
-import NewRequestDialog from "@/components/patients/NewRequestDialog.vue";
+import RequestTable from "@/components/patients/action-steps/RequestTable.vue";
+import NewRequestDialog from "@/components/patients/action-steps/NewRequestDialog.vue";
 import { Comment, Occurrence, Task, Condition, Goal, Procedure, TaskStatus, Coding } from "@/types";
 import { TasksModule } from "@/store/modules/tasks";
 import { ElNotification } from "element-plus";

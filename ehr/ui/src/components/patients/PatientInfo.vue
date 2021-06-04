@@ -1,6 +1,7 @@
 <script lang="ts">
 import { defineComponent, computed } from "vue";
 import { ContextModule } from "@/store/modules/context";
+import { Phone, Email } from "@/types";
 
 export default defineComponent({
 	name: "PatientInfo",
@@ -11,14 +12,18 @@ export default defineComponent({
 		const gender = computed<string | null | undefined>(() => ContextModule.patient?.gender || "N/A");
 		const lang = computed<string | null | undefined>(() => ContextModule.patient?.language || "N/A");
 		const address = computed<string | null | undefined>(() => ContextModule.patient?.address || "N/A");
-		const phone = computed<string | null | undefined>(() => ContextModule.patient?.phones[0]?.phone || "N/A");
-		const email = computed<string | null | undefined>(() => ContextModule.patient?.emails[0]?.email || "N/A");
 		const employmentStatus = computed<string | null | undefined>(() => ContextModule.patient?.employmentStatus || "N/A");
 		const race = computed<string | null | undefined>(() => ContextModule.patient?.race || "N/A");
 		const ethnicity = computed<string | null | undefined>(() => ContextModule.patient?.ethnicity || "N/A");
 		const educationLevel = computed<string | null | undefined>(() => ContextModule.patient?.education || "N/A");
 		const maritalStatus = computed<string | null | undefined>(() => ContextModule.patient?.maritalStatus || "N/A");
 		const insurance = computed<string | null | undefined>(() => ContextModule.patient?.insurances.join(", ") || "N/A");
+
+		const phone = computed<string | null | undefined>(() => ContextModule.patient?.phones[0]?.phone || "N/A");
+		const allPhones = computed<Phone[]>(() => ContextModule.patient?.phones || []);
+		const email = computed<string | null | undefined>(() => ContextModule.patient?.emails[0]?.email || "N/A");
+		const allEmails = computed<Email[]>(() => ContextModule.patient?.emails || []);
+
 
 		return {
 			name,
@@ -34,7 +39,9 @@ export default defineComponent({
 			ethnicity,
 			educationLevel,
 			maritalStatus,
-			insurance
+			insurance,
+			allPhones,
+			allEmails
 		};
 	}
 });
@@ -51,7 +58,7 @@ export default defineComponent({
 		</div>
 		<el-row>
 			<el-col
-				:span="8"
+				:span="7"
 				class="info-block"
 			>
 				<div class="info-item">
@@ -88,7 +95,7 @@ export default defineComponent({
 				</div>
 			</el-col>
 			<el-col
-				:span="8"
+				:span="10"
 				class="info-block"
 			>
 				<div class="info-item">
@@ -105,6 +112,30 @@ export default defineComponent({
 					</div>
 					<div class="value">
 						{{ phone }}
+
+						<el-popover
+							v-if="allPhones.length > 1"
+							placement="right"
+							trigger="hover"
+							width="auto"
+						>
+							<template #reference>
+								<span class="info-icon"></span>
+							</template>
+							<table class="info-icon-content">
+								<tr
+									v-for="phone in allPhones"
+									:key="phone.phone"
+								>
+									<td class="label">
+										{{ phone.use }}:
+									</td>
+									<td class="value">
+										{{ phone.phone }}
+									</td>
+								</tr>
+							</table>
+						</el-popover>
 					</div>
 				</div>
 				<div class="info-item">
@@ -113,6 +144,30 @@ export default defineComponent({
 					</div>
 					<div class="value">
 						{{ email }}
+
+						<el-popover
+							v-if="allEmails.length > 1"
+							placement="right"
+							trigger="hover"
+							width="auto"
+						>
+							<template #reference>
+								<span class="info-icon"></span>
+							</template>
+							<table class="info-icon-content">
+								<tr
+									v-for="email in allEmails"
+									:key="email.email"
+								>
+									<td class="label">
+										{{ email.use }}:
+									</td>
+									<td class="value">
+										{{ email.email }}
+									</td>
+								</tr>
+							</table>
+						</el-popover>
 					</div>
 				</div>
 				<div class="info-item">
@@ -125,7 +180,7 @@ export default defineComponent({
 				</div>
 			</el-col>
 			<el-col
-				:span="8"
+				:span="7"
 				class="info-block"
 			>
 				<div class="info-item">
@@ -214,7 +269,23 @@ export default defineComponent({
 	}
 
 	.value {
+		display: flex;
+		align-items: baseline;
+
 		@include dont-break-out();
+	}
+
+	.info-icon {
+		margin-left: 10px;
+		flex-shrink: 0;
+
+		@include icon("~@/assets/images/info.svg", 12px, 12px);
+	}
+}
+
+.info-icon-content {
+	.label {
+		color: $global-text-muted-color;
 	}
 }
 

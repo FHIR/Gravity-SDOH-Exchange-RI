@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, reactive, computed } from "vue";
-import { TableData } from "@/components/patients/ActionSteps.vue";
+import { TableData } from "@/components/patients/action-steps/ActionSteps.vue";
 import { Occurrence, TaskStatus, updateTaskPayload } from "@/types";
 import moment from "moment";
 import { TasksModule } from "@/store/modules/tasks";
