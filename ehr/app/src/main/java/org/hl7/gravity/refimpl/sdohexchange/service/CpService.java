@@ -6,13 +6,18 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.info.ServiceRequestInfo;
-import org.hl7.gravity.refimpl.sdohexchange.info.TaskInfo;
-import org.hl7.gravity.refimpl.sdohexchange.info.composer.TasksInfoComposer;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,52 +29,118 @@ import org.springframework.stereotype.Service;
 public class CpService {
 
   private final FhirContext fhirContext;
-  private final TasksInfoComposer tasksInfoComposer;
   @Value("${ehr.open-fhir-server-uri}")
   private String identifierSystem;
 
-  public TaskInfo getTask(String id, Endpoint endpoint) throws CpClientException {
-    IGenericClient cpClient = fhirContext.newRestfulGenericClient(endpoint.getAddress());
-    Bundle cpTaskBundle = null;
+  public void create(final Task ehrTask, final Endpoint endpoint) throws CpClientException {
+    Task cpTask = externalizeResource(ehrTask.copy(), identifierSystem);
+    //TODO: Remove this after Logica bug response
+    cpTask.setMeta(null);
+    cpTask.addIdentifier()
+        .setSystem(identifierSystem)
+        .setValue(ehrTask.getIdElement()
+            .getIdPart());
     try {
-      cpTaskBundle = cpClient.search()
+      cpClient(endpoint).create()
+          .resource(cpTask)
+          .execute();
+    } catch (BaseServerResponseException exc) {
+      throw new CpClientException(
+          String.format("Could not create a Task with identifier '%s' in CP at '%s'. Reason: %s.",
+              identifierSystem + "|" + ehrTask.getIdElement()
+                  .getIdPart(), endpoint.getAddress(), exc.getMessage()), exc);
+    }
+  }
+
+  public TaskInfoHolder read(final String id, final Endpoint endpoint) throws CpClientException {
+    try {
+      Bundle taskBundle = cpClient(endpoint).search()
           .forResource(Task.class)
           .where(Task.IDENTIFIER.exactly()
               .systemAndValues(identifierSystem, id))
           .include(Task.INCLUDE_FOCUS)
           .returnBundle(Bundle.class)
           .execute();
-    } catch (
-        BaseServerResponseException exc) {
+      // Additional validation
+      int tasksSize = FhirUtil.getFromBundle(taskBundle, Task.class)
+          .size();
+      if (tasksSize == 0) {
+        throw new CpClientException(String.format("No Task is present at '%s' for identifier '%s'.",
+            endpoint.getAddress(), identifierSystem + "|" + id));
+      } else if (tasksSize > 1) {
+        throw new CpClientException(String.format("More than one Task is present at '%s' for identifier '%s'.",
+            endpoint.getAddress(), identifierSystem + "|" + id));
+      }
+      return new TaskInfoBundleExtractor().extract(taskBundle)
+          .stream()
+          .findFirst()
+          .get();
+    } catch (BaseServerResponseException exc) {
       throw new CpClientException(
           String.format("Task retrieval failed for identifier '%s' at CP location '%s'. Reason: %s.",
-              identifierSystem + "|" + id, cpClient.getServerBase(), exc.getMessage()), exc);
+              identifierSystem + "|" + id, endpoint.getAddress(), exc.getMessage()), exc);
     }
-    List<Task> tasks = FhirUtil.getFromBundle(cpTaskBundle, Task.class);
-    if (tasks.size() == 0) {
-      throw new CpClientException(
-          String.format("No Task is present at '%s' for identifier '%s'.", cpClient.getServerBase(),
-              identifierSystem + "|" + id));
-    } else if (tasks.size() > 1) {
-      throw new CpClientException(
-          String.format("More than one Task is present at '%s' for identifier '%s'.", cpClient.getServerBase(),
-              identifierSystem + "|" + id));
-    }
-    List<ServiceRequest> serviceRequests = FhirUtil.getFromBundle(cpTaskBundle, ServiceRequest.class);
-    return new TaskInfo(tasks.get(0), new ServiceRequestInfo(serviceRequests.get(0), null, null, null), null);
   }
 
-  public Bundle transaction(Bundle bundle, Endpoint endpoint) throws CpClientException {
-    IGenericClient cpClient = fhirContext.newRestfulGenericClient(endpoint.getAddress());
+  public void sync(final Task ehrTask, final ServiceRequest ehrServiceRequest, final Endpoint endpoint)
+      throws CpClientException {
+    Bundle cpUpdateBundle = new Bundle();
+    cpUpdateBundle.setType(BundleType.TRANSACTION);
+
+    TaskInfoHolder cpTaskInfo = read(ehrTask.getIdElement()
+        .getIdPart(), endpoint);
+    Task cpTask = cpTaskInfo.getTask();
+    cpTask.setStatus(ehrTask.getStatus());
+    cpTask.setStatusReason(ehrTask.getStatusReason());
+    cpTask.setLastModifiedElement(ehrTask.getLastModifiedElement());
+    cpTask.setNote(ehrTask.getNote());
+    cpUpdateBundle.addEntry(FhirUtil.createPutEntry(cpTask));
+
+    ServiceRequest cpServiceRequest = cpTaskInfo.getServiceRequest();
+    if (!ehrServiceRequest.getStatus()
+        .equals(cpServiceRequest.getStatus())) {
+      cpServiceRequest.setStatus(ehrServiceRequest.getStatus());
+      cpUpdateBundle.addEntry(FhirUtil.createPutEntry(cpServiceRequest));
+    }
+    transaction(cpUpdateBundle, endpoint);
+  }
+
+  public Bundle search(final List<String> ids, Class<? extends IBaseResource> resource, Endpoint endpoint) {
+    return cpClient(endpoint).search()
+        .forResource(resource)
+        .where(Resource.RES_ID.exactly()
+            .codes(ids))
+        .returnBundle(Bundle.class)
+        .execute();
+  }
+
+  protected Bundle transaction(final Bundle transactionBundle, final Endpoint endpoint) throws CpClientException {
     try {
-      return cpClient.transaction()
-          .withBundle(bundle)
+      return cpClient(endpoint).transaction()
+          .withBundle(transactionBundle)
           .execute();
     } catch (BaseServerResponseException exc) {
       throw new CpClientException(
-          String.format("Transaction execution failed at CP location '%s'. Reason: %s.", cpClient.getServerBase(),
+          String.format("Transaction execution failed at CP location '%s'. Reason: %s.", endpoint.getAddress(),
               exc.getMessage()), exc);
     }
+  }
+
+  protected <T extends Resource> T externalizeResource(T resource, String baseUrl) {
+    FhirUtil.getAllReferences(fhirContext, resource)
+        .forEach(reference -> externalizeReference(reference, baseUrl));
+    resource.setId(IdType.newRandomUuid());
+    return resource;
+  }
+
+  protected void externalizeReference(Reference reference, String baseUrl) {
+    IIdType el = reference.getReferenceElement();
+    el.setParts(baseUrl, el.getResourceType(), el.getIdPart(), null);
+    reference.setReferenceElement(el);
+  }
+
+  private IGenericClient cpClient(Endpoint endpoint) {
+    return fhirContext.newRestfulGenericClient(endpoint.getAddress());
   }
 
   /**

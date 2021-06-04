@@ -7,7 +7,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Task;
 
 import java.util.stream.Stream;
-import org.hl7.gravity.refimpl.sdohexchange.exception.InvalidTaskStatusException;
+import org.hl7.gravity.refimpl.sdohexchange.exception.TaskUpdateException;
 
 @AllArgsConstructor
 public enum TaskStatus {
@@ -27,7 +27,7 @@ public enum TaskStatus {
     return Stream.of(TaskStatus.values())
         .filter(targetEnum -> targetEnum.status.equals(status))
         .findFirst()
-        .orElseThrow(() -> new InvalidTaskStatusException(String.format("Invalid Task status '%s'", status)));
+        .orElseThrow(() -> new TaskUpdateException(String.format("Invalid Task status '%s'", status)));
   }
 
   @JsonValue

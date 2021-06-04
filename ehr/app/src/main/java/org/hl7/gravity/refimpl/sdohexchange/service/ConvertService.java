@@ -3,6 +3,16 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.minidev.json.JSONObject;
 import org.apache.commons.io.FileUtils;
@@ -24,17 +34,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author Mykhailo Stefantsiv
@@ -95,17 +94,15 @@ public class ConvertService {
   }
 
   private String convertToBundle(JSONObject questionnaireResponse, String mapUri) {
-    String map;
     try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
       Element element = validationEngine.transform(questionnaireResponse.toString()
           .getBytes(), Manager.FhirFormat.JSON, mapUri);
       new JsonParser(validationEngine.getContext()).compose(element, byteArrayOutputStream,
           org.hl7.fhir.r5.formats.IParser.OutputStyle.PRETTY, null);
-      map = new String(byteArrayOutputStream.toByteArray());
+      return byteArrayOutputStream.toString();
     } catch (IOException e) {
-      throw new IllegalStateException(String.format("QuestionnaireReponse with id cannot be parsed."), e.getCause());
+      throw new IllegalStateException("QuestionnaireResponse with id cannot be parsed.", e.getCause());
     }
-    return map;
   }
 
   private void loadStructureDefinitions() throws IOException {
@@ -138,5 +135,4 @@ public class ConvertService {
     Files.delete(jsonMap.toPath());
     Files.delete(mapIg);
   }
-
 }

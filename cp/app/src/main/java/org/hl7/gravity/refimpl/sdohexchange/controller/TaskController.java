@@ -47,12 +47,13 @@ public class TaskController {
   }
 
   @PutMapping("/{id}")
-  @ApiOperation(value = "Update Task resource by id.")
+  @ApiOperation(value = "Update Task resource.")
   public ResponseEntity<Void> update(@PathVariable @NotBlank(message = "Task id can't be empty.") String id,
       @RequestBody @Valid UpdateTaskRequestDto updateTaskRequestDto,
       @ApiIgnore @AuthenticationPrincipal OidcUser user) {
     UserDto userDto = new UserInfoToDtoConverter().convert(user.getClaims());
     taskService.update(id, updateTaskRequestDto, userDto);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.noContent()
+        .build();
   }
 }

@@ -5,10 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class CodingDto {
+@AllArgsConstructor
+abstract class PersonDto {
 
-  private String code;
-  private String display;
+  private String id;
+  private String name;
 }

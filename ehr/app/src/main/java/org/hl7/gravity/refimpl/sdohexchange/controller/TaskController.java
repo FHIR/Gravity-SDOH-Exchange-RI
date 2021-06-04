@@ -7,13 +7,17 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.UserInfoToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.NewTaskResponseDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("task")
@@ -36,8 +41,10 @@ public class TaskController {
           + "etc. This endpoint will fail if request is invalid or preconditions are not met. All details will be "
           + "provided in error response description. In some cases a Task creation might succeed but a Task of a "
           + "status will be set to FAILED. Refer to an 'outcome' field for more details.")
-  public NewTaskResponseDto create(@RequestBody @Valid NewTaskRequestDto newTaskRequestDto) {
-    return new NewTaskResponseDto(taskService.newTask(newTaskRequestDto));
+  public NewTaskResponseDto create(@RequestBody @Valid NewTaskRequestDto newTaskRequestDto,
+      @ApiIgnore @AuthenticationPrincipal OidcUser user) {
+    UserDto userDto = new UserInfoToDtoConverter().convert(user.getClaims());
+    return new NewTaskResponseDto(taskService.newTask(newTaskRequestDto, userDto));
   }
 
   @GetMapping
@@ -50,12 +57,19 @@ public class TaskController {
     return taskService.listTasks();
   }
 
+  @GetMapping("/{id}")
+  @ApiOperation(value = "Read Task resource by id.")
+  public TaskDto read(@PathVariable @NotBlank(message = "") String id) {
+    return taskService.read(id);
+  }
+
   @PutMapping("{id}")
   @ApiOperation(value = "Update Task resource.")
-  public ResponseEntity<TaskDto> update(@PathVariable @NotBlank(message = "Task id can't be empty.") String id,
-      @RequestBody UpdateTaskRequestDto update) {
-    TaskDto taskDto = taskService.update(id, update);
-    return taskDto == null ? ResponseEntity.notFound()
-        .build() : ResponseEntity.ok(taskDto);
+  public ResponseEntity<Void> update(@PathVariable @NotBlank(message = "Task id can't be empty.") String id,
+      @RequestBody UpdateTaskRequestDto update, @ApiIgnore @AuthenticationPrincipal OidcUser user) {
+    UserDto userDto = new UserInfoToDtoConverter().convert(user.getClaims());
+    taskService.update(id, update, userDto);
+    return ResponseEntity.noContent()
+        .build();
   }
 }

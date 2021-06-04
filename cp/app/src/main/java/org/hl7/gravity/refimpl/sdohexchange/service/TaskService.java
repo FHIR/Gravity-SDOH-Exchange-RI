@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.codesystems.SearchModifierCode;
@@ -23,7 +22,8 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,25 +70,26 @@ public class TaskService {
         .stream()
         .map(code -> sdohMappings.findResourceCoding(Procedure.class, code))
         .collect(Collectors.toList());
-
     Bundle taskBundle = cpClient.search()
         .forResource(Task.class)
         .where(Task.RES_ID.exactly()
             .code(id))
-        // include ServiceRequest
         .include(Task.INCLUDE_FOCUS)
         .returnBundle(Bundle.class)
         .execute();
-    Task task = FhirUtil.getFromBundle(taskBundle, Task.class)
+    TaskInfoHolder taskInfo = new TaskInfoBundleExtractor().extract(taskBundle)
         .stream()
         .findFirst()
         .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)));
-    ServiceRequest serviceRequest = FhirUtil.getFirstFromBundle(taskBundle, ServiceRequest.class);
-
-    TaskUpdateBundleFactory bundleFactory = new TaskUpdateBundleFactory(task, serviceRequest, update.getTaskStatus(),
-        update.getStatusReason(), update.getComment(), update.getOutcome(), procedureCodes);
+    TaskUpdateBundleFactory bundleFactory = new TaskUpdateBundleFactory();
+    bundleFactory.setTask(taskInfo.getTask());
+    bundleFactory.setServiceRequest(taskInfo.getServiceRequest());
+    bundleFactory.setStatus(update.getTaskStatus());
+    bundleFactory.setStatusReason(update.getStatusReason());
+    bundleFactory.setComment(update.getComment());
+    bundleFactory.setOutcome(update.getOutcome());
+    bundleFactory.setProcedureCodes(procedureCodes);
     bundleFactory.setUser(user);
-
     cpClient.transaction()
         .withBundle(bundleFactory.createUpdateBundle())
         .execute();
