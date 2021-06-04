@@ -48,7 +48,9 @@ export default defineComponent({
 			size="mini"
 			class="edit-assessment-form"
 		>
-			<h4>SUMMARY</h4>
+			<h4>
+				Summary
+			</h4>
 			<el-form-item label="Assessment Name">
 				{{ assessment.name }}
 			</el-form-item>
@@ -63,7 +65,9 @@ export default defineComponent({
 			</el-form-item>
 
 			<el-divider />
-			<h4>RESPONSES</h4>
+			<h4>
+				Question-Answer Pairs
+			</h4>
 
 			<el-form-item
 				label="Question 1:"

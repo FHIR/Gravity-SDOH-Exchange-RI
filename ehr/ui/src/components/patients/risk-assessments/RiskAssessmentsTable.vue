@@ -4,7 +4,7 @@ import { TableData } from "@/components/patients/risk-assessments/RiskAssessment
 import EditAssessmentDialog from "@/components/patients/risk-assessments/EditAssessmentDialog.vue";
 
 export default defineComponent({
-	name: "RequestTable",
+	name: "RiskAssessmentsTable",
 	components: {
 		EditAssessmentDialog
 	},

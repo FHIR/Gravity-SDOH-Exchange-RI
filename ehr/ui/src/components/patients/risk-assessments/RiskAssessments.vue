@@ -47,8 +47,8 @@ export default defineComponent({
 </script>
 
 <template>
-	<div class="action-steps">
-		<div class="action-steps-switcher">
+	<div class="risk-assessments">
+		<div class="risk-assessments-switcher">
 			<el-radio-group
 				v-model="activeGroup"
 				size="mini"
@@ -106,7 +106,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
 
-.action-steps-switcher {
+.risk-assessments-switcher {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
