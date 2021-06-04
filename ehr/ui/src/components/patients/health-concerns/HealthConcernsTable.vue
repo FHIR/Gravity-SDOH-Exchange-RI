@@ -153,8 +153,9 @@ export default defineComponent({
 	}
 
 	.icon-resolved {
-		@include icon("~@/assets/images/concern-resolved.svg", 32px);
 		margin: 0 20px;
+
+		@include icon("~@/assets/images/concern-resolved.svg", 32px);
 	}
 
 	.icon-remove {

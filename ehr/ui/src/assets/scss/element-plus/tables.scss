@@ -12,7 +12,7 @@
 		td {
 			padding: 5px 0;
 		}
- 	}
+	}
 
 	.el-table__row {
 		td {
@@ -35,18 +35,18 @@
 		border-bottom: 0;
 	}
 
-	.el-table__header-wrapper {
-		.cell {
-			color: $grey;
-			font-weight: $global-font-weight-normal;
-		}
-	}
-
 	.cell {
 		white-space: nowrap;
 		padding: 0 20px;
 		font-size: $global-medium-font-size;
 		line-height: 19px;
+	}
+
+	.el-table__header-wrapper {
+		.cell {
+			color: $grey;
+			font-weight: $global-font-weight-normal;
+		}
 	}
 
 	.status-cell {
