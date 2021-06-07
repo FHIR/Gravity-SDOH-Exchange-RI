@@ -90,6 +90,11 @@ export type Procedure = {
 	id: string
 }
 
+export type Period = {
+	start: string,
+	end?: string
+}
+
 export type ServiceRequest = {
 	category: Coding,
 	code: Coding,
@@ -139,4 +144,14 @@ export type Assessment = {
 	questions: string[],
 	actions: string
 	status: "Past" | "Planned"
+};
+
+export type Problem = {
+	id: string,
+	name: string,
+	basedOn: string,
+	onsetPeriod: Period,
+	goals: number,
+	actionSteps: number,
+	clinicalStatus: string
 };
