@@ -65,12 +65,12 @@ export type Occurrence = {
 	end: string
 }
 
-export type Goal = {
+export type ServiceRequestGoal = {
 	display: string,
 	id: string
 }
 
-export type Consent = {
+export type ServiceRequestConsent = {
 	display: string,
 	id: string
 }
@@ -80,7 +80,7 @@ export type Coding = {
 	display: string
 }
 
-export type Condition = {
+export type ServiceRequestCondition = {
 	display: string,
 	id: string
 };
@@ -93,10 +93,10 @@ export type Procedure = {
 export type ServiceRequest = {
 	category: Coding,
 	code: Coding,
-	conditions: Condition[],
-	consent: Consent,
+	conditions: ServiceRequestCondition[],
+	consent: ServiceRequestConsent,
 	errors: string[],
-	goals: Goal[],
+	goals: ServiceRequestGoal[],
 	id: string,
 	occurrence: Occurrence
 };
@@ -139,4 +139,18 @@ export type Assessment = {
 	questions: string[],
 	actions: string
 	status: "Past" | "Planned"
+};
+
+//todo: mocked types, change after BE sync
+export type Goal = {
+	name: string,
+	problems: string[],
+	addedBy: string,
+	startDate: string,
+	endDate: string,
+	targets: string[],
+	comments: Comment[],
+	category: Coding,
+	code: Coding,
+	status: "active" | "completed"
 };
