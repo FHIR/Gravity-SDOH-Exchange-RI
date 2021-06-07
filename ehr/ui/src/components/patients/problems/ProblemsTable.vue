@@ -1,9 +1,11 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { TableData } from "@/components/patients/problems/Problems.vue";
+import ActionButton from "@/components/patients/ActionButton.vue";
 
 export default defineComponent({
 	name: "ProblemsTable",
+	components: { ActionButton },
 	props: {
 		data: {
 			type: Array as PropType<TableData[]>,
@@ -13,8 +15,7 @@ export default defineComponent({
 			type: String,
 			required: true
 		}
-	},
-	setup() {}
+	}
 });
 </script>
 
@@ -72,24 +73,18 @@ export default defineComponent({
 				width="350"
 			>
 				<template #default="scope">
-					<button class="action-button">
-						<span class="button-content">
-							<span class="icon add-goal"></span>
-							<span class="button-text">Add Goal</span>
-						</span>
-					</button>
-					<button class="action-button">
-						<span class="button-content">
-							<span class="icon add-action-step"></span>
-							<span class="button-text">Add Action Step</span>
-						</span>
-					</button>
-					<button class="action-button">
-						<span class="button-content">
-							<span class="icon mark-as-closed"></span>
-							<span class="button-text">Mark As Closed</span>
-						</span>
-					</button>
+					<ActionButton
+						icon-class="add-goal"
+						label="Add Goal"
+					/>
+					<ActionButton
+						icon-class="add-action-step"
+						label="Add Action Step"
+					/>
+					<ActionButton
+						icon-class="mark-as-closed"
+						label="Mark As Closed"
+					/>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -98,7 +93,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
-@import "~@/assets/scss/abstracts/mixins";
 
 .title {
 	margin: 10px 20px 0;
@@ -119,54 +113,5 @@ export default defineComponent({
 	+ .table-wrapper {
 		margin-top: 30px;
 	}
-}
-
-.action-button {
-	background-color: $global-background;
-	padding: 3px 12px;
-	min-height: 25px;
-	min-width: 44px;
-	border-radius: 19px;
-	border: 0.3px solid $global-base-border-color;
-	vertical-align: center;
-	cursor: pointer;
-
-	.button-content {
-		display: flex;
-	}
-
-	.button-text {
-		font-size: $global-font-size;
-		line-height: 16px;
-		margin-left: 5px;
-		display: none;
-	}
-
-	&:hover,
-	&:focus {
-		background-color: $global-background;
-		color: $global-text-color;
-		border-color: $global-primary-color;
-
-		.button-text {
-			display: inline-block;
-		}
-	}
-
-	+ .action-button {
-		margin-left: 20px;
-	}
-}
-
-.add-goal {
-	@include icon("~@/assets/images/add-goal.svg", 16px);
-}
-
-.add-action-step {
-	@include icon("~@/assets/images/add-action-step.svg", 16px);
-}
-
-.mark-as-closed {
-	@include icon("~@/assets/images/mark-as-closed.svg", 16px);
 }
 </style>
