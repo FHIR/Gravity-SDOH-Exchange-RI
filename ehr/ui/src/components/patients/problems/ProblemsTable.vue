@@ -72,20 +72,18 @@ export default defineComponent({
 				label="Actions"
 				width="350"
 			>
-				<template #default="scope">
-					<ActionButton
-						icon-class="add-goal"
-						label="Add Goal"
-					/>
-					<ActionButton
-						icon-class="add-action-step"
-						label="Add Action Step"
-					/>
-					<ActionButton
-						icon-class="mark-as-closed"
-						label="Mark As Closed"
-					/>
-				</template>
+				<ActionButton
+					icon-class="add-goal"
+					label="Add Goal"
+				/>
+				<ActionButton
+					icon-class="add-action-step"
+					label="Add Action Step"
+				/>
+				<ActionButton
+					icon-class="mark-as-closed"
+					label="Mark As Closed"
+				/>
 			</el-table-column>
 		</el-table>
 	</div>
