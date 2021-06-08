@@ -3,11 +3,13 @@ import { defineComponent, ref } from "vue";
 import HealthConcerns from "@/components/patients/health-concerns/HealthConcerns.vue";
 import ActionSteps from "@/components/patients/action-steps/ActionSteps.vue";
 import RiskAssessments from "@/components/patients/risk-assessments/RiskAssessments.vue";
+import Problems from "@/components/patients/problems/Problems.vue";
 
 export default defineComponent({
 	name: "Tabs",
 	components: {
 		HealthConcerns,
+		Problems,
 		ActionSteps,
 		RiskAssessments
 	},
@@ -33,7 +35,7 @@ export default defineComponent({
 			label="Problems"
 			name="problems"
 		>
-			Problems
+			<Problems />
 		</el-tab-pane>
 		<el-tab-pane
 			label="Goals"
