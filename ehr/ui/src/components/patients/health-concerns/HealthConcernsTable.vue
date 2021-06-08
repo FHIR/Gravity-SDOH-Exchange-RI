@@ -2,11 +2,13 @@
 import { defineComponent, PropType, ref } from "vue";
 import EditConcernDialog from "@/components/patients/health-concerns/EditConcernDialog.vue";
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
+import ActionButton from "@/components/patients/ActionButton.vue";
 
 export default defineComponent({
 	name: "HealthConcernsTable",
 	components: {
-		EditConcernDialog
+		EditConcernDialog,
+		ActionButton
 	},
 	props: {
 		data: {
@@ -86,10 +88,20 @@ export default defineComponent({
 				<el-table-column
 					v-if="type === 'ActiveConcerns'"
 					label="Actions"
+					width="580"
 				>
-					<div class="icon icon-promote"></div>
-					<div class="icon icon-resolved"></div>
-					<div class="icon icon-remove"></div>
+					<ActionButton
+						icon-class="icon-promote"
+						label="Promote to Problem"
+					/>
+					<ActionButton
+						icon-class="icon-resolved"
+						label="Mark as resolved"
+					/>
+					<ActionButton
+						icon-class="icon-remove"
+						label="Remove"
+					/>
 				</el-table-column>
 				<el-table-column
 					v-if="type === 'PromotedOrResolvedConcerns'"
@@ -105,7 +117,6 @@ export default defineComponent({
 				>
 					May 5, 2021, 10:00 AM
 				</el-table-column>
-				<el-table-column v-if="type === 'ActiveConcerns'" />
 			</el-table>
 		</div>
 
@@ -144,24 +155,6 @@ export default defineComponent({
 }
 
 .el-table {
-	.icon {
-		cursor: pointer;
-	}
-
-	.icon-promote {
-		@include icon("~@/assets/images/concern-promote.svg", 32px);
-	}
-
-	.icon-resolved {
-		margin: 0 20px;
-
-		@include icon("~@/assets/images/concern-resolved.svg", 32px);
-	}
-
-	.icon-remove {
-		@include icon("~@/assets/images/concern-remove.svg", 32px);
-	}
-
 	.status-cell {
 		display: flex;
 		align-items: center;

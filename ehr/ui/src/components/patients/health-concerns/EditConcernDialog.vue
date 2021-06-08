@@ -41,7 +41,6 @@ export default defineComponent({
 			size="mini"
 			class="edit-concern-form"
 		>
-			<h4>Please confirm that the following health concern can be promoted to a problem:</h4>
 			<el-form-item label="Category">
 				{{ concern.category }}
 			</el-form-item>

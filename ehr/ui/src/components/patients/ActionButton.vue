@@ -6,11 +6,11 @@ export default defineComponent({
 	props: {
 		iconClass: {
 			type: String,
-			require: true
+			required: true
 		},
 		label: {
 			type: String,
-			require: true
+			required: true
 		}
 	}
 });
@@ -46,11 +46,16 @@ export default defineComponent({
 		display: flex;
 	}
 
+	.icon {
+		flex-shrink: 0;
+	}
+
 	.label {
 		font-size: $global-font-size;
 		line-height: 16px;
 		margin-left: 5px;
 		display: none;
+		overflow: hidden;
 	}
 
 	&:hover,
@@ -58,6 +63,9 @@ export default defineComponent({
 		background-color: $global-background;
 		color: $global-text-color;
 		border-color: $global-primary-color;
+		max-width: fit-content;
+
+		@include grow-animation();
 
 		.label {
 			display: inline-block;
@@ -79,5 +87,17 @@ export default defineComponent({
 
 .mark-as-closed {
 	@include icon("~@/assets/images/mark-as-closed.svg", 16px);
+}
+
+.icon-promote {
+	@include icon("~@/assets/images/concern-promote.svg", 16px, 20px);
+}
+
+.icon-resolved {
+	@include icon("~@/assets/images/concern-resolved.svg", 22px, 19px);
+}
+
+.icon-remove {
+	@include icon("~@/assets/images/concern-remove.svg", 20px, 19px);
 }
 </style>

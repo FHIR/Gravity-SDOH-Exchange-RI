@@ -40,6 +40,8 @@
 		padding: 0 20px;
 		font-size: $global-medium-font-size;
 		line-height: 19px;
+		display: flex;
+		align-items: center;
 	}
 
 	.el-table__header-wrapper {
