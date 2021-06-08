@@ -36,12 +36,13 @@
 	background-repeat: no-repeat;
 	background-size: 100%;
 }
+// Workaround to apply same keyframe animation to different items
 
 $animation-id-count: 0;
 
 @function animation-id() {
 	$id: $animation-id-count;
-	$animation-id-count: $id + 1 !global;
+	$animation-id-count: $id + 1;
 
 	@return animation-id-#{$id};
 }

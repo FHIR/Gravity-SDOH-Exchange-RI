@@ -88,7 +88,7 @@ export default defineComponent({
 				<el-table-column
 					v-if="type === 'ActiveConcerns'"
 					label="Actions"
-					width="580"
+					width="350"
 				>
 					<ActionButton
 						icon-class="icon-promote"
@@ -152,24 +152,5 @@ export default defineComponent({
 ::v-deep(.el-table--enable-row-hover) .el-table__body tr:hover {
 	box-shadow: 0 2px 5px 0 rgba(51, 51, 51, 0.25);
 	border-radius: 5px;
-}
-
-.el-table {
-	.status-cell {
-		display: flex;
-		align-items: center;
-		height: 35px;
-		line-height: 1;
-
-		.info {
-			display: flex;
-			flex-direction: column;
-		}
-
-		.date {
-			font-size: $global-small-font-size;
-			color: $grey;
-		}
-	}
 }
 </style>

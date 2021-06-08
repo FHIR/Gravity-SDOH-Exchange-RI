@@ -52,7 +52,7 @@ export default defineComponent({
 
 	.label {
 		font-size: $global-font-size;
-		line-height: 16px;
+		line-height: 20px;
 		margin-left: 5px;
 		display: none;
 		overflow: hidden;
@@ -78,19 +78,19 @@ export default defineComponent({
 }
 
 .add-goal {
-	@include icon("~@/assets/images/add-goal.svg", 16px);
+	@include icon("~@/assets/images/add-goal.svg", 20px);
 }
 
 .add-action-step {
-	@include icon("~@/assets/images/add-action-step.svg", 16px);
+	@include icon("~@/assets/images/add-action-step.svg", 20px);
 }
 
 .mark-as-closed {
-	@include icon("~@/assets/images/mark-as-closed.svg", 16px);
+	@include icon("~@/assets/images/mark-as-closed.svg", 21px);
 }
 
 .icon-promote {
-	@include icon("~@/assets/images/concern-promote.svg", 16px, 20px);
+	@include icon("~@/assets/images/concern-promote.svg", 17px, 20px);
 }
 
 .icon-resolved {
