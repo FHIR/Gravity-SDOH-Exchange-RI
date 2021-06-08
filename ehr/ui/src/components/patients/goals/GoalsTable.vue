@@ -1,9 +1,13 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/goals/Goals.vue";
+import ActionButton from "@/components/patients/ActionButton.vue";
 
 export default defineComponent({
 	name: "GoalsTable",
+	components: {
+		ActionButton
+	},
 	props: {
 		data: {
 			type: Array as PropType<TableData[]>,
@@ -79,8 +83,20 @@ export default defineComponent({
 			<el-table-column
 				v-if="status === 'active'"
 				label="Actions"
+				width="350"
 			>
-				actions
+				<ActionButton
+					icon-class="mark-as-completed"
+					label="Mark as Completed"
+				/>
+				<ActionButton
+					icon-class="remove-goal"
+					label="Remove"
+				/>
+				<ActionButton
+					icon-class="add-target"
+					label="Add Target"
+				/>
 			</el-table-column>
 
 			<el-table-column
