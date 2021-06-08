@@ -38,7 +38,7 @@ export default defineComponent({
 	min-height: 25px;
 	min-width: 44px;
 	border-radius: 19px;
-	border: 0.3px solid $global-base-border-color;
+	border: 1px solid $global-base-border-color;
 	vertical-align: center;
 	cursor: pointer;
 
