@@ -136,6 +136,16 @@ export type Comment = {
 	time: string
 };
 
+export type Concern = {
+	name: string,
+	createdAt: string,
+	category: string
+	id: string,
+	basedOn: string,
+	actions: string,
+	status: string
+};
+
 export type Assessment = {
 	name: string,
 	createdAt: string,
