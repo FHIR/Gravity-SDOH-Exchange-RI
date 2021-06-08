@@ -90,6 +90,11 @@ export type Procedure = {
 	id: string
 }
 
+export type Period = {
+	start: string,
+	end?: string
+}
+
 export type ServiceRequest = {
 	category: Coding,
 	code: Coding,
@@ -131,6 +136,16 @@ export type Comment = {
 	time: string
 };
 
+export type Concern = {
+	name: string,
+	createdAt: string,
+	category: string
+	id: string,
+	basedOn: string,
+	actions: string,
+	status: string
+};
+
 export type Assessment = {
 	name: string,
 	createdAt: string,
@@ -141,7 +156,16 @@ export type Assessment = {
 	status: "Past" | "Planned"
 };
 
-//todo: mocked types, change after BE sync
+export type Problem = {
+	id: string,
+	name: string,
+	basedOn: string,
+	onsetPeriod: Period,
+	goals: number,
+	actionSteps: number,
+	clinicalStatus: string
+};
+
 export type Goal = {
 	name: string,
 	problems: string[],
