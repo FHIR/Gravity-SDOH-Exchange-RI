@@ -18,7 +18,7 @@ public class OrganizationToDtoConverter implements Converter<Organization, Organ
         .getIdPart();
     OrganizationDto orgDto = new OrganizationDto(orgId);
     orgDto.setName(org.getName());
-    //We are interested only in CBO/CBRO types. Other are ignored.
+    //We are interested only in CBO/CP types. Other are ignored.
     Coding coding = FhirUtil.findCoding(org.getType(), OrganizationTypeCode.SYSTEM);
     if (coding == null) {
       orgDto.getErrors()

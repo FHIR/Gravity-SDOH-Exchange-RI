@@ -1,38 +1,27 @@
-package org.hl7.gravity.refimpl.sdohexchange.dto.converter.info;
+package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ConditionToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.GoalToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
-import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConsentResponseDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OccurrenceResponseDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ServiceRequestDto;
-import org.hl7.gravity.refimpl.sdohexchange.info.ServiceRequestInfo;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
-import java.util.stream.Collectors;
-
 @Slf4j
-public class ServiceRequestInfoToDtoConverter implements Converter<ServiceRequestInfo, ServiceRequestDto> {
+public class ServiceRequestToDtoConverter implements Converter<ServiceRequest, ServiceRequestDto> {
 
-  private final GoalToDtoConverter goalToDtoConverter;
-  private final ConditionToDtoConverter conditionToDtoConverter;
-
-  public ServiceRequestInfoToDtoConverter() {
-    this.goalToDtoConverter = new GoalToDtoConverter();
-    this.conditionToDtoConverter = new ConditionToDtoConverter();
-  }
+  private final TypeToDtoConverter typeToDtoConverter = new TypeToDtoConverter();
 
   @Override
-  public ServiceRequestDto convert(ServiceRequestInfo serviceRequestInfo) {
-    ServiceRequest serviceRequest = serviceRequestInfo.getServiceRequest();
+  public ServiceRequestDto convert(ServiceRequest serviceRequest) {
     String id = serviceRequest.getIdElement()
         .getIdPart();
     ServiceRequestDto serviceRequestDto = new ServiceRequestDto(id);
@@ -44,21 +33,26 @@ public class ServiceRequestInfoToDtoConverter implements Converter<ServiceReques
     serviceRequestDto.setCode(new CodingDto(requestCode.getCode(), requestCode.getDisplay()));
     serviceRequestDto.setOccurrence(convertOccurrence(serviceRequest.getOccurrence()));
 
-    serviceRequestDto.setGoals(serviceRequestInfo.getGoals()
+    serviceRequestDto.setConditions(serviceRequest.getReasonReference()
         .stream()
-        .map(goalToDtoConverter::convert)
+        .map(typeToDtoConverter::convert)
         .collect(Collectors.toList()));
-    serviceRequestDto.setConditions(serviceRequestInfo.getConditions()
+    serviceRequestDto.setGoals(serviceRequest.getSupportingInfo()
         .stream()
-        .map(conditionToDtoConverter::convert)
+        .filter(info -> info.getReferenceElement()
+            .getResourceType()
+            .equals(Goal.class.getSimpleName()))
+        .map(typeToDtoConverter::convert)
         .collect(Collectors.toList()));
     //TODO: confirm display
-    Consent consent = serviceRequestInfo.getConsent();
-    ConsentResponseDto consentResponseDto = new ConsentResponseDto(consent.getIdElement()
-        .getIdPart(), consent.getScope()
-        .getCodingFirstRep()
-        .getDisplay());
-    serviceRequestDto.setConsent(consentResponseDto);
+    serviceRequestDto.setConsent(serviceRequest.getSupportingInfo()
+        .stream()
+        .filter(info -> info.getReferenceElement()
+            .getResourceType()
+            .equals(Consent.class.getSimpleName()))
+        .map(typeToDtoConverter::convert)
+        .findAny()
+        .orElse(null));
     return serviceRequestDto;
   }
 

@@ -8,11 +8,6 @@ import org.hl7.fhir.r4.model.Task;
 
 import java.util.stream.Stream;
 
-/**
- * Possible values for {@link org.hl7.fhir.r4.model.Task} status change.
- *
- * @author Mykhailo Stefantsiv
- */
 @AllArgsConstructor
 public enum TaskStatus {
   CANCELLED(Task.TaskStatus.CANCELLED.getDisplay(), Task.TaskStatus.CANCELLED);

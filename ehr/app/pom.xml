@@ -14,11 +14,6 @@
   <name>EHR App</name>
   <packaging>jar</packaging>
 
-  <properties>
-    <spring_boot_version>2.2.6.RELEASE</spring_boot_version>
-    <hapi_version>5.2.0</hapi_version>
-  </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -80,6 +75,11 @@
     <dependency>
       <groupId>org.hl7.gravity.refimpl.sdohexchange.components</groupId>
       <artifactId>fhir-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hl7.gravity.refimpl.sdohexchange.components</groupId>
+      <artifactId>spring-boot-starter-exception-handler</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
