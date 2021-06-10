@@ -3,10 +3,12 @@ import { defineComponent, PropType, ref } from "vue";
 import EditConcernDialog from "@/components/patients/health-concerns/EditConcernDialog.vue";
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
+import NewConcernDialog from "@/components/patients/health-concerns/NewConcernDialog.vue";
 
 export default defineComponent({
 	name: "HealthConcernsTable",
 	components: {
+		NewConcernDialog,
 		EditConcernDialog,
 		ActionButton
 	},
@@ -26,6 +28,7 @@ export default defineComponent({
 	},
 	setup() {
 		const editConcernDialogVisible = ref<boolean>(false);
+		const newConcernDialogVisible = ref<boolean>(false);
 		const editConcern = ref<TableData>();
 		const onConcernClick = (row: TableData) => {
 			editConcernDialogVisible.value = true;
@@ -34,6 +37,7 @@ export default defineComponent({
 
 		return {
 			editConcernDialogVisible,
+			newConcernDialogVisible,
 			onConcernClick,
 			editConcern
 		};
@@ -46,10 +50,22 @@ export default defineComponent({
 		<div
 			class="table-wrapper"
 		>
-			<div class="title">
-				<h3>
-					{{ title }}
-				</h3>
+			<div class="header">
+				<div class="title">
+					<h3>
+						{{ title }}
+					</h3>
+				</div>
+				<el-button
+					v-if="type === 'ActiveConcerns'"
+					plain
+					round
+					type="primary"
+					size="mini"
+					@click="newConcernDialogVisible = true"
+				>
+					Add Health Concern
+				</el-button>
 			</div>
 			<el-table :data="data">
 				<el-table-column
@@ -88,7 +104,7 @@ export default defineComponent({
 				<el-table-column
 					v-if="type === 'ActiveConcerns'"
 					label="Actions"
-					width="350"
+					width="580"
 				>
 					<ActionButton
 						icon-class="icon-promote"
@@ -125,12 +141,28 @@ export default defineComponent({
 			:concern="editConcern"
 			@close="editConcernDialogVisible = false"
 		/>
+
+		<NewConcernDialog
+			:visible="newConcernDialogVisible"
+			@close="newConcernDialogVisible = false"
+		/>
 	</div>
 </template>
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
 @import "~@/assets/scss/abstracts/mixins";
+
+.header {
+	display: flex;
+	justify-content: space-between;
+
+	.el-button {
+		width: 155px;
+		height: 25px;
+		margin-top: 10px;
+	}
+}
 
 .title {
 	margin: 10px 20px 0;

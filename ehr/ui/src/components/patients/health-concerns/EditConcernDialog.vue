@@ -28,7 +28,7 @@ export default defineComponent({
 <template>
 	<el-dialog
 		:model-value="visible"
-		title="Promote Health Concern to Problem"
+		title="Health Concern Details"
 		:width="700"
 		append-to-body
 		destroy-on-close
@@ -41,6 +41,9 @@ export default defineComponent({
 			size="mini"
 			class="edit-concern-form"
 		>
+			<el-form-item label="Health Concern">
+				{{ concern.name }}
+			</el-form-item>
 			<el-form-item label="Category">
 				{{ concern.category }}
 			</el-form-item>
