@@ -194,7 +194,7 @@ export default defineComponent({
 			/>
 			<div
 				v-if="!isRequestLoading && !(completedRequests.length || activeRequests.length)"
-				class="no-request-data"
+				class="no-data"
 			>
 				<h2>No Referral Requests Yet</h2>
 				<el-button
@@ -228,21 +228,5 @@ export default defineComponent({
 
 .referrals {
 	min-height: 130px;
-}
-
-.no-request-data {
-	height: 240px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	background-color: $global-background;
-
-	h2 {
-		color: $whisper;
-		font-size: $global-xxxlarge-font-size;
-		font-weight: $global-font-weight-normal;
-		margin-bottom: 50px;
-	}
 }
 </style>

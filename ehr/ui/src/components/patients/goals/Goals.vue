@@ -68,6 +68,20 @@ export default defineComponent({
 			:data="completedGoals"
 			status="completed"
 		/>
+		<div
+			v-if="!isDataLoading && !(activeGoals.length > 0 || completedGoals.length > 0)"
+			class="no-data"
+		>
+			<h2>No Goals Yet</h2>
+			<el-button
+				plain
+				round
+				type="primary"
+				size="mini"
+			>
+				Add Goal
+			</el-button>
+		</div>
 	</div>
 </template>
 
