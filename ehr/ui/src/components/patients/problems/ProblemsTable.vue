@@ -15,6 +15,10 @@ export default defineComponent({
 		title: {
 			type: String,
 			required: true
+		},
+		type: {
+			type: String,
+			default: "active-problems"
 		}
 	},
 	setup() {
@@ -87,6 +91,7 @@ export default defineComponent({
 				</template>
 			</el-table-column>
 			<el-table-column
+				v-if="type === 'active problems'"
 				label="Actions"
 				width="350"
 			>
@@ -102,6 +107,15 @@ export default defineComponent({
 					icon-class="mark-as-closed"
 					label="Mark As Closed"
 				/>
+			</el-table-column>
+			<el-table-column
+				v-if="type === 'closed problems'"
+				label="Closed Date"
+				width="350"
+			>
+				<template #default="scope">
+					<span>{{ $filters.formatDateTime(scope.row?.closedDate) }}</span>
+				</template>
 			</el-table-column>
 		</el-table>
 

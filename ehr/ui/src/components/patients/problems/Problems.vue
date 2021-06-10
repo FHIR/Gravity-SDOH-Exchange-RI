@@ -8,7 +8,8 @@ export type TableData = {
 	id: string,
 	name: string,
 	basedOn: string,
-	startDate: string | undefined
+	startDate?: string,
+	closedDate?: string,
 	goals: number,
 	actionSteps: number,
 	status: string,
@@ -29,6 +30,7 @@ export default defineComponent({
 				name: problem.name,
 				basedOn: problem.basedOn,
 				startDate: problem.onsetPeriod.start,
+				closedDate: problem.onsetPeriod.end,
 				goals: problem.goals,
 				actionSteps: problem.actionSteps,
 				status: problem.clinicalStatus,
@@ -56,11 +58,13 @@ export default defineComponent({
 			v-if="activeProblems.length"
 			:data="activeProblems"
 			title="Active Problems"
+			type="active problems"
 		/>
 		<ProblemsTable
 			v-if="closedProblems.length"
 			:data="closedProblems"
 			title="Closed Problems"
+			type="closed problems"
 		/>
 		<div
 			v-if="!tableData.length"

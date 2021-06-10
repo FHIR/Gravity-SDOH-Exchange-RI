@@ -26,7 +26,8 @@ class Problems extends VuexModule implements IProblems {
 		name: "Hunger Vital Signs",
 		basedOn: "Hunger Vital Signs assessment",
 		onsetPeriod: {
-			start: "2019-08-18T12:31:35.123Z"
+			start: "2019-08-18T12:31:35.123Z",
+			end: "2021-10-28T12:31:35.123Z"
 		},
 		goals: 0,
 		actionSteps: 0,
