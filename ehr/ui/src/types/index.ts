@@ -163,5 +163,7 @@ export type Problem = {
 	onsetPeriod: Period,
 	goals: number,
 	actionSteps: number,
-	clinicalStatus: string
+	clinicalStatus: string,
+	code: string,
+	category: string
 };

@@ -17,7 +17,9 @@ class Problems extends VuexModule implements IProblems {
 		},
 		goals: 0,
 		actionSteps: 0,
-		clinicalStatus: "active"
+		clinicalStatus: "active",
+		code: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
+		category: "test"
 	},
 	{
 		id: "SDOHCC-Condition-HungerVitalSign-Example-2",
@@ -28,7 +30,9 @@ class Problems extends VuexModule implements IProblems {
 		},
 		goals: 0,
 		actionSteps: 0,
-		clinicalStatus: "resolved"
+		clinicalStatus: "resolved",
+		code: "Insuficient Food Supply (706875005)",
+		category: "test"
 	}];
 }
 

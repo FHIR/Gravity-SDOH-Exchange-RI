@@ -11,7 +11,9 @@ export type TableData = {
 	startDate: string | undefined
 	goals: number,
 	actionSteps: number,
-	status: string
+	status: string,
+	code: string,
+	category: string
 };
 
 export default defineComponent({
@@ -29,7 +31,9 @@ export default defineComponent({
 				startDate: problem.onsetPeriod.start,
 				goals: problem.goals,
 				actionSteps: problem.actionSteps,
-				status: problem.clinicalStatus
+				status: problem.clinicalStatus,
+				code: problem.code,
+				category: problem.category
 			}))
 		);
 

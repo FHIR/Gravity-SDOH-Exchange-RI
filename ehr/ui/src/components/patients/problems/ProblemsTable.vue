@@ -1,11 +1,12 @@
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/problems/Problems.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
+import ProblemDialog from "@/components/patients/problems/ProblemDialog.vue";
 
 export default defineComponent({
 	name: "ProblemsTable",
-	components: { ActionButton },
+	components: { ActionButton, ProblemDialog },
 	props: {
 		data: {
 			type: Array as PropType<TableData[]>,
@@ -15,6 +16,22 @@ export default defineComponent({
 			type: String,
 			required: true
 		}
+	},
+	setup() {
+		const problemsDialogVisible = ref<boolean>(false);
+		const activeProblem = ref<TableData>();
+
+		const onRequestClick = (row: TableData) => {
+			problemsDialogVisible.value = true;
+			activeProblem.value = row;
+		};
+
+		return {
+			problemsDialogVisible,
+			activeProblem,
+			onRequestClick
+		};
+
 	}
 });
 </script>
@@ -35,6 +52,7 @@ export default defineComponent({
 				<template #default="scope">
 					<el-button
 						type="text"
+						@click="onRequestClick(scope.row)"
 					>
 						{{ scope.row.name }}
 					</el-button>
@@ -86,6 +104,12 @@ export default defineComponent({
 				/>
 			</el-table-column>
 		</el-table>
+
+		<ProblemDialog
+			:visible="problemsDialogVisible"
+			:problem="activeProblem"
+			@close="problemsDialogVisible = false"
+		/>
 	</div>
 </template>
 
