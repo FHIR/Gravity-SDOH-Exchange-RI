@@ -25,7 +25,7 @@ export default defineComponent({
 		const problemsDialogVisible = ref<boolean>(false);
 		const activeProblem = ref<TableData>();
 
-		const onRequestClick = (row: TableData) => {
+		const viewProblem = (row: TableData) => {
 			problemsDialogVisible.value = true;
 			activeProblem.value = row;
 		};
@@ -33,7 +33,7 @@ export default defineComponent({
 		return {
 			problemsDialogVisible,
 			activeProblem,
-			onRequestClick
+			viewProblem
 		};
 
 	}
@@ -65,7 +65,7 @@ export default defineComponent({
 				<template #default="scope">
 					<el-button
 						type="text"
-						@click="onRequestClick(scope.row)"
+						@click="viewProblem(scope.row)"
 					>
 						{{ scope.row.name }}
 					</el-button>
