@@ -100,4 +100,16 @@ export default defineComponent({
 .icon-remove {
 	@include icon("~@/assets/images/concern-remove.svg", 20px, 19px);
 }
+
+.mark-as-completed {
+	@include icon("~@/assets/images/goal-mark-as-completed.svg", 18px, 20px);
+}
+
+.remove-goal {
+	@include icon("~@/assets/images/goal-remove.svg", 21px, 20px);
+}
+
+.add-target {
+	@include icon("~@/assets/images/goal-add-target.svg", 20px);
+}
 </style>

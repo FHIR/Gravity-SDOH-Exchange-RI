@@ -2,7 +2,7 @@
 import { computed, defineComponent, onMounted, onUnmounted, ref, watch, h } from "vue";
 import RequestTable from "@/components/patients/action-steps/RequestTable.vue";
 import NewRequestDialog from "@/components/patients/action-steps/NewRequestDialog.vue";
-import { Comment, Occurrence, Task, Condition, Goal, Procedure, TaskStatus, Coding } from "@/types";
+import { Comment, Occurrence, Task, ServiceRequestCondition, ServiceRequestGoal, Procedure, TaskStatus, Coding } from "@/types";
 import { TasksModule } from "@/store/modules/tasks";
 import { ElNotification } from "element-plus";
 import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
@@ -11,8 +11,8 @@ export type TableData = {
 	name: string,
 	status: TaskStatus,
 	category: Coding,
-	problems: Condition[],
-	goals: Goal[],
+	problems: ServiceRequestCondition[],
+	goals: ServiceRequestGoal[],
 	performer: string | null | undefined,
 	consent: string
 	outcomes: string | null,
@@ -194,7 +194,7 @@ export default defineComponent({
 			/>
 			<div
 				v-if="!isRequestLoading && !(completedRequests.length || activeRequests.length)"
-				class="no-request-data"
+				class="no-data"
 			>
 				<h2>No Referral Requests Yet</h2>
 				<el-button
@@ -228,21 +228,5 @@ export default defineComponent({
 
 .referrals {
 	min-height: 130px;
-}
-
-.no-request-data {
-	height: 240px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	background-color: $global-background;
-
-	h2 {
-		color: $whisper;
-		font-size: $global-xxxlarge-font-size;
-		font-weight: $global-font-weight-normal;
-		margin-bottom: 50px;
-	}
 }
 </style>

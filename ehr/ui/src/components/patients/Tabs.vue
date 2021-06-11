@@ -4,6 +4,7 @@ import HealthConcerns from "@/components/patients/health-concerns/HealthConcerns
 import ActionSteps from "@/components/patients/action-steps/ActionSteps.vue";
 import RiskAssessments from "@/components/patients/risk-assessments/RiskAssessments.vue";
 import Problems from "@/components/patients/problems/Problems.vue";
+import Goals from "@/components/patients/goals/Goals.vue";
 
 export default defineComponent({
 	name: "Tabs",
@@ -11,7 +12,8 @@ export default defineComponent({
 		HealthConcerns,
 		Problems,
 		ActionSteps,
-		RiskAssessments
+		RiskAssessments,
+		Goals
 	},
 	setup() {
 		const activeTab = ref<string>("actionSteps");
@@ -41,7 +43,7 @@ export default defineComponent({
 			label="Goals"
 			name="goals"
 		>
-			Goals
+			<Goals />
 		</el-tab-pane>
 		<el-tab-pane
 			label="Action Steps"
