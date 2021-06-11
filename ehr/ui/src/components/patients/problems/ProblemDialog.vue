@@ -7,6 +7,7 @@ export type FormModel = {
 	name: string,
 	basedOn: string,
 	startDate: string,
+	closedDate?: string,
 	goals: number,
 	actionSteps: number,
 	clinicalStatus: string,
@@ -37,6 +38,7 @@ export default defineComponent({
 			name: "",
 			basedOn: "",
 			startDate: "",
+			closedDate: "",
 			category: "",
 			goals: 0,
 			actionSteps: 0,
@@ -94,6 +96,12 @@ export default defineComponent({
 				</el-form-item>
 				<el-form-item label="Assessment Date">
 					{{ $filters.formatDateTime(formModel.startDate) }}
+				</el-form-item>
+				<el-form-item
+					v-if="formModel.closedDate"
+					label="Closed Date"
+				>
+					{{ $filters.formatDateTime(formModel.closedDate) }}
 				</el-form-item>
 			</template>
 		</el-form>
