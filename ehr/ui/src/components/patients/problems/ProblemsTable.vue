@@ -16,9 +16,9 @@ export default defineComponent({
 			type: String,
 			required: true
 		},
-		type: {
+		status: {
 			type: String,
-			default: "active-problems"
+			default: "active"
 		}
 	},
 	setup() {
@@ -48,6 +48,15 @@ export default defineComponent({
 			<h3>
 				{{ title }}
 			</h3>
+			<el-button
+				v-if="status === 'active'"
+				plain
+				round
+				type="primary"
+				size="mini"
+			>
+				Add Problem
+			</el-button>
 		</div>
 		<el-table :data="data">
 			<el-table-column
@@ -91,7 +100,7 @@ export default defineComponent({
 				</template>
 			</el-table-column>
 			<el-table-column
-				v-if="type === 'active problems'"
+				v-if="status === 'active'"
 				label="Actions"
 				width="350"
 			>
@@ -109,7 +118,7 @@ export default defineComponent({
 				/>
 			</el-table-column>
 			<el-table-column
-				v-if="type === 'closed problems'"
+				v-if="status === 'closed'"
 				label="Closed Date"
 				width="350"
 			>
@@ -132,6 +141,8 @@ export default defineComponent({
 
 .title {
 	margin: 10px 20px 0;
+	display: flex;
+	justify-content: space-between;
 
 	h3 {
 		font-weight: $global-font-weight-medium;

@@ -58,13 +58,13 @@ export default defineComponent({
 			v-if="activeProblems.length"
 			:data="activeProblems"
 			title="Active Problems"
-			type="active problems"
+			status="active"
 		/>
 		<ProblemsTable
 			v-if="closedProblems.length"
 			:data="closedProblems"
 			title="Closed Problems"
-			type="closed problems"
+			status="closed"
 		/>
 		<div
 			v-if="!tableData.length"
