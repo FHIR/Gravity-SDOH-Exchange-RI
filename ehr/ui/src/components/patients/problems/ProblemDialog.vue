@@ -25,10 +25,6 @@ export default defineComponent({
 		problem: {
 			type: Object as PropType<TableData>,
 			default: undefined
-		},
-		editMode: {
-			type: Boolean,
-			default: false
 		}
 	},
 	emits: ["close"],
@@ -81,29 +77,27 @@ export default defineComponent({
 			size="mini"
 			class="problem-form"
 		>
-			<template v-if="!editMode">
-				<el-form-item label="Problem">
-					{{ formModel.name }}
-				</el-form-item>
-				<el-form-item label="Category">
-					{{ formModel.category }}
-				</el-form-item>
-				<el-form-item label="Code">
-					{{ formModel.code }}
-				</el-form-item>
-				<el-form-item label="Base on">
-					{{ formModel.basedOn }}
-				</el-form-item>
-				<el-form-item label="Assessment Date">
-					{{ $filters.formatDateTime(formModel.startDate) }}
-				</el-form-item>
-				<el-form-item
-					v-if="formModel.closedDate"
-					label="Closed Date"
-				>
-					{{ $filters.formatDateTime(formModel.closedDate) }}
-				</el-form-item>
-			</template>
+			<el-form-item label="Problem">
+				{{ formModel.name }}
+			</el-form-item>
+			<el-form-item label="Category">
+				{{ formModel.category }}
+			</el-form-item>
+			<el-form-item label="Code">
+				{{ formModel.code }}
+			</el-form-item>
+			<el-form-item label="Base on">
+				{{ formModel.basedOn }}
+			</el-form-item>
+			<el-form-item label="Assessment Date">
+				{{ $filters.formatDateTime(formModel.startDate) }}
+			</el-form-item>
+			<el-form-item
+				v-if="formModel.closedDate"
+				label="Closed Date"
+			>
+				{{ $filters.formatDateTime(formModel.closedDate) }}
+			</el-form-item>
 		</el-form>
 		<template #footer>
 			<el-button
