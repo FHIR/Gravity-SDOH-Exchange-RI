@@ -107,20 +107,13 @@ export default defineComponent({
 		</el-form>
 		<template #footer>
 			<el-button
-				round
-				size="mini"
-				@click="$emit('close')"
-			>
-				Cancel
-			</el-button>
-			<el-button
 				plain
 				round
 				type="primary"
 				size="mini"
 				@click="$emit('close')"
 			>
-				Confirm
+				Close
 			</el-button>
 		</template>
 	</el-dialog>
