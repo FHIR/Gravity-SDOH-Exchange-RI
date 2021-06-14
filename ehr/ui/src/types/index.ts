@@ -118,6 +118,15 @@ export type newTaskPayload = {
 	occurrence: Occurrence | string
 };
 
+export type newConcernPayload = {
+	name: string,
+	assessmentDate?: string,
+	category: string
+	basedOn?: string,
+	actions?: string,
+	code?: string
+}
+
 export type updateTaskPayload = {
 	comment?: string,
 	status: TaskStatus | null,

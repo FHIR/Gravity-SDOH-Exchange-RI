@@ -1,13 +1,14 @@
 import axios from "axios";
 import {
-	ContextResponse,
-	Task,
+	Coding,
+	Concern,
 	Condition,
+	ContextResponse,
 	Goal,
-	Organization,
 	newTaskPayload,
-	updateTaskPayload,
-	Coding
+	Organization,
+	Task,
+	updateTaskPayload
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -21,6 +22,24 @@ export const getTasks = async (): Promise<Task[]> => {
 
 	return res.data;
 };
+
+export const getConcerns = async (): Promise<Concern[]> => [{
+	status: "Active",
+	id: "123123",
+	name: "Hunger Vital Signs",
+	createdAt: "2021-05-18T14:15:08",
+	category: "Food Insecurity",
+	basedOn: "Past",
+	actions: "send to patient"
+}, {
+	status: "PromotedOrResolved",
+	id: "123123",
+	name: "Hunger Vital Signs",
+	createdAt: "2021-05-18T14:15:08",
+	category: "Food Insecurity",
+	basedOn: "Past",
+	actions: "send to patient"
+}];
 
 export const createTask = async (payload: newTaskPayload): Promise<{ taskId: string }> => {
 	const res = await axios.post("/task", payload);
@@ -57,6 +76,8 @@ export const getCategories = async (): Promise<Coding[]> => {
 
 	return res.data;
 };
+
+export const getCodes = async (): Promise<Coding[]> => [{ display: "Transportation Insecurity", code: "Z59.82" }];
 
 export const getRequests = async (code: string): Promise<Coding[]> => {
 	const res = await axios.get(`/mappings/categories/${code}/servicerequest/codings`);

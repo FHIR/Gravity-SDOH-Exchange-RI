@@ -1,16 +1,17 @@
 <script lang="ts">
 import { defineComponent, reactive, ref } from "vue";
-import { getCategories } from "@/api";
-import { Condition, Coding } from "@/types";
+import { getCategories, getCodes } from "@/api";
+import { Coding, newConcernPayload } from "@/types";
 import { RuleItem } from "async-validator";
+import moment from "moment";
+import { ConcernsModule } from "@/store/modules/concerns";
 
 export type FormModel = {
 	name: string,
 	category: string,
-	icd10Code: string,
-	snomedCtCode: string,
+	code: string,
 	basedOn: string,
-	occurrence: string
+	assessmentDate: string
 };
 
 export default defineComponent({
@@ -24,19 +25,17 @@ export default defineComponent({
 	emits: ["close"],
 	setup(props, { emit }) {
 		const categoryOptions = ref<Coding[]>([]);
-		const icd10Code = ref<Coding[]>([]);
-		const snomedCtCode = ref<Condition[]>([]);
+		const codes = ref<Coding[]>([]);
 
 		const formModel = reactive<FormModel>({
 			name: "",
 			category: "",
-			icd10Code: "",
-			snomedCtCode: "",
+			code: "",
 			basedOn: "",
-			occurrence: ""
+			assessmentDate: ""
 		});
-		const occurrenceType = ref<string>("");
-		//todo: use element-ui form type
+		const assessmentDate = ref<string>("");
+
 		const formEl = ref<HTMLFormElement>();
 
 		//
@@ -44,13 +43,13 @@ export default defineComponent({
 		//
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
+			codes.value = await getCodes();
 		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
 			emit("close");
 		};
 
-		//todo: seems like element-ui added few additional keys to async-validator RuleItem
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: {
 				required: true,
@@ -68,16 +67,34 @@ export default defineComponent({
 		//
 		const disabledOccurrenceDate = (time: Date): boolean => time.getTime() < Date.now();
 
+		const onFormSave = () => {
+			formEl.value?.validate((valid: boolean) => {
+				if (valid) {
+					const payload: newConcernPayload = { ...formModel };
+					saveInProgress.value = true;
+					payload.assessmentDate = moment(formModel.assessmentDate).format("YYYY-MM-DD[T]HH:mm:ss");
+					try {
+						ConcernsModule.createConcern(payload);
+						emit("close");
+					} finally {
+						saveInProgress.value = false;
+					}
+				}
+			});
+		};
+
 		return {
 			formModel,
 			categoryOptions,
+			codes,
 			formRules,
 			formEl,
-			occurrenceType,
+			assessmentDate,
 			disabledOccurrenceDate,
 			saveInProgress,
 			onDialogOpen,
-			onDialogClose
+			onDialogClose,
+			onFormSave
 		};
 	}
 });
@@ -119,7 +136,6 @@ export default defineComponent({
 				<el-select
 					v-model="formModel.category"
 					placeholder="Select category"
-					@change="onCategoryChange($event)"
 				>
 					<el-option
 						v-for="item in categoryOptions"
@@ -130,23 +146,18 @@ export default defineComponent({
 				</el-select>
 			</el-form-item>
 			<el-form-item
-				label="ICD-10 Code"
+				label="Code"
 			>
 				<el-select
-					v-model="formModel.icd10Code"
+					v-model="formModel.code"
 					placeholder="Select code"
 				>
-					<el-option />
-				</el-select>
-			</el-form-item>
-			<el-form-item
-				label="SNOMED-CT Code"
-			>
-				<el-select
-					v-model="formModel.snomedCtCode"
-					placeholder="Select code"
-				>
-					<el-option />
+					<el-option
+						v-for="item in codes"
+						:key="item.code"
+						:label="`${item.display}(${item.code})`"
+						:value="item.code"
+					/>
 				</el-select>
 			</el-form-item>
 			<el-form-item
@@ -161,7 +172,7 @@ export default defineComponent({
 				label="Assessment Date"
 			>
 				<el-date-picker
-					v-model="formModel.occurrence"
+					v-model="formModel.assessmentDate"
 					:disabled-date="disabledOccurrenceDate"
 					placeholder="Select date"
 				/>
@@ -181,6 +192,7 @@ export default defineComponent({
 				type="primary"
 				size="mini"
 				:loading="saveInProgress"
+				@click="onFormSave"
 			>
 				Add Health Concern
 			</el-button>

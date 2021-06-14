@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, onMounted, ref } from "vue";
 import { Concern } from "@/types";
 import { ConcernsModule } from "@/store/modules/concerns";
 import HealthConcernsTable from "@/components/patients/health-concerns/HealthConcernsTable.vue";
@@ -35,6 +35,15 @@ export default defineComponent({
 		);
 		const activeConcerns = computed<TableData[]>(() => tableData.value.filter(t => t.status === "Active"));
 		const promotedOrResolvedConcerns = computed<TableData[]>(() => tableData.value.filter(t => t.status === "PromotedOrResolved"));
+
+		onMounted(async () => {
+			isRequestLoading.value = true;
+			try {
+				await ConcernsModule.getConcerns();
+			} finally {
+				isRequestLoading.value = false;
+			}
+		});
 
 		return {
 			activeConcerns,

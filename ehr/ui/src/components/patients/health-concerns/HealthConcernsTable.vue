@@ -104,7 +104,7 @@ export default defineComponent({
 				<el-table-column
 					v-if="type === 'ActiveConcerns'"
 					label="Actions"
-					width="580"
+					width="350"
 				>
 					<ActionButton
 						icon-class="icon-promote"
