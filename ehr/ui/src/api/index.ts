@@ -25,6 +25,7 @@ export const getTasks = async (): Promise<Task[]> => {
 };
 
 export const getConcerns = async (): Promise<Concern[]> => [{
+	//todo: remove mock after BE sync
 	status: "Active",
 	id: "123123",
 	name: "Hunger Vital Signs",
@@ -78,7 +79,9 @@ export const getCategories = async (): Promise<Coding[]> => {
 	return res.data;
 };
 
-export const getCodes = async (): Promise<Coding[]> => [{ display: "Transportation Insecurity", code: "Z59.82" }];
+//todo: remove mock after BE sync
+export const getIcd10Codes = async (): Promise<Coding[]> => [{ display: "Transportation Insecurity", code: "Z59.82" }];
+export const getSnomedCtCodes = async (): Promise<Coding[]> => [{ display: "Food Insecurity", code: "F19.12" }];
 
 export const getRequests = async (code: string): Promise<Coding[]> => {
 	const res = await axios.get(`/mappings/categories/${code}/servicerequest/codings`);

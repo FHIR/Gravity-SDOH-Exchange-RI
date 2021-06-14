@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, reactive, ref } from "vue";
-import { getCategories, getCodes } from "@/api";
+import { getCategories, getIcd10Codes, getSnomedCtCodes } from "@/api";
 import { Coding, newConcernPayload } from "@/types";
 import { RuleItem } from "async-validator";
 import moment from "moment";
@@ -9,7 +9,8 @@ import { ConcernsModule } from "@/store/modules/concerns";
 export type FormModel = {
 	name: string,
 	category: string,
-	code: string,
+	icd10Code: string,
+	snomedCtCode: string,
 	basedOn: string,
 	assessmentDate: string
 };
@@ -25,12 +26,14 @@ export default defineComponent({
 	emits: ["close"],
 	setup(props, { emit }) {
 		const categoryOptions = ref<Coding[]>([]);
-		const codes = ref<Coding[]>([]);
+		const icd10Codes = ref<Coding[]>([]);
+		const snomedCtCodes = ref<Coding[]>([]);
 
 		const formModel = reactive<FormModel>({
 			name: "",
 			category: "",
-			code: "",
+			icd10Code: "",
+			snomedCtCode: "",
 			basedOn: "",
 			assessmentDate: ""
 		});
@@ -43,7 +46,8 @@ export default defineComponent({
 		//
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
-			codes.value = await getCodes();
+			icd10Codes.value = await getIcd10Codes();
+			snomedCtCodes.value = await getSnomedCtCodes();
 		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
@@ -82,7 +86,8 @@ export default defineComponent({
 		return {
 			formModel,
 			categoryOptions,
-			codes,
+			icd10Codes,
+			snomedCtCodes,
 			formRules,
 			formEl,
 			assessmentDate,
@@ -141,14 +146,29 @@ export default defineComponent({
 				</el-select>
 			</el-form-item>
 			<el-form-item
-				label="Code"
+				label="ICD-10 Code"
 			>
 				<el-select
-					v-model="formModel.code"
+					v-model="formModel.icd10Code"
 					placeholder="Select code"
 				>
 					<el-option
-						v-for="item in codes"
+						v-for="item in icd10Codes"
+						:key="item.code"
+						:label="`${item.display}(${item.code})`"
+						:value="item.code"
+					/>
+				</el-select>
+			</el-form-item>
+			<el-form-item
+				label="SNOMED-CT Code"
+			>
+				<el-select
+					v-model="formModel.snomedCtCode"
+					placeholder="Select code"
+				>
+					<el-option
+						v-for="item in snomedCtCodes"
 						:key="item.code"
 						:label="`${item.display}(${item.code})`"
 						:value="item.code"
