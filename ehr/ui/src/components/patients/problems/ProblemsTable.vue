@@ -21,6 +21,7 @@ export default defineComponent({
 			default: "active"
 		}
 	},
+	emits: ["add-problem"],
 	setup() {
 		const problemsDialogVisible = ref<boolean>(false);
 		const activeProblem = ref<TableData>();
@@ -54,6 +55,7 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				@click="$emit('add-problem')"
 			>
 				Add Problem
 			</el-button>
