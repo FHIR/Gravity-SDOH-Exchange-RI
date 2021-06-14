@@ -1,11 +1,12 @@
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/problems/Problems.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
+import ProblemDialog from "@/components/patients/problems/ProblemDialog.vue";
 
 export default defineComponent({
 	name: "ProblemsTable",
-	components: { ActionButton },
+	components: { ActionButton, ProblemDialog },
 	props: {
 		data: {
 			type: Array as PropType<TableData[]>,
@@ -14,7 +15,27 @@ export default defineComponent({
 		title: {
 			type: String,
 			required: true
+		},
+		status: {
+			type: String,
+			default: "active"
 		}
+	},
+	setup() {
+		const problemsDialogVisible = ref<boolean>(false);
+		const activeProblem = ref<TableData>();
+
+		const viewProblem = (row: TableData) => {
+			problemsDialogVisible.value = true;
+			activeProblem.value = row;
+		};
+
+		return {
+			problemsDialogVisible,
+			activeProblem,
+			viewProblem
+		};
+
 	}
 });
 </script>
@@ -27,6 +48,15 @@ export default defineComponent({
 			<h3>
 				{{ title }}
 			</h3>
+			<el-button
+				v-if="status === 'active'"
+				plain
+				round
+				type="primary"
+				size="mini"
+			>
+				Add Problem
+			</el-button>
 		</div>
 		<el-table :data="data">
 			<el-table-column
@@ -35,6 +65,7 @@ export default defineComponent({
 				<template #default="scope">
 					<el-button
 						type="text"
+						@click="viewProblem(scope.row)"
 					>
 						{{ scope.row.name }}
 					</el-button>
@@ -69,6 +100,7 @@ export default defineComponent({
 				</template>
 			</el-table-column>
 			<el-table-column
+				v-if="status === 'active'"
 				label="Actions"
 				width="350"
 			>
@@ -85,7 +117,22 @@ export default defineComponent({
 					label="Mark as Closed"
 				/>
 			</el-table-column>
+			<el-table-column
+				v-if="status === 'closed'"
+				label="Closed Date"
+				width="350"
+			>
+				<template #default="scope">
+					<span>{{ $filters.formatDateTime(scope.row?.closedDate) }}</span>
+				</template>
+			</el-table-column>
 		</el-table>
+
+		<ProblemDialog
+			:visible="problemsDialogVisible"
+			:problem="activeProblem"
+			@close="problemsDialogVisible = false"
+		/>
 	</div>
 </template>
 
@@ -94,6 +141,8 @@ export default defineComponent({
 
 .title {
 	margin: 10px 20px 0;
+	display: flex;
+	justify-content: space-between;
 
 	h3 {
 		font-weight: $global-font-weight-medium;
