@@ -4,10 +4,12 @@ import { config } from "vuex-module-decorators";
 config.rawError = true;
 import { IContext } from "@/store/modules/context";
 import { ITasks } from "@/store/modules/tasks";
+import { IGoals } from "@/store/modules/goals";
 
 export interface IRootState {
 	context: IContext,
-	tasks: ITasks
+	tasks: ITasks,
+	goals: IGoals
 }
 
 export default createStore<IRootState>({

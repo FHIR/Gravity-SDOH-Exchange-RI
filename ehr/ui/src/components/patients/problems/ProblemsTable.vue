@@ -116,7 +116,7 @@ export default defineComponent({
 				/>
 				<ActionButton
 					icon-class="mark-as-closed"
-					label="Mark As Closed"
+					label="Mark as Closed"
 				/>
 			</el-table-column>
 			<el-table-column

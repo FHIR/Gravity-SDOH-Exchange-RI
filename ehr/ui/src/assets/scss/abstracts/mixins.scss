@@ -32,7 +32,9 @@
 	display: inline-block;
 	width: $w;
 	height: $h;
-	background-image: url($src);
+	@if $src {
+		background-image: url($src);
+	}
 	background-repeat: no-repeat;
 	background-size: 100%;
 }
