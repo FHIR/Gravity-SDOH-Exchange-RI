@@ -3,6 +3,8 @@ import { defineComponent, ref, reactive } from "vue";
 import { Coding } from "@/types";
 import { RuleItem } from "async-validator";
 import { getCategories, getProblemCodes } from "@/api";
+import moment from "moment";
+import { ProblemsModule } from "@/store/modules/problems";
 
 export type FormModel = {
 	name: string,
@@ -67,11 +69,35 @@ export default defineComponent({
 			}
 		};
 
+		const saveInProgress = ref<boolean>(false);
+
+		//
+		// On save button click handler. Validate form, if everything is ok save it and close dialog.
+		//
+		const onFormSave = () => {
+			formEl.value?.validate(async (valid: boolean) => {
+				if (valid) {
+					saveInProgress.value = true;
+					const payload = { ...formModel };
+					payload.startDate = moment(formModel.startDate).format("YYYY-MM-DD[T]HH:mm:ss");
+
+					try {
+						await ProblemsModule.createProblem(payload);
+						emit("close");
+					} finally {
+						saveInProgress.value = false;
+					}
+				}
+			});
+		};
+
 		return {
 			formModel,
 			formRules,
 			onDialogClose,
 			onDialogOpen,
+			onFormSave,
+			saveInProgress,
 			formEl,
 			categoryOptions,
 			codeOptions
@@ -173,6 +199,8 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				:loading="saveInProgress"
+				@click="onFormSave"
 			>
 				Add problem
 			</el-button>

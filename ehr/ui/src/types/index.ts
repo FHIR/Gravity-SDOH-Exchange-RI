@@ -168,6 +168,14 @@ export type Problem = {
 	category: string
 };
 
+export type newProblem = {
+	name: string,
+	category: string,
+	code: string,
+	basedOn: string,
+	startDate: string
+}
+
 export type Goal = {
 	name: string,
 	problems: string[],

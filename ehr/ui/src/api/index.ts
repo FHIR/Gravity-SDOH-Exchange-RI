@@ -9,7 +9,8 @@ import {
 	updateTaskPayload,
 	Coding,
 	Goal,
-	Problem
+	Problem,
+	newProblem
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -159,4 +160,11 @@ export const getProblems = async(): Promise<Problem[]> => {
 	}];
 
 	return res;
+};
+
+// todo: change and remove mocked data after sync with BE
+export const createProblem = async (payload: newProblem): Promise<newProblem> => {
+	// const res = await axios.post("/problem", payload);
+	// return res.data;
+	return payload;
 };
