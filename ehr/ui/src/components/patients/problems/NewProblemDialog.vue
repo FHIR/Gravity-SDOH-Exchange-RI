@@ -12,6 +12,14 @@ export type FormModel = {
 	startDate: string
 };
 
+const DEFAULT_FORM_MODEL = {
+	name: "",
+	category: "",
+	code: "",
+	basedOn: "Conversation with Patient",
+	startDate: ""
+};
+
 export default defineComponent({
 	name: "NewProblemDialog",
 	props: {
@@ -23,13 +31,7 @@ export default defineComponent({
 	emits: ["close"],
 	setup(props, { emit }) {
 		const formEl = ref<HTMLFormElement>();
-		const formModel = reactive<FormModel>({
-			name: "",
-			category: "",
-			code: "",
-			basedOn: "",
-			startDate: ""
-		});
+		let formModel = reactive<FormModel>(DEFAULT_FORM_MODEL);
 		const categoryOptions = ref<Coding[]>([]);
 		const codeOptions = ref<Coding[]>([]);
 
@@ -42,10 +44,10 @@ export default defineComponent({
 		// On dialog open fetch all options for dropdowns and reset previous edits.
 		//
 		const onDialogOpen = async () => {
+			formModel = DEFAULT_FORM_MODEL;
 			categoryOptions.value = await getCategories();
 			codeOptions.value = await getProblemCodes();
 		};
-
 
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: {
@@ -145,6 +147,7 @@ export default defineComponent({
 				<el-input
 					v-model="formModel.basedOn"
 					placeholder="Enter based on here..."
+					disabled
 				/>
 			</el-form-item>
 
