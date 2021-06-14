@@ -44,7 +44,27 @@ export default defineComponent({
 </template>
 
 <style lang="scss" scoped>
-.patients .el-row {
-	margin-bottom: 30px;
+@import "~@/assets/scss/abstracts/variables";
+
+.patients {
+	.el-row {
+		margin-bottom: 30px;
+	}
+
+	::v-deep(.no-data) {
+		height: 240px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: flex-start;
+		background-color: $global-background;
+
+		h2 {
+			color: $whisper;
+			font-size: $global-xxxlarge-font-size;
+			font-weight: $global-font-weight-normal;
+			margin-bottom: 50px;
+		}
+	}
 }
 </style>

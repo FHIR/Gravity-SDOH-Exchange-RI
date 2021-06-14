@@ -112,7 +112,7 @@ export default defineComponent({
 					/>
 					<ActionButton
 						icon-class="icon-resolved"
-						label="Mark as resolved"
+						label="Mark as Resolved"
 					/>
 					<ActionButton
 						icon-class="icon-remove"
