@@ -1,5 +1,5 @@
 <script lang="ts">
-import {computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, onMounted, ref } from "vue";
 import ProblemsTable from "@/components/patients/problems/ProblemsTable.vue";
 import { Problem } from "@/types";
 import { ProblemsModule } from "@/store/modules/problems";
@@ -46,7 +46,19 @@ export default defineComponent({
 
 		const newProblemsDialogVisible = ref<boolean>(false);
 
+		const isLoading = ref<boolean>(false);
+
+		onMounted(async () => {
+			isLoading.value = true;
+			try {
+				await ProblemsModule.getProblems();
+			} finally {
+				isLoading.value = false;
+			}
+		});
+
 		return {
+			isLoading,
 			tableData,
 			activeProblems,
 			closedProblems,
@@ -57,7 +69,10 @@ export default defineComponent({
 </script>
 
 <template>
-	<div class="problems">
+	<div
+		v-loading="isLoading"
+		class="problems"
+	>
 		<ProblemsTable
 			v-if="activeProblems.length"
 			:data="activeProblems"
