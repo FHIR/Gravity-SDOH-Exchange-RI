@@ -62,10 +62,6 @@ export default defineComponent({
 		};
 
 		const saveInProgress = ref<boolean>(false);
-		//
-		// Disable all dates that are less than today. Used inside occurrence date-pickers.
-		//
-		const disabledOccurrenceDate = (time: Date): boolean => time.getTime() < Date.now();
 
 		const onFormSave = () => {
 			formEl.value?.validate((valid: boolean) => {
@@ -90,7 +86,6 @@ export default defineComponent({
 			formRules,
 			formEl,
 			assessmentDate,
-			disabledOccurrenceDate,
 			saveInProgress,
 			onDialogOpen,
 			onDialogClose,
@@ -173,7 +168,6 @@ export default defineComponent({
 			>
 				<el-date-picker
 					v-model="formModel.assessmentDate"
-					:disabled-date="disabledOccurrenceDate"
 					placeholder="Select date"
 				/>
 			</el-form-item>
