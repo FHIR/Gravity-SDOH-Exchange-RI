@@ -63,3 +63,15 @@ export const getRequests = async (code: string): Promise<Coding[]> => {
 
 	return res.data;
 };
+
+export const getProblemCodes = async (): Promise<Coding[]> => {
+	//todo: call real request and remove mocked data
+	//const res = await axios.get("/mappings/problemCodes");
+
+	//return res.data;
+
+	return [{
+		code: "Z59.49",
+		display: "Lack of Adequate Food & Safe Drinking Water"
+	}];
+};

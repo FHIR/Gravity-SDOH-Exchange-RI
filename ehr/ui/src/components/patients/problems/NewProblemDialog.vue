@@ -2,6 +2,7 @@
 import { defineComponent, ref, reactive } from "vue";
 import { Coding } from "@/types";
 import { RuleItem } from "async-validator";
+import { getCategories, getProblemCodes } from "@/api";
 
 export type FormModel = {
 	name: string,
@@ -37,6 +38,15 @@ export default defineComponent({
 			emit("close");
 		};
 
+		//
+		// On dialog open fetch all options for dropdowns and reset previous edits.
+		//
+		const onDialogOpen = async () => {
+			categoryOptions.value = await getCategories();
+			codeOptions.value = await getProblemCodes();
+		};
+
+
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: {
 				required: true,
@@ -59,6 +69,7 @@ export default defineComponent({
 			formModel,
 			formRules,
 			onDialogClose,
+			onDialogOpen,
 			formEl,
 			categoryOptions,
 			codeOptions
@@ -76,6 +87,7 @@ export default defineComponent({
 		destroy-on-close
 		custom-class="problem-dialog"
 		@close="onDialogClose"
+		@open="onDialogOpen"
 	>
 		<el-form
 			ref="formEl"
@@ -122,7 +134,7 @@ export default defineComponent({
 					<el-option
 						v-for="item in codeOptions"
 						:key="item.code"
-						:label="item.display"
+						:label="`${item.display} (${item.code})`"
 						:value="item.code"
 					/>
 				</el-select>
