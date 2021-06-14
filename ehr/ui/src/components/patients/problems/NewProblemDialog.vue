@@ -1,6 +1,7 @@
 <script lang="ts">
 import { defineComponent, ref, reactive } from "vue";
 import { Coding } from "@/types";
+import { RuleItem } from "async-validator";
 
 export type FormModel = {
 	name: string,
@@ -36,8 +37,27 @@ export default defineComponent({
 			emit("close");
 		};
 
+		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
+			name: {
+				required: true,
+				trigger: "change",
+				message: "This field is required"
+			},
+			category: {
+				required: true,
+				trigger: "change",
+				message: "This field is required"
+			},
+			code: {
+				required: true,
+				trigger: "change",
+				message: "This field is required"
+			}
+		};
+
 		return {
 			formModel,
+			formRules,
 			onDialogClose,
 			formEl,
 			categoryOptions,
@@ -60,6 +80,7 @@ export default defineComponent({
 		<el-form
 			ref="formEl"
 			:model="formModel"
+			:rules="formRules"
 			label-width="155px"
 			label-position="left"
 			size="mini"
@@ -67,6 +88,7 @@ export default defineComponent({
 		>
 			<el-form-item
 				label="Problem"
+				prop="name"
 			>
 				<el-input
 					v-model="formModel.name"
@@ -75,6 +97,7 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="Category"
+				prop="category"
 			>
 				<el-select
 					v-model="formModel.category"
@@ -90,6 +113,7 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="Code"
+				prop="code"
 			>
 				<el-select
 					v-model="formModel.code"
