@@ -204,7 +204,7 @@ export default defineComponent({
 			</el-form-item>
 
 			<el-form-item
-				label="Assessment Date"
+				label="Creation Date"
 			>
 				<el-date-picker
 					v-model="formModel.startDate"

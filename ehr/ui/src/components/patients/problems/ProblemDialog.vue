@@ -94,7 +94,7 @@ export default defineComponent({
 			<el-form-item label="Base on">
 				{{ formModel.basedOn }}
 			</el-form-item>
-			<el-form-item label="Assessment Date">
+			<el-form-item label="Creation Date">
 				{{ $filters.formatDateTime(formModel.startDate) }}
 			</el-form-item>
 			<el-form-item

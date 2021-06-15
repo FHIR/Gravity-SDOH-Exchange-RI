@@ -81,7 +81,7 @@ export default defineComponent({
 				</template>
 			</el-table-column>
 			<el-table-column
-				label="Start Date"
+				label="Creation Date"
 			>
 				<template #default="scope">
 					<span>{{ $filters.formatDateTime(scope.row.startDate) }}</span>
