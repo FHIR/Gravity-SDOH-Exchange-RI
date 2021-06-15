@@ -11,7 +11,8 @@ export type FormModel = {
 	goals: number,
 	actionSteps: number,
 	clinicalStatus: string,
-	code: string,
+	codeISD: string,
+	codeSNOMED: string,
 	category: string
 };
 
@@ -39,7 +40,8 @@ export default defineComponent({
 			goals: 0,
 			actionSteps: 0,
 			clinicalStatus: "",
-			code: ""
+			codeISD: "",
+			codeSNOMED: ""
 		});
 
 		const onDialogOpen = () => {
@@ -83,8 +85,11 @@ export default defineComponent({
 			<el-form-item label="Category">
 				{{ formModel.category }}
 			</el-form-item>
-			<el-form-item label="Code">
-				{{ formModel.code }}
+			<el-form-item label="ICD-10 Code">
+				{{ formModel.codeISD }}
+			</el-form-item>
+			<el-form-item label="SNOMED-CT Code">
+				{{ formModel.codeSNOMED }}
 			</el-form-item>
 			<el-form-item label="Base on">
 				{{ formModel.basedOn }}

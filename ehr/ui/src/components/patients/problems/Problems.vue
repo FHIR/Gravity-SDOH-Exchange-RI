@@ -14,7 +14,8 @@ export type TableData = {
 	goals: number,
 	actionSteps: number,
 	status: string,
-	code: string,
+	codeISD: string,
+	codeSNOMED: string,
 	category: string
 };
 
@@ -36,7 +37,8 @@ export default defineComponent({
 				goals: problem.goals,
 				actionSteps: problem.actionSteps,
 				status: problem.clinicalStatus,
-				code: problem.code,
+				codeISD: problem.codeISD,
+				codeSNOMED: problem.codeSNOMED,
 				category: problem.category
 			}))
 		);

@@ -108,20 +108,25 @@ export const getGoals = async(): Promise<Goal[]> => {
 	return res;
 };
 
-export const getProblemCodes = async (): Promise<Coding[]> => {
-	//todo: call real request and remove mocked data
-	//const res = await axios.get("/mappings/problemCodes");
-
+export const getProblemCodes = async (code: string): Promise<{ isd: Coding[], snomed: Coding[] }> => {
+	// todo: call real request and remove mocked data
+	// const res = await axios.get(`/mappings/categories/${code}/condition/codings`);
 	//return res.data;
 
-	const res: Coding[] = [{
-		code: "Z59.49",
-		display: "Lack of Adequate Food & Safe Drinking Water"
-	},
-	{
-		code: "Z59.49",
-		display: "Lack of Adequate Food & Safe Drinking Water"
-	}];
+	const res: { isd: Coding[], snomed: Coding[] } = {
+		isd: [{
+			code: "Z59.49",
+			display: "Lack of Adequate Food & Safe Drinking Water"
+		},
+		{
+			code: "Z59.4229",
+			display: "Lack of Adequate Food & Safe Drinking Water"
+		}],
+		snomed: [{
+			code: "385767005",
+			display: "Meals on wheels provision education"
+		}]
+	};
 
 	return res;
 };
@@ -141,7 +146,8 @@ export const getProblems = async(): Promise<Problem[]> => {
 		goals: 0,
 		actionSteps: 0,
 		clinicalStatus: "active",
-		code: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
+		codeISD: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
+		codeSNOMED: "Meals on wheels provision education (385767005)",
 		category: "test"
 	},
 	{
@@ -155,7 +161,8 @@ export const getProblems = async(): Promise<Problem[]> => {
 		goals: 0,
 		actionSteps: 0,
 		clinicalStatus: "resolved",
-		code: "Insuficient Food Supply (706875005)",
+		codeISD: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
+		codeSNOMED: "Meals on wheels provision education (385767005)",
 		category: "test"
 	}];
 

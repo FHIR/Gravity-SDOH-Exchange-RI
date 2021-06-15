@@ -6,10 +6,16 @@ import { getCategories, getProblemCodes } from "@/api";
 import moment from "moment";
 import { ProblemsModule } from "@/store/modules/problems";
 
+const DEFAULT_REQUIRED_RULE = {
+	required: true,
+	message: "This field is required"
+};
+
 export type FormModel = {
 	name: string,
 	category: string,
-	code: string,
+	codeISD: string,
+	codeSNOMED: string,
 	basedOn: string,
 	startDate: string
 };
@@ -17,7 +23,8 @@ export type FormModel = {
 const DEFAULT_FORM_MODEL = {
 	name: "",
 	category: "",
-	code: "",
+	codeISD: "",
+	codeSNOMED: "",
 	basedOn: "Conversation with Patient",
 	startDate: ""
 };
@@ -33,9 +40,22 @@ export default defineComponent({
 	emits: ["close"],
 	setup(props, { emit }) {
 		const formEl = ref<HTMLFormElement>();
-		let formModel = reactive<FormModel>(DEFAULT_FORM_MODEL);
+		const formModel = reactive<FormModel>(DEFAULT_FORM_MODEL);
 		const categoryOptions = ref<Coding[]>([]);
-		const codeOptions = ref<Coding[]>([]);
+		const codeISDOptions = ref<Coding[]>([]);
+		const codeSNOMEDOptions = ref<Coding[]>([]);
+
+		//
+		// Clear code fields on every category change because they are connected.
+		//
+		const onCategoryChange = async (code: string) => {
+			formModel.codeISD = "";
+			formModel.codeSNOMED = "";
+
+			const codes = await getProblemCodes(code);
+			codeISDOptions.value = codes.isd;
+			codeSNOMEDOptions.value = codes.snomed;
+		};
 
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
@@ -46,27 +66,14 @@ export default defineComponent({
 		// On dialog open fetch all options for dropdowns and reset previous edits.
 		//
 		const onDialogOpen = async () => {
-			formModel = DEFAULT_FORM_MODEL;
 			categoryOptions.value = await getCategories();
-			codeOptions.value = await getProblemCodes();
 		};
 
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
-			name: {
-				required: true,
-				trigger: "change",
-				message: "This field is required"
-			},
-			category: {
-				required: true,
-				trigger: "change",
-				message: "This field is required"
-			},
-			code: {
-				required: true,
-				trigger: "change",
-				message: "This field is required"
-			}
+			name: DEFAULT_REQUIRED_RULE,
+			category: DEFAULT_REQUIRED_RULE,
+			codeISD: DEFAULT_REQUIRED_RULE,
+			codeSNOMED: DEFAULT_REQUIRED_RULE
 		};
 
 		const saveInProgress = ref<boolean>(false);
@@ -100,7 +107,9 @@ export default defineComponent({
 			saveInProgress,
 			formEl,
 			categoryOptions,
-			codeOptions
+			onCategoryChange,
+			codeISDOptions,
+			codeSNOMEDOptions
 		};
 	}
 });
@@ -142,6 +151,7 @@ export default defineComponent({
 				<el-select
 					v-model="formModel.category"
 					placeholder="Select Category"
+					@change="onCategoryChange($event)"
 				>
 					<el-option
 						v-for="item in categoryOptions"
@@ -152,15 +162,31 @@ export default defineComponent({
 				</el-select>
 			</el-form-item>
 			<el-form-item
-				label="Code"
-				prop="code"
+				label="ICD-10 Code"
+				prop="codeISD"
 			>
 				<el-select
-					v-model="formModel.code"
+					v-model="formModel.codeISD"
 					placeholder="Select Code"
 				>
 					<el-option
-						v-for="item in codeOptions"
+						v-for="item in codeISDOptions"
+						:key="item.code"
+						:label="`${item.display} (${item.code})`"
+						:value="item.code"
+					/>
+				</el-select>
+			</el-form-item>
+			<el-form-item
+				label="SNOMED-CT Code"
+				prop="codeSNOMED"
+			>
+				<el-select
+					v-model="formModel.codeSNOMED"
+					placeholder="Select Code"
+				>
+					<el-option
+						v-for="item in codeSNOMEDOptions"
 						:key="item.code"
 						:label="`${item.display} (${item.code})`"
 						:value="item.code"
