@@ -1,9 +1,13 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
+import DropButton from "@/components/DropButton.vue";
 
 export default defineComponent({
 	name: "EditConcernDialog",
+	components: {
+		DropButton
+	},
 	props: {
 		visible: {
 			type: Boolean,
@@ -68,15 +72,13 @@ export default defineComponent({
 			>
 				Cancel
 			</el-button>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				:loading="saveInProgress"
-			>
-				Confirm
-			</el-button>
+			<DropButton
+				label="Save Changes"
+				:items="[{ id: '1', label: 'Promote to Problem', iconSrc: require('@/assets/images/concern-promote.svg') }
+					,{ id: '2', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') }
+					,{ id: '3', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
+				]"
+			/>
 		</template>
 	</el-dialog>
 </template>
