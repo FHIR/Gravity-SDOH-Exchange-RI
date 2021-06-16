@@ -50,7 +50,7 @@ public class TaskPollingService {
   private final IGenericClient openEhrClient;
   private final CpService cpService;
 
-  @Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
+  //@Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
   public void updateTasks() {
     log.info("Updating tasks from CP Organizations...");
     Bundle tasksBundle = openEhrClient.search()
