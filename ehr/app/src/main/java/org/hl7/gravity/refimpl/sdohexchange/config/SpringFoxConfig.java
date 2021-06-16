@@ -21,6 +21,7 @@ public class SpringFoxConfig {
   public static final String CONTEXT_API_TAG = "Context Controller";
   public static final String SUPPORT_API_TAG = "Support Controller";
   public static final String TASK_API_TAG = "Task Controller";
+  public static final String ASSESSMENT_API_TAG = "Social Risk Assessment Controller";
   public static final String MAPPINGS_API_TAG = "Mappings Controller";
   public static final String ADMINISTRATION_API_TAG = "Administration Controller";
 
@@ -38,6 +39,7 @@ public class SpringFoxConfig {
                 + "instances being created."),
             new Tag(TASK_API_TAG, "Perform operations on Task resources. This includes creation of tasks in CBRO "
                 + "organizations and triggering an automatic polling mechanism for Task status synchronization."),
+            new Tag(ASSESSMENT_API_TAG, "Get details of past and planned Social Risk Assessments."),
             new Tag(MAPPINGS_API_TAG, "Get details of SDOH categories and codes."),
             new Tag(ADMINISTRATION_API_TAG, "Perform operations and manipulations with FHIR resources, for example "
                 + "converts resources from one to another."))
