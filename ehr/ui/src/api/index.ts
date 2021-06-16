@@ -26,21 +26,19 @@ export const getTasks = async (): Promise<Task[]> => {
 
 export const getConcerns = async (): Promise<Concern[]> => [{
 	//todo: remove mock after BE sync
-	status: "Active",
-	id: "123123",
+	concernStatus: "Active",
 	name: "Hunger Vital Signs",
-	createdAt: "2021-05-18T14:15:08",
+	assessmentDate: "2021-05-18T14:15:08",
 	category: "Food Insecurity",
 	basedOn: "Past",
-	actions: "send to patient"
+	status: "send to patient"
 }, {
-	status: "PromotedOrResolved",
-	id: "123123",
 	name: "Hunger Vital Signs",
-	createdAt: "2021-05-18T14:15:08",
+	assessmentDate: "2021-05-18T14:15:08",
 	category: "Food Insecurity",
 	basedOn: "Past",
-	actions: "send to patient"
+	status: "send to patient",
+	concernStatus: "PromotedOrResolved"
 }];
 
 export const createTask = async (payload: newTaskPayload): Promise<{ taskId: string }> => {

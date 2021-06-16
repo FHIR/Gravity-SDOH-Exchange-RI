@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, reactive, ref } from "vue";
 import { getCategories, getIcd10Codes, getSnomedCtCodes } from "@/api";
-import { Coding, newConcernPayload } from "@/types";
+import { Coding, NewConcernPayload } from "@/types";
 import { RuleItem } from "async-validator";
 import moment from "moment";
 import { ConcernsModule } from "@/store/modules/concerns";
@@ -70,9 +70,9 @@ export default defineComponent({
 		const onFormSave = () => {
 			formEl.value?.validate((valid: boolean) => {
 				if (valid) {
-					const payload: newConcernPayload = { ...formModel };
+					const assessmentDate = moment(formModel.assessmentDate).format("YYYY-MM-DD[T]HH:mm:ss");
+					const payload: NewConcernPayload = { ...formModel, status: "Send to patient", assessmentDate, concernStatus: "Active" };
 					saveInProgress.value = true;
-					payload.assessmentDate = moment(formModel.assessmentDate).format("YYYY-MM-DD[T]HH:mm:ss");
 					try {
 						ConcernsModule.createConcern(payload);
 						emit("close");

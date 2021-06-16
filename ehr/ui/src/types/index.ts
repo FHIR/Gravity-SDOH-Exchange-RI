@@ -118,14 +118,25 @@ export type newTaskPayload = {
 	occurrence: Occurrence | string
 };
 
-export type newConcernPayload = {
+export type NewConcernPayload = {
 	name: string,
-	assessmentDate?: string,
+	assessmentDate: string,
 	category: string
-	basedOn?: string,
-	actions?: string,
-	code?: string
+	basedOn: string,
+	status: string,
+	icd10Code?: string,
+	snomedCtCode?: string,
+	concernStatus: string,
 }
+
+export type Concern = {
+	name: string,
+	assessmentDate: string,
+	category: string
+	basedOn: string,
+	status: string,
+	concernStatus: string
+};
 
 export type updateTaskPayload = {
 	comment?: string,
@@ -143,16 +154,6 @@ export type Comment = {
 	},
 	text: string,
 	time: string
-};
-
-export type Concern = {
-	name: string,
-	createdAt: string,
-	category: string
-	id: string,
-	basedOn: string,
-	actions: string,
-	status: string
 };
 
 export type Assessment = {

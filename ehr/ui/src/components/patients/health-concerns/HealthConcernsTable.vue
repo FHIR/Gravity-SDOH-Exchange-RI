@@ -98,7 +98,7 @@ export default defineComponent({
 					label="Assessment Date"
 				>
 					<template #default="scope">
-						{{ $filters.formatDateTime(scope.row.createdAt) }}
+						{{ $filters.formatDateTime(scope.row.assessmentDate) }}
 					</template>
 				</el-table-column>
 				<el-table-column
@@ -124,7 +124,7 @@ export default defineComponent({
 					label="Status"
 				>
 					<template #default="scope">
-						{{ scope.row.actions }}
+						{{ scope.row.status }}
 					</template>
 				</el-table-column>
 				<el-table-column

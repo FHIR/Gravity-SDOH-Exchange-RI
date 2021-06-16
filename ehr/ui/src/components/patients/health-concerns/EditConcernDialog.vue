@@ -61,7 +61,7 @@ export default defineComponent({
 				{{ concern.basedOn }}
 			</el-form-item>
 			<el-form-item label="Assessment Date">
-				{{ $filters.formatDateTime(concern.createdAt) }}
+				{{ $filters.formatDateTime(concern.assessmentDate) }}
 			</el-form-item>
 		</el-form>
 		<template #footer>
