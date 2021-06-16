@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, reactive, ref, watch } from "vue";
-import { getGoals, getConditions, getOrganizations, getCategories, getRequests } from "@/api";
-import { Condition, Goal, newTaskPayload, Organization, Coding } from "@/types";
+import { getServiceRequestGoals, getServiceRequestConditions, getOrganizations, getCategories, getRequests } from "@/api";
+import { ServiceRequestCondition, ServiceRequestGoal, newTaskPayload, Organization, Coding } from "@/types";
 import _ from "@/vendors/lodash";
 import { TasksModule } from "@/store/modules/tasks";
 import { RuleItem } from "async-validator";
@@ -33,8 +33,8 @@ export default defineComponent({
 	setup(props, { emit }) {
 		const categoryOptions = ref<Coding[]>([]);
 		const requestOptions = ref<Coding[]>([]);
-		const conditionOptions = ref<Condition[]>([]);
-		const goalOptions = ref<Goal[]>([]);
+		const conditionOptions = ref<ServiceRequestCondition[]>([]);
+		const goalOptions = ref<ServiceRequestGoal[]>([]);
 		const performerOptions = ref<Organization[]>([]);
 
 		const formModel = reactive<FormModel>({
@@ -61,8 +61,8 @@ export default defineComponent({
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
 			performerOptions.value = await getOrganizations();
-			conditionOptions.value = await getConditions();
-			goalOptions.value = await getGoals();
+			conditionOptions.value = await getServiceRequestConditions();
+			goalOptions.value = await getServiceRequestGoals();
 		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();

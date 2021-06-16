@@ -2,12 +2,13 @@ import axios from "axios";
 import {
 	ContextResponse,
 	Task,
-	Condition,
-	Goal,
+	ServiceRequestCondition,
+	ServiceRequestGoal,
 	Organization,
 	newTaskPayload,
 	updateTaskPayload,
-	Coding
+	Coding,
+	Goal
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -34,13 +35,13 @@ export const updateTask = async ({ id, ...data }: updateTaskPayload): Promise<Ta
 	return res.data;
 };
 
-export const getConditions = async (): Promise<Condition[]> => {
+export const getServiceRequestConditions = async (): Promise<ServiceRequestCondition[]> => {
 	const res = await axios.get("/support/conditions");
 
 	return res.data;
 };
 
-export const getGoals = async (): Promise<Goal[]> => {
+export const getServiceRequestGoals = async (): Promise<ServiceRequestGoal[]> => {
 	const res = await axios.get("/support/goals");
 
 	return res.data;
@@ -62,4 +63,45 @@ export const getRequests = async (code: string): Promise<Coding[]> => {
 	const res = await axios.get(`/mappings/categories/${code}/servicerequest/codings`);
 
 	return res.data;
+};
+
+export const getGoals = async(): Promise<Goal[]> => {
+	//todo: remove mock after BE sync
+	const res: Goal[] = [{
+		name: "Reduce Medication Const",
+		problems: ["Food Insecurity"],
+		addedBy: "test",
+		startDate: "2021-05-18T14:07:48",
+		endDate: "",
+		targets: ["fisrt", "second"],
+		comments: [],
+		category: {
+			code: "111",
+			display: "Food Insecurity"
+		},
+		code: {
+			code: "10782290009",
+			display: "Food Security"
+		},
+		status: "active"
+	}, {
+		name: "Reduce Medication Const",
+		problems: ["Food Insecurity"],
+		addedBy: "test",
+		startDate: "2021-05-18T14:07:48",
+		endDate: "2021-06-15T14:07:48",
+		targets: ["fisrt", "second"],
+		comments: [],
+		category: {
+			code: "111",
+			display: "Food Insecurity"
+		},
+		code: {
+			code: "10782290009",
+			display: "Food Security"
+		},
+		status: "completed"
+	}];
+
+	return res;
 };

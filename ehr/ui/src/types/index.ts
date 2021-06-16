@@ -65,12 +65,12 @@ export type Occurrence = {
 	end: string
 }
 
-export type Goal = {
+export type ServiceRequestGoal = {
 	display: string,
 	id: string
 }
 
-export type Consent = {
+export type ServiceRequestConsent = {
 	display: string,
 	id: string
 }
@@ -80,7 +80,7 @@ export type Coding = {
 	display: string
 }
 
-export type Condition = {
+export type ServiceRequestCondition = {
 	display: string,
 	id: string
 };
@@ -98,10 +98,10 @@ export type Period = {
 export type ServiceRequest = {
 	category: Coding,
 	code: Coding,
-	conditions: Condition[],
-	consent: Consent,
+	conditions: ServiceRequestCondition[],
+	consent: ServiceRequestConsent,
 	errors: string[],
-	goals: Goal[],
+	goals: ServiceRequestGoal[],
 	id: string,
 	occurrence: Occurrence
 };
@@ -163,5 +163,20 @@ export type Problem = {
 	onsetPeriod: Period,
 	goals: number,
 	actionSteps: number,
-	clinicalStatus: string
+	clinicalStatus: string,
+	code: string,
+	category: string
+};
+
+export type Goal = {
+	name: string,
+	problems: string[],
+	addedBy: string,
+	startDate: string,
+	endDate: string,
+	targets: string[],
+	comments: Comment[],
+	category: Coding,
+	code: Coding,
+	status: "active" | "completed"
 };

@@ -8,10 +8,13 @@ export type TableData = {
 	id: string,
 	name: string,
 	basedOn: string,
-	startDate: string | undefined
+	startDate?: string,
+	closedDate?: string,
 	goals: number,
 	actionSteps: number,
-	status: string
+	status: string,
+	code: string,
+	category: string
 };
 
 export default defineComponent({
@@ -27,9 +30,12 @@ export default defineComponent({
 				name: problem.name,
 				basedOn: problem.basedOn,
 				startDate: problem.onsetPeriod.start,
+				closedDate: problem.onsetPeriod.end,
 				goals: problem.goals,
 				actionSteps: problem.actionSteps,
-				status: problem.clinicalStatus
+				status: problem.clinicalStatus,
+				code: problem.code,
+				category: problem.category
 			}))
 		);
 
@@ -52,11 +58,13 @@ export default defineComponent({
 			v-if="activeProblems.length"
 			:data="activeProblems"
 			title="Active Problems"
+			status="active"
 		/>
 		<ProblemsTable
 			v-if="closedProblems.length"
 			:data="closedProblems"
 			title="Closed Problems"
+			status="closed"
 		/>
 		<div
 			v-if="!tableData.length"
