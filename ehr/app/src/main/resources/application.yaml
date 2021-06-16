@@ -25,6 +25,11 @@ spring:
             user-info-uri: https://auth.logicahealth.org/userinfo
             jwk-set-uri: https://auth.logicahealth.org/jwk
             userNameAttribute: sub
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2MB
+      max-request-size: 10MB
 
 swagger:
   title: SDOH Exchange EHR App API

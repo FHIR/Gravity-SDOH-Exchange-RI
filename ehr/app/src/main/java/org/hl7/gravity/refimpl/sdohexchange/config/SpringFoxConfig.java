@@ -22,6 +22,7 @@ public class SpringFoxConfig {
   public static final String SUPPORT_API_TAG = "Support Controller";
   public static final String TASK_API_TAG = "Task Controller";
   public static final String MAPPINGS_API_TAG = "Mappings Controller";
+  public static final String CONSENT_API_TAG = "Consent Controller";
   public static final String ADMINISTRATION_API_TAG = "Administration Controller";
 
   @Bean
@@ -33,14 +34,15 @@ public class SpringFoxConfig {
         .paths(PathSelectors.any())
         .build()
         .tags(new Tag(USER_API_TAG, "Get details of a currently logged in user."),
-            new Tag(CONTEXT_API_TAG, "Get context details of a currently logged in user."),
-            new Tag(SUPPORT_API_TAG, "Fetch lists of available FHIR resources to reference from Task/ServiceRequest "
-                + "instances being created."),
-            new Tag(TASK_API_TAG, "Perform operations on Task resources. This includes creation of tasks in CBRO "
-                + "organizations and triggering an automatic polling mechanism for Task status synchronization."),
-            new Tag(MAPPINGS_API_TAG, "Get details of SDOH categories and codes."),
-            new Tag(ADMINISTRATION_API_TAG, "Perform operations and manipulations with FHIR resources, for example "
-                + "converts resources from one to another."))
+            new Tag(CONTEXT_API_TAG, "Get context details of a currently logged in user."), new Tag(SUPPORT_API_TAG,
+                "Fetch lists of available FHIR resources to reference from Task/ServiceRequest "
+                    + "instances being created."), new Tag(TASK_API_TAG,
+                "Perform operations on Task resources. This includes creation of tasks in CBRO "
+                    + "organizations and triggering an automatic polling mechanism for Task status synchronization."),
+            new Tag(MAPPINGS_API_TAG, "Get details of SDOH categories and codes."), new Tag(ADMINISTRATION_API_TAG,
+                "Perform operations and manipulations with FHIR resources, for example "
+                    + "converts resources from one to another."),
+            new Tag(CONSENT_API_TAG, "Perform operations on Consent resources."))
         .apiInfo(apiInfo)
         .useDefaultResponseMessages(false);
   }

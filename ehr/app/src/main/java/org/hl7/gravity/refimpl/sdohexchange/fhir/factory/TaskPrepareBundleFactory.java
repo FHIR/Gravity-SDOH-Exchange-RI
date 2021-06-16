@@ -1,8 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.factory;
 
 import ca.uhn.fhir.rest.api.Constants;
-import java.util.List;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -20,11 +18,14 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Create a transaction bundle to retrieve all necessary resources for Task creation.
  */
 @AllArgsConstructor
-public class TaskPrepareBundleFactory {
+public class TaskPrepareBundleFactory extends PrepareBundleFactory {
 
   private final String patient;
   private final String practitioner;
@@ -119,37 +120,5 @@ public class TaskPrepareBundleFactory {
         eq(Goal.SP_RES_ID, String.join(",", goals)),
         eq(Constants.PARAM_PROFILE, SDOHProfiles.GOAL)
     )));
-  }
-
-  private static String path(String resource, String id) {
-    return resource + "/" + id;
-  }
-
-  private static String addParams(String url, String params) {
-    return url + "?" + params;
-  }
-
-  private static String hasSystemWithAnyCode(String system) {
-    return system + "|";
-  }
-
-  private static String hasSystemAndCode(String system, String code) {
-    return hasSystemWithAnyCode(system) + code;
-  }
-
-  private static String resourceField(String resource, String field) {
-    return resource + "." + field;
-  }
-
-  private static String eq(String param, String value) {
-    return param + "=" + value;
-  }
-
-  private static String include(String resource, String field) {
-    return resource + ":" + field;
-  }
-
-  private static String combineParams(String... params) {
-    return String.join("&", params);
   }
 }
