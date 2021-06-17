@@ -164,9 +164,19 @@ export type Problem = {
 	goals: number,
 	actionSteps: number,
 	clinicalStatus: string,
-	code: string,
+	codeISD: string,
+	codeSNOMED: string,
 	category: string
 };
+
+export type newProblem = {
+	name: string,
+	category: string,
+	codeISD: string,
+	codeSNOMED: string,
+	basedOn: string,
+	startDate: string
+}
 
 export type Goal = {
 	name: string,
