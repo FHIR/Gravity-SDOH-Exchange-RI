@@ -54,7 +54,7 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
   /**
    * Create GET entry to retrieve a Patient by id.
    *
-   * @return consent entry
+   * @return patient entry
    */
   protected BundleEntryComponent getPatientEntry() {
     Assert.notNull(patient, "Patient can't be null.");
@@ -79,7 +79,7 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
   /**
    * Create GET entry to retrieve a Consent by id.
    *
-   * @return patient entry
+   * @return consent entry
    */
   protected BundleEntryComponent getConsentEntry() {
     Assert.notNull(performer, "Consent can't be null.");
