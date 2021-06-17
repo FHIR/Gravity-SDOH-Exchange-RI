@@ -87,6 +87,12 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
         addParams(Consent.class.getSimpleName(), combineParams(eq(Consent.SP_RES_ID, consent))));
   }
 
+  /**
+   * Create GET entry to retrieve a performing Organization by id and additionally check whether it has supported type,
+   * also include all related Endpoint resources with specific connection type.
+   *
+   * @return organization and endpoint entry
+   */
   protected BundleEntryComponent getPerformerWithEndpointEntry() {
     Assert.notNull(performer, "Performer Organization can't be null.");
     EndpointConnectionType connectionType = EndpointConnectionType.HL7FHIRREST;
