@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.google.common.base.Strings;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,6 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskCreateException;
-import org.hl7.gravity.refimpl.sdohexchange.exception.TaskPrepareException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
@@ -57,9 +55,6 @@ public class TaskService {
 
   public String newTask(NewTaskRequestDto taskRequest, UserDto user) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
-    if (Strings.isNullOrEmpty(taskRequest.getConsent())) {
-      throw new TaskPrepareException("Patient consent must be provided. Set consent to TRUE.");
-    }
     TaskPrepareBundleFactory taskPrepareBundleFactory = new TaskPrepareBundleFactory(smartOnFhirContext.getPatient(),
         user.getId(), taskRequest.getPerformerId(), taskRequest.getConsent(), taskRequest.getConditionIds(),
         taskRequest.getGoalIds());
