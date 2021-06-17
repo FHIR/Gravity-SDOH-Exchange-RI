@@ -3,14 +3,6 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import com.google.common.collect.Lists;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
@@ -28,16 +20,25 @@ import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.codesystems.SearchModifierCode;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskFailBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TasksPollingBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TasksPollingBundleExtractor.TaskPollingUpdateException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TasksPollingBundleExtractor.TasksPollingInfo;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskFailBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.service.CpService.CpClientException;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
