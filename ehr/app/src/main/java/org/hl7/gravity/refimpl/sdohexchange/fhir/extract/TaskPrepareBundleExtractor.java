@@ -1,16 +1,11 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
 import com.google.common.base.Strings;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Organization;
@@ -21,6 +16,13 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskPrepareException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskPrepareBundleExtractor.TaskPrepareInfoHolder;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Transaction bundle parser of resources required for Task creation.
@@ -55,6 +57,7 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
     private final PractitionerRole practitionerRole;
     private final Organization performerOrganization;
     private final Endpoint endpoint;
+    private final Consent consent;
     private final List<Condition> conditions;
     private final List<Goal> goals;
 
@@ -71,6 +74,7 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
       this.endpoint = getEndpoint(resourceList(resources, Endpoint.class));
       this.conditions = resourceList(resources, Condition.class);
       this.goals = resourceList(resources, Goal.class);
+      this.consent = getConsent(resourceList(resources, Consent.class));
     }
 
     public Reference getPerformer() {
@@ -121,6 +125,13 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
                     .getIdPart(), organizationId));
       }
       return endpoint;
+    }
+
+    private Consent getConsent(List<Consent> consents) {
+      if(consents.isEmpty()){
+        throw new TaskPrepareException("No Consent have been found.");
+      }
+      return consents.stream().findFirst().get();
     }
   }
 }

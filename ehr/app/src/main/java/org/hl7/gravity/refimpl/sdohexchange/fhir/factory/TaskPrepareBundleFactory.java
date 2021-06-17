@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Organization;
@@ -30,7 +31,7 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
   private final String patient;
   private final String practitioner;
   private final String performer;
-  //TODO: Add consent in future release
+  private final String consent;
   private final List<String> conditions;
   private final List<String> goals;
 
@@ -41,6 +42,7 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
     prepareBundle.addEntry(getPatientEntry());
     prepareBundle.addEntry(getPractitionerRoleEntry());
     prepareBundle.addEntry(getPerformerWithEndpointEntry());
+    prepareBundle.addEntry(getConsentEntry());
     Optional.ofNullable(getConditionsEntry())
         .ifPresent(prepareBundle::addEntry);
     Optional.ofNullable(getGoalsEntry())
@@ -52,7 +54,7 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
   /**
    * Create GET entry to retrieve a Patient by id.
    *
-   * @return patient entry
+   * @return consent entry
    */
   protected BundleEntryComponent getPatientEntry() {
     Assert.notNull(patient, "Patient can't be null.");
@@ -75,11 +77,16 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
   }
 
   /**
-   * Create GET entry to retrieve a performing Organization by id and additionally check whether it has supported type,
-   * also include all related Endpoint resources with specific connection type.
+   * Create GET entry to retrieve a Consent by id.
    *
-   * @return organization and endpoint entry
+   * @return patient entry
    */
+  protected BundleEntryComponent getConsentEntry() {
+    Assert.notNull(performer, "Consent can't be null.");
+    return FhirUtil.createGetEntry(
+        addParams(Consent.class.getSimpleName(), combineParams(eq(Consent.SP_RES_ID, consent))));
+  }
+
   protected BundleEntryComponent getPerformerWithEndpointEntry() {
     Assert.notNull(performer, "Performer Organization can't be null.");
     EndpointConnectionType connectionType = EndpointConnectionType.HL7FHIRREST;

@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.ConsentRepository;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ConsentToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.BaseConsentDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConsentAttachmentDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConsentDto;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ConsentService {
 
+  private final ConsentToDtoConverter converter;
   private final SmartOnFhirContext smartOnFhirContext;
   private final ConsentRepository consentRepository;
   private final IGenericClient ehrClient;
@@ -45,15 +47,7 @@ public class ConsentService {
     Bundle bundle = consentRepository.findAllByPatient(smartOnFhirContext.getPatient());
     List<Consent> consentResources = FhirUtil.getFromBundle(bundle, Consent.class);
     return consentResources.stream()
-        .map(consent -> ConsentDto.builder()
-            .id(consent.getIdElement().getIdPart())
-            .name(consent.getSourceAttachment().getTitle())
-            .category(consent.getCategoryFirstRep().getCodingFirstRep().getCode())
-            .consentDate(FhirUtil.toLocalDateTime(consent.getDateTimeElement()))
-            .scope(consent.getScope().getCodingFirstRep().getDisplay())
-            .status(consent.getStatus().getDisplay())
-            .organization(consent.getOrganization().get(0).getDisplay())
-            .build())
+        .map(converter::convert)
         .collect(Collectors.toList());
   }
 
@@ -73,15 +67,7 @@ public class ConsentService {
 
     MethodOutcome methodOutcome = ehrClient.create().resource(consent).execute();
     Consent savedConsent = (Consent) methodOutcome.getResource();
-    return ConsentDto.builder()
-        .id(savedConsent.getIdElement().getIdPart())
-        .name(savedConsent.getSourceAttachment().getTitle())
-        .category(savedConsent.getCategoryFirstRep().getCodingFirstRep().getCode())
-        .consentDate(FhirUtil.toLocalDateTime(savedConsent.getDateTimeElement()))
-        .scope(savedConsent.getScope().getCodingFirstRep().getDisplay())
-        .status(savedConsent.getStatus().getDisplay())
-        .organization(savedConsent.getOrganization().get(0).getDisplay())
-        .build();
+    return converter.convert(savedConsent);
   }
 
   public ConsentAttachmentDto retrieveAttachmentInfo(String id) {
