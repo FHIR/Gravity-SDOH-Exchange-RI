@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+	Concern,
 	ContextResponse,
 	Task,
 	ServiceRequestCondition,
@@ -10,7 +11,8 @@ import {
 	Coding,
 	Goal,
 	Problem,
-	newProblem
+	newProblem,
+	NewConcernPayload
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -24,6 +26,33 @@ export const getTasks = async (): Promise<Task[]> => {
 
 	return res.data;
 };
+
+export const getConcerns = async (): Promise<Concern[]> => [{
+	//todo: remove mock after BE sync
+	concernStatus: "Active",
+	name: "Hunger Vital Signs",
+	assessmentDate: "2021-05-18T14:15:08",
+	category: "Food Insecurity",
+	basedOn: "Past",
+	status: "send to patient"
+}, {
+	name: "Hunger Vital Signs",
+	assessmentDate: "2021-05-18T14:15:08",
+	category: "Food Insecurity",
+	basedOn: "Past",
+	status: "send to patient",
+	concernStatus: "PromotedOrResolved"
+}];
+
+// TODO: Delete when BE will be ready
+export const addConcernResponse = (payload: NewConcernPayload): Concern => ({
+	name: payload.name,
+	assessmentDate: payload.assessmentDate,
+	category: payload.category,
+	basedOn: payload.basedOn,
+	status: payload.status,
+	concernStatus: payload.concernStatus
+});
 
 export const createTask = async (payload: newTaskPayload): Promise<{ taskId: string }> => {
 	const res = await axios.post("/task", payload);
@@ -60,6 +89,10 @@ export const getCategories = async (): Promise<Coding[]> => {
 
 	return res.data;
 };
+
+//todo: remove mock after BE sync
+export const getIcd10Codes = async (): Promise<Coding[]> => [{ display: "Transportation Insecurity", code: "Z59.82" }];
+export const getSnomedCtCodes = async (): Promise<Coding[]> => [{ display: "Food Insecurity", code: "F19.12" }];
 
 export const getRequests = async (code: string): Promise<Coding[]> => {
 	const res = await axios.get(`/mappings/categories/${code}/servicerequest/codings`);

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, onMounted, ref } from "vue";
 import { Concern } from "@/types";
 import { ConcernsModule } from "@/store/modules/concerns";
 import HealthConcernsTable from "@/components/patients/health-concerns/HealthConcernsTable.vue";
@@ -7,11 +7,10 @@ import HealthConcernsTable from "@/components/patients/health-concerns/HealthCon
 export type TableData = {
 	name: string,
 	status: string,
-	createdAt: string,
+	assessmentDate: string,
 	category: string,
 	basedOn: string,
-	actions: string,
-	id: string
+	concernStatus: string
 }
 
 export default defineComponent({
@@ -26,15 +25,23 @@ export default defineComponent({
 			concerns.value.map((concern: Concern) => ({
 				name: concern.name,
 				status: concern.status,
-				createdAt: concern.createdAt,
+				assessmentDate: concern.assessmentDate,
 				category: concern.category,
 				basedOn: concern.basedOn,
-				actions: concern.actions,
-				id: concern.id
+				concernStatus: concern.concernStatus
 			}))
 		);
-		const activeConcerns = computed<TableData[]>(() => tableData.value.filter(t => t.status === "Active"));
-		const promotedOrResolvedConcerns = computed<TableData[]>(() => tableData.value.filter(t => t.status === "PromotedOrResolved"));
+		const activeConcerns = computed<TableData[]>(() => tableData.value.filter(t => t.concernStatus === "Active"));
+		const promotedOrResolvedConcerns = computed<TableData[]>(() => tableData.value.filter(t => t.concernStatus === "PromotedOrResolved"));
+
+		onMounted(async () => {
+			isRequestLoading.value = true;
+			try {
+				await ConcernsModule.getConcerns();
+			} finally {
+				isRequestLoading.value = false;
+			}
+		});
 
 		return {
 			activeConcerns,
