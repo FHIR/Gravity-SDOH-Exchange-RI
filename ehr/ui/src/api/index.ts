@@ -9,7 +9,8 @@ import {
 	newTaskPayload,
 	updateTaskPayload,
 	Coding,
-	Goal
+	Goal,
+	NewConcernPayload
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -40,6 +41,16 @@ export const getConcerns = async (): Promise<Concern[]> => [{
 	status: "send to patient",
 	concernStatus: "PromotedOrResolved"
 }];
+
+// TODO: Delete when BE will be ready
+export const addConcernResponse = (payload: NewConcernPayload): Concern => ({
+	name: payload.name,
+	assessmentDate: payload.assessmentDate,
+	category: payload.category,
+	basedOn: payload.basedOn,
+	status: payload.status,
+	concernStatus: payload.concernStatus
+});
 
 export const createTask = async (payload: newTaskPayload): Promise<{ taskId: string }> => {
 	const res = await axios.post("/task", payload);

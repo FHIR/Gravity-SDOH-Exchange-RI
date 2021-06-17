@@ -1,5 +1,5 @@
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import { getConcerns } from "@/api";
+import { getConcerns, addConcernResponse } from "@/api";
 import store from "@/store";
 import { Concern, NewConcernPayload } from "@/types";
 
@@ -33,15 +33,5 @@ class Concerns extends VuexModule implements IConcerns {
 		this.addConcern(addConcernResponse(payload));
 	}
 }
-
-// TODO: Delete when BE will be ready
-const addConcernResponse = (payload: NewConcernPayload): Concern => ({
-	name: payload.name,
-	assessmentDate: payload.assessmentDate,
-	category: payload.category,
-	basedOn: payload.basedOn,
-	status: payload.status,
-	concernStatus: payload.concernStatus
-});
 
 export const ConcernsModule = getModule(Concerns);
