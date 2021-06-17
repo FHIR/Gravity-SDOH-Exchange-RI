@@ -8,34 +8,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.codesystems.ConsentAction;
-import org.hl7.fhir.r4.model.codesystems.ConsentPolicy;
-import org.hl7.fhir.r4.model.codesystems.ConsentScope;
-import org.hl7.fhir.r4.model.codesystems.V3ActCode;
-import org.hl7.fhir.r4.model.codesystems.V3RoleClass;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.ConsentRepository;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ConsentToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.BaseConsentDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConsentAttachmentDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConsentDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.ConsentCreateException;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.ConsentPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.resource.CreateConsentFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,6 +38,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ConsentService {
 
+  private final ConsentToDtoConverter converter;
   private final SmartOnFhirContext smartOnFhirContext;
   private final ConsentRepository consentRepository;
   private final IGenericClient ehrClient;
@@ -56,14 +47,7 @@ public class ConsentService {
     Bundle bundle = consentRepository.findAllByPatient(smartOnFhirContext.getPatient());
     List<Consent> consentResources = FhirUtil.getFromBundle(bundle, Consent.class);
     return consentResources.stream()
-        .map(consent -> ConsentDto.builder()
-            .id(consent.getIdElement().getIdPart())
-            .name(consent.getSourceAttachment().getTitle())
-            .attachment(consent.getSourceAttachment().getData())
-            .scope(consent.getScope().getCodingFirstRep().getDisplay())
-            .status(consent.getStatus().getDisplay())
-            .organization(consent.getOrganization().get(0).getDisplay())
-            .build())
+        .map(converter::convert)
         .collect(Collectors.toList());
   }
 
@@ -77,52 +61,13 @@ public class ConsentService {
   }
 
   public ConsentDto createConsent(String name, MultipartFile attachment, UserDto userDto) {
-    Consent consent = new Consent();
+    Reference patient = FhirUtil.toReference(Patient.class, smartOnFhirContext.getPatient());
+    Reference organization = retrieveOrganization(userDto);
+    Consent consent = new CreateConsentFactory(name, patient, attachment, organization).createConsent();
 
-    consent.getSourceAttachment().setTitle(name);
-    try {
-      consent.getSourceAttachment().setData(attachment.getBytes());
-    } catch (IOException e) {
-      throw new ConsentCreateException("Consent attachment cannot be read.");
-    }
-    consent.getSourceAttachment().setContentType(MediaType.APPLICATION_PDF_VALUE);
-
-    consent.setId(IdType.newRandomUuid());
-    consent.setStatus(Consent.ConsentState.ACTIVE);
-    consent.setDateTimeElement(DateTimeType.now());
-    consent.getMeta().addProfile(SDOHProfiles.CONSENT);
-
-    ConsentScope consentScope = ConsentScope.PATIENTPRIVACY;
-    consent.getScope()
-        .addCoding(new Coding(consentScope.getSystem(), consentScope.toCode(), consentScope.getDisplay()));
-    V3ActCode actCode = V3ActCode.IDSCL;
-    consent.addCategory(
-        new CodeableConcept().addCoding(new Coding(actCode.getSystem(), actCode.toCode(), actCode.getDisplay())));
-    consent.setPatient(FhirUtil.toReference(Patient.class, smartOnFhirContext.getPatient()));
-
-    ConsentPolicy consentPolicy = ConsentPolicy.HIPAAAUTH;
-    consent.getPolicyRule()
-        .addCoding(new Coding(consentPolicy.getSystem(), consentPolicy.toCode(), consentPolicy.getDisplay()));
-    V3RoleClass roleClass = V3RoleClass.PAT;
-    consent.getProvision().addActor().setReference(FhirUtil.toReference(Patient.class, smartOnFhirContext.getPatient()))
-        .getRole()
-        .addCoding(new Coding(roleClass.getSystem(), roleClass.toCode(), roleClass.getDisplay()));
-
-    ConsentAction consentAction = ConsentAction.DISCLOSE;
-    consent.getProvision().addAction().getCoding()
-        .add(new Coding(consentAction.getSystem(), consentAction.toCode(), consentAction.getDisplay()));
-    consent.getOrganization().add(retrieveOrganization(userDto));
-
-    MethodOutcome outcome = ehrClient.create().resource(consent).execute();
-    Consent savedConsent = (Consent) outcome.getResource();
-    return ConsentDto.builder()
-        .id(savedConsent.getIdElement().getIdPart())
-        .name(savedConsent.getSourceAttachment().getTitle())
-        .attachment(savedConsent.getSourceAttachment().getData())
-        .scope(savedConsent.getScope().getCodingFirstRep().getDisplay())
-        .status(savedConsent.getStatus().getDisplay())
-        .organization(savedConsent.getOrganization().get(0).getDisplay())
-        .build();
+    MethodOutcome methodOutcome = ehrClient.create().resource(consent).execute();
+    Consent savedConsent = (Consent) methodOutcome.getResource();
+    return converter.convert(savedConsent);
   }
 
   public ConsentAttachmentDto retrieveAttachmentInfo(String id) {

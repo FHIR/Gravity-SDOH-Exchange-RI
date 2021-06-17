@@ -1,6 +1,7 @@
-import { VuexModule, Module, getModule } from "vuex-module-decorators";
+import { VuexModule, Module, getModule, Action, Mutation } from "vuex-module-decorators";
 import store from "@/store";
-import { Problem } from "@/types";
+import { newProblem, Problem } from "@/types";
+import { getProblems, createProblem } from "@/api";
 
 export interface IProblems {
 	problems: Problem[]
@@ -8,33 +9,26 @@ export interface IProblems {
 
 @Module({ dynamic: true, store, name: "problems" })
 class Problems extends VuexModule implements IProblems {
-	problems: Problem[] = [{
-		id: "SDOHCC-Condition-HungerVitalSign-Example-1",
-		name: "Hunger Vital Signs",
-		basedOn: "Hunger Vital Signs assessment",
-		onsetPeriod: {
-			start: "2019-08-18T12:31:35.123Z"
-		},
-		goals: 0,
-		actionSteps: 0,
-		clinicalStatus: "active",
-		code: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
-		category: "test"
-	},
-	{
-		id: "SDOHCC-Condition-HungerVitalSign-Example-2",
-		name: "Hunger Vital Signs",
-		basedOn: "Hunger Vital Signs assessment",
-		onsetPeriod: {
-			start: "2019-08-18T12:31:35.123Z",
-			end: "2021-10-28T12:31:35.123Z"
-		},
-		goals: 0,
-		actionSteps: 0,
-		clinicalStatus: "resolved",
-		code: "Insuficient Food Supply (706875005)",
-		category: "test"
-	}];
+	problems: Problem[] = []
+
+	@Mutation
+	setProblems(payload: Problem[]): void {
+		this.problems = payload;
+	}
+
+	@Action
+	async getProblems(): Promise<void> {
+		const data = await getProblems();
+
+		this.setProblems(data);
+	}
+
+	@Action
+	async createProblem(payload: newProblem): Promise<void> {
+		await createProblem(payload);
+		// todo: check if we get response on create problem. if yes add new problem to list, if not get all problems again
+		await getProblems();
+	}
 }
 
 export const ProblemsModule = getModule(Problems);

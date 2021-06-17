@@ -7,8 +7,6 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
-import java.util.Arrays;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -25,23 +23,25 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskCreateException;
-import org.hl7.gravity.refimpl.sdohexchange.exception.TaskPrepareException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskFailBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskPrepareBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskPrepareBundleExtractor.TaskPrepareInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskUpdateBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskUpdateBundleExtractor.TaskUpdateInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskFailBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.service.CpService.CpClientException;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -55,11 +55,9 @@ public class TaskService {
 
   public String newTask(NewTaskRequestDto taskRequest, UserDto user) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
-    if (taskRequest.getConsent() != Boolean.TRUE) {
-      throw new TaskPrepareException("Patient consent must be provided. Set consent to TRUE.");
-    }
     TaskPrepareBundleFactory taskPrepareBundleFactory = new TaskPrepareBundleFactory(smartOnFhirContext.getPatient(),
-        user.getId(), taskRequest.getPerformerId(), taskRequest.getConditionIds(), taskRequest.getGoalIds());
+        user.getId(), taskRequest.getPerformerId(), taskRequest.getConsent(), taskRequest.getConditionIds(),
+        taskRequest.getGoalIds());
     Bundle taskRelatedResources = ehrClient.transaction()
         .withBundle(taskPrepareBundleFactory.createPrepareBundle())
         .execute();
@@ -76,6 +74,7 @@ public class TaskService {
     taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
     taskBundleFactory.setComment(taskRequest.getComment());
     taskBundleFactory.setUser(user);
+    taskBundleFactory.setConsent(taskPrepareInfoHolder.getConsent());
     taskBundleFactory.setConditions(taskPrepareInfoHolder.getConditions(taskRequest.getConditionIds()));
     taskBundleFactory.setGoals(taskPrepareInfoHolder.getGoals(taskRequest.getGoalIds()));
 

@@ -1,11 +1,12 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.request;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,5 +28,5 @@ public class NewTaskRequestDto {
   @NotEmpty(message = "Performer Organization id can't be empty.")
   private String performerId;
   @NotNull
-  private Boolean consent;
+  private String consent;
 }

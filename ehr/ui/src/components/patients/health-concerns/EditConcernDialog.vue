@@ -1,9 +1,13 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
+import DropButton from "@/components/DropButton.vue";
 
 export default defineComponent({
 	name: "EditConcernDialog",
+	components: {
+		DropButton
+	},
 	props: {
 		visible: {
 			type: Boolean,
@@ -28,7 +32,7 @@ export default defineComponent({
 <template>
 	<el-dialog
 		:model-value="visible"
-		title="Promote Health Concern to Problem"
+		title="Health Concern Details"
 		:width="700"
 		append-to-body
 		destroy-on-close
@@ -41,6 +45,9 @@ export default defineComponent({
 			size="mini"
 			class="edit-concern-form"
 		>
+			<el-form-item label="Health Concern">
+				{{ concern.name }}
+			</el-form-item>
 			<el-form-item label="Category">
 				{{ concern.category }}
 			</el-form-item>
@@ -54,7 +61,7 @@ export default defineComponent({
 				{{ concern.basedOn }}
 			</el-form-item>
 			<el-form-item label="Assessment Date">
-				{{ $filters.formatDateTime(concern.createdAt) }}
+				{{ $filters.formatDateTime(concern.assessmentDate) }}
 			</el-form-item>
 		</el-form>
 		<template #footer>
@@ -65,15 +72,13 @@ export default defineComponent({
 			>
 				Cancel
 			</el-button>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				:loading="saveInProgress"
-			>
-				Confirm
-			</el-button>
+			<DropButton
+				label="Save Changes"
+				:items="[{ id: '1', label: 'Promote to Problem', iconSrc: require('@/assets/images/concern-promote.svg') }
+					,{ id: '2', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') }
+					,{ id: '3', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
+				]"
+			/>
 		</template>
 	</el-dialog>
 </template>

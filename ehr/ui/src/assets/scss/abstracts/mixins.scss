@@ -32,21 +32,22 @@
 	display: inline-block;
 	width: $w;
 	height: $h;
+
 	@if $src {
 		background-image: url($src);
 	}
+
 	background-repeat: no-repeat;
-	background-size: 100%;
+	background-size: contain;
+	background-position: center;
 }
+
 // Workaround to apply same keyframe animation to different items
 
 $animation-id-count: 0;
 
 @function animation-id() {
-	$id: $animation-id-count;
-	$animation-id-count: $id + 1;
-
-	@return animation-id-#{$id};
+	@return animation-id-#{$animation-id-count + 1};
 }
 
 @mixin grow-animation {

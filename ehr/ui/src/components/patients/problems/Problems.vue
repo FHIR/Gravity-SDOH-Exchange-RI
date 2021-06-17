@@ -1,8 +1,9 @@
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, onMounted, ref } from "vue";
 import ProblemsTable from "@/components/patients/problems/ProblemsTable.vue";
 import { Problem } from "@/types";
 import { ProblemsModule } from "@/store/modules/problems";
+import NewProblemDialog from "@/components/patients/problems/NewProblemDialog.vue";
 
 export type TableData = {
 	id: string,
@@ -13,13 +14,15 @@ export type TableData = {
 	goals: number,
 	actionSteps: number,
 	status: string,
-	code: string,
+	codeISD: string,
+	codeSNOMED: string,
 	category: string
 };
 
 export default defineComponent({
 	name: "Problems",
 	components: {
+		NewProblemDialog,
 		ProblemsTable
 	},
 	setup() {
@@ -34,7 +37,8 @@ export default defineComponent({
 				goals: problem.goals,
 				actionSteps: problem.actionSteps,
 				status: problem.clinicalStatus,
-				code: problem.code,
+				codeISD: problem.codeISD,
+				codeSNOMED: problem.codeSNOMED,
 				category: problem.category
 			}))
 		);
@@ -42,23 +46,41 @@ export default defineComponent({
 		const activeProblems = computed<TableData[]>(() => tableData.value.filter(t => t.status === "active"));
 		const closedProblems = computed<TableData[]>(() => tableData.value.filter(t => t.status === "resolved"));
 
+		const newProblemsDialogVisible = ref<boolean>(false);
+
+		const isLoading = ref<boolean>(false);
+
+		onMounted(async () => {
+			isLoading.value = true;
+			try {
+				await ProblemsModule.getProblems();
+			} finally {
+				isLoading.value = false;
+			}
+		});
 
 		return {
+			isLoading,
 			tableData,
 			activeProblems,
-			closedProblems
+			closedProblems,
+			newProblemsDialogVisible
 		};
 	}
 });
 </script>
 
 <template>
-	<div class="problems">
+	<div
+		v-loading="isLoading"
+		class="problems"
+	>
 		<ProblemsTable
 			v-if="activeProblems.length"
 			:data="activeProblems"
 			title="Active Problems"
 			status="active"
+			@add-problem="newProblemsDialogVisible = true"
 		/>
 		<ProblemsTable
 			v-if="closedProblems.length"
@@ -76,10 +98,15 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				@click="newProblemsDialogVisible = true"
 			>
 				Add Problem
 			</el-button>
 		</div>
+		<NewProblemDialog
+			:visible="newProblemsDialogVisible"
+			@close="newProblemsDialogVisible = false"
+		/>
 	</div>
 </template>
 

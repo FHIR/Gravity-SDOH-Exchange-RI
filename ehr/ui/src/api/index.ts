@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+	Concern,
 	ContextResponse,
 	Task,
 	ServiceRequestCondition,
@@ -8,7 +9,10 @@ import {
 	newTaskPayload,
 	updateTaskPayload,
 	Coding,
-	Goal
+	Goal,
+	Problem,
+	newProblem,
+	NewConcernPayload
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -22,6 +26,33 @@ export const getTasks = async (): Promise<Task[]> => {
 
 	return res.data;
 };
+
+export const getConcerns = async (): Promise<Concern[]> => [{
+	//todo: remove mock after BE sync
+	concernStatus: "Active",
+	name: "Hunger Vital Signs",
+	assessmentDate: "2021-05-18T14:15:08",
+	category: "Food Insecurity",
+	basedOn: "Past",
+	status: "send to patient"
+}, {
+	name: "Hunger Vital Signs",
+	assessmentDate: "2021-05-18T14:15:08",
+	category: "Food Insecurity",
+	basedOn: "Past",
+	status: "send to patient",
+	concernStatus: "PromotedOrResolved"
+}];
+
+// TODO: Delete when BE will be ready
+export const addConcernResponse = (payload: NewConcernPayload): Concern => ({
+	name: payload.name,
+	assessmentDate: payload.assessmentDate,
+	category: payload.category,
+	basedOn: payload.basedOn,
+	status: payload.status,
+	concernStatus: payload.concernStatus
+});
 
 export const createTask = async (payload: newTaskPayload): Promise<{ taskId: string }> => {
 	const res = await axios.post("/task", payload);
@@ -58,6 +89,10 @@ export const getCategories = async (): Promise<Coding[]> => {
 
 	return res.data;
 };
+
+//todo: remove mock after BE sync
+export const getIcd10Codes = async (): Promise<Coding[]> => [{ display: "Transportation Insecurity", code: "Z59.82" }];
+export const getSnomedCtCodes = async (): Promise<Coding[]> => [{ display: "Food Insecurity", code: "F19.12" }];
 
 export const getRequests = async (code: string): Promise<Coding[]> => {
 	const res = await axios.get(`/mappings/categories/${code}/servicerequest/codings`);
@@ -104,4 +139,72 @@ export const getGoals = async(): Promise<Goal[]> => {
 	}];
 
 	return res;
+};
+
+export const getProblemCodes = async (code: string): Promise<{ isd: Coding[], snomed: Coding[] }> => {
+	// todo: call real request and remove mocked data
+	// const res = await axios.get(`/mappings/categories/${code}/condition/codings`);
+	//return res.data;
+
+	const res: { isd: Coding[], snomed: Coding[] } = {
+		isd: [{
+			code: "Z59.49",
+			display: "Lack of Adequate Food & Safe Drinking Water"
+		},
+		{
+			code: "Z59.4229",
+			display: "Lack of Adequate Food & Safe Drinking Water"
+		}],
+		snomed: [{
+			code: "385767005",
+			display: "Meals on wheels provision education"
+		}]
+	};
+
+	return res;
+};
+
+
+export const getProblems = async(): Promise<Problem[]> => {
+	// todo: remove mocked data after BE sync
+	// const res = await axios.get("/problem");
+	// return res.data;
+	const res: Problem[] =  [{
+		id: "SDOHCC-Condition-HungerVitalSign-Example-1",
+		name: "Hunger Vital Signs",
+		basedOn: "Hunger Vital Signs assessment",
+		onsetPeriod: {
+			start: "2019-08-18T12:31:35.123Z"
+		},
+		goals: 0,
+		actionSteps: 0,
+		clinicalStatus: "active",
+		codeISD: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
+		codeSNOMED: "Meals on wheels provision education (385767005)",
+		category: "test"
+	},
+	{
+		id: "SDOHCC-Condition-HungerVitalSign-Example-2",
+		name: "Hunger Vital Signs",
+		basedOn: "Hunger Vital Signs assessment",
+		onsetPeriod: {
+			start: "2019-08-18T12:31:35.123Z",
+			end: "2021-10-28T12:31:35.123Z"
+		},
+		goals: 0,
+		actionSteps: 0,
+		clinicalStatus: "resolved",
+		codeISD: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
+		codeSNOMED: "Meals on wheels provision education (385767005)",
+		category: "test"
+	}];
+
+	return res;
+};
+
+// todo: change and remove mocked data after sync with BE
+export const createProblem = async (payload: newProblem): Promise<newProblem> => {
+	// const res = await axios.post("/problem", payload);
+	// return res.data;
+	return payload;
 };

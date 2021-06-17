@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Organization;
@@ -30,7 +31,7 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
   private final String patient;
   private final String practitioner;
   private final String performer;
-  //TODO: Add consent in future release
+  private final String consent;
   private final List<String> conditions;
   private final List<String> goals;
 
@@ -41,6 +42,7 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
     prepareBundle.addEntry(getPatientEntry());
     prepareBundle.addEntry(getPractitionerRoleEntry());
     prepareBundle.addEntry(getPerformerWithEndpointEntry());
+    prepareBundle.addEntry(getConsentEntry());
     Optional.ofNullable(getConditionsEntry())
         .ifPresent(prepareBundle::addEntry);
     Optional.ofNullable(getGoalsEntry())
@@ -72,6 +74,17 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
         eq(Constants.PARAM_PROFILE, UsCoreProfiles.PRACTITIONER_ROLE),
         eq(resourceField(PractitionerRole.SP_ORGANIZATION, Constants.PARAM_PROFILE), UsCoreProfiles.ORGANIZATION)
     )));
+  }
+
+  /**
+   * Create GET entry to retrieve a Consent by id.
+   *
+   * @return consent entry
+   */
+  protected BundleEntryComponent getConsentEntry() {
+    Assert.notNull(performer, "Consent can't be null.");
+    return FhirUtil.createGetEntry(
+        addParams(Consent.class.getSimpleName(), combineParams(eq(Consent.SP_RES_ID, consent))));
   }
 
   /**
