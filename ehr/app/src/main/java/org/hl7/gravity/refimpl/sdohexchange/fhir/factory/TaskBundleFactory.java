@@ -1,7 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.factory;
 
 import com.google.common.base.Strings;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Bundle;
@@ -31,6 +30,8 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 
+import java.util.List;
+
 /**
  * Class that holds a logic for creation of a new Task with required referenced resources during a "Create Task" flow.
  * Result is a Transaction Bundle.s
@@ -49,6 +50,7 @@ public class TaskBundleFactory {
   private Reference requester;
   private String comment;
   private UserDto user;
+  private Consent consent;
   private List<Condition> conditions;
   private List<Goal> goals;
 
@@ -65,11 +67,9 @@ public class TaskBundleFactory {
     Bundle bundle = new Bundle();
     bundle.setType(Bundle.BundleType.TRANSACTION);
 
-    Consent consent = createConsent();
     ServiceRequest serviceRequest = createServiceRequest(consent);
     Task task = createTask(serviceRequest);
 
-    bundle.addEntry(FhirUtil.createPostEntry(consent));
     bundle.addEntry(FhirUtil.createPostEntry(serviceRequest));
     bundle.addEntry(FhirUtil.createPostEntry(task));
 

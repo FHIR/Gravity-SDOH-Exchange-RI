@@ -1,6 +1,7 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
@@ -18,6 +19,8 @@ public class TypeToDtoConverter implements Converter<Type, TypeDto> {
     } else if (type instanceof Reference) {
       IIdType element = ((Reference) type).getReferenceElement();
       return new ReferenceDto(element.getIdPart(), ((Reference) type).getDisplay());
+    } else if (type instanceof Coding){
+      return new StringTypeDto(((Coding) type).getDisplay());
     }
     return null;
   }
