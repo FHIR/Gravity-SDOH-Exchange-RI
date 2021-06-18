@@ -27,9 +27,9 @@ export default defineComponent({
 		<el-dropdown
 			split-button
 			trigger="click"
+			popper-class="drop-button-dropdown"
 			@click="$emit('click')"
 			@command="$emit('item-click', $event)"
-			popper-class="drop-button-dropdown"
 		>
 			{{ label }}
 			<template #dropdown>
@@ -56,6 +56,10 @@ export default defineComponent({
 
 .drop-button {
 	margin-left: 20px;
+
+	::v-deep(.el-dropdown) .el-button-group {
+		display: inline-flex;
+	}
 
 	::v-deep(.el-button) {
 		padding: 0;
