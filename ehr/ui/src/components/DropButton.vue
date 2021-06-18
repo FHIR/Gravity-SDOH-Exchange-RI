@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, computed, PropType } from "vue";
+import { defineComponent, PropType } from "vue";
 
 type Item = {
 	id: string,
@@ -23,7 +23,7 @@ export default defineComponent({
 </script>
 
 <template>
-	<div class="drop-button">
+	<span class="drop-button">
 		<el-dropdown
 			split-button
 			trigger="click"
@@ -48,18 +48,18 @@ export default defineComponent({
 				</el-dropdown-menu>
 			</template>
 		</el-dropdown>
-	</div>
+	</span>
 </template>
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
 
 .drop-button {
+	margin-left: 20px;
 
 	::v-deep(.el-button) {
-		height: 25px;
 		padding: 0;
-		min-height: 0;
+		min-height: 25px;
 		border-radius: 25px;
 		border: 1px solid $global-primary-color;
 
