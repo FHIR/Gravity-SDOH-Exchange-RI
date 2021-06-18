@@ -53,6 +53,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+$chevron-width: 30px;
 
 .drop-button {
 	margin-left: 20px;
@@ -69,12 +70,12 @@ export default defineComponent({
 		border: 1px solid $global-primary-color;
 
 		&:first-child {
-			width: 173px - 30px;
+			width: 173px - $chevron-width;
 			border-right: none;
 		}
 
 		&:last-child {
-			width: 30px;
+			width: $chevron-width;
 			border-left: none;
 
 			&::before {

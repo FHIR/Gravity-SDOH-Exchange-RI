@@ -1,30 +1,20 @@
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
+import { defineComponent, ref } from "vue";
 import NewConsentDialog from "./NewConsentDialog.vue";
+import { Consent } from "@/types";
+import { getConsents, getConsentAttachment } from "@/api";
 
-
-type Consent = {
-	name: string,
-	status: string,
-	scope: string,
-	category: string,
-	organization: string,
-	date: string
-}
 
 export default defineComponent({
 	components: { NewConsentDialog },
 	setup() {
-		const foo = {
-			name: "Yes",
-			status: "Active",
-			scope: "Privacy Consent",
-			category: "IDSCL",
-			organization: "Provider/EHR",
-			date: "May 18, 2021, 10:00 AM"
-		};
+		const consents = ref<Consent[]>([]);
+		const consentsLoading = ref(true);
 
-		const data = [foo, foo, foo];
+		getConsents().then(resp => {
+			consentsLoading.value = false;
+			consents.value = resp;
+		});
 
 		const dialogOpened = ref(false);
 
@@ -32,10 +22,37 @@ export default defineComponent({
 			dialogOpened.value = true;
 		};
 
+		const onConsentCreated = (newOne: Consent) => {
+			dialogOpened.value = false;
+			consents.value = [...consents.value, newOne];
+		};
+
+		const attachmentLoading = ref(false);
+
+		const viewAttachment = async (consentId: string) => {
+			try {
+				attachmentLoading.value = true;
+				const blob = await getConsentAttachment(consentId);
+				// Potential memory leak
+				const objectUrl = URL.createObjectURL(blob);
+				const newWin = window.open();
+				if (newWin) {
+					newWin.location.href = objectUrl;
+				}
+			} finally {
+				attachmentLoading.value = false;
+			}
+		};
+
+
 		return {
 			dialogOpened,
-			data,
-			addNewConsent
+			consentsLoading,
+			consents,
+			addNewConsent,
+			onConsentCreated,
+			viewAttachment,
+			attachmentLoading
 		};
 	}
 });
@@ -43,10 +60,12 @@ export default defineComponent({
 
 <template>
 	<div
+		v-loading="consentsLoading"
 		class="consents"
+		:class="{ 'wait-cursor': attachmentLoading }"
 	>
 		<div
-			v-if="data.length === 0"
+			v-if="consents.length === 0"
 			class="empty-state"
 		>
 			<div class="text">
@@ -82,10 +101,13 @@ export default defineComponent({
 				</el-button>
 			</div>
 
-			<el-table :data="data">
+			<el-table :data="consents">
 				<el-table-column label="Consent Name">
 					<template #default="scope">
-						<el-button type="text">
+						<el-button
+							type="text"
+							@click="viewAttachment(scope.row.id)"
+						>
 							{{ scope.row.name }}
 						</el-button>
 					</template>
@@ -114,20 +136,17 @@ export default defineComponent({
 						{{ scope.row.organization }}
 					</template>
 				</el-table-column>
-
 				<el-table-column label="Consent Date">
 					<template #default="scope">
-						{{ scope.row.date }}
+						{{ $filters.formatDateTime(scope.row.consentDate) }}
 					</template>
-				</el-table-column>
-
-				<el-table-column label="Actions">
 				</el-table-column>
 			</el-table>
 		</div>
 
 		<NewConsentDialog
 			v-model:opened="dialogOpened"
+			@consent-created="onConsentCreated"
 		/>
 	</div>
 </template>
@@ -138,6 +157,10 @@ export default defineComponent({
 .consents {
 	min-height: 340px;
 
+	&.wait-cursor * {
+		cursor: wait;
+	}
+
 	.empty-state {
 		display: flex;
 		flex-direction: column;
@@ -147,7 +170,7 @@ export default defineComponent({
 
 		.text {
 			font-size: 48px;
-			font-weight: 400;
+			font-weight: $global-font-weight-normal;
 			color: $whisper;
 			margin-bottom: 50px;
 		}
@@ -166,8 +189,8 @@ export default defineComponent({
 		padding-left: 20px;
 
 		.title {
-			font-size: 18px;
-			font-weight: 500;
+			font-size: $global-large-font-size;
+			font-weight: $global-font-weight-medium;
 		}
 	}
 }

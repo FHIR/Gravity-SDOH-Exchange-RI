@@ -60,8 +60,8 @@ export default defineComponent({
 			<RiskAssessments />
 		</el-tab-pane>
 		<el-tab-pane
-			label="Consent"
-			name="consent"
+			label="Consents"
+			name="consents"
 		>
 			<Consents />
 		</el-tab-pane>

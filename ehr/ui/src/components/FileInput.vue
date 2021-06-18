@@ -5,7 +5,16 @@ import { defineComponent, PropType, ref } from "vue";
 export default defineComponent({
 	props: {
 		value: {
-			type: Object as PropType<File | null>
+			type: Object as PropType<File | null>,
+			default: null
+		},
+		accept: {
+			type: String,
+			default: ""
+		},
+		disabled: {
+			type: Boolean,
+			default: false
 		}
 	},
 	emits: ["update:value"],
@@ -13,11 +22,11 @@ export default defineComponent({
 		const inputRef = ref<HTMLInputElement>(null as unknown as HTMLInputElement);
 
 		const activate = () => {
-			inputRef.value.click();
+			!props.disabled && inputRef.value.click();
 		};
 
 		const remove = () => {
-			ctx.emit("update:value", null);
+			!props.disabled && ctx.emit("update:value", null);
 		};
 
 		const onChange = () => {
@@ -44,6 +53,7 @@ export default defineComponent({
 	<span class="file-input">
 		<span
 			class="cover"
+			:class="{ disabled }"
 		>
 			<template
 				v-if="value"
@@ -71,10 +81,11 @@ export default defineComponent({
 		</span>
 
 		<input
-			type="file"
 			ref="inputRef"
+			type="file"
+			:accept="accept"
 			@change="onChange"
-		/>
+		>
 	</span>
 </template>
 
@@ -88,6 +99,11 @@ export default defineComponent({
 
 	.cover {
 		cursor: pointer;
+
+		&.disabled {
+			color: $global-muted-color;
+			cursor: not-allowed;
+		}
 	}
 
 	.file-name {

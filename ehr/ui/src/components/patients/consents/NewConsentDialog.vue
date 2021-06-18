@@ -1,6 +1,7 @@
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, ref, reactive, watch } from "vue";
 import FileInput from "@/components/FileInput.vue";
+import { createConsent } from "@/api";
 
 export default defineComponent({
 	components: { FileInput },
@@ -10,24 +11,66 @@ export default defineComponent({
 			default: false
 		}
 	},
-	emits: ["update:opened"],
-	setup(_, ctx) {
-		const file = ref<File | null>(null);
-		const name = ref("");
-		const status = ref("Active");
-		const scope = ref("Patient Privacy (Code)");
-		const date = ref("");
+	emits: ["update:opened", "consent-created"],
+	setup(props, ctx) {
+		const formModel = reactive({
+			file: null as File | null,
+			name: ""
+		});
+
+		watch(() => formModel.file, () => {
+			formRef.value?.validateField("file");
+		});
+
+		const formRef = ref<any>();
+
+		const rules = {
+			file: { required: true, message: "This field is required" },
+			name: { required: true, message: "This field is required" }
+		};
+
+		const resetFields = () => {
+			formModel.file = null;
+			formModel.name = "";
+			formRef.value?.clearValidate();
+		};
+
+		watch(() => props.opened, () => {
+			resetFields();
+		});
+
+		const saveInProgress = ref(false);
+
+		const save = async () => {
+			const valid = await formRef.value!.validate();
+			if (!valid) {
+				return;
+			}
+			if (formModel.file === null || formModel.name === "") {
+				return;
+			}
+			saveInProgress.value = true;
+			try {
+				const resp = await createConsent(formModel.name, formModel.file!);
+				ctx.emit("consent-created", resp);
+				resetFields();
+			} finally {
+				saveInProgress.value = false;
+			}
+		};
 
 		const beforeClose = () => {
-			ctx.emit("update:opened", false);
+			if (!saveInProgress.value) {
+				ctx.emit("update:opened", false);
+			}
 		};
 
 		return {
-			file,
-			name,
-			status,
-			scope,
-			date,
+			formModel,
+			formRef,
+			rules,
+			saveInProgress,
+			save,
 			beforeClose
 		};
 	}
@@ -43,50 +86,33 @@ export default defineComponent({
 			:before-close="beforeClose"
 		>
 			<el-form
+				ref="formRef"
+				:model="formModel"
+				:rules="rules"
 				label-width="155px"
 				label-position="left"
 				size="mini"
 			>
-				<el-form-item label="Category">
-					IDSCL (healthcare information disclosure)
-				</el-form-item>
-
-				<el-form-item label="Consent Document">
+				<el-form-item
+					label="Consent Document"
+					prop="file"
+				>
 					<FileInput
-						v-model:value="file"
+						v-model:value="formModel.file"
+						:disabled="saveInProgress"
+						accept="application/pdf,.pdf"
 					/>
 				</el-form-item>
 
-				<el-form-item label="Consent Name">
+				<el-form-item
+					label="Consent Name"
+					prop="name"
+				>
 					<el-input
-						v-model="name"
+						v-model="formModel.name"
+						:disabled="saveInProgress"
+						placeholder="Enter Consent Name"
 					/>
-				</el-form-item>
-
-				<el-form-item label="Status">
-					<el-select
-						v-model="status"
-					>
-					</el-select>
-				</el-form-item>
-
-				<el-form-item label="Scope">
-					<el-select
-						v-model="scope"
-					>
-					</el-select>
-				</el-form-item>
-
-				<el-form-item label="Consent Date">
-					<el-date-picker
-						placeholder="Select date"
-						v-model="date"
-						class="consent-date-picker"
-					/>
-				</el-form-item>
-
-				<el-form-item label="Organization">
-					Provider/EHR
 				</el-form-item>
 			</el-form>
 
@@ -103,6 +129,8 @@ export default defineComponent({
 					round
 					type="primary"
 					size="mini"
+					:loading="saveInProgress"
+					@click="save"
 				>
 					Save Consent
 				</el-button>
@@ -112,11 +140,4 @@ export default defineComponent({
 </template>
 
 <style lang="scss" scoped>
-@import "~@/assets/scss/abstracts/variables";
-
-.new-consent-dialog {
-	::v-deep(.el-date-editor.consent-date-picker) {
-		width: 130px;
-	}
-}
 </style>
