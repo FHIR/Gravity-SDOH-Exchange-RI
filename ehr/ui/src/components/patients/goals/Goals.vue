@@ -1,6 +1,6 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from "vue";
-import { Goal } from "@/types";
+import { Goal, Coding, Comment } from "@/types";
 import { GoalsModule } from "@/store/modules/goals";
 import GoalsTable from "@/components/patients/goals/GoalsTable.vue";
 
@@ -11,7 +11,11 @@ export type TableData = {
 	startDate: string,
 	endDate: string,
 	targets: string[],
-	status: string
+	status: string,
+	category: Coding,
+	code: Coding,
+	id: string,
+	comments: Comment[]
 };
 
 export default defineComponent({
@@ -30,7 +34,11 @@ export default defineComponent({
 				startDate: goal.startDate,
 				endDate: goal.endDate,
 				targets: goal.targets,
-				status: goal.status
+				status: goal.status,
+				category: goal.category,
+				code: goal.code,
+				id: goal.id,
+				comments: goal.comments
 			}))
 		);
 		const activeGoals = computed<TableData[]>(() => tableData.value.filter(goal => goal.status === "active"));

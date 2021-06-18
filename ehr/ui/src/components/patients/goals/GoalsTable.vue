@@ -2,11 +2,13 @@
 import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/goals/Goals.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
+import GoalDialog from "@/components/patients/goals/GoalDialog.vue";
 
 export default defineComponent({
 	name: "GoalsTable",
 	components: {
-		ActionButton
+		ActionButton,
+		GoalDialog
 	},
 	props: {
 		data: {
@@ -21,8 +23,19 @@ export default defineComponent({
 	setup(props) {
 		const title = ref<string>(props.status === "active" ? "Active Goals" : "Completed Goals");
 
+		const goalDialogVisible = ref<boolean>(false);
+		const activeGoal = ref<TableData>();
+
+		const onGoalClick = (row: TableData) => {
+			goalDialogVisible.value = true;
+			activeGoal.value = row;
+		};
+
 		return {
-			title
+			title,
+			goalDialogVisible,
+			activeGoal,
+			onGoalClick
 		};
 	}
 });
@@ -47,7 +60,10 @@ export default defineComponent({
 		<el-table :data="data">
 			<el-table-column label="Goal">
 				<template #default="scope">
-					<el-button type="text">
+					<el-button
+						type="text"
+						@click="onGoalClick(scope.row)"
+					>
 						{{ scope.row.name }}
 					</el-button>
 				</template>
@@ -109,6 +125,12 @@ export default defineComponent({
 			</el-table-column>
 		</el-table>
 	</div>
+
+	<GoalDialog
+		:visible="goalDialogVisible"
+		:goal="activeGoal"
+		@close="goalDialogVisible = false"
+	/>
 </template>
 
 <style lang="scss" scoped>
