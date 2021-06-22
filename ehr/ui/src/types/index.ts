@@ -216,3 +216,13 @@ export type UpdateGoalPayload = {
 	status?: "active" | "completed",
 	endDate?: string
 };
+
+export type Consent = {
+	id: string,
+	name: string,
+	status: string,
+	scope: string,
+	category: string,
+	organization: string,
+	consentDate: string
+};

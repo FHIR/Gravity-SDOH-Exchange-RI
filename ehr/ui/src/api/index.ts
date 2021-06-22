@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+	Consent,
 	Concern,
 	ContextResponse,
 	Task,
@@ -255,3 +256,15 @@ export const createProblem = async (payload: newProblem): Promise<newProblem> =>
 	// return res.data;
 	payload;
 
+
+export const getConsents = async () => (await axios.get<Consent[]>("/consent")).data;
+
+export const createConsent = async (name: string, attachment: File) => {
+	const formData = new FormData();
+	formData.append("name", name);
+	formData.append("attachment", attachment);
+	const resp = await axios.post<Consent>("/consent", formData);
+	return resp.data;
+}
+
+export const getConsentAttachment = async (consentId: string) => (await axios.get<Blob>(`/consent/${consentId}/attachment`, { responseType: "blob" })).data;
