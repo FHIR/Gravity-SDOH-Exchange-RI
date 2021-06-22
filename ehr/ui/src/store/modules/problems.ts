@@ -19,7 +19,6 @@ class Problems extends VuexModule implements IProblems {
 	@Mutation
 	changeProblem(payload: Problem) {
 		this.problems = this.problems.map(item => item.id === payload.id ? payload : item);
-		debugger;
 	}
 
 	@Action
@@ -39,7 +38,6 @@ class Problems extends VuexModule implements IProblems {
 	@Action
 	async updateProblem(payload: updateProblemPayload): Promise<void> {
 		const updatedProblem = await updateProblem(payload);
-		debugger;
 		this.changeProblem(updatedProblem);
 	}
 }
