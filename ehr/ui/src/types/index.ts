@@ -206,3 +206,13 @@ export type Goal = {
 	code: Coding,
 	status: "active" | "completed"
 };
+
+export type Consent = {
+	id: string,
+	name: string,
+	status: string,
+	scope: string,
+	category: string,
+	organization: string,
+	consentDate: string
+};
