@@ -210,5 +210,7 @@ export type UpdateGoalPayload = {
 	problems?: string[],
 	startDate?: string,
 	addedBy?: string
-	comment?: string
+	comment?: string,
+	status?: "active" | "completed",
+	endDate?: string
 };

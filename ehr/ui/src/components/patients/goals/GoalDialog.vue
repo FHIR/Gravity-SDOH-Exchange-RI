@@ -6,6 +6,7 @@ import { RuleItem } from "async-validator";
 import { getCategories, getRequests, getServiceRequestConditions } from "@/api";
 import { GoalsModule } from "@/store/modules/goals";
 import _ from "@/vendors/lodash";
+import moment from "moment";
 
 import DropButton from "@/components/DropButton.vue";
 
@@ -32,14 +33,18 @@ export default defineComponent({
 		goal: {
 			type: Object as PropType<TableData>,
 			default: undefined
+		},
+		openPhase: {
+			type: String as PropType<"edit" | "completion">,
+			default: "edit"
 		}
 	},
 	emits: ["close"],
 	setup(props, { emit }) {
+		const { goal, openPhase } = toRefs(props);
 		const categoryOptions = ref<Coding[]>([]);
 		const codeOptions = ref<Coding[]>([]);
 		const problemOptions = ref<ServiceRequestCondition[]>([]);
-		const { goal } = toRefs(props);
 		const formModel = reactive<FormModel>({
 			category: "",
 			code: "",
@@ -50,7 +55,6 @@ export default defineComponent({
 			comment: ""
 		});
 		const formEl = ref<HTMLFormElement>();
-
 		//todo: seems like element-ui added few additional keys to async-validator RuleItem
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			category: {
@@ -72,12 +76,12 @@ export default defineComponent({
 				startDate: goal.value.startDate,
 				addedBy: goal.value.addedBy
 			});
+			phase.value = openPhase.value;
 
 			categoryOptions.value = await getCategories();
 			codeOptions.value = await getRequests(goal.value.category.code);
 			problemOptions.value = await getServiceRequestConditions();
 		};
-
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
 			emit("close");
@@ -108,6 +112,31 @@ export default defineComponent({
 				saveInProgress.value = false;
 			}
 		};
+		const isDisabled = computed<boolean>(() => phase.value === "completion");
+
+		const phase = ref<"edit" | "completion">("edit");
+		const completionDate = ref<string>("");
+
+		const onActionClick = (action: string) => {
+			if (action === "mark-as-completed") {
+				phase.value = "completion";
+			}
+		};
+
+		const onCompletionConfirm = async() => {
+			const payload: UpdateGoalPayload = {
+				id: goal.value.id,
+				status: "completed",
+				endDate: moment(completionDate.value || new Date()).format("YYYY-MM-DD[T]HH:mm:ss")
+			};
+			saveInProgress.value = true;
+			try {
+				await GoalsModule.updateGoal(payload);
+				emit("close");
+			} finally {
+				saveInProgress.value = false;
+			}
+		};
 
 		return {
 			formModel,
@@ -120,7 +149,12 @@ export default defineComponent({
 			problemOptions,
 			hasChanges,
 			saveInProgress,
-			onFormSave
+			onFormSave,
+			onActionClick,
+			phase,
+			completionDate,
+			onCompletionConfirm,
+			isDisabled
 		};
 	}
 });
@@ -141,6 +175,7 @@ export default defineComponent({
 			ref="formEl"
 			:model="formModel"
 			:rules="formRules"
+			:disabled="isDisabled"
 			label-width="155px"
 			label-position="left"
 			size="mini"
@@ -259,25 +294,52 @@ export default defineComponent({
 			</div>
 		</el-form>
 		<template #footer>
-			<el-button
-				round
-				size="mini"
-				@click="$emit('close')"
-			>
-				Close
-			</el-button>
+			<div v-if="phase === 'completion'">
+				<div class="completion-date">
+					<span>Please enter goal completion date:</span>
+					<el-date-picker
+						v-model="completionDate"
+						placeholder="Select Date"
+						size="mini"
+					/>
+				</div>
 
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				:loading="saveInProgress"
-				:disabled="!hasChanges"
-				@click="onFormSave"
-			>
-				Save Changes
-			</el-button>
+				<el-button
+					round
+					size="mini"
+					@click="phase = 'edit'"
+				>
+					Cancel
+				</el-button>
+
+				<el-button
+					plain
+					round
+					type="primary"
+					size="mini"
+					@click="onCompletionConfirm"
+				>
+					Confirm
+				</el-button>
+			</div>
+
+			<div v-if="phase === 'edit'">
+				<el-button
+					round
+					size="mini"
+					@click="$emit('close')"
+				>
+					Cancel
+				</el-button>
+
+				<DropButton
+					label="Save Changes"
+					:items="[{ id: 'mark-as-completed', label: 'Mark as Completed', iconSrc: require('@/assets/images/goal-mark-as-completed.svg') }]"
+					:disabled="!hasChanges"
+					@click="onFormSave"
+					@item-click="onActionClick"
+				/>
+			</div>
 		</template>
 	</el-dialog>
 </template>
@@ -302,6 +364,18 @@ export default defineComponent({
 		&:last-child {
 			margin-bottom: 0;
 		}
+	}
+}
+
+.completion-date {
+	text-align: left;
+	margin-bottom: 20px;
+
+	span {
+		color: $global-text-color;
+		font-size: $global-font-size;
+		font-weight: $global-font-weight-medium;
+		margin-right: 10px;
 	}
 }
 </style>

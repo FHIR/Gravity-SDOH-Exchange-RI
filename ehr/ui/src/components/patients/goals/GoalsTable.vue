@@ -23,19 +23,28 @@ export default defineComponent({
 	setup(props) {
 		const title = ref<string>(props.status === "active" ? "Active Goals" : "Completed Goals");
 
-		const goalDialogVisible = ref<boolean>(false);
+		const dialogVisible = ref<boolean>(false);
+		const dialogOpenPhase = ref<"edit" | "completion">();
 		const activeGoal = ref<TableData>();
 
-		const onGoalClick = (row: TableData) => {
-			goalDialogVisible.value = true;
+		const onGoalActionClick = (action: string, row: TableData) => {
+			switch (action) {
+				case "mark-as-completed":
+					dialogOpenPhase.value = "completion";
+					break;
+				default:
+					dialogOpenPhase.value = "edit";
+			}
 			activeGoal.value = row;
+			dialogVisible.value = true;
 		};
 
 		return {
 			title,
-			goalDialogVisible,
+			dialogVisible,
 			activeGoal,
-			onGoalClick
+			dialogOpenPhase,
+			onGoalActionClick
 		};
 	}
 });
@@ -62,7 +71,7 @@ export default defineComponent({
 				<template #default="scope">
 					<el-button
 						type="text"
-						@click="onGoalClick(scope.row)"
+						@click="onGoalActionClick('edit', scope.row)"
 					>
 						{{ scope.row.name }}
 					</el-button>
@@ -101,18 +110,21 @@ export default defineComponent({
 				label="Actions"
 				width="350"
 			>
-				<ActionButton
-					icon-class="mark-as-completed"
-					label="Mark as Completed"
-				/>
-				<ActionButton
-					icon-class="remove-goal"
-					label="Remove"
-				/>
-				<ActionButton
-					icon-class="add-target"
-					label="Add Target"
-				/>
+				<template #default="scope">
+					<ActionButton
+						icon-class="mark-as-completed"
+						label="Mark as Completed"
+						@click="onGoalActionClick('mark-as-completed', scope.row)"
+					/>
+					<!--				<ActionButton-->
+					<!--					icon-class="remove-goal"-->
+					<!--					label="Remove"-->
+					<!--				/>-->
+					<!--				<ActionButton-->
+					<!--					icon-class="add-target"-->
+					<!--					label="Add Target"-->
+					<!--				/>-->
+				</template>
 			</el-table-column>
 
 			<el-table-column
@@ -127,9 +139,10 @@ export default defineComponent({
 	</div>
 
 	<GoalDialog
-		:visible="goalDialogVisible"
+		:visible="dialogVisible"
 		:goal="activeGoal"
-		@close="goalDialogVisible = false"
+		:open-phase="dialogOpenPhase"
+		@close="dialogVisible = false"
 	/>
 </template>
 
