@@ -18,7 +18,7 @@ export default defineComponent({
 			required: true
 		}
 	},
-	emits: ["click", "item-click"]
+	emits: ["click", "action-click"]
 });
 </script>
 
@@ -29,7 +29,7 @@ export default defineComponent({
 			trigger="click"
 			popper-class="drop-button-dropdown"
 			@click="$emit('click')"
-			@command="$emit('item-click', $event)"
+			@command="$emit('action-click', $event)"
 		>
 			{{ label }}
 			<template #dropdown>

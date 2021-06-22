@@ -130,6 +130,7 @@ export type NewConcernPayload = {
 }
 
 export type Concern = {
+	id: string,
 	name: string,
 	assessmentDate: string,
 	category: string

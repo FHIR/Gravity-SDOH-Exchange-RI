@@ -21,6 +21,16 @@ class Concerns extends VuexModule implements IConcerns {
 		this.concerns = [...this.concerns, payload];
 	}
 
+	@Mutation
+	removeConcernFormList(id: string) {
+		this.concerns = this.concerns.filter(concern => concern.id !== id);
+	}
+
+	@Mutation
+	promoteOrResolve(payload: Concern) {
+		this.concerns = this.concerns.map(el => el.id === payload.id ? payload : el);
+	}
+
 	@Action
 	async getConcerns(): Promise<void> {
 		const data = await getConcerns();
@@ -31,6 +41,16 @@ class Concerns extends VuexModule implements IConcerns {
 	@Action
 	createConcern(payload: NewConcernPayload) {
 		this.addConcern(addConcernResponse(payload));
+	}
+
+	@Action
+	removeConcern(id: string) {
+		this.removeConcernFormList(id);
+	}
+
+	@Action
+	promoteOrResolveConcern(concern: Concern) {
+		this.promoteOrResolve(concern);
 	}
 }
 

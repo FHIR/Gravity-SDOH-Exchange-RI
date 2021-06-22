@@ -10,7 +10,8 @@ export type TableData = {
 	assessmentDate: string,
 	category: string,
 	basedOn: string,
-	concernStatus: string
+	concernStatus: string,
+	id: string
 }
 
 export default defineComponent({
@@ -23,6 +24,7 @@ export default defineComponent({
 		const concerns = computed<Concern[]>(() => ConcernsModule.concerns);
 		const tableData = computed<TableData[]>(() =>
 			concerns.value.map((concern: Concern) => ({
+				id: concern.id,
 				name: concern.name,
 				status: concern.status,
 				assessmentDate: concern.assessmentDate,

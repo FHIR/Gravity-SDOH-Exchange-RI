@@ -1,7 +1,10 @@
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { computed, defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
 import DropButton from "@/components/DropButton.vue";
+import { ACTION_BUTTONS } from "@/utils/constants";
+import { ConcernsModule } from "@/store/modules/concerns";
+import { Concern } from "@/types";
 
 export default defineComponent({
 	name: "EditConcernDialog",
@@ -14,16 +17,54 @@ export default defineComponent({
 			default: false
 		},
 		concern: {
-			type: Object as PropType<TableData>,
+			type: Object as PropType<TableData | undefined>,
 			default: undefined
+		},
+		clickedAction: {
+			type: String,
+			required: true
 		}
 	},
-	emits: ["close"],
-	setup() {
+	emits: ["close", "change-action"],
+	setup(props, { emit }) {
 		const saveInProgress = ref<boolean>(false);
 
+		const confirmAction = (clickedAction: string) => {
+			if (clickedAction === ACTION_BUTTONS.remove) {
+				ConcernsModule.removeConcern(props.concern!.id);
+
+				// TODO while we don't have BE
+				//Temporarily, in case Promote to problem or Mark as Resolved push to "Promoted Or Resolved table"
+			} else if (clickedAction === ACTION_BUTTONS.promoteToProblem || props.clickedAction === ACTION_BUTTONS.markAsResolved) {
+				const promotedOrResolvedConcern: Concern = { ...props.concern!, concernStatus: "PromotedOrResolved" };
+				ConcernsModule.promoteOrResolveConcern(promotedOrResolvedConcern);
+			}
+		};
+
+		const handleActionClick = (clickedAction: string) => {
+			emit("change-action", clickedAction);
+		};
+
+		const confirmActionText = computed<string>(() => {
+			switch (props.clickedAction) {
+				case ACTION_BUTTONS.promoteToProblem:
+					return "Please confirm this health concern can be promoted to a problem.";
+				case ACTION_BUTTONS.markAsResolved:
+					return "Please confirm that this health concern can be marked as resolved.";
+				case ACTION_BUTTONS.remove:
+					return "Please confirm that you want to remove this health concern.";
+
+				default: return "Save changes" ;
+			}
+		});
+
+
 		return {
-			saveInProgress
+			saveInProgress,
+			ACTION_BUTTONS,
+			confirmActionText,
+			confirmAction,
+			handleActionClick
 		};
 	}
 });
@@ -34,9 +75,8 @@ export default defineComponent({
 		:model-value="visible"
 		title="Health Concern Details"
 		:width="700"
-		append-to-body
 		destroy-on-close
-		custom-class="edit-concern-dialog"
+		@close="$emit('close')"
 	>
 		<el-form
 			ref="formEl"
@@ -65,6 +105,12 @@ export default defineComponent({
 			</el-form-item>
 		</el-form>
 		<template #footer>
+			<div
+				v-if="clickedAction !== ACTION_BUTTONS.default"
+				class="confirm-text"
+			>
+				{{ confirmActionText }}
+			</div>
 			<el-button
 				round
 				size="mini"
@@ -73,12 +119,24 @@ export default defineComponent({
 				Cancel
 			</el-button>
 			<DropButton
-				label="Save Changes"
-				:items="[{ id: '1', label: 'Promote to Problem', iconSrc: require('@/assets/images/concern-promote.svg') }
-					,{ id: '2', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') }
-					,{ id: '3', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
+				v-if="clickedAction === ACTION_BUTTONS.default"
+				:label="clickedAction"
+				:items="[{ id: 'Promote to Problem', label: 'Promote to Problem', iconSrc: require('@/assets/images/concern-promote.svg') }
+					,{ id: 'Mark as Resolved', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') }
+					,{ id: 'Remove', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
 				]"
+				@action-click="handleActionClick"
 			/>
+			<el-button
+				v-else
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="confirmAction(clickedAction)"
+			>
+				Confirm
+			</el-button>
 		</template>
 	</el-dialog>
 </template>
@@ -114,5 +172,12 @@ export default defineComponent({
 
 .date {
 	margin-left: 10px;
+}
+
+.confirm-text {
+	text-align: left;
+	margin-bottom: 20px;
+	font-size: $global-font-size;
+	font-weight: $global-font-weight-medium;
 }
 </style>
