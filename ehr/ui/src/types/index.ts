@@ -199,8 +199,10 @@ export type Goal = {
 	comments: Comment[],
 	category: Coding,
 	code: Coding,
-	status: "active" | "completed"
+	status: GoalStatus
 };
+
+export type GoalStatus = "active" | "completed"
 
 export type UpdateGoalPayload = {
 	id: string,

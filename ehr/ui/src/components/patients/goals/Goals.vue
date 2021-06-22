@@ -92,11 +92,3 @@ export default defineComponent({
 		</div>
 	</div>
 </template>
-
-<style lang="scss" scoped>
-@import "~@/assets/scss/abstracts/variables";
-
-.table-wrapper:not(:first-child) {
-	margin-top: 30px;
-}
-</style>

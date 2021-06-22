@@ -3,6 +3,9 @@ import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/goals/Goals.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
 import GoalDialog from "@/components/patients/goals/GoalDialog.vue";
+import { GoalStatus } from "@/types";
+
+export type GoalAction = "edit" | "mark-as-completed";
 
 export default defineComponent({
 	name: "GoalsTable",
@@ -16,7 +19,7 @@ export default defineComponent({
 			required: true
 		},
 		status: {
-			type: String,
+			type: String as PropType<GoalStatus>,
 			default: "active"
 		}
 	},
@@ -24,13 +27,13 @@ export default defineComponent({
 		const title = ref<string>(props.status === "active" ? "Active Goals" : "Completed Goals");
 
 		const dialogVisible = ref<boolean>(false);
-		const dialogOpenPhase = ref<"edit" | "completion">();
+		const dialogOpenPhase = ref<GoalAction>();
 		const activeGoal = ref<TableData>();
 
-		const onGoalActionClick = (action: string, row: TableData) => {
+		const onGoalActionClick = (action: GoalAction, row: TableData) => {
 			switch (action) {
 				case "mark-as-completed":
-					dialogOpenPhase.value = "completion";
+					dialogOpenPhase.value = "mark-as-completed";
 					break;
 				default:
 					dialogOpenPhase.value = "edit";
@@ -166,5 +169,9 @@ export default defineComponent({
 	border: 1px solid $global-base-border-color;
 	padding: 10px 20px;
 	min-height: 130px;
+
+	+ .table-wrapper {
+		margin-top: 30px;
+	}
 }
 </style>
