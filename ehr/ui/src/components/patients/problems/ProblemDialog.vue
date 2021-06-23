@@ -22,8 +22,6 @@ export type FormModel = {
 
 const CONFIRM_MESSAGES = {
 	"view": "",
-	"add-goal": "",
-	"add-action-step": "",
 	"mark-as-close": "Please confirm that this problem can be marked as closed."
 };
 
@@ -44,7 +42,7 @@ export default defineComponent({
 			default: "view"
 		}
 	},
-	emits: ["close", "change-mode"],
+	emits: ["close", "trigger-action"],
 	setup(props, { emit }) {
 		const formModel = reactive<FormModel>({
 			id: "",
@@ -73,7 +71,7 @@ export default defineComponent({
 		};
 
 		const handleActionClick = (action: ProblemDialogMode) => {
-			emit("change-mode", action);
+			emit("trigger-action", action);
 		};
 
 		const handleConfirm = () => {
@@ -194,11 +192,11 @@ export default defineComponent({
 			/>
 			<el-button
 				v-else
+				v-loading="actionInProgress"
 				plain
 				round
 				type="primary"
 				size="mini"
-				v-loading="actionInProgress"
 				@click="handleConfirm"
 			>
 				Confirm

@@ -4,7 +4,8 @@ import { TableData } from "@/components/patients/problems/Problems.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
 import ProblemDialog from "@/components/patients/problems/ProblemDialog.vue";
 
-export type ProblemDialogMode = "view" | "add-goal" | "add-action-step" | "mark-as-close";
+export type ProblemDialogMode = "view" | "mark-as-close";
+export type ProblemActionType = "view" | "add-goal" | "add-action-step" | "mark-as-close";
 
 export default defineComponent({
 	name: "ProblemsTable",
@@ -24,21 +25,28 @@ export default defineComponent({
 		}
 	},
 	emits: ["add-problem"],
-	setup() {
+	setup(props, { emit }) {
 		const problemsDialogVisible = ref<boolean>(false);
 		const activeProblem = ref<TableData | null>(null);
-		const activeMode = ref<ProblemDialogMode>("view");
+		const problemsDialogMode = ref<ProblemActionType>("view");
 
-		const handleActionClick = (action: ProblemDialogMode, problem: TableData) => {
-			activeMode.value = action;
-			problemsDialogVisible.value = true;
-			activeProblem.value = problem;
+		const handleActionClick = (action: ProblemActionType, problem: TableData) => {
+			if (action === "mark-as-close" || action === "view") {
+				problemsDialogMode.value = action;
+				problemsDialogVisible.value = true;
+				activeProblem.value = problem;
+			}
+			if (action === "add-goal") {
+				// todo: handle add goal behavior
+				// emit(action, problem);
+				// go to goal tab and show add goal dialog
+			}
 		};
 
 		return {
 			problemsDialogVisible,
 			activeProblem,
-			activeMode,
+			problemsDialogMode,
 			handleActionClick
 		};
 
@@ -115,6 +123,7 @@ export default defineComponent({
 					<ActionButton
 						icon-class="add-goal"
 						label="Add Goal"
+						@click="handleActionClick('add-goal', scope.row)"
 					/>
 					<ActionButton
 						icon-class="add-action-step"
@@ -141,9 +150,9 @@ export default defineComponent({
 		<ProblemDialog
 			:visible="problemsDialogVisible"
 			:problem="activeProblem"
-			:mode="activeMode"
+			:mode="problemsDialogMode"
 			@close="problemsDialogVisible = false"
-			@change-mode="activeMode = $event"
+			@trigger-action="handleActionClick"
 		/>
 	</div>
 </template>
