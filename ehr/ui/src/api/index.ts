@@ -13,7 +13,8 @@ import {
 	Goal,
 	Problem,
 	newProblem,
-	NewConcernPayload
+	NewConcernPayload,
+	UpdateGoalPayload
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -101,16 +102,33 @@ export const getRequests = async (code: string): Promise<Coding[]> => {
 	return res.data;
 };
 
-export const getGoals = async(): Promise<Goal[]> => {
+export const getGoals = async (): Promise<Goal[]> => {
 	//todo: remove mock after BE sync
 	const res: Goal[] = [{
+		id: "1",
 		name: "Reduce Medication Const",
 		problems: ["Food Insecurity"],
 		addedBy: "test",
 		startDate: "2021-05-18T14:07:48",
 		endDate: "",
 		targets: ["fisrt", "second"],
-		comments: [],
+		comments: [{
+			author: {
+				display: "",
+				id: "",
+				resourceType: ""
+			},
+			text: "Some comments to share",
+			time: "2021-05-18T14:07:48"
+		}, {
+			author: {
+				display: "",
+				id: "",
+				resourceType: ""
+			},
+			text: "Another loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong comment",
+			time: "2021-05-18T14:07:48"
+		}],
 		category: {
 			code: "111",
 			display: "Food Insecurity"
@@ -121,6 +139,7 @@ export const getGoals = async(): Promise<Goal[]> => {
 		},
 		status: "active"
 	}, {
+		id: "2",
 		name: "Reduce Medication Const",
 		problems: ["Food Insecurity"],
 		addedBy: "test",
@@ -140,6 +159,34 @@ export const getGoals = async(): Promise<Goal[]> => {
 	}];
 
 	return res;
+};
+
+//todo: remove mock
+export const updateGoal = async ({ id }: UpdateGoalPayload): Promise<Goal> => {
+	const mock: Goal = {
+		id,
+		name: "Reduce Medication Const",
+		problems: ["Food Insecurity"],
+		addedBy: "test",
+		startDate: "2021-05-18T14:07:48",
+		endDate: "2021-06-15T14:07:48",
+		targets: ["fisrt", "second"],
+		comments: [],
+		category: {
+			code: "111",
+			display: "Food Insecurity"
+		},
+		code: {
+			code: "10782290009",
+			display: "Food Security"
+		},
+		status: "active"
+	};
+
+	return mock;
+	// const res = await axios.put(`/goal/${id}`, data);
+	//
+	// return res.data;
 };
 
 export const getProblemCodes = async (code: string): Promise<{ isd: Coding[], snomed: Coding[] }> => {
@@ -204,12 +251,11 @@ export const getProblems = async(): Promise<Problem[]> => {
 };
 
 // todo: change and remove mocked data after sync with BE
-/* eslint-disable */
-export const createProblem = async (payload: newProblem): Promise<newProblem> => {
+export const createProblem = async (payload: newProblem): Promise<newProblem> =>
 	// const res = await axios.post("/problem", payload);
 	// return res.data;
-	return payload;
-};
+	payload;
+
 
 export const getConsents = async () => (await axios.get<Consent[]>("/consent")).data;
 
@@ -219,6 +265,6 @@ export const createConsent = async (name: string, attachment: File) => {
 	formData.append("attachment", attachment);
 	const resp = await axios.post<Consent>("/consent", formData);
 	return resp.data;
-}
+};
 
 export const getConsentAttachment = async (consentId: string) => (await axios.get<Blob>(`/consent/${consentId}/attachment`, { responseType: "blob" })).data;
