@@ -1,7 +1,7 @@
-import { getGoals } from "@/api";
+import { getGoals, updateGoal } from "@/api";
 import { VuexModule, Module, Action, Mutation, getModule } from "vuex-module-decorators";
 import store from "@/store";
-import { Goal } from "@/types";
+import { Goal, UpdateGoalPayload } from "@/types";
 
 export interface IGoals {
 	goals: Goal[]
@@ -16,11 +16,23 @@ class Goals extends VuexModule implements IGoals {
 		this.goals = payload;
 	}
 
+	@Mutation
+	changeGoal(payload: Goal): void {
+		this.goals = this.goals.map(goal => goal.id === payload.id ? payload : goal);
+	}
+
 	@Action
 	async getGoals(): Promise<void> {
 		const data = await getGoals();
 
 		this.setGoals(data);
+	}
+
+	@Action
+	async updateGoal(payload: UpdateGoalPayload): Promise<void> {
+		const updatedTask = await updateGoal(payload);
+
+		this.changeGoal(updatedTask);
 	}
 }
 

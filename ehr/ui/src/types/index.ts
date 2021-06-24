@@ -195,6 +195,7 @@ export type updateProblemPayload = {
 }
 
 export type Goal = {
+	id: string,
 	name: string,
 	problems: string[],
 	addedBy: string,
@@ -204,7 +205,22 @@ export type Goal = {
 	comments: Comment[],
 	category: Coding,
 	code: Coding,
-	status: "active" | "completed"
+	status: GoalStatus
+};
+
+export type GoalStatus = "active" | "completed"
+
+export type UpdateGoalPayload = {
+	id: string,
+	category?: string,
+	code?: string,
+	name?: string,
+	problems?: string[],
+	startDate?: string,
+	addedBy?: string
+	comment?: string,
+	status?: "active" | "completed",
+	endDate?: string
 };
 
 export type Consent = {
