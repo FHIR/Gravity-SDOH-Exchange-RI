@@ -16,8 +16,14 @@ export type FormModel = {
 	name: string,
 	problems: string[],
 	startDate: string,
+	endDate: string,
 	addedBy: string,
 	comment: string
+};
+
+const DEFAULT_REQUIRED_RULE = {
+	required: true,
+	message: "This field is required"
 };
 
 export default defineComponent({
@@ -52,19 +58,15 @@ export default defineComponent({
 			name: "",
 			problems: [],
 			startDate: "",
+			endDate: "",
 			addedBy: "",
 			comment: ""
 		});
 		const formEl = ref<HTMLFormElement>();
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
-			category: {
-				required: true,
-				message: "This field is required"
-			},
-			code: {
-				required: true,
-				message: "This field is required"
-			}
+			name: DEFAULT_REQUIRED_RULE,
+			category: DEFAULT_REQUIRED_RULE,
+			code: DEFAULT_REQUIRED_RULE
 		};
 		const hasFormChanges = computed<boolean>(() =>
 			(
@@ -86,13 +88,16 @@ export default defineComponent({
 				name: goal.value.name,
 				problems: [ ...goal.value.problems ],
 				startDate: goal.value.startDate,
+				endDate: goal.value.endDate,
 				addedBy: goal.value.addedBy
 			});
 			phase.value = openPhase.value;
 
-			categoryOptions.value = await getCategories();
-			codeOptions.value = await getRequests(goal.value.category.code);
-			problemOptions.value = await getServiceRequestConditions();
+			if (phase.value !== "view") {
+				categoryOptions.value = await getCategories();
+				codeOptions.value = await getRequests(goal.value.category.code);
+				problemOptions.value = await getServiceRequestConditions();
+			}
 		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
@@ -113,13 +118,14 @@ export default defineComponent({
 			}
 		};
 		const onSaveChangesClick = async () => {
+			await formEl.value!.validate();
 			await saveGoal();
 			emit("close");
 		};
 
 		const phase = ref<GoalAction>("edit");
 		const onActionClick = async (action: string) => {
-			hasFormChanges.value && await saveGoal();
+			hasFormChanges.value && await formEl.value!.validate() && await saveGoal();
 
 			if (action === "mark-as-completed") {
 				phase.value = "mark-as-completed";
@@ -176,7 +182,7 @@ export default defineComponent({
 		destroy-on-close
 		custom-class="goal-dialog"
 		@close="onDialogClose"
-		@opened="onDialogOpen"
+		@open="onDialogOpen"
 	>
 		<el-form
 			ref="formEl"
@@ -189,10 +195,28 @@ export default defineComponent({
 			class="goal-form"
 		>
 			<el-form-item
+				label="Goal Name"
+				prop="name"
+			>
+				<span v-if="phase === 'view'">
+					{{ formModel.name }}
+				</span>
+				<el-input
+					v-else
+					v-model="formModel.name"
+					placeholder="Add Goal Name"
+				/>
+			</el-form-item>
+
+			<el-form-item
 				label="Category"
 				prop="category"
 			>
+				<span v-if="phase === 'view'">
+					{{ formModel.category }}
+				</span>
 				<el-select
+					v-else
 					v-model="formModel.category"
 					placeholder="Select Category"
 				>
@@ -209,7 +233,11 @@ export default defineComponent({
 				label="Code"
 				prop="code"
 			>
+				<span v-if="phase === 'view'">
+					{{ formModel.code }}
+				</span>
 				<el-select
+					v-else
 					v-model="formModel.code"
 					filterable
 					placeholder="Select Code"
@@ -224,20 +252,19 @@ export default defineComponent({
 			</el-form-item>
 
 			<el-form-item
-				label="Goal Name"
-				prop="name"
-			>
-				<el-input
-					v-model="formModel.name"
-					placeholder="Add Goal Name"
-				/>
-			</el-form-item>
-
-			<el-form-item
 				label="Problem(s)"
 				prop="problems"
 			>
+				<div v-if="phase === 'view'">
+					<div
+						v-for="(item, index) in formModel.problems"
+						:key="index"
+					>
+						<span class="problem">{{ item }}</span>
+					</div>
+				</div>
 				<el-select
+					v-else
 					v-model="formModel.problems"
 					multiple
 					placeholder="Select Problem(s)"
@@ -255,23 +282,40 @@ export default defineComponent({
 				label="Start Date"
 				prop="startDate"
 			>
+				<span v-if="phase === 'view'">
+					{{ $filters.formatDateTime(formModel.startDate) }}
+				</span>
 				<el-date-picker
+					v-else
 					v-model="formModel.startDate"
 					placeholder="Select Date"
 				/>
 			</el-form-item>
 
 			<el-form-item
+				v-if="phase === 'view'"
+				label="End Date"
+				prop="endDate"
+			>
+				{{ $filters.formatDateTime(formModel.endDate) }}
+			</el-form-item>
+
+			<el-form-item
 				label="Added By"
 				prop="addedBy"
 			>
+				<span v-if="phase === 'view'">
+					{{ formModel.addedBy }}
+				</span>
 				<el-input
+					v-else
 					v-model="formModel.addedBy"
 					placeholder="Add Author"
 				/>
 			</el-form-item>
 
 			<el-form-item
+				v-if="phase !== 'view'"
 				label="Comment"
 				prop="comment"
 			>
@@ -347,12 +391,25 @@ export default defineComponent({
 					@item-click="onActionClick"
 				/>
 			</div>
+
+			<div v-if="phase === 'view'">
+				<el-button
+					plain
+					round
+					type="primary"
+					size="mini"
+					@click="$emit('close')"
+				>
+					Close
+				</el-button>
+			</div>
 		</template>
 	</el-dialog>
 </template>
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+@import "~@/assets/scss/abstracts/mixins";
 
 .goal-form {
 	.el-select {
@@ -371,6 +428,16 @@ export default defineComponent({
 		&:last-child {
 			margin-bottom: 0;
 		}
+	}
+
+	//todo: create small `tag` component for displaying goals/problems/procedures with blue bg
+	.problem {
+		background-color: $alice-blue;
+		border-radius: 5px;
+		padding: 0 5px;
+		font-size: $global-small-font-size;
+
+		@include dont-break-out();
 	}
 }
 

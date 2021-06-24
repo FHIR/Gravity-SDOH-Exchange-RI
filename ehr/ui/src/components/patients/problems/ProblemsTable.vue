@@ -25,7 +25,7 @@ export default defineComponent({
 		}
 	},
 	emits: ["add-problem"],
-	setup(props, { emit }) {
+	setup() {
 		const problemsDialogVisible = ref<boolean>(false);
 		const activeProblem = ref<TableData | null>(null);
 		const problemsDialogOpenPhase = ref<ProblemActionType>("view");
