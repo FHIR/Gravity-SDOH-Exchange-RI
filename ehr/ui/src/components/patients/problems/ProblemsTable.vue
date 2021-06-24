@@ -4,8 +4,8 @@ import { TableData } from "@/components/patients/problems/Problems.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
 import ProblemDialog from "@/components/patients/problems/ProblemDialog.vue";
 
-export type ProblemDialogMode = "view" | "mark-as-close";
-export type ProblemActionType = "view" | "add-goal" | "add-action-step" | "mark-as-close";
+export type ProblemDialogPhase = "view" | "mark-as-closed";
+export type ProblemActionType = "view" | "add-goal" | "add-action-step" | "mark-as-closed";
 
 export default defineComponent({
 	name: "ProblemsTable",
@@ -28,11 +28,11 @@ export default defineComponent({
 	setup(props, { emit }) {
 		const problemsDialogVisible = ref<boolean>(false);
 		const activeProblem = ref<TableData | null>(null);
-		const problemsDialogMode = ref<ProblemActionType>("view");
+		const problemsDialogOpenPhase = ref<ProblemActionType>("view");
 
 		const handleActionClick = (action: ProblemActionType, problem: TableData) => {
-			if (action === "mark-as-close" || action === "view") {
-				problemsDialogMode.value = action;
+			if (action === "mark-as-closed" || action === "view") {
+				problemsDialogOpenPhase.value = action;
 				problemsDialogVisible.value = true;
 				activeProblem.value = problem;
 			}
@@ -46,7 +46,7 @@ export default defineComponent({
 		return {
 			problemsDialogVisible,
 			activeProblem,
-			problemsDialogMode,
+			problemsDialogOpenPhase,
 			handleActionClick
 		};
 
@@ -132,7 +132,7 @@ export default defineComponent({
 					<ActionButton
 						icon-class="mark-as-closed"
 						label="Mark as Closed"
-						@click="handleActionClick('mark-as-close', scope.row)"
+						@click="handleActionClick('mark-as-closed', scope.row)"
 					/>
 				</template>
 			</el-table-column>
@@ -150,9 +150,8 @@ export default defineComponent({
 		<ProblemDialog
 			:visible="problemsDialogVisible"
 			:problem="activeProblem"
-			:mode="problemsDialogMode"
+			:open-phase="problemsDialogOpenPhase"
 			@close="problemsDialogVisible = false"
-			@trigger-action="handleActionClick"
 		/>
 	</div>
 </template>
