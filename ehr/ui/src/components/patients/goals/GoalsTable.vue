@@ -23,6 +23,7 @@ export default defineComponent({
 			default: "active"
 		}
 	},
+	emits: ["add-goal"],
 	setup(props) {
 		const title = ref<string>(props.status === "active" ? "Active Goals" : "Completed Goals");
 
@@ -65,6 +66,7 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				@click="$emit('add-goal')"
 			>
 				Add Goal
 			</el-button>
