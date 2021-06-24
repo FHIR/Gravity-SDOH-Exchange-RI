@@ -68,11 +68,7 @@ export default defineComponent({
 			Object.assign(formModel, problem.value);
 		};
 
-		//
-		// reset phase to default and close dialog
-		//
 		const onDialogClose = () => {
-			phase.value = "view";
 			emit("close");
 		};
 
@@ -133,7 +129,7 @@ export default defineComponent({
 		destroy-on-close
 		custom-class="problem-dialog"
 		@close="onDialogClose"
-		@opened="onDialogOpen"
+		@open="onDialogOpen"
 	>
 		<el-form
 			:model="formModel"
