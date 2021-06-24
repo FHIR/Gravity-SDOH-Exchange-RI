@@ -68,7 +68,11 @@ export default defineComponent({
 			Object.assign(formModel, problem.value);
 		};
 
+		//
+		// reset phase to default and close dialog
+		//
 		const onDialogClose = () => {
+			phase.value = "view";
 			emit("close");
 		};
 
@@ -107,6 +111,7 @@ export default defineComponent({
 		};
 
 		return {
+			phase,
 			formModel,
 			confirmMessage,
 			showConfirm,
@@ -176,7 +181,7 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
-				@click="$emit('close')"
+				@click="phase = 'view'"
 			>
 				Cancel
 			</el-button>
