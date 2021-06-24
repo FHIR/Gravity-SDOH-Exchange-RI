@@ -63,9 +63,8 @@ $chevron-width: 30px;
 	}
 
 	::v-deep(.el-button) {
-		height: 25px;
 		padding: 0;
-		min-height: 0;
+		min-height: 25px;
 		border-radius: 25px;
 		border: 1px solid $global-primary-color;
 

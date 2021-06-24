@@ -188,6 +188,12 @@ export type newProblem = {
 	startDate: string
 }
 
+export type updateProblemPayload = {
+	id: string,
+	closeDate: string,
+	status: string
+}
+
 export type Goal = {
 	id: string,
 	name: string,

@@ -13,6 +13,7 @@ import {
 	Goal,
 	Problem,
 	newProblem,
+	updateProblemPayload,
 	NewConcernPayload,
 	UpdateGoalPayload
 } from "@/types";
@@ -256,6 +257,29 @@ export const createProblem = async (payload: newProblem): Promise<newProblem> =>
 	// return res.data;
 	payload;
 
+
+// todo: change and remove mocked data after sync with BE
+export const updateProblem = async ({ id, ...data }: updateProblemPayload): Promise<Problem> => {
+	//const res = await axios.put(`/problem/${id}`, data);
+	//return res.data;
+
+	const res: Problem = {
+		id: "SDOHCC-Condition-HungerVitalSign-Example-1",
+		name: "Hunger Vital Signs",
+		basedOn: "Hunger Vital Signs assessment",
+		onsetPeriod: {
+			start: "2019-08-18T12:31:35.123Z",
+			end: "2021-10-28T12:31:35.123Z"
+		},
+		goals: 0,
+		actionSteps: 0,
+		clinicalStatus: "resolved",
+		codeISD: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
+		codeSNOMED: "Meals on wheels provision education (385767005)",
+		category: "test"
+	};
+	return res;
+};
 
 export const getConsents = async () => (await axios.get<Consent[]>("/consent")).data;
 

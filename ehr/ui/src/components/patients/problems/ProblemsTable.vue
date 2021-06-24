@@ -4,6 +4,9 @@ import { TableData } from "@/components/patients/problems/Problems.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
 import ProblemDialog from "@/components/patients/problems/ProblemDialog.vue";
 
+export type ProblemDialogPhase = "view" | "mark-as-closed";
+export type ProblemActionType = "view" | "add-goal" | "add-action-step" | "mark-as-closed";
+
 export default defineComponent({
 	name: "ProblemsTable",
 	components: { ActionButton, ProblemDialog },
@@ -22,19 +25,29 @@ export default defineComponent({
 		}
 	},
 	emits: ["add-problem"],
-	setup() {
+	setup(props, { emit }) {
 		const problemsDialogVisible = ref<boolean>(false);
-		const activeProblem = ref<TableData>();
+		const activeProblem = ref<TableData | null>(null);
+		const problemsDialogOpenPhase = ref<ProblemActionType>("view");
 
-		const viewProblem = (row: TableData) => {
-			problemsDialogVisible.value = true;
-			activeProblem.value = row;
+		const handleActionClick = (action: ProblemActionType, problem: TableData) => {
+			if (action === "mark-as-closed" || action === "view") {
+				problemsDialogOpenPhase.value = action;
+				problemsDialogVisible.value = true;
+				activeProblem.value = problem;
+			}
+			if (action === "add-goal") {
+				// todo: handle add goal behavior
+				// emit(action, problem);
+				// go to goal tab and show add goal dialog
+			}
 		};
 
 		return {
 			problemsDialogVisible,
 			activeProblem,
-			viewProblem
+			problemsDialogOpenPhase,
+			handleActionClick
 		};
 
 	}
@@ -67,7 +80,7 @@ export default defineComponent({
 				<template #default="scope">
 					<el-button
 						type="text"
-						@click="viewProblem(scope.row)"
+						@click="handleActionClick('view', scope.row)"
 					>
 						{{ scope.row.name }}
 					</el-button>
@@ -106,18 +119,22 @@ export default defineComponent({
 				label="Actions"
 				width="350"
 			>
-				<ActionButton
-					icon-class="add-goal"
-					label="Add Goal"
-				/>
-				<ActionButton
-					icon-class="add-action-step"
-					label="Add Action Step"
-				/>
-				<ActionButton
-					icon-class="mark-as-closed"
-					label="Mark as Closed"
-				/>
+				<template #default="scope">
+					<ActionButton
+						icon-class="add-goal"
+						label="Add Goal"
+						@click="handleActionClick('add-goal', scope.row)"
+					/>
+					<ActionButton
+						icon-class="add-action-step"
+						label="Add Action Step"
+					/>
+					<ActionButton
+						icon-class="mark-as-closed"
+						label="Mark as Closed"
+						@click="handleActionClick('mark-as-closed', scope.row)"
+					/>
+				</template>
 			</el-table-column>
 			<el-table-column
 				v-if="status === 'closed'"
@@ -133,6 +150,7 @@ export default defineComponent({
 		<ProblemDialog
 			:visible="problemsDialogVisible"
 			:problem="activeProblem"
+			:open-phase="problemsDialogOpenPhase"
 			@close="problemsDialogVisible = false"
 		/>
 	</div>
