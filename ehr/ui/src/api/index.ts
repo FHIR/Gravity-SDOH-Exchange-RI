@@ -261,10 +261,9 @@ export const createProblem = async (payload: newProblem): Promise<newProblem> =>
 // todo: change and remove mocked data after sync with BE
 export const updateProblem = async ({ id, ...data }: updateProblemPayload): Promise<Problem> => {
 	//const res = await axios.put(`/problem/${id}`, data);
-
 	//return res.data;
 
-	return {
+	const res: Problem = {
 		id: "SDOHCC-Condition-HungerVitalSign-Example-1",
 		name: "Hunger Vital Signs",
 		basedOn: "Hunger Vital Signs assessment",
@@ -279,6 +278,7 @@ export const updateProblem = async ({ id, ...data }: updateProblemPayload): Prom
 		codeSNOMED: "Meals on wheels provision education (385767005)",
 		category: "test"
 	};
+	return res;
 };
 
 export const getConsents = async () => (await axios.get<Consent[]>("/consent")).data;
