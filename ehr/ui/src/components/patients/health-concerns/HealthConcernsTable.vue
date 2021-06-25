@@ -180,9 +180,4 @@ export default defineComponent({
 	padding: 10px 20px;
 	min-height: 130px;
 }
-
-::v-deep(.el-table--enable-row-hover) .el-table__body tr:hover {
-	box-shadow: 0 2px 5px 0 rgba(51, 51, 51, 0.25);
-	border-radius: 5px;
-}
 </style>

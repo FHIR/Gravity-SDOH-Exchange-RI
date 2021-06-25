@@ -108,7 +108,7 @@ export const getGoals = async (): Promise<Goal[]> => {
 	const res: Goal[] = [{
 		id: "1",
 		name: "Reduce Medication Const",
-		problems: ["Food Insecurity"],
+		problems: ["Food Insecurity", "Food Security"],
 		addedBy: "test",
 		startDate: "2021-05-18T14:07:48",
 		endDate: "",

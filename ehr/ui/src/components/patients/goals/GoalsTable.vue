@@ -5,7 +5,7 @@ import ActionButton from "@/components/patients/ActionButton.vue";
 import GoalDialog from "@/components/patients/goals/GoalDialog.vue";
 import { GoalStatus } from "@/types";
 
-export type GoalAction = "edit" | "mark-as-completed";
+export type GoalAction = "edit" | "mark-as-completed" | "view";
 
 export default defineComponent({
 	name: "GoalsTable",
@@ -31,13 +31,7 @@ export default defineComponent({
 		const activeGoal = ref<TableData>();
 
 		const onGoalActionClick = (action: GoalAction, row: TableData) => {
-			switch (action) {
-				case "mark-as-completed":
-					dialogOpenPhase.value = "mark-as-completed";
-					break;
-				default:
-					dialogOpenPhase.value = "edit";
-			}
+			dialogOpenPhase.value = action;
 			activeGoal.value = row;
 			dialogVisible.value = true;
 		};
@@ -74,7 +68,7 @@ export default defineComponent({
 				<template #default="scope">
 					<el-button
 						type="text"
-						@click="onGoalActionClick('edit', scope.row)"
+						@click="onGoalActionClick(status === 'active' ? 'edit' : 'view', scope.row)"
 					>
 						{{ scope.row.name }}
 					</el-button>
@@ -84,7 +78,7 @@ export default defineComponent({
 			<el-table-column label="Problem(s)">
 				<template #default="scope">
 					<el-button type="text">
-						{{ scope.row.problems }}
+						{{ scope.row.problems.length > 1 ? `${scope.row.problems.length} Problems` : scope.row.problems.length === 1 ? scope.row.problems[0] : "--" }}
 					</el-button>
 				</template>
 			</el-table-column>
