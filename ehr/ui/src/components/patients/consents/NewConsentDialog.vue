@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, ref, reactive, watch } from "vue";
+import { defineComponent, PropType, ref, reactive, watch } from "vue";
 import FileInput from "@/components/FileInput.vue";
 import { createConsent } from "@/api";
 
@@ -9,6 +9,10 @@ export default defineComponent({
 		opened: {
 			type: Boolean,
 			default: false
+		},
+		existingConsentNames: {
+			type: Array as PropType<string[]>,
+			default: () => []
 		}
 	},
 	emits: ["update:opened", "consent-created"],
@@ -24,9 +28,19 @@ export default defineComponent({
 
 		const formRef = ref<any>();
 
+		const nameIsNotUsedValidator = (_: any, value: string, cb: (msg?: string) => void) => {
+			if (props.existingConsentNames.includes(value)) {
+				cb("Name already used");
+			}
+			cb();
+		};
+
 		const rules = {
 			file: { required: true, message: "This field is required" },
-			name: { required: true, message: "This field is required" }
+			name: [
+				{ required: true, message: "This field is required" },
+				{ validator: nameIsNotUsedValidator }
+			]
 		};
 
 		const resetFields = () => {
@@ -92,6 +106,7 @@ export default defineComponent({
 				label-width="155px"
 				label-position="left"
 				size="mini"
+				@submit.prevent="save"
 			>
 				<el-form-item
 					label="Consent Document"
