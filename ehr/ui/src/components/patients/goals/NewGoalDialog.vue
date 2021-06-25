@@ -4,7 +4,7 @@ import { Coding, Problem } from "@/types";
 import { RuleItem } from "async-validator";
 import { getCategories, getGoalCodes } from "@/api";
 import moment from "moment";
-// import { GoalsModule } from "@/store/modules/goals";
+import { GoalsModule } from "@/store/modules/goals";
 import { ProblemsModule } from "@/store/modules/problems";
 
 const DEFAULT_REQUIRED_RULE = {
@@ -89,8 +89,7 @@ export default defineComponent({
 					payload.startDate = moment(formModel.startDate).format("YYYY-MM-DD[T]HH:mm:ss");
 
 					try {
-						// todo: add request
-						// await GoalsModule.createGoal(payload);
+						await GoalsModule.createGoal(payload);
 						emit("close");
 					} finally {
 						saveInProgress.value = false;
@@ -201,14 +200,14 @@ export default defineComponent({
 
 			<el-form-item label="Added by">
 				<el-input
-					v-model="formModel.name"
+					v-model="formModel.addedBy"
 					placeholder="Enter Added by name"
 				/>
 			</el-form-item>
 
 			<el-form-item label="Comment">
 				<el-input
-					v-model="formModel.name"
+					v-model="formModel.comment"
 					type="textarea"
 					placeholder="Enter your comment here"
 				/>

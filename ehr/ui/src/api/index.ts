@@ -15,7 +15,8 @@ import {
 	newProblem,
 	updateProblemPayload,
 	NewConcernPayload,
-	UpdateGoalPayload
+	UpdateGoalPayload,
+	NewGoalPayload
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -189,6 +190,11 @@ export const updateGoal = async ({ id }: UpdateGoalPayload): Promise<Goal> => {
 	//
 	// return res.data;
 };
+
+// todo: change and remove mocked data after sync with BE
+export const createGoal = async (payload: NewGoalPayload): Promise<NewGoalPayload> => payload;
+// const res = await axios.post("/goal", payload);
+// return res.data;
 
 export const getProblemCodes = async (code: string): Promise<{ isd: Coding[], snomed: Coding[] }> => {
 	// todo: call real request and remove mocked data
