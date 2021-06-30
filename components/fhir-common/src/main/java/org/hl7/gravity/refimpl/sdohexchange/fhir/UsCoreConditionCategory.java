@@ -11,9 +11,7 @@ public enum UsCoreConditionCategory {
   /** A point in time diagnosis (e.g. from a physician or nurse) in context of an encounter. */
   ENCOUNTERDIAGNOSIS,
   /** Additional health concerns from other stakeholders which are outside the provider’s problem list. */
-  HEALTHCONCERN,
-  /** Added to help the parsers. */
-  NULL;
+  HEALTHCONCERN;
 
   public static UsCoreConditionCategory fromCode(String codeString) throws FHIRException {
     if (codeString == null || "".equals(codeString)) {
@@ -45,7 +43,16 @@ public enum UsCoreConditionCategory {
   }
 
   public String getSystem() {
-    return "http://hl7.org/fhir/us/core/CodeSystem/condition-category";
+    switch (this) {
+      case PROBLEMLISTITEM:
+        return "http://hl7.org/fhir/us/core/CodeSystem/condition-category";
+      case ENCOUNTERDIAGNOSIS:
+        return "http://hl7.org/fhir/us/core/CodeSystem/condition-category";
+      case HEALTHCONCERN:
+        return "http://hl7.org/fhir/us/core/CodeSystem/condition-category";
+      default:
+        return "?";
+    }
   }
 
   public String getDefinition() {

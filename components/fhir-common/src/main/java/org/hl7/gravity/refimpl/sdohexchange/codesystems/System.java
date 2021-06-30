@@ -8,7 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class System {
 
+  public static final String SNOMED = "http://snomed.info/sct";
+  public static final String ICD_10 = "http://www.ama-assn.org/go/cpt";
+
   private String system;
+  private String display;
   private List<Coding> codings;
 
   public org.hl7.fhir.r4.model.Coding findCoding(String codingCode) {

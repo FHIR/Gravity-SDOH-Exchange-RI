@@ -2,14 +2,19 @@ package org.hl7.gravity.refimpl.sdohexchange.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.Coding;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.SystemDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,8 +46,21 @@ public class MappingsController {
   @ApiOperation(value = "Get ServiceRequest codings based on SDOH category.")
   public List<CodingDto> procedureCodings(
       @PathVariable @NotBlank(message = "Category can't be empty.") String category) {
-    return sdohMappings.findAllResourceCodings(category, ServiceRequest.class)
+    return toCodingDto(sdohMappings.findAllResourceCodings(category, ServiceRequest.class));
+  }
+
+  @GetMapping("/categories/{category}/condition/codings")
+  @ApiOperation(value = "Get Condition codings based on SDOH category for SNOMED and ICD-10 systems.")
+  public List<SystemDto> conditionCodings(
+      @PathVariable @NotBlank(message = "Category can't be empty.") String category) {
+    return sdohMappings.findResourceSystems(category, Condition.class, Arrays.asList(System.SNOMED, System.ICD_10))
         .stream()
+        .map(system -> new SystemDto(system.getSystem(), system.getDisplay(), toCodingDto(system.getCodings())))
+        .collect(Collectors.toList());
+  }
+
+  private static List<CodingDto> toCodingDto(List<Coding> codings) {
+    return codings.stream()
         .map(coding -> new CodingDto(coding.getCode(), coding.getDisplay()))
         .collect(Collectors.toList());
   }

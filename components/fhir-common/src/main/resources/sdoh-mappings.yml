@@ -7,6 +7,7 @@ sdoh-mappings:
         - resource: "Procedure"
           systems:
             - system: "http://snomed.info/sct"
+              display: "SNOMED CT"
               codings:
                 - display: "Assessment of health and social care needs"
                   code: "710824005"
@@ -24,7 +25,8 @@ sdoh-mappings:
                   code: "710925007"
                 - display: "Referral to social worker"
                   code: "308440001"
-            - system: "http://www.ama-assn.org/go/cpt"
+            - system: "http://hl7.org/fhir/sid/icd-10-cm"
+              display: "ICD-10-CM"
               codings:
                 - display: "Administration of caregiver-focused health risk assessment instrument (eg, depression inventory) for the benefit of the patient, with scoring
                     and documentation, per standardized instrument"
@@ -47,6 +49,7 @@ sdoh-mappings:
         - resource: "ServiceRequest"
           systems:
             - system: "http://snomed.info/sct"
+              display: "SNOMED CT"
               codings:
                 - display: "Assessment of health and social care needs"
                   code: "710824005"
@@ -66,12 +69,35 @@ sdoh-mappings:
                   code: "713109004"
                 - display: "Referral to social worker"
                   code: "308440001"
+        - resource: "Condition"
+          systems:
+            - system: "http://snomed.info/sct"
+              display: "SNOMED CT"
+              codings:
+                - display: "Food insecurity (finding)"
+                  code: "733423003"
+                - display: "Insufficient food supply (finding)"
+                  code: "706875005"
+            - system: "http://hl7.org/fhir/sid/icd-10-cm"
+              display: "ICD-10-CM"
+              codings:
+                - display: "Food insecurity, unspecified"
+                  code: "Z59.49"
+                - display: "Lack of adequate food and safe drinking water"
+                  code: "Z59.4"
+                - display: "Mild food insecurity"
+                  code: "Z59.41"
+                - display: "Moderate food insecurity"
+                  code: "Z59.42"
+                - display: "Severe food insecurity"
+                  code: "Z59.43"
     - code: "housing-instability-homelessness"
       display: "Housing Instability Homelessness"
       resources:
         - resource: "Procedure"
           systems:
             - system: "http://snomed.info/sct"
+              display: "SNOMED CT"
               codings:
                 - display: "Housing assessment"
                   code: "225340009"
@@ -82,17 +108,59 @@ sdoh-mappings:
         - resource: "ServiceRequest"
           systems:
             - system: "http://snomed.info/sct"
+              display: "SNOMED CT"
               codings:
                 - display: "Housing assessment"
                   code: "225340009"
                 - display: "Referral to housing service"
                   code: "710911006"
+        - resource: "Condition"
+          systems:
+            - system: "http://snomed.info/sct"
+              display: "SNOMED CT"
+              codings:
+                - display: "Eviction notice served (finding)"
+                  code: "160752000"
+                - display: "Homeless (finding)"
+                  code: "32911000"
+                - display: "Living temporarily with relatives (finding)"
+                  code: "406132007"
+                - display: "Sleeping in night shelter (finding)"
+                  code: "224231004"
+                - display: "Sleeping in vehicle (finding)"
+                  code: "224233001"
+                - display: "Sleeping out (finding)"
+                  code: "224229008"
+            - system: "http://hl7.org/fhir/sid/icd-10-cm"
+              display: "ICD-10-CM"
+              codings:
+                - display: "Homelessness"
+                  code: "Z59.0"
+                - display: "Homelessness, unspecified"
+                  code: "Z59.09"
+                - display: "Housing instability, housed unspecified"
+                  code: "Z59.819"
+                - display: "Housing instability, housed, homelessness in past 12 months"
+                  code: "Z59.812"
+                - display: "Housing instability, housed, with risk of homelessness"
+                  code: "Z59.811"
+                - display: "Other problems related to housing and economic circumstances"
+                  code: "Z59.8"
+                - display: "Sheltered homelessness"
+                  code: "Z59.01"
+                - display: "Unsheltered homelessness"
+                  code: "Z59.02"
+                - display:
+                  code:
+                - display:
+                  code:
     - code: "transportation-insecurity"
       display: "Transportation Insecurity"
       resources:
         - resource: "Procedure"
           systems:
             - system: "http://snomed.info/sct"
+              display: "SNOMED CT"
               codings:
                 - display: "Provision of taxi"
                   code: "716730006"
@@ -101,6 +169,25 @@ sdoh-mappings:
         - resource: "ServiceRequest"
           systems:
             - system: "http://snomed.info/sct"
+              display: "SNOMED CT"
               codings:
                 - display: "Transportation case management"
                   code: "410365006"
+        - resource: "Condition"
+          systems:
+            - system: "http://snomed.info/sct"
+              display: "SNOMED CT"
+              codings:
+                - display: "Lack of access to transportation (finding)"
+                  code: "713458007"
+                - display: "Transport distance too great (finding)"
+                  code: "160696009"
+                - display: "Transport too expensive (finding)"
+                  code: "160695008"
+                - display: "Transportation barrier impedes ability to use community resources (finding)"
+                  code: "424629004"
+            - system: "http://hl7.org/fhir/sid/icd-10-cm"
+              display: "ICD-10-CM"
+              codings:
+                - display: "Transportation insecurity"
+                  code: "Z59.82"
