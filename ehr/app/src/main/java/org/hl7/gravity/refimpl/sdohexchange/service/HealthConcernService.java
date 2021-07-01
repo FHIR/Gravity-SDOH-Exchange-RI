@@ -24,6 +24,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewHealthConcernDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.HealthConcernDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.HealthConcernCreateException;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernInfoBundleExtractor;
@@ -112,6 +113,31 @@ public class HealthConcernService {
     Coding coding = FhirUtil.findCoding(healthConcern.getCategory(), problem.getSystem());
     coding.setCode(problem.toCode());
     coding.setDisplay(problem.getDisplay());
+    healthConcern.setOnset(DateTimeType.now());
+
+    ehrClient.update()
+        .resource(healthConcern)
+        .execute();
+  }
+
+  public void resolve(String id) {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    Bundle responseBundle = searchHealthConcernQuery()
+        .where(Condition.RES_ID.exactly()
+            .code(id))
+        .returnBundle(Bundle.class)
+        .execute();
+    Condition healthConcern = new HealthConcernInfoBundleExtractor().extract(responseBundle)
+        .stream()
+        .findFirst()
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)))
+        .getCondition();
+
+    ConditionClinicalStatusCodes resolvedStatus = ConditionClinicalStatusCodes.RESOLVED;
+    Coding coding = healthConcern.getClinicalStatus().getCodingFirstRep();
+    coding.setCode(resolvedStatus.toCode());
+    coding.setDisplay(resolvedStatus.getDisplay());
     healthConcern.setOnset(DateTimeType.now());
 
     ehrClient.update()
