@@ -55,4 +55,11 @@ public class HealthConcernsController {
     healthConcernService.promote(id);
     return ResponseEntity.noContent().build();
   }
+
+  @PutMapping("/resolve/{id}")
+  @ApiOperation(value = "Mark an active Health Concern as resolved.")
+  public ResponseEntity<Void> resolve(@PathVariable @NotBlank String id) {
+    healthConcernService.resolve(id);
+    return ResponseEntity.noContent().build();
+  }
 }
