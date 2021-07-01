@@ -1,9 +1,10 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
 import com.google.common.base.Strings;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -17,13 +18,6 @@ import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskPrepareException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskPrepareBundleExtractor.TaskPrepareInfoHolder;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 /**
  * Transaction bundle parser of resources required for Task creation.
  */
@@ -31,23 +25,7 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
 
   @Override
   public TaskPrepareInfoHolder extract(Bundle bundle) {
-    Map<? extends Class<? extends Resource>, List<Resource>> taskResources = bundle.getEntry()
-        .stream()
-        .map(BundleEntryComponent::getResource)
-        .filter(Objects::nonNull)
-        .map(resource -> {
-          if (resource instanceof Bundle) {
-            return ((Bundle) resource).getEntry()
-                .stream()
-                .map(BundleEntryComponent::getResource)
-                .collect(Collectors.toList());
-          } else {
-            return Collections.singletonList(resource);
-          }
-        })
-        .flatMap(Collection::stream)
-        .collect(Collectors.groupingBy(Resource::getClass));
-    return new TaskPrepareInfoHolder(taskResources);
+    return new TaskPrepareInfoHolder(extractToMap(bundle));
   }
 
   @Getter
@@ -128,10 +106,12 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
     }
 
     private Consent getConsent(List<Consent> consents) {
-      if(consents.isEmpty()){
+      if (consents.isEmpty()) {
         throw new TaskPrepareException("No Consent have been found.");
       }
-      return consents.stream().findFirst().get();
+      return consents.stream()
+          .findFirst()
+          .get();
     }
   }
 }
