@@ -1,7 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,7 @@ public class AssessmentDto implements Validated {
   private String questionnaireUrl;
   private LocalDateTime date;
   private List<TypeDto> healthConcerns;
-  private List<AssessmentItem> item;
+  private List<AssessmentResponse> assessmentResponse;
   private List<AssessmentDto> previous;
 
   @Setter(AccessLevel.NONE)
@@ -28,18 +27,9 @@ public class AssessmentDto implements Validated {
 
   @Getter
   @Setter
-  public static class AssessmentItem {
+  public static class AssessmentResponse {
 
-    private String text;
-    private List<AssessmentAnswer> answer;
-    private List<AssessmentItem> item;
-  }
-
-  @Getter
-  @Setter
-  public static class AssessmentAnswer {
-
-    @JsonValue
-    private TypeDto value;
+    private TypeDto question;
+    private TypeDto answer;
   }
 }
