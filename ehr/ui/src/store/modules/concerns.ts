@@ -1,36 +1,52 @@
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import { getConcerns, addConcernResponse } from "@/api";
+import { getActiveConcerns, getResolvedConcerns, addConcernResponse } from "@/api";
 import store from "@/store";
 import { Concern, NewConcernPayload } from "@/types";
 
 export interface IConcerns {
-	concerns: Concern[]
+	activeConcerns: Concern[],
+	resolvedConcerns: Concern[]
 }
 
 @Module({ dynamic: true, store, name: "concern" })
 class Concerns extends VuexModule implements IConcerns {
-	concerns: Concern[] = [];
+	activeConcerns: Concern[] = [];
+	resolvedConcerns: Concern[] = [];
 
 	@Mutation
-	setConcerns(payload: Concern[]): void {
-		this.concerns = payload;
+	setActiveConcerns(payload: Concern[]): void {
+		this.activeConcerns = payload;
+	}
+
+	@Mutation
+	setResolvedConcerns(payload: Concern[]): void {
+		this.resolvedConcerns = payload;
 	}
 
 	@Mutation
 	addConcern(payload: Concern): void {
-		this.concerns = [...this.concerns, payload];
+		this.activeConcerns = [...this.activeConcerns, payload];
 	}
 
 	@Action
-	async getConcerns(): Promise<void> {
-		const data = await getConcerns();
+	async getActiveConcerns(): Promise<void> {
+		const data = await getActiveConcerns();
 
-		this.setConcerns(data);
+		this.setActiveConcerns(data);
 	}
 
 	@Action
-	createConcern(payload: NewConcernPayload) {
-		this.addConcern(addConcernResponse(payload));
+	async getResolvedConcerns(): Promise<void> {
+		const data = await getResolvedConcerns();
+
+		this.setResolvedConcerns(data);
+	}
+
+	@Action
+	async createConcern(payload: NewConcernPayload): Promise<void> {
+		const data = await addConcernResponse(payload);
+
+		this.addConcern(data);
 	}
 }
 
