@@ -208,6 +208,16 @@ export type Goal = {
 	status: GoalStatus
 };
 
+export type NewGoalPayload = {
+	name: string,
+	category: string,
+	code: string,
+	problems?: string[],
+	addedBy?: string,
+	startDate?: string,
+	comments?: string,
+}
+
 export type GoalStatus = "active" | "completed"
 
 export type UpdateGoalPayload = {
