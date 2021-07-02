@@ -7,11 +7,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.HealthConcernDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
@@ -37,13 +39,29 @@ public class HealthConcernBundleToDtoConverter implements Converter<Bundle, List
           healthConcernDto.setId(condition.getIdElement()
               .getIdPart());
           healthConcernDto.setName(codeableConceptToStringConverter.convert(condition.getCode()));
-          Coding coding = FhirUtil.findCoding(condition.getCategory(), SDOHMappings.getInstance()
+          Coding categoryCoding = FhirUtil.findCoding(condition.getCategory(), SDOHMappings.getInstance()
               .getSystem());
-          if (coding == null) {
+          if (categoryCoding == null) {
             healthConcernDto.getErrors()
                 .add("SDOH category is not found.");
           } else {
-            healthConcernDto.setCategory(new CodingDto(coding.getCode(), coding.getDisplay()));
+            healthConcernDto.setCategory(new CodingDto(categoryCoding.getCode(), categoryCoding.getDisplay()));
+          }
+          Optional<Coding> icdCodeCodingOptional = findCode(condition.getCode(), System.ICD_10);
+          if (icdCodeCodingOptional.isPresent()) {
+            Coding icdCodeCoding = icdCodeCodingOptional.get();
+            healthConcernDto.setIcdCode(new CodingDto(icdCodeCoding.getCode(), icdCodeCoding.getDisplay()));
+          } else {
+            healthConcernDto.getErrors()
+                .add("ICD-10 code is not found.");
+          }
+          Optional<Coding> snomedCodeCodingOptional = findCode(condition.getCode(), System.SNOMED);
+          if (snomedCodeCodingOptional.isPresent()) {
+            Coding snomedCodeCoding = snomedCodeCodingOptional.get();
+            healthConcernDto.setSnomedCode(new CodingDto(snomedCodeCoding.getCode(), snomedCodeCoding.getDisplay()));
+          } else {
+            healthConcernDto.getErrors()
+                .add("SNOMED-CT code is not found.");
           }
 
           QuestionnaireResponse questionnaireResponse = healthConcernInfo.getQuestionnaireResponse();
@@ -70,5 +88,13 @@ public class HealthConcernBundleToDtoConverter implements Converter<Bundle, List
           return healthConcernDto;
         })
         .collect(Collectors.toList());
+  }
+
+  private Optional<Coding> findCode(CodeableConcept code, String system) {
+    return code.getCoding()
+        .stream()
+        .filter(coding -> coding.getSystem()
+            .equals(system))
+        .findFirst();
   }
 }

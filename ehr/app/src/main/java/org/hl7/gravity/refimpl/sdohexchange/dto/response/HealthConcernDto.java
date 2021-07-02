@@ -17,6 +17,8 @@ public class HealthConcernDto implements Validated {
   private String id;
   private String name;
   private CodingDto category;
+  private CodingDto icdCode;
+  private CodingDto snomedCode;
   private TypeDto basedOn;
   private TypeDto authoredBy;
   private LocalDateTime date;
