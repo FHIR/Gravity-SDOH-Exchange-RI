@@ -29,6 +29,10 @@ export default defineComponent({
 	setup(props, { emit }) {
 		const saveInProgress = ref<boolean>(false);
 
+		const onDialogClose = () => {
+			emit("close");
+		};
+
 		const confirmAction = (clickedAction: string) => {
 			if (clickedAction === ACTION_BUTTONS.remove) {
 				ConcernsModule.removeConcern(props.concern!.id);
@@ -61,6 +65,7 @@ export default defineComponent({
 
 		return {
 			saveInProgress,
+			onDialogClose,
 			ACTION_BUTTONS,
 			confirmActionText,
 			confirmAction,
@@ -76,7 +81,8 @@ export default defineComponent({
 		title="Health Concern Details"
 		:width="700"
 		destroy-on-close
-		@close="$emit('close')"
+		custom-class="edit-concern-dialog"
+		@close="onDialogClose"
 	>
 		<el-form
 			ref="formEl"
@@ -89,16 +95,16 @@ export default defineComponent({
 				{{ concern.name }}
 			</el-form-item>
 			<el-form-item label="Category">
-				{{ concern.category }}
+				{{ concern.category.display }}
 			</el-form-item>
 			<el-form-item label="ICD-10 Code">
-				code
+				{{ concern.icdCode ? `${concern.icdCode.display} (${concern.icdCode.code})` : "N/A" }}
 			</el-form-item>
 			<el-form-item label="SNOMED-CT Code">
-				code
+				{{ concern.snomedCode ? `${concern.snomedCode.display} (${concern.snomedCode.code})` : "N/A" }}
 			</el-form-item>
 			<el-form-item label="Based on">
-				{{ concern.basedOn }}
+				{{ concern.basedOn.display ? concern.basedOn.display : concern.basedOn }}
 			</el-form-item>
 			<el-form-item label="Assessment Date">
 				{{ $filters.formatDateTime(concern.assessmentDate) }}
@@ -121,10 +127,12 @@ export default defineComponent({
 			<DropButton
 				v-if="clickedAction === ACTION_BUTTONS.default"
 				:label="clickedAction"
-				:items="[{ id: 'Promote to Problem', label: 'Promote to Problem', iconSrc: require('@/assets/images/concern-promote.svg') }
-					,{ id: 'Mark as Resolved', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') }
-					,{ id: 'Remove', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
+				:items="[
+					{ id: '1', label: 'Promote to Problem', iconSrc: require('@/assets/images/concern-promote.svg') },
+					{ id: '2', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') },
+					{ id: '3', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
 				]"
+				@click="$emit('close')"
 				@action-click="handleActionClick"
 			/>
 			<el-button
@@ -143,36 +151,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
-@import "~@/assets/scss/abstracts/mixins";
-
-.edit-concern-form {
-	.el-divider {
-		margin: 20px 0;
-	}
-}
-
-.wrapper {
-	line-height: 15px;
-	margin-top: 5px;
-	margin-bottom: 10px;
-
-	&:last-child {
-		margin-bottom: 0;
-	}
-}
-
-.item {
-	background-color: $alice-blue;
-	border-radius: 5px;
-	padding: 0 5px;
-	font-size: $global-small-font-size;
-
-	@include dont-break-out();
-}
-
-.date {
-	margin-left: 10px;
-}
 
 .confirm-text {
 	text-align: left;

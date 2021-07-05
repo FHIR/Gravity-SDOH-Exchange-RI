@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ConsentService {
 
-  private final ConsentToDtoConverter converter;
   private final SmartOnFhirContext smartOnFhirContext;
   private final ConsentRepository consentRepository;
   private final IGenericClient ehrClient;
@@ -47,7 +46,7 @@ public class ConsentService {
     Bundle bundle = consentRepository.findAllByPatient(smartOnFhirContext.getPatient());
     List<Consent> consentResources = FhirUtil.getFromBundle(bundle, Consent.class);
     return consentResources.stream()
-        .map(converter::convert)
+        .map(consent -> new ConsentToDtoConverter().convert(consent))
         .collect(Collectors.toList());
   }
 
@@ -67,7 +66,7 @@ public class ConsentService {
 
     MethodOutcome methodOutcome = ehrClient.create().resource(consent).execute();
     Consent savedConsent = (Consent) methodOutcome.getResource();
-    return converter.convert(savedConsent);
+    return new ConsentToDtoConverter().convert(savedConsent);
   }
 
   public ConsentAttachmentDto retrieveAttachmentInfo(String id) {

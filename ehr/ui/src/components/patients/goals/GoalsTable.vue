@@ -2,11 +2,16 @@
 import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/goals/Goals.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
+import GoalDialog from "@/components/patients/goals/GoalDialog.vue";
+import { GoalStatus } from "@/types";
+
+export type GoalAction = "edit" | "mark-as-completed" | "view";
 
 export default defineComponent({
 	name: "GoalsTable",
 	components: {
-		ActionButton
+		ActionButton,
+		GoalDialog
 	},
 	props: {
 		data: {
@@ -14,15 +19,30 @@ export default defineComponent({
 			required: true
 		},
 		status: {
-			type: String,
+			type: String as PropType<GoalStatus>,
 			default: "active"
 		}
 	},
+	emits: ["add-goal"],
 	setup(props) {
 		const title = ref<string>(props.status === "active" ? "Active Goals" : "Completed Goals");
 
+		const dialogVisible = ref<boolean>(false);
+		const dialogOpenPhase = ref<GoalAction>();
+		const activeGoal = ref<TableData>();
+
+		const onGoalActionClick = (action: GoalAction, row: TableData) => {
+			dialogOpenPhase.value = action;
+			activeGoal.value = row;
+			dialogVisible.value = true;
+		};
+
 		return {
-			title
+			title,
+			dialogVisible,
+			activeGoal,
+			dialogOpenPhase,
+			onGoalActionClick
 		};
 	}
 });
@@ -40,6 +60,7 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				@click="$emit('add-goal')"
 			>
 				Add Goal
 			</el-button>
@@ -47,7 +68,10 @@ export default defineComponent({
 		<el-table :data="data">
 			<el-table-column label="Goal">
 				<template #default="scope">
-					<el-button type="text">
+					<el-button
+						type="text"
+						@click="onGoalActionClick(status === 'active' ? 'edit' : 'view', scope.row)"
+					>
 						{{ scope.row.name }}
 					</el-button>
 				</template>
@@ -56,7 +80,7 @@ export default defineComponent({
 			<el-table-column label="Problem(s)">
 				<template #default="scope">
 					<el-button type="text">
-						{{ scope.row.problems }}
+						{{ scope.row.problems.length > 1 ? `${scope.row.problems.length} Problems` : scope.row.problems.length === 1 ? scope.row.problems[0] : "--" }}
 					</el-button>
 				</template>
 			</el-table-column>
@@ -85,18 +109,21 @@ export default defineComponent({
 				label="Actions"
 				width="350"
 			>
-				<ActionButton
-					icon-class="mark-as-completed"
-					label="Mark as Completed"
-				/>
-				<ActionButton
-					icon-class="remove-goal"
-					label="Remove"
-				/>
-				<ActionButton
-					icon-class="add-target"
-					label="Add Target"
-				/>
+				<template #default="scope">
+					<ActionButton
+						icon-class="mark-as-completed"
+						label="Mark as Completed"
+						@click="onGoalActionClick('mark-as-completed', scope.row)"
+					/>
+					<!--				<ActionButton-->
+					<!--					icon-class="remove-goal"-->
+					<!--					label="Remove"-->
+					<!--				/>-->
+					<!--				<ActionButton-->
+					<!--					icon-class="add-target"-->
+					<!--					label="Add Target"-->
+					<!--				/>-->
+				</template>
 			</el-table-column>
 
 			<el-table-column
@@ -109,6 +136,13 @@ export default defineComponent({
 			</el-table-column>
 		</el-table>
 	</div>
+
+	<GoalDialog
+		:visible="dialogVisible"
+		:goal="activeGoal"
+		:open-phase="dialogOpenPhase"
+		@close="dialogVisible = false"
+	/>
 </template>
 
 <style lang="scss" scoped>
@@ -131,5 +165,9 @@ export default defineComponent({
 	border: 1px solid $global-base-border-color;
 	padding: 10px 20px;
 	min-height: 130px;
+
+	+ .table-wrapper {
+		margin-top: 30px;
+	}
 }
 </style>

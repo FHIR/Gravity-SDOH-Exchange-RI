@@ -12,24 +12,17 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AssessmentDto implements Validated {
+public class HealthConcernDto implements Validated {
 
   private String id;
   private String name;
-  private String questionnaireUrl;
+  private CodingDto category;
+  private CodingDto icdCode;
+  private CodingDto snomedCode;
+  private TypeDto basedOn;
+  private TypeDto authoredBy;
   private LocalDateTime date;
-  private List<TypeDto> healthConcerns;
-  private List<AssessmentResponse> assessmentResponse;
-  private List<AssessmentDto> previous;
 
   @Setter(AccessLevel.NONE)
   private List<String> errors = new ArrayList<>();
-
-  @Getter
-  @Setter
-  public static class AssessmentResponse {
-
-    private TypeDto question;
-    private TypeDto answer;
-  }
 }

@@ -1,8 +1,9 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from "vue";
-import { Goal } from "@/types";
+import { Goal, Coding, Comment } from "@/types";
 import { GoalsModule } from "@/store/modules/goals";
 import GoalsTable from "@/components/patients/goals/GoalsTable.vue";
+import NewGoalDialog from "@/components/patients/goals/NewGoalDialog.vue";
 
 export type TableData = {
 	name: string,
@@ -11,12 +12,17 @@ export type TableData = {
 	startDate: string,
 	endDate: string,
 	targets: string[],
-	status: string
+	status: string,
+	category: Coding,
+	code: Coding,
+	id: string,
+	comments: Comment[]
 };
 
 export default defineComponent({
 	name: "Goals",
 	components: {
+		NewGoalDialog,
 		GoalsTable
 	},
 	setup() {
@@ -30,11 +36,17 @@ export default defineComponent({
 				startDate: goal.startDate,
 				endDate: goal.endDate,
 				targets: goal.targets,
-				status: goal.status
+				status: goal.status,
+				category: goal.category,
+				code: goal.code,
+				id: goal.id,
+				comments: goal.comments
 			}))
 		);
 		const activeGoals = computed<TableData[]>(() => tableData.value.filter(goal => goal.status === "active"));
 		const completedGoals = computed<TableData[]>(() => tableData.value.filter(goal => goal.status === "completed"));
+		const newGoalDialogVisible = ref<boolean>(false);
+
 		onMounted(async () => {
 			isDataLoading.value = true;
 			try {
@@ -47,7 +59,8 @@ export default defineComponent({
 		return {
 			activeGoals,
 			completedGoals,
-			isDataLoading
+			isDataLoading,
+			newGoalDialogVisible
 		};
 	}
 });
@@ -62,6 +75,7 @@ export default defineComponent({
 			v-if="activeGoals.length > 0"
 			:data="activeGoals"
 			status="active"
+			@add-goal="newGoalDialogVisible = true"
 		/>
 		<GoalsTable
 			v-if="completedGoals.length > 0"
@@ -78,17 +92,14 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				@click="newGoalDialogVisible = true"
 			>
 				Add Goal
 			</el-button>
 		</div>
+		<NewGoalDialog
+			:visible="newGoalDialogVisible"
+			@close="newGoalDialogVisible = false"
+		/>
 	</div>
 </template>
-
-<style lang="scss" scoped>
-@import "~@/assets/scss/abstracts/variables";
-
-.table-wrapper:not(:first-child) {
-	margin-top: 30px;
-}
-</style>

@@ -1,7 +1,7 @@
 import { VuexModule, Module, getModule, Action, Mutation } from "vuex-module-decorators";
 import store from "@/store";
-import { newProblem, Problem } from "@/types";
-import { getProblems, createProblem } from "@/api";
+import { newProblem, Problem, updateProblemPayload } from "@/types";
+import { getProblems, createProblem, updateProblem } from "@/api";
 
 export interface IProblems {
 	problems: Problem[]
@@ -16,6 +16,11 @@ class Problems extends VuexModule implements IProblems {
 		this.problems = payload;
 	}
 
+	@Mutation
+	changeProblem(payload: Problem) {
+		this.problems = this.problems.map(item => item.id === payload.id ? payload : item);
+	}
+
 	@Action
 	async getProblems(): Promise<void> {
 		const data = await getProblems();
@@ -28,6 +33,12 @@ class Problems extends VuexModule implements IProblems {
 		await createProblem(payload);
 		// todo: check if we get response on create problem. if yes add new problem to list, if not get all problems again
 		await getProblems();
+	}
+
+	@Action
+	async updateProblem(payload: updateProblemPayload): Promise<void> {
+		const updatedProblem = await updateProblem(payload);
+		this.changeProblem(updatedProblem);
 	}
 }
 

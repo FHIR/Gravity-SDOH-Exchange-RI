@@ -15,7 +15,8 @@ public class AssessmentInfoToDtoConverter
 
   public static final String QUESTIONNAIRE_NAME_EXTENSION = "http://hl7.org/fhir/StructureDefinition/display";
 
-  private final AssessmentItemToDtoConverter assessmentItemToDtoConverter = new AssessmentItemToDtoConverter();
+  private final AssessmentResponseToDtoConverter
+      assessmentResponseToDtoConverter = new AssessmentResponseToDtoConverter();
   private final CodeableConceptToStringConverter codeableConceptToStringConverter =
       new CodeableConceptToStringConverter(", ");
 
@@ -38,7 +39,7 @@ public class AssessmentInfoToDtoConverter
     assessmentDto.setQuestionnaireUrl(questionnaireResponse.getQuestionnaire());
     assessmentDto.setDate(FhirUtil.toLocalDateTime(questionnaireResponse
         .getAuthoredElement()));
-    assessmentDto.setItem(assessmentItemToDtoConverter.convert(questionnaireResponse.getItem()));
+    assessmentDto.setAssessmentResponse(assessmentResponseToDtoConverter.convert(infoHolder.getObservations()));
 
     assessmentDto.setHealthConcerns(infoHolder.getConditions()
         .stream()

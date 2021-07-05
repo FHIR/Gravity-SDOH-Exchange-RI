@@ -90,14 +90,14 @@ export default defineComponent({
 					label="Category"
 				>
 					<template #default="scope">
-						{{ scope.row.category }}
+						{{ scope.row.category.display }}
 					</template>
 				</el-table-column>
 				<el-table-column
 					label="Based On"
 				>
 					<template #default="scope">
-						{{ scope.row.basedOn }}
+						{{ scope.row.basedOn.display ? scope.row.basedOn.display : scope.row.basedOn }}
 					</template>
 				</el-table-column>
 				<el-table-column
@@ -128,14 +128,6 @@ export default defineComponent({
 							label="Remove"
 							@clicked="concernOrActionClick(scope.row, ACTION_BUTTONS.remove)"
 						/>
-					</template>
-				</el-table-column>
-				<el-table-column
-					v-if="type === 'PromotedOrResolvedConcerns'"
-					label="Status"
-				>
-					<template #default="scope">
-						{{ scope.row.status }}
 					</template>
 				</el-table-column>
 				<el-table-column
@@ -192,10 +184,5 @@ export default defineComponent({
 	border: 1px solid $global-base-border-color;
 	padding: 10px 20px;
 	min-height: 130px;
-}
-
-::v-deep(.el-table--enable-row-hover) .el-table__body tr:hover {
-	box-shadow: 0 2px 5px 0 rgba(51, 51, 51, 0.25);
-	border-radius: 5px;
 }
 </style>

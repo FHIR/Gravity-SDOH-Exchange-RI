@@ -1,18 +1,15 @@
 <script lang="ts">
 import { defineComponent, reactive, ref } from "vue";
-import { getCategories, getIcd10Codes, getSnomedCtCodes } from "@/api";
-import { Coding, NewConcernPayload } from "@/types";
+import { getCategories, getConditionCodes } from "@/api";
+import { Coding } from "@/types";
 import { RuleItem } from "async-validator";
-import moment from "moment";
 import { ConcernsModule } from "@/store/modules/concerns";
 
 export type FormModel = {
 	name: string,
 	category: string,
-	icd10Code: string,
-	snomedCtCode: string,
-	basedOn: string,
-	assessmentDate: string
+	icdCode: string,
+	snomedCode: string
 };
 
 export default defineComponent({
@@ -26,16 +23,14 @@ export default defineComponent({
 	emits: ["close"],
 	setup(props, { emit }) {
 		const categoryOptions = ref<Coding[]>([]);
-		const icd10Codes = ref<Coding[]>([]);
-		const snomedCtCodes = ref<Coding[]>([]);
+		const icdCodes = ref<Coding[]>([]);
+		const snomedCodes = ref<Coding[]>([]);
 
 		const formModel = reactive<FormModel>({
 			name: "",
 			category: "",
-			icd10Code: "",
-			snomedCtCode: "",
-			basedOn: "",
-			assessmentDate: ""
+			icdCode: "",
+			snomedCode: ""
 		});
 		const assessmentDate = ref<string>("");
 
@@ -46,12 +41,19 @@ export default defineComponent({
 		//
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
-			icd10Codes.value = await getIcd10Codes();
-			snomedCtCodes.value = await getSnomedCtCodes();
 		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
 			emit("close");
+		};
+
+		const onCategoryChange =  async (category: string) => {
+			formModel.icdCode = "";
+			formModel.snomedCode = "";
+
+			const conditionCodes = await getConditionCodes(category);
+			icdCodes.value = conditionCodes.find(item => item.display === "ICD-10-CM")?.codings || [];
+			snomedCodes.value = conditionCodes.find(item => item.display === "SNOMED CT")?.codings || [];
 		};
 
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
@@ -62,6 +64,14 @@ export default defineComponent({
 			category: {
 				required: true,
 				message: "This field is required"
+			},
+			icdCode: {
+				required: true,
+				message: "This field is required"
+			},
+			snomedCode: {
+				required: true,
+				message: "This field is required"
 			}
 		};
 
@@ -70,11 +80,9 @@ export default defineComponent({
 		const onFormSave = () => {
 			formEl.value?.validate((valid: boolean) => {
 				if (valid) {
-					const assessmentDate = moment(formModel.assessmentDate).format("YYYY-MM-DD[T]HH:mm:ss");
-					const payload: NewConcernPayload = { ...formModel, status: "Send to patient", assessmentDate, concernStatus: "Active" };
 					saveInProgress.value = true;
 					try {
-						ConcernsModule.createConcern(payload);
+						ConcernsModule.createConcern(formModel);
 						emit("close");
 					} finally {
 						saveInProgress.value = false;
@@ -86,15 +94,16 @@ export default defineComponent({
 		return {
 			formModel,
 			categoryOptions,
-			icd10Codes,
-			snomedCtCodes,
+			icdCodes,
+			snomedCodes,
 			formRules,
 			formEl,
 			assessmentDate,
 			saveInProgress,
 			onDialogOpen,
 			onDialogClose,
-			onFormSave
+			onFormSave,
+			onCategoryChange
 		};
 	}
 });
@@ -105,7 +114,6 @@ export default defineComponent({
 		:model-value="visible"
 		title="New Health Concern"
 		:width="700"
-		append-to-body
 		destroy-on-close
 		custom-class="new-concern-dialog"
 		@close="onDialogClose"
@@ -136,6 +144,7 @@ export default defineComponent({
 				<el-select
 					v-model="formModel.category"
 					placeholder="Select category"
+					@change="onCategoryChange"
 				>
 					<el-option
 						v-for="item in categoryOptions"
@@ -147,28 +156,30 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="ICD-10 Code"
+				prop="icdCode"
 			>
 				<el-select
-					v-model="formModel.icd10Code"
+					v-model="formModel.icdCode"
 					placeholder="Select code"
 				>
 					<el-option
-						v-for="item in icd10Codes"
+						v-for="item in icdCodes"
 						:key="item.code"
-						:label="`${item.display}(${item.code})`"
+						:label="`${item.display} (${item.code})`"
 						:value="item.code"
 					/>
 				</el-select>
 			</el-form-item>
 			<el-form-item
 				label="SNOMED-CT Code"
+				prop="snomedCode"
 			>
 				<el-select
-					v-model="formModel.snomedCtCode"
+					v-model="formModel.snomedCode"
 					placeholder="Select code"
 				>
 					<el-option
-						v-for="item in snomedCtCodes"
+						v-for="item in snomedCodes"
 						:key="item.code"
 						:label="`${item.display}(${item.code})`"
 						:value="item.code"
@@ -179,16 +190,17 @@ export default defineComponent({
 				label="Based on"
 			>
 				<el-input
-					v-model="formModel.basedOn"
-					placeholder="Conversation with doctor"
+					model-value="Conversation with Patient"
+					disabled
 				/>
 			</el-form-item>
 			<el-form-item
 				label="Assessment Date"
 			>
 				<el-date-picker
-					v-model="formModel.assessmentDate"
+					:model-value="new Date()"
 					placeholder="Select date"
+					disabled
 				/>
 			</el-form-item>
 		</el-form>

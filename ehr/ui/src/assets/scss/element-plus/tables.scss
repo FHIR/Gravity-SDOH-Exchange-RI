@@ -12,6 +12,11 @@
 		td {
 			padding: 5px 0;
 		}
+
+		tr:hover {
+			box-shadow: $global-box-shadow;
+			border-radius: 5px;
+		}
 	}
 
 	.el-table__row {

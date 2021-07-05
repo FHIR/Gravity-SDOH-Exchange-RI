@@ -1,6 +1,10 @@
 <script lang="ts">
-import { defineComponent, PropType, reactive } from "vue";
-import { TableData } from "@/components/patients/action-steps/ActionSteps.vue";
+import { computed, defineComponent, PropType, reactive, ref, toRefs } from "vue";
+import { TableData } from "@/components/patients/problems/Problems.vue";
+import { ProblemDialogPhase, ProblemActionType } from "@/components/patients/problems/ProblemsTable.vue";
+import DropButton from "@/components/DropButton.vue";
+import moment from "moment";
+import { ProblemsModule } from "@/store/modules/problems";
 
 export type FormModel = {
 	id: string,
@@ -16,8 +20,14 @@ export type FormModel = {
 	category: string
 };
 
+const CONFIRM_MESSAGES = {
+	"view": "",
+	"mark-as-closed": "Please confirm that this problem can be marked as closed."
+};
+
 export default defineComponent({
 	name: "ProblemDialog",
+	components: { DropButton },
 	props: {
 		visible: {
 			type: Boolean,
@@ -26,6 +36,10 @@ export default defineComponent({
 		problem: {
 			type: Object as PropType<TableData>,
 			default: undefined
+		},
+		openPhase: {
+			type: String as PropType<ProblemDialogPhase>,
+			default: "view"
 		}
 	},
 	emits: ["close"],
@@ -43,19 +57,65 @@ export default defineComponent({
 			codeISD: "",
 			codeSNOMED: ""
 		});
+		const { problem, openPhase } = toRefs(props);
+		const phase = ref<ProblemDialogPhase>("view");
+		const confirmMessage = computed<string>(() => CONFIRM_MESSAGES[phase.value]);
+		const showConfirm = computed<boolean>(() => phase.value !== "view");
+		const actionInProgress = ref<boolean>(false);
 
 		const onDialogOpen = () => {
-			Object.assign(formModel, props.problem);
+			phase.value = openPhase.value;
+			Object.assign(formModel, problem.value);
 		};
 
 		const onDialogClose = () => {
 			emit("close");
 		};
 
+		const handleActionClick = (action: ProblemActionType) => {
+			if(action === "mark-as-closed") {
+				phase.value = action;
+			}
+
+			if(action === "add-goal") {
+				// todo:
+				// emit("close");
+				// emit("trigger-add-goal", action, problem.value);
+			}
+		};
+
+		const handleConfirm = () => {
+			if(phase.value === "mark-as-closed") {
+				markAsClosed();
+			}
+		};
+
+		const markAsClosed = async () => {
+			const payload = {
+				id: problem.value.id,
+				closeDate: moment(new Date()).format("YYYY-MM-DD[T]HH:mm:ss"),
+				status: "resolved"
+			};
+
+			actionInProgress.value = true;
+			try {
+				await ProblemsModule.updateProblem(payload);
+				emit("close");
+			} finally {
+				actionInProgress.value = false;
+			}
+		};
+
 		return {
+			phase,
 			formModel,
+			confirmMessage,
+			showConfirm,
+			actionInProgress,
 			onDialogOpen,
-			onDialogClose
+			onDialogClose,
+			handleActionClick,
+			handleConfirm
 		};
 	}
 });
@@ -66,11 +126,10 @@ export default defineComponent({
 		:model-value="visible"
 		title="Problem Details"
 		:width="700"
-		append-to-body
 		destroy-on-close
 		custom-class="problem-dialog"
 		@close="onDialogClose"
-		@opened="onDialogOpen"
+		@open="onDialogOpen"
 	>
 		<el-form
 			:model="formModel"
@@ -105,7 +164,25 @@ export default defineComponent({
 			</el-form-item>
 		</el-form>
 		<template #footer>
+			<div
+				v-if="showConfirm"
+				class="confirm-message"
+			>
+				{{ confirmMessage }}
+			</div>
+
 			<el-button
+				v-if="showConfirm"
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="phase = 'view'"
+			>
+				Cancel
+			</el-button>
+			<el-button
+				v-if="problem?.status === 'resolved'"
 				plain
 				round
 				type="primary"
@@ -114,6 +191,38 @@ export default defineComponent({
 			>
 				Close
 			</el-button>
+			<DropButton
+				v-else-if="!showConfirm"
+				label="Close"
+				:items="[{ id: 'add-goal', label: 'Add Goal', iconSrc: require('@/assets/images/add-goal.svg') },
+					{ id: 'add-action-step', label: 'Add Action Step', iconSrc: require('@/assets/images/add-action-step.svg') },
+					{ id: 'mark-as-closed', label: 'Mark as Closed', iconSrc: require('@/assets/images/mark-as-closed.svg') }
+				]"
+				@click="$emit('close')"
+				@item-click="handleActionClick"
+			/>
+			<el-button
+				v-else
+				v-loading="actionInProgress"
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="handleConfirm"
+			>
+				Confirm
+			</el-button>
 		</template>
 	</el-dialog>
 </template>
+
+<style lang="scss" scoped>
+@import "~@/assets/scss/abstracts/variables";
+
+.confirm-message {
+	margin-bottom: 20px;
+	text-align: left;
+	font-weight: $global-font-weight-medium;
+	font-size: $global-font-size;
+}
+</style>
