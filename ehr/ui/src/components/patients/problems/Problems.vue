@@ -82,6 +82,21 @@ export default defineComponent({
 			status="active"
 			@add-problem="newProblemsDialogVisible = true"
 		/>
+		<div
+			v-if="!activeProblems.length && closedProblems.length"
+			class="no-active-problems"
+		>
+			<h2>No Active Problems</h2>
+			<el-button
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="newProblemsDialogVisible = true"
+			>
+				Add Problem
+			</el-button>
+		</div>
 		<ProblemsTable
 			v-if="closedProblems.length"
 			:data="closedProblems"
@@ -89,7 +104,7 @@ export default defineComponent({
 			status="closed"
 		/>
 		<div
-			v-if="!tableData.length"
+			v-if="!isLoading && !tableData.length"
 			class="no-data"
 		>
 			<h2>No Problems Yet</h2>
@@ -122,10 +137,29 @@ export default defineComponent({
 	background-color: $global-background;
 
 	h2 {
-		color: $whisper;
+		color: $global-muted-color;
 		font-size: $global-xxxlarge-font-size;
 		font-weight: $global-font-weight-normal;
 		margin-bottom: 50px;
+	}
+}
+
+.no-active-problems {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border: $global-border;
+	border-radius: 5px;
+	padding: 20px;
+	margin-bottom: 30px;
+
+	h2 {
+		color: $global-muted-color;
+		font-size: $global-large-font-size;
+		font-weight: $global-font-weight-normal;
+		width: 100%;
+		text-align: center;
+		margin: 0;
 	}
 }
 </style>

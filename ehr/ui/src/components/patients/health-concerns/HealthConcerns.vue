@@ -24,7 +24,7 @@ export default defineComponent({
 		NewConcernDialog
 	},
 	setup() {
-		const isRequestLoading = ref<boolean>(false);
+		const isDataLoading = ref<boolean>(false);
 		const newConcernDialogVisible = ref<boolean>(false);
 		const activeConcerns = computed<Concern[]>(() => ConcernsModule.activeConcerns);
 		const activeConcernsTableData = computed<TableData[]>(() =>
@@ -50,19 +50,19 @@ export default defineComponent({
 		);
 
 		onMounted(async () => {
-			isRequestLoading.value = true;
+			isDataLoading.value = true;
 			try {
 				await ConcernsModule.getActiveConcerns();
 				await ConcernsModule.getResolvedConcerns();
 			} finally {
-				isRequestLoading.value = false;
+				isDataLoading.value = false;
 			}
 		});
 
 		return {
 			activeConcernsTableData,
 			resolvedConcernsTableData,
-			isRequestLoading,
+			isDataLoading,
 			newConcernDialogVisible
 		};
 	}
@@ -71,7 +71,7 @@ export default defineComponent({
 
 <template>
 	<div
-		v-loading="isRequestLoading"
+		v-loading="isDataLoading"
 		class="health-concerns"
 	>
 		<HealthConcernsTable
@@ -81,7 +81,29 @@ export default defineComponent({
 			@add-concern="newConcernDialogVisible = true"
 		/>
 		<div
-			v-if="!isRequestLoading && !activeConcernsTableData.length"
+			v-if="!activeConcernsTableData.length && resolvedConcernsTableData.length"
+			class="no-active-concerns"
+		>
+			<h2>No Active Health Concerns</h2>
+			<el-button
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="newConcernDialogVisible = true"
+			>
+				Add Health Concerns
+			</el-button>
+		</div>
+		<HealthConcernsTable
+			v-if="resolvedConcernsTableData.length"
+			:data="resolvedConcernsTableData"
+			type="ResolvedConcerns"
+			class="resolved-concerns"
+			title="Resolved Health Concerns"
+		/>
+		<div
+			v-if="!isDataLoading && !activeConcernsTableData.length && !resolvedConcernsTableData.length"
 			class="no-request-data"
 		>
 			<h2>No Health Concerns Yet</h2>
@@ -95,13 +117,6 @@ export default defineComponent({
 				Add Health Concern
 			</el-button>
 		</div>
-		<HealthConcernsTable
-			v-if="resolvedConcernsTableData.length"
-			:data="resolvedConcernsTableData"
-			type="ResolvedConcerns"
-			class="resolved-concerns"
-			title="Resolved Health Concerns"
-		/>
 		<NewConcernDialog
 			:visible="newConcernDialogVisible"
 			@close="newConcernDialogVisible = false"
@@ -130,5 +145,24 @@ export default defineComponent({
 
 .promoted-concerns {
 	margin-top: 30px;
+}
+
+.no-active-concerns {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border: $global-border;
+	border-radius: 5px;
+	padding: 20px;
+	margin-bottom: 30px;
+
+	h2 {
+		color: $global-muted-color;
+		font-size: $global-large-font-size;
+		font-weight: $global-font-weight-normal;
+		width: 100%;
+		text-align: center;
+		margin: 0;
+	}
 }
 </style>
