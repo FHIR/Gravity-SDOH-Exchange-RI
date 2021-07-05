@@ -1,7 +1,7 @@
-import { getGoals, updateGoal } from "@/api";
+import { createGoal, getGoals, updateGoal } from "@/api";
 import { VuexModule, Module, Action, Mutation, getModule } from "vuex-module-decorators";
 import store from "@/store";
-import { Goal, UpdateGoalPayload } from "@/types";
+import { Goal, NewGoalPayload, UpdateGoalPayload } from "@/types";
 
 export interface IGoals {
 	goals: Goal[]
@@ -33,6 +33,13 @@ class Goals extends VuexModule implements IGoals {
 		const updatedTask = await updateGoal(payload);
 
 		this.changeGoal(updatedTask);
+	}
+
+	@Action
+	async createGoal(payload: NewGoalPayload): Promise<void> {
+		await createGoal(payload);
+		// todo: check if we get response on create goal. if yes add new problem to list, if not get all problems again
+		await this.getGoals();
 	}
 }
 

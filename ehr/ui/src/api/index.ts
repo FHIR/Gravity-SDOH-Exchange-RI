@@ -15,7 +15,8 @@ import {
 	newProblem,
 	updateProblemPayload,
 	NewConcernPayload,
-	UpdateGoalPayload
+	UpdateGoalPayload,
+	NewGoalPayload
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -181,6 +182,11 @@ export const updateGoal = async ({ id }: UpdateGoalPayload): Promise<Goal> => {
 	// return res.data;
 };
 
+// todo: change and remove mocked data after sync with BE
+export const createGoal = async (payload: NewGoalPayload): Promise<NewGoalPayload> => payload;
+// const res = await axios.post("/goal", payload);
+// return res.data;
+
 export const getProblemCodes = async (code: string): Promise<{ isd: Coding[], snomed: Coding[] }> => {
 	// todo: call real request and remove mocked data
 	// const res = await axios.get(`/mappings/categories/${code}/condition/codings`);
@@ -204,6 +210,19 @@ export const getProblemCodes = async (code: string): Promise<{ isd: Coding[], sn
 	return res;
 };
 
+export const getGoalCodes = async (code: string): Promise<Coding[]> => {
+	// todo: call real request and remove mocked data
+	// const res = await axios.get(`/mappings/categories/${code}/goals/codings`);
+	//return res.data;
+
+	const res: Coding[] = [{
+		code: "385767005",
+		display: "Meals on wheels provision education"
+	}];
+
+	return res;
+};
+
 
 export const getProblems = async(): Promise<Problem[]> => {
 	// todo: remove mocked data after BE sync
@@ -211,7 +230,7 @@ export const getProblems = async(): Promise<Problem[]> => {
 	// return res.data;
 	const res: Problem[] =  [{
 		id: "SDOHCC-Condition-HungerVitalSign-Example-1",
-		name: "Hunger Vital Signs",
+		name: "Hunger Vital Signs 1",
 		basedOn: "Hunger Vital Signs assessment",
 		onsetPeriod: {
 			start: "2019-08-18T12:31:35.123Z"
@@ -225,7 +244,7 @@ export const getProblems = async(): Promise<Problem[]> => {
 	},
 	{
 		id: "SDOHCC-Condition-HungerVitalSign-Example-2",
-		name: "Hunger Vital Signs",
+		name: "Hunger Vital Signs 2",
 		basedOn: "Hunger Vital Signs assessment",
 		onsetPeriod: {
 			start: "2019-08-18T12:31:35.123Z",

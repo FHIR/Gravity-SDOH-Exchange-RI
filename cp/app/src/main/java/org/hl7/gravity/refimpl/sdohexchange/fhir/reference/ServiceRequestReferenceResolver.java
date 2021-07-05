@@ -1,15 +1,12 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.reference;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Condition;
@@ -20,7 +17,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.reference.util.ServiceRequestReferenceCollector;
-import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 
 /**
  * Reference resolver for {@link ServiceRequest} resource.
@@ -36,15 +32,17 @@ public class ServiceRequestReferenceResolver implements ReferenceResolver {
   @Getter
   private List<Reference> goalsRefs;
 
+  private List<Reference> externalConsentRefs;
   private List<Reference> externalConditionRefs;
   private List<Reference> externalGoalRefs;
 
+  private Map<String, Consent> localConsents;
   private Map<String, Condition> localConditions;
   private Map<String, Goal> localGoals;
 
+  private Map<String, Consent> externalConsents;
   private Map<String, Condition> externalConditions;
   private Map<String, Goal> externalGoals;
-  private Map<String, Consent> externalConsents;
 
   public ServiceRequestReferenceResolver(ServiceRequest serviceRequest, String identifierSystem) {
     this.consentsRef = ServiceRequestReferenceCollector.getConsents(serviceRequest);
@@ -55,17 +53,26 @@ public class ServiceRequestReferenceResolver implements ReferenceResolver {
 
   @Override
   public List<Reference> getLocalReferences() {
-    return Stream.concat(conditionsRefs.stream(), goalsRefs.stream())
-        .collect(Collectors.toList());
+    ArrayList<Reference> localReferences = new ArrayList<>();
+    localReferences.addAll(consentsRef);
+    localReferences.addAll(conditionsRefs);
+    localReferences.addAll(goalsRefs);
+    return localReferences;
   }
 
   @Override
   public void setLocalResources(Map<Class<? extends Resource>, List<Resource>> localResources) {
+    this.localConsents = collectResources(localResources, Consent.class, c -> c.getIdentifierFirstRep()
+        .getValue());
     this.localConditions = collectResources(localResources, Condition.class, c -> c.getIdentifierFirstRep()
         .getValue());
     this.localGoals = collectResources(localResources, Goal.class, g -> g.getIdentifierFirstRep()
         .getValue());
 
+    this.externalConsentRefs = consentsRef.stream()
+        .filter(ref -> !localConsents.containsKey(ref.getReferenceElement()
+            .getIdPart()))
+        .collect(Collectors.toList());
     this.externalConditionRefs = conditionsRefs.stream()
         .filter(ref -> !localConditions.containsKey(ref.getReferenceElement()
             .getIdPart()))
@@ -89,8 +96,7 @@ public class ServiceRequestReferenceResolver implements ReferenceResolver {
   @Override
   public List<Reference> getExternalReferences() {
     ArrayList<Reference> externalReferences = new ArrayList<>();
-    // Right now we always load consent resources
-    externalReferences.addAll(consentsRef);
+    externalReferences.addAll(externalConsentRefs);
     externalReferences.addAll(externalConditionRefs);
     externalReferences.addAll(externalGoalRefs);
     return externalReferences;
@@ -157,6 +163,10 @@ public class ServiceRequestReferenceResolver implements ReferenceResolver {
             .getIdPart());
     consent.setId(IdType.newRandomUuid());
     return consent;
+  }
+
+  public boolean createConsent(IIdType iIdType) {
+    return externalConsents.containsKey(iIdType.getIdPart());
   }
 
   private <T extends Resource> Map<String, T> collectResources(Map<Class<? extends Resource>, List<Resource>> resources,

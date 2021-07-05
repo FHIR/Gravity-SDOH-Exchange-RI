@@ -3,6 +3,7 @@ import { computed, defineComponent, onMounted, ref } from "vue";
 import { Goal, Coding, Comment } from "@/types";
 import { GoalsModule } from "@/store/modules/goals";
 import GoalsTable from "@/components/patients/goals/GoalsTable.vue";
+import NewGoalDialog from "@/components/patients/goals/NewGoalDialog.vue";
 import NoActiveItems from "@/components/patients/NoActiveItems.vue";
 import NoItems from "@/components/patients/NoItems.vue";
 
@@ -23,6 +24,7 @@ export type TableData = {
 export default defineComponent({
 	name: "Goals",
 	components: {
+		NewGoalDialog,
 		NoItems,
 		NoActiveItems,
 		GoalsTable
@@ -47,6 +49,8 @@ export default defineComponent({
 		);
 		const activeGoals = computed<TableData[]>(() => tableData.value.filter(goal => goal.status === "active"));
 		const completedGoals = computed<TableData[]>(() => tableData.value.filter(goal => goal.status === "completed"));
+		const newGoalDialogVisible = ref<boolean>(false);
+
 		onMounted(async () => {
 			isDataLoading.value = true;
 			try {
@@ -59,7 +63,8 @@ export default defineComponent({
 		return {
 			activeGoals,
 			completedGoals,
-			isDataLoading
+			isDataLoading,
+			newGoalDialogVisible
 		};
 	}
 });
@@ -74,6 +79,7 @@ export default defineComponent({
 			v-if="activeGoals.length > 0"
 			:data="activeGoals"
 			status="active"
+			@add-goal="newGoalDialogVisible = true"
 		/>
 		<NoActiveItems
 			v-else-if="!activeGoals.length && completedGoals.length"
@@ -89,6 +95,11 @@ export default defineComponent({
 			v-if="!isDataLoading && !(activeGoals.length > 0 || completedGoals.length > 0)"
 			message="No Goals Yet"
 			button-label="Add Goal"
+			@add-item="newGoalDialogVisible = true"
+		/>
+		<NewGoalDialog
+			:visible="newGoalDialogVisible"
+			@close="newGoalDialogVisible = false"
 		/>
 	</div>
 </template>

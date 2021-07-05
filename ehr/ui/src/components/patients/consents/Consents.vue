@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import NewConsentDialog from "./NewConsentDialog.vue";
 import { Consent } from "@/types";
 import { getConsents, getConsentAttachment } from "@/api";
@@ -28,22 +28,17 @@ export default defineComponent({
 			consents.value = [...consents.value, newOne];
 		};
 
-		const attachmentLoading = ref(false);
-
 		const viewAttachment = async (consentId: string) => {
-			try {
-				attachmentLoading.value = true;
+			const newWin = window.open();
+			if (newWin) {
 				const blob = await getConsentAttachment(consentId);
-				// Potential memory leak
 				const objectUrl = URL.createObjectURL(blob);
-				const newWin = window.open();
-				if (newWin) {
-					newWin.location.href = objectUrl;
-				}
-			} finally {
-				attachmentLoading.value = false;
+				newWin.location.href = objectUrl;
+				URL.revokeObjectURL(objectUrl);
 			}
 		};
+
+		const existingConsentNames = computed<string[]>(() => consents.value.map(({ name }) => name));
 
 
 		return {
@@ -53,7 +48,7 @@ export default defineComponent({
 			addNewConsent,
 			onConsentCreated,
 			viewAttachment,
-			attachmentLoading
+			existingConsentNames
 		};
 	}
 });
@@ -63,7 +58,6 @@ export default defineComponent({
 	<div
 		v-loading="consentsLoading"
 		class="consents"
-		:class="{ 'wait-cursor': attachmentLoading }"
 	>
 		<NoItems
 			v-if="consents.length === 0"
@@ -136,6 +130,7 @@ export default defineComponent({
 
 		<NewConsentDialog
 			v-model:opened="dialogOpened"
+			:existing-consent-names="existingConsentNames"
 			@consent-created="onConsentCreated"
 		/>
 	</div>
