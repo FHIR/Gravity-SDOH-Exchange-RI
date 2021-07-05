@@ -59,22 +59,22 @@ public class TaskReferenceResourcesLoader {
 
     Patient patient = referenceResolver.getPatient();
     if (referenceResolver.createPatient()) {
-      // Create CBRO Patient resource
+      // Create CP Patient resource
       bundle.addEntry(FhirUtil.createPostEntry(patient));
     }
     Organization requester = referenceResolver.getRequester();
     if (referenceResolver.createRequester()) {
-      // Create CBRO Organization resource
+      // Create CP Organization resource
       bundle.addEntry(FhirUtil.createPostEntry(requester));
     }
     ServiceRequest serviceRequest = referenceResolver.getServiceRequest();
-    // Link CBRO ServiceRequest with Patient
+    // Link CP ServiceRequest with Patient
     serviceRequest.setSubject(FhirUtil.toReference(Patient.class, patient.getIdElement()
         .getIdPart()));
-    // Create CBRO ServiceRequest resource
+    // Create CP ServiceRequest resource
     bundle.addEntry(FhirUtil.createPostEntry(serviceRequest));
 
-    // Link CBRO Task with Patient, Organization and ServiceRequest
+    // Link CP Task with Patient, Organization and ServiceRequest
     task.setFor(FhirUtil.toReference(Patient.class, patient.getIdElement()
         .getIdPart(), patient.getNameFirstRep()
         .getNameAsSingleString()));
@@ -103,14 +103,18 @@ public class TaskReferenceResourcesLoader {
     for (Reference serviceRequestRef : referenceResolver.getConsentsRef()) {
       IIdType serviceRequestEl = serviceRequestRef.getReferenceElement();
       Consent consent = referenceResolver.getConsent(serviceRequestEl);
-      updateResourceRefs(consent, ehrClient.getServerBase(), referenceConsumers);
-      // Create CBRO Goal resource
-      bundle.addEntry(FhirUtil.createPostEntry(consent));
-      // Link CBRO ServiceRequest reference with Gaol
+      // Update links only for new conditions
+      if (referenceResolver.createConsent(serviceRequestEl)) {
+        updateResourceRefs(consent, ehrClient.getServerBase(), referenceConsumers);
+        // Create CP Condition resource
+        bundle.addEntry(FhirUtil.createPostEntry(consent));
+      }
+      // Link CP ServiceRequest reference with Consent
       serviceRequestEl.setParts(null, serviceRequestEl.getResourceType(), consent.getIdElement()
           .getIdPart(), null);
       serviceRequestRef.setReferenceElement(serviceRequestEl);
     }
+
     Map<String, Condition> processedConditions = new HashMap<>();
     for (Reference serviceRequestRef : referenceResolver.getConditionsRefs()) {
       IIdType serviceRequestEl = serviceRequestRef.getReferenceElement();
@@ -118,10 +122,10 @@ public class TaskReferenceResourcesLoader {
       // Update links only for new conditions
       if (referenceResolver.createCondition(serviceRequestEl)) {
         updateResourceRefs(condition, ehrClient.getServerBase(), referenceConsumers);
-        // Create CBRO Condition resource
+        // Create CP Condition resource
         bundle.addEntry(FhirUtil.createPostEntry(condition));
       }
-      // Link CBRO ServiceRequest reference with Condition
+      // Link CP ServiceRequest reference with Condition
       serviceRequestEl.setParts(null, serviceRequestEl.getResourceType(), condition.getIdElement()
           .getIdPart(), null);
       serviceRequestRef.setReferenceElement(serviceRequestEl);
@@ -133,12 +137,13 @@ public class TaskReferenceResourcesLoader {
     for (Reference serviceRequestRef : referenceResolver.getGoalsRefs()) {
       IIdType serviceRequestEl = serviceRequestRef.getReferenceElement();
       Goal goal = referenceResolver.getGoal(serviceRequestEl);
+      // Update links only for new goals
       if (referenceResolver.createGoal(serviceRequestEl)) {
         updateResourceRefs(goal, ehrClient.getServerBase(), referenceConsumers);
-        // Create CBRO Goal resource
+        // Create CP Goal resource
         bundle.addEntry(FhirUtil.createPostEntry(goal));
       }
-      // Link CBRO ServiceRequest reference with Gaol
+      // Link CP ServiceRequest reference with Gaol
       serviceRequestEl.setParts(null, serviceRequestEl.getResourceType(), goal.getIdElement()
           .getIdPart(), null);
       serviceRequestRef.setReferenceElement(serviceRequestEl);
