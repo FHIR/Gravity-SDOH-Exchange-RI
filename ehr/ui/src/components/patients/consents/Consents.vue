@@ -3,10 +3,11 @@ import { defineComponent, ref } from "vue";
 import NewConsentDialog from "./NewConsentDialog.vue";
 import { Consent } from "@/types";
 import { getConsents, getConsentAttachment } from "@/api";
+import NoItems from "@/components/patients/NoItems.vue";
 
 
 export default defineComponent({
-	components: { NewConsentDialog },
+	components: { NoItems, NewConsentDialog },
 	setup() {
 		const consents = ref<Consent[]>([]);
 		const consentsLoading = ref(true);
@@ -64,23 +65,12 @@ export default defineComponent({
 		class="consents"
 		:class="{ 'wait-cursor': attachmentLoading }"
 	>
-		<div
+		<NoItems
 			v-if="consents.length === 0"
-			class="empty-state"
-		>
-			<div class="text">
-				No Consents Added Yet
-			</div>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				@click="addNewConsent"
-			>
-				Add New Consent
-			</el-button>
-		</div>
+			message="No Consents Yet"
+			button-label="Add Consent"
+			@add-item="addNewConsent"
+		/>
 
 		<div
 			v-else
@@ -159,21 +149,6 @@ export default defineComponent({
 
 	&.wait-cursor * {
 		cursor: wait;
-	}
-
-	.empty-state {
-		display: flex;
-		flex-direction: column;
-		height: 340px;
-		align-items: center;
-		justify-content: center;
-
-		.text {
-			font-size: 48px;
-			font-weight: $global-font-weight-normal;
-			color: $whisper;
-			margin-bottom: 50px;
-		}
 	}
 
 	.table-wrap {

@@ -4,6 +4,7 @@ import { Goal, Coding, Comment } from "@/types";
 import { GoalsModule } from "@/store/modules/goals";
 import GoalsTable from "@/components/patients/goals/GoalsTable.vue";
 import NoActiveItems from "@/components/patients/NoActiveItems.vue";
+import NoItems from "@/components/patients/NoItems.vue";
 
 export type TableData = {
 	name: string,
@@ -22,6 +23,7 @@ export type TableData = {
 export default defineComponent({
 	name: "Goals",
 	components: {
+		NoItems,
 		NoActiveItems,
 		GoalsTable
 	},
@@ -75,26 +77,18 @@ export default defineComponent({
 		/>
 		<NoActiveItems
 			v-else-if="!activeGoals.length && completedGoals.length"
-			items-name="Goals"
+			message="No Active Goals"
+			button-label="Add Goal"
 		/>
 		<GoalsTable
 			v-if="completedGoals.length > 0"
 			:data="completedGoals"
 			status="completed"
 		/>
-		<div
+		<NoItems
 			v-if="!isDataLoading && !(activeGoals.length > 0 || completedGoals.length > 0)"
-			class="no-data"
-		>
-			<h2>No Goals Yet</h2>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-			>
-				Add Goal
-			</el-button>
-		</div>
+			message="No Goals Yet"
+			button-label="Add Goal"
+		/>
 	</div>
 </template>

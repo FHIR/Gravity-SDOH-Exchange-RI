@@ -2,7 +2,7 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-	name: "NoActiveItems",
+	name: "NoItems",
 	props: {
 		message: {
 			type: String,
@@ -18,9 +18,7 @@ export default defineComponent({
 </script>
 
 <template>
-	<div
-		class="no-active-items"
-	>
+	<div class="no-data">
 		<h2>{{ message }}</h2>
 		<el-button
 			plain
@@ -37,22 +35,19 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
 
-.no-active-items {
+.no-data {
+	height: 240px;
 	display: flex;
-	justify-content: center;
+	flex-direction: column;
 	align-items: center;
-	border: $global-border;
-	border-radius: 5px;
-	padding: 20px;
-	margin-bottom: 30px;
+	justify-content: flex-start;
+	background-color: $global-background;
 
 	h2 {
 		color: $global-muted-color;
-		font-size: $global-large-font-size;
+		font-size: $global-xxxlarge-font-size;
 		font-weight: $global-font-weight-normal;
-		width: 100%;
-		text-align: center;
-		margin: 0;
+		margin-bottom: 50px;
 	}
 }
 </style>

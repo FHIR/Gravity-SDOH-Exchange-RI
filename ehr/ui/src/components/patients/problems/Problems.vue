@@ -5,6 +5,7 @@ import { Problem } from "@/types";
 import { ProblemsModule } from "@/store/modules/problems";
 import NewProblemDialog from "@/components/patients/problems/NewProblemDialog.vue";
 import NoActiveItems from "@/components/patients/NoActiveItems.vue";
+import NoItems from "@/components/patients/NoItems.vue";
 
 export type TableData = {
 	id: string,
@@ -23,6 +24,7 @@ export type TableData = {
 export default defineComponent({
 	name: "Problems",
 	components: {
+		NoItems,
 		NoActiveItems,
 		NewProblemDialog,
 		ProblemsTable
@@ -86,7 +88,8 @@ export default defineComponent({
 		/>
 		<NoActiveItems
 			v-else-if="!activeProblems.length && closedProblems.length"
-			items-name="Problems"
+			message="No Active Problems"
+			button-label="Add Problem"
 			@add-item="newProblemsDialogVisible = true"
 		/>
 		<ProblemsTable
@@ -95,21 +98,12 @@ export default defineComponent({
 			title="Closed Problems"
 			status="closed"
 		/>
-		<div
+		<NoItems
 			v-if="!isLoading && !tableData.length"
-			class="no-data"
-		>
-			<h2>No Problems Yet</h2>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				@click="newProblemsDialogVisible = true"
-			>
-				Add Problem
-			</el-button>
-		</div>
+			massage="No Problems Yet"
+			button-label="Add Problem"
+			@add-item="newProblemsDialogVisible = true"
+		/>
 		<NewProblemDialog
 			:visible="newProblemsDialogVisible"
 			@close="newProblemsDialogVisible = false"
@@ -117,22 +111,3 @@ export default defineComponent({
 	</div>
 </template>
 
-<style lang="scss" scoped>
-@import "~@/assets/scss/abstracts/variables";
-
-.no-data {
-	height: 240px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	background-color: $global-background;
-
-	h2 {
-		color: $global-muted-color;
-		font-size: $global-xxxlarge-font-size;
-		font-weight: $global-font-weight-normal;
-		margin-bottom: 50px;
-	}
-}
-</style>

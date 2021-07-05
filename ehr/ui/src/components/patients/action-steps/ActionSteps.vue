@@ -6,6 +6,7 @@ import { Comment, Occurrence, Task, ServiceRequestCondition, ServiceRequestGoal,
 import { TasksModule } from "@/store/modules/tasks";
 import { ElNotification } from "element-plus";
 import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
+import NoItems from "@/components/patients/NoItems.vue";
 
 export type TableData = {
 	name: string,
@@ -35,6 +36,7 @@ export type taskStatusDiff = {
 export default defineComponent({
 	name: "ActionSteps",
 	components: {
+		NoItems,
 		RequestTable,
 		NewRequestDialog
 	},
@@ -192,21 +194,12 @@ export default defineComponent({
 				:data="completedRequests"
 				title="Completed Requests"
 			/>
-			<div
+			<NoItems
 				v-if="!isRequestLoading && !(completedRequests.length || activeRequests.length)"
-				class="no-data"
-			>
-				<h2>No Referral Requests Yet</h2>
-				<el-button
-					plain
-					round
-					type="primary"
-					size="mini"
-					@click="newRequestDialogVisible = true"
-				>
-					Add New Request
-				</el-button>
-			</div>
+				message="No Referral Requests Yet"
+				button-label="Add Request"
+				@add-item="newRequestDialogVisible = true"
+			/>
 		</div>
 
 		<NewRequestDialog

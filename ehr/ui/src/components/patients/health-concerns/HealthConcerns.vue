@@ -5,6 +5,7 @@ import { ConcernsModule } from "@/store/modules/concerns";
 import HealthConcernsTable from "@/components/patients/health-concerns/HealthConcernsTable.vue";
 import NewConcernDialog from "@/components/patients/health-concerns/NewConcernDialog.vue";
 import NoActiveItems from "@/components/patients/NoActiveItems.vue";
+import NoItems from "@/components/patients/NoItems.vue";
 
 export type TableData = {
 	name: string,
@@ -21,6 +22,7 @@ export type TableData = {
 export default defineComponent({
 	name: "HealthConcerns",
 	components: {
+		NoItems,
 		NoActiveItems,
 		HealthConcernsTable,
 		NewConcernDialog
@@ -84,7 +86,8 @@ export default defineComponent({
 		/>
 		<NoActiveItems
 			v-else-if="!activeConcernsTableData.length && resolvedConcernsTableData.length"
-			items-name="Health Concerns"
+			message="No Active Health Concerns Yet"
+			button-label="Add Health Concern"
 			@add-item="newConcernDialogVisible = true"
 		/>
 		<HealthConcernsTable
@@ -94,21 +97,12 @@ export default defineComponent({
 			class="resolved-concerns"
 			title="Resolved Health Concerns"
 		/>
-		<div
+		<NoItems
 			v-if="!isDataLoading && !activeConcernsTableData.length && !resolvedConcernsTableData.length"
-			class="no-request-data"
-		>
-			<h2>No Health Concerns Yet</h2>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				@click="newConcernDialogVisible = true"
-			>
-				Add Health Concern
-			</el-button>
-		</div>
+			message="No Health Concerns Yet"
+			button-label="Add Health Concern"
+			@add-item="newConcernDialogVisible = true"
+		/>
 		<NewConcernDialog
 			:visible="newConcernDialogVisible"
 			@close="newConcernDialogVisible = false"
@@ -117,24 +111,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss" scoped>
-@import "~@/assets/scss/abstracts/variables";
-
-.no-request-data {
-	height: 240px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	background-color: $global-background;
-
-	h2 {
-		color: $whisper;
-		font-size: $global-xxxlarge-font-size;
-		font-weight: $global-font-weight-normal;
-		margin-bottom: 50px;
-	}
-}
-
 .promoted-concerns {
 	margin-top: 30px;
 }
