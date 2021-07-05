@@ -81,7 +81,6 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
-				@click="newProblemsDialogVisible = true"
 			>
 				Add Goal
 			</el-button>
