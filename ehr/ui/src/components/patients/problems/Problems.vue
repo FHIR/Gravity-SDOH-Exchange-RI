@@ -4,6 +4,7 @@ import ProblemsTable from "@/components/patients/problems/ProblemsTable.vue";
 import { Problem } from "@/types";
 import { ProblemsModule } from "@/store/modules/problems";
 import NewProblemDialog from "@/components/patients/problems/NewProblemDialog.vue";
+import NoActiveItems from "@/components/patients/NoActiveItems.vue";
 
 export type TableData = {
 	id: string,
@@ -22,6 +23,7 @@ export type TableData = {
 export default defineComponent({
 	name: "Problems",
 	components: {
+		NoActiveItems,
 		NewProblemDialog,
 		ProblemsTable
 	},
@@ -82,21 +84,11 @@ export default defineComponent({
 			status="active"
 			@add-problem="newProblemsDialogVisible = true"
 		/>
-		<div
-			v-if="!activeProblems.length && closedProblems.length"
-			class="no-active-problems"
-		>
-			<h2>No Active Problems</h2>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				@click="newProblemsDialogVisible = true"
-			>
-				Add Problem
-			</el-button>
-		</div>
+		<NoActiveItems
+			v-else-if="!activeProblems.length && closedProblems.length"
+			items-name="Problems"
+			@add-item="newProblemsDialogVisible = true"
+		/>
 		<ProblemsTable
 			v-if="closedProblems.length"
 			:data="closedProblems"
@@ -141,25 +133,6 @@ export default defineComponent({
 		font-size: $global-xxxlarge-font-size;
 		font-weight: $global-font-weight-normal;
 		margin-bottom: 50px;
-	}
-}
-
-.no-active-problems {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border: $global-border;
-	border-radius: 5px;
-	padding: 20px;
-	margin-bottom: 30px;
-
-	h2 {
-		color: $global-muted-color;
-		font-size: $global-large-font-size;
-		font-weight: $global-font-weight-normal;
-		width: 100%;
-		text-align: center;
-		margin: 0;
 	}
 }
 </style>

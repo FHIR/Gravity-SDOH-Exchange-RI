@@ -3,6 +3,7 @@ import { computed, defineComponent, onMounted, ref } from "vue";
 import { Goal, Coding, Comment } from "@/types";
 import { GoalsModule } from "@/store/modules/goals";
 import GoalsTable from "@/components/patients/goals/GoalsTable.vue";
+import NoActiveItems from "@/components/patients/NoActiveItems.vue";
 
 export type TableData = {
 	name: string,
@@ -21,6 +22,7 @@ export type TableData = {
 export default defineComponent({
 	name: "Goals",
 	components: {
+		NoActiveItems,
 		GoalsTable
 	},
 	setup() {
@@ -71,20 +73,10 @@ export default defineComponent({
 			:data="activeGoals"
 			status="active"
 		/>
-		<div
-			v-if="!activeGoals.length && completedGoals.length"
-			class="no-active-goals"
-		>
-			<h2>No Active Goals</h2>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-			>
-				Add Goal
-			</el-button>
-		</div>
+		<NoActiveItems
+			v-else-if="!activeGoals.length && completedGoals.length"
+			items-name="Goals"
+		/>
 		<GoalsTable
 			v-if="completedGoals.length > 0"
 			:data="completedGoals"
@@ -106,26 +98,3 @@ export default defineComponent({
 		</div>
 	</div>
 </template>
-
-<style lang="scss" scoped>
-@import "~@/assets/scss/abstracts/variables";
-
-.no-active-goals {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border: $global-border;
-	border-radius: 5px;
-	padding: 20px;
-	margin-bottom: 30px;
-
-	h2 {
-		color: $global-muted-color;
-		font-size: $global-large-font-size;
-		font-weight: $global-font-weight-normal;
-		width: 100%;
-		text-align: center;
-		margin: 0;
-	}
-}
-</style>

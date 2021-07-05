@@ -4,6 +4,7 @@ import { Coding, Concern } from "@/types";
 import { ConcernsModule } from "@/store/modules/concerns";
 import HealthConcernsTable from "@/components/patients/health-concerns/HealthConcernsTable.vue";
 import NewConcernDialog from "@/components/patients/health-concerns/NewConcernDialog.vue";
+import NoActiveItems from "@/components/patients/NoActiveItems.vue";
 
 export type TableData = {
 	name: string,
@@ -20,6 +21,7 @@ export type TableData = {
 export default defineComponent({
 	name: "HealthConcerns",
 	components: {
+		NoActiveItems,
 		HealthConcernsTable,
 		NewConcernDialog
 	},
@@ -80,21 +82,11 @@ export default defineComponent({
 			type="ActiveConcerns"
 			@add-concern="newConcernDialogVisible = true"
 		/>
-		<div
-			v-if="!activeConcernsTableData.length && resolvedConcernsTableData.length"
-			class="no-active-concerns"
-		>
-			<h2>No Active Health Concerns</h2>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				@click="newConcernDialogVisible = true"
-			>
-				Add Health Concerns
-			</el-button>
-		</div>
+		<NoActiveItems
+			v-else-if="!activeConcernsTableData.length && resolvedConcernsTableData.length"
+			items-name="Health Concerns"
+			@add-item="newConcernDialogVisible = true"
+		/>
 		<HealthConcernsTable
 			v-if="resolvedConcernsTableData.length"
 			:data="resolvedConcernsTableData"
@@ -145,24 +137,5 @@ export default defineComponent({
 
 .promoted-concerns {
 	margin-top: 30px;
-}
-
-.no-active-concerns {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border: $global-border;
-	border-radius: 5px;
-	padding: 20px;
-	margin-bottom: 30px;
-
-	h2 {
-		color: $global-muted-color;
-		font-size: $global-large-font-size;
-		font-weight: $global-font-weight-normal;
-		width: 100%;
-		text-align: center;
-		margin: 0;
-	}
 }
 </style>
