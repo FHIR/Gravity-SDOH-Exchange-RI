@@ -150,10 +150,6 @@ sdoh-mappings:
                   code: "Z59.01"
                 - display: "Unsheltered homelessness"
                   code: "Z59.02"
-                - display:
-                  code:
-                - display:
-                  code:
     - code: "transportation-insecurity"
       display: "Transportation Insecurity"
       resources:

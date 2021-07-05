@@ -31,32 +31,23 @@ export const getTasks = async (): Promise<Task[]> => {
 	return res.data;
 };
 
-export const getConcerns = async (): Promise<Concern[]> => [{
-	//todo: remove mock after BE sync
-	concernStatus: "Active",
-	name: "Hunger Vital Signs",
-	assessmentDate: "2021-05-18T14:15:08",
-	category: "Food Insecurity",
-	basedOn: "Past",
-	status: "send to patient"
-}, {
-	name: "Hunger Vital Signs",
-	assessmentDate: "2021-05-18T14:15:08",
-	category: "Food Insecurity",
-	basedOn: "Past",
-	status: "send to patient",
-	concernStatus: "PromotedOrResolved"
-}];
+export const getActiveConcerns = async (): Promise<Concern[]> => {
+	const res = await axios.get("/health-concern/active");
 
-// TODO: Delete when BE will be ready
-export const addConcernResponse = (payload: NewConcernPayload): Concern => ({
-	name: payload.name,
-	assessmentDate: payload.assessmentDate,
-	category: payload.category,
-	basedOn: payload.basedOn,
-	status: payload.status,
-	concernStatus: payload.concernStatus
-});
+	return res.data;
+};
+
+export const getResolvedConcerns = async (): Promise<Concern[]> => {
+	const res = await axios.get("/health-concern/resolved");
+
+	return res.data;
+};
+
+export const addConcernResponse = async (payload: NewConcernPayload): Promise<Concern> => {
+	const res = await axios.post("/health-concern", payload);
+
+	return res.data;
+};
 
 export const createTask = async (payload: newTaskPayload): Promise<{ taskId: string }> => {
 	const res = await axios.post("/task", payload);
@@ -94,10 +85,10 @@ export const getCategories = async (): Promise<Coding[]> => {
 	return res.data;
 };
 
-//todo: remove mock after BE sync
-export const getIcd10Codes = async (): Promise<Coding[]> => [{ display: "Transportation Insecurity", code: "Z59.82" }];
-export const getSnomedCtCodes = async (): Promise<Coding[]> => [{ display: "Food Insecurity", code: "F19.12" }];
-
+export const getConditionCodes = async (category: string): Promise<{ codings: Coding[], display: "ICD-10-CM" | "SNOMED CT" }[]> => {
+	const res = await axios.get(`/mappings/categories/${category}/condition/codings`);
+	return res.data;
+};
 export const getRequests = async (code: string): Promise<Coding[]> => {
 	const res = await axios.get(`/mappings/categories/${code}/servicerequest/codings`);
 

@@ -120,22 +120,23 @@ export type newTaskPayload = {
 
 export type NewConcernPayload = {
 	name: string,
-	assessmentDate: string,
 	category: string
-	basedOn: string,
-	status: string,
-	icd10Code?: string,
-	snomedCtCode?: string,
-	concernStatus: string,
+	icdCode: string,
+	snomedCode: string,
 }
 
 export type Concern = {
+	id: string,
 	name: string,
-	assessmentDate: string,
-	category: string
-	basedOn: string,
-	status: string,
-	concernStatus: string
+	category: Coding,
+	icdCode: Coding,
+	snomedCode: Coding,
+	basedOn: string | {
+		display: string,
+		id: string,
+	},
+	date: string,
+	errors: string[]
 };
 
 export type updateTaskPayload = {

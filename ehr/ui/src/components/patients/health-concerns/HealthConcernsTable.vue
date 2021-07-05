@@ -84,14 +84,14 @@ export default defineComponent({
 					label="Category"
 				>
 					<template #default="scope">
-						{{ scope.row.category }}
+						{{ scope.row.category.display }}
 					</template>
 				</el-table-column>
 				<el-table-column
 					label="Based On"
 				>
 					<template #default="scope">
-						{{ scope.row.basedOn }}
+						{{ scope.row.basedOn.display ? scope.row.basedOn.display : scope.row.basedOn }}
 					</template>
 				</el-table-column>
 				<el-table-column
@@ -118,14 +118,6 @@ export default defineComponent({
 						icon-class="icon-remove"
 						label="Remove"
 					/>
-				</el-table-column>
-				<el-table-column
-					v-if="type === 'PromotedOrResolvedConcerns'"
-					label="Status"
-				>
-					<template #default="scope">
-						{{ scope.row.status }}
-					</template>
 				</el-table-column>
 				<el-table-column
 					v-if="type === 'PromotedOrResolvedConcerns'"
