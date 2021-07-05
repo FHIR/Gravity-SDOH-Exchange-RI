@@ -3,6 +3,7 @@ import { computed, defineComponent, onMounted, ref } from "vue";
 import { Coding, Concern } from "@/types";
 import { ConcernsModule } from "@/store/modules/concerns";
 import HealthConcernsTable from "@/components/patients/health-concerns/HealthConcernsTable.vue";
+import NewConcernDialog from "@/components/patients/health-concerns/NewConcernDialog.vue";
 
 export type TableData = {
 	name: string,
@@ -19,10 +20,12 @@ export type TableData = {
 export default defineComponent({
 	name: "HealthConcerns",
 	components: {
-		HealthConcernsTable
+		HealthConcernsTable,
+		NewConcernDialog
 	},
 	setup() {
 		const isRequestLoading = ref<boolean>(false);
+		const newConcernDialogVisible = ref<boolean>(false);
 		const activeConcerns = computed<Concern[]>(() => ConcernsModule.activeConcerns);
 		const activeConcernsTableData = computed<TableData[]>(() =>
 			activeConcerns.value.map((concern: Concern) => ({
@@ -59,44 +62,50 @@ export default defineComponent({
 		return {
 			activeConcernsTableData,
 			resolvedConcernsTableData,
-			isRequestLoading
+			isRequestLoading,
+			newConcernDialogVisible
 		};
 	}
 });
 </script>
 
 <template>
-	<div class="health-concerns">
+	<div
+		v-loading="isRequestLoading"
+		class="health-concerns"
+	>
+		<HealthConcernsTable
+			v-if="activeConcernsTableData.length"
+			:data="activeConcernsTableData"
+			type="ActiveConcerns"
+			@add-concern="newConcernDialogVisible = true"
+		/>
 		<div
-			v-loading="isRequestLoading"
+			v-if="!isRequestLoading && !activeConcernsTableData.length"
+			class="no-request-data"
 		>
-			<HealthConcernsTable
-				v-if="activeConcernsTableData.length"
-				:data="activeConcernsTableData"
-				type="ActiveConcerns"
-			/>
-			<div
-				v-if="!isRequestLoading && !activeConcernsTableData.length"
-				class="no-request-data"
+			<h2>No Health Concerns Yet</h2>
+			<el-button
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="newConcernDialogVisible = true"
 			>
-				<h2>No Health Concerns Yet</h2>
-				<el-button
-					plain
-					round
-					type="primary"
-					size="mini"
-				>
-					Add Health Concern
-				</el-button>
-			</div>
-			<HealthConcernsTable
-				v-if="resolvedConcernsTableData.length"
-				:data="resolvedConcernsTableData"
-				type="ResolvedConcerns"
-				class="resolved-concerns"
-				title="Resolved Health Concerns"
-			/>
+				Add Health Concern
+			</el-button>
 		</div>
+		<HealthConcernsTable
+			v-if="resolvedConcernsTableData.length"
+			:data="resolvedConcernsTableData"
+			type="ResolvedConcerns"
+			class="resolved-concerns"
+			title="Resolved Health Concerns"
+		/>
+		<NewConcernDialog
+			:visible="newConcernDialogVisible"
+			@close="newConcernDialogVisible = false"
+		/>
 	</div>
 </template>
 

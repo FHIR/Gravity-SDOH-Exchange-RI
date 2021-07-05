@@ -3,12 +3,10 @@ import { defineComponent, PropType, ref } from "vue";
 import EditConcernDialog from "@/components/patients/health-concerns/EditConcernDialog.vue";
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
-import NewConcernDialog from "@/components/patients/health-concerns/NewConcernDialog.vue";
 
 export default defineComponent({
 	name: "HealthConcernsTable",
 	components: {
-		NewConcernDialog,
 		EditConcernDialog,
 		ActionButton
 	},
@@ -26,9 +24,9 @@ export default defineComponent({
 			required: true
 		}
 	},
+	emits: ["add-concern"],
 	setup() {
 		const editConcernDialogVisible = ref<boolean>(false);
-		const newConcernDialogVisible = ref<boolean>(false);
 		const editConcern = ref<TableData>();
 		const onConcernClick = (row: TableData) => {
 			editConcernDialogVisible.value = true;
@@ -37,7 +35,6 @@ export default defineComponent({
 
 		return {
 			editConcernDialogVisible,
-			newConcernDialogVisible,
 			onConcernClick,
 			editConcern
 		};
@@ -62,7 +59,7 @@ export default defineComponent({
 					round
 					type="primary"
 					size="mini"
-					@click="newConcernDialogVisible = true"
+					@click="$emit('add-concern')"
 				>
 					Add Health Concern
 				</el-button>
@@ -132,11 +129,6 @@ export default defineComponent({
 			:visible="editConcernDialogVisible"
 			:concern="editConcern"
 			@close="editConcernDialogVisible = false"
-		/>
-
-		<NewConcernDialog
-			:visible="newConcernDialogVisible"
-			@close="newConcernDialogVisible = false"
 		/>
 	</div>
 </template>
