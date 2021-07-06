@@ -5,6 +5,7 @@ import { ConcernsModule } from "@/store/modules/concerns";
 import HealthConcernsTable from "@/components/patients/health-concerns/HealthConcernsTable.vue";
 
 export type TableData = {
+	id: string,
 	name: string,
 	assessmentDate: string,
 	basedOn: string | {
@@ -38,6 +39,7 @@ export default defineComponent({
 		const resolvedConcerns = computed<Concern[]>(() => ConcernsModule.resolvedConcerns);
 		const resolvedConcernsTableData = computed<TableData[]>(() =>
 			resolvedConcerns.value.map((concern: Concern) => ({
+				id: concern.id,
 				name: concern.name,
 				assessmentDate: concern.date,
 				basedOn: concern.basedOn,

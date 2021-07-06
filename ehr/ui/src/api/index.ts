@@ -43,6 +43,10 @@ export const getResolvedConcerns = async (): Promise<Concern[]> => {
 	return res.data;
 };
 
+export const resolveConcern = async (id: string) => {
+	await axios.put(`/health-concern/resolve/${id}`);
+};
+
 export const addConcernResponse = async (payload: NewConcernPayload): Promise<Concern> => {
 	const res = await axios.post("/health-concern", payload);
 

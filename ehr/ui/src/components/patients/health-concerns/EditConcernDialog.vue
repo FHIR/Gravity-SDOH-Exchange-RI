@@ -1,10 +1,16 @@
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from "vue";
+import { computed, defineComponent, PropType, ref, toRefs } from "vue";
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
 import DropButton from "@/components/DropButton.vue";
-import { ACTION_BUTTONS } from "@/utils/constants";
 import { ConcernsModule } from "@/store/modules/concerns";
-import { Concern } from "@/types";
+import { ConcernAction } from "@/components/patients/health-concerns/HealthConcernsTable.vue";
+
+const CONFIRM_TEXT = {
+	"view": "",
+	"promote-to-problem": "Please confirm this health concern can be promoted to a problem.",
+	"mark-as-resolved": "Please confirm that this health concern can be marked as resolved.",
+	"remove": "Please confirm that you want to remove this health concern."
+};
 
 export default defineComponent({
 	name: "EditConcernDialog",
@@ -20,56 +26,48 @@ export default defineComponent({
 			type: Object as PropType<TableData | undefined>,
 			default: undefined
 		},
-		clickedAction: {
-			type: String,
-			required: true
+		openPhase: {
+			type: String as PropType<ConcernAction>,
+			default: "view"
 		}
 	},
 	emits: ["close", "change-action"],
 	setup(props, { emit }) {
+		const { concern, openPhase } = toRefs(props);
 		const saveInProgress = ref<boolean>(false);
+		const phase = ref<ConcernAction>("view");
+		const confirmActionText = computed<string>(() => CONFIRM_TEXT[phase.value]);
+		const showConfirm = computed<boolean>(() => phase.value !== "view");
 
 		const onDialogClose = () => {
 			emit("close");
 		};
 
-		const confirmAction = (clickedAction: string) => {
-			if (clickedAction === ACTION_BUTTONS.remove) {
+		const onDialogOpen = () => {
+			phase.value = openPhase.value;
+		};
+
+		const confirmActionClick = () => {
+			if (phase.value === "remove") {
 				ConcernsModule.removeConcern(props.concern!.id);
-
-				// TODO while we don't have BE
-				//Temporarily, in case Promote to problem or Mark as Resolved push to "Promoted Or Resolved table"
-			} else if (clickedAction === ACTION_BUTTONS.promoteToProblem || props.clickedAction === ACTION_BUTTONS.markAsResolved) {
-				const promotedOrResolvedConcern: Concern = { ...props.concern!, concernStatus: "PromotedOrResolved" };
-				ConcernsModule.promoteOrResolveConcern(promotedOrResolvedConcern);
+			} else if (phase.value === "mark-as-resolved") {
+				ConcernsModule.resolveConcern(props.concern!.id);
 			}
 		};
 
-		const handleActionClick = (clickedAction: string) => {
-			emit("change-action", clickedAction);
+		const handleActionClick = (clickedAction: ConcernAction) => {
+			phase.value = clickedAction;
 		};
-
-		const confirmActionText = computed<string>(() => {
-			switch (props.clickedAction) {
-				case ACTION_BUTTONS.promoteToProblem:
-					return "Please confirm this health concern can be promoted to a problem.";
-				case ACTION_BUTTONS.markAsResolved:
-					return "Please confirm that this health concern can be marked as resolved.";
-				case ACTION_BUTTONS.remove:
-					return "Please confirm that you want to remove this health concern.";
-
-				default: return "Save changes" ;
-			}
-		});
-
 
 		return {
 			saveInProgress,
 			onDialogClose,
-			ACTION_BUTTONS,
 			confirmActionText,
-			confirmAction,
-			handleActionClick
+			confirmActionClick,
+			handleActionClick,
+			onDialogOpen,
+			showConfirm,
+			phase
 		};
 	}
 });
@@ -83,6 +81,7 @@ export default defineComponent({
 		destroy-on-close
 		custom-class="edit-concern-dialog"
 		@close="onDialogClose"
+		@open="onDialogOpen"
 	>
 		<el-form
 			ref="formEl"
@@ -112,36 +111,39 @@ export default defineComponent({
 		</el-form>
 		<template #footer>
 			<div
-				v-if="clickedAction !== ACTION_BUTTONS.default"
+				v-if="showConfirm"
 				class="confirm-text"
 			>
 				{{ confirmActionText }}
 			</div>
 			<el-button
-				round
-				size="mini"
-				@click="$emit('close')"
-			>
-				Cancel
-			</el-button>
-			<DropButton
-				v-if="clickedAction === ACTION_BUTTONS.default"
-				:label="clickedAction"
-				:items="[
-					{ id: '1', label: 'Promote to Problem', iconSrc: require('@/assets/images/concern-promote.svg') },
-					{ id: '2', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') },
-					{ id: '3', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
-				]"
-				@click="$emit('close')"
-				@action-click="handleActionClick"
-			/>
-			<el-button
-				v-else
+				v-if="showConfirm"
 				plain
 				round
 				type="primary"
 				size="mini"
-				@click="confirmAction(clickedAction)"
+				@click="phase = 'view'"
+			>
+				Cancel
+			</el-button>
+			<DropButton
+				v-else-if="!showConfirm"
+				label="Close"
+				:items="[
+					{ id: 'promote-to-problem', label: 'Promote to Problem', iconSrc: require('@/assets/images/concern-promote.svg') },
+					{ id: 'mark-as-resolved', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') },
+					{ id: 'remove', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
+				]"
+				@click="$emit('close')"
+				@item-click="handleActionClick"
+			/>
+			<el-button
+				v-if="showConfirm"
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="confirmActionClick"
 			>
 				Confirm
 			</el-button>

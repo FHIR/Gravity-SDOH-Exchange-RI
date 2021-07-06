@@ -122,7 +122,7 @@ export type NewConcernPayload = {
 	name: string,
 	category: string
 	icdCode: string,
-	snomedCode: string,
+	snomedCode: string
 }
 
 export type Concern = {

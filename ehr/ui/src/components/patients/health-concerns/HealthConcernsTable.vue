@@ -4,7 +4,8 @@ import EditConcernDialog from "@/components/patients/health-concerns/EditConcern
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
 import NewConcernDialog from "@/components/patients/health-concerns/NewConcernDialog.vue";
-import { ACTION_BUTTONS } from "@/utils/constants";
+
+export type ConcernAction = "view" | "mark-as-resolved" | "promote-to-problem" | "remove";
 
 export default defineComponent({
 	name: "HealthConcernsTable",
@@ -31,12 +32,12 @@ export default defineComponent({
 		const editConcernDialogVisible = ref<boolean>(false);
 		const newConcernDialogVisible = ref<boolean>(false);
 		const editConcern = ref<TableData>();
-		const clickedAction = ref<string>("");
+		const dialogOpenPhase = ref<ConcernAction>("view");
 
-		const concernOrActionClick = (row: TableData, val: string) => {
+		const concernOrActionClick = (row: TableData, phase: ConcernAction) => {
+			dialogOpenPhase.value = phase;
 			editConcernDialogVisible.value = true;
 			editConcern.value = row;
-			clickedAction.value = val;
 		};
 
 		return {
@@ -44,8 +45,7 @@ export default defineComponent({
 			newConcernDialogVisible,
 			concernOrActionClick,
 			editConcern,
-			clickedAction,
-			ACTION_BUTTONS
+			dialogOpenPhase
 		};
 	}
 });
@@ -80,7 +80,7 @@ export default defineComponent({
 					<template #default="scope">
 						<el-button
 							type="text"
-							@click="concernOrActionClick(scope.row, ACTION_BUTTONS.default)"
+							@click="concernOrActionClick(scope.row, 'view')"
 						>
 							{{ scope.row.name }}
 						</el-button>
@@ -116,17 +116,17 @@ export default defineComponent({
 						<ActionButton
 							icon-class="icon-promote"
 							label="Promote to Problem"
-							@clicked="concernOrActionClick(scope.row, ACTION_BUTTONS.promoteToProblem)"
+							@clicked="concernOrActionClick(scope.row, 'promote-to-problem')"
 						/>
 						<ActionButton
 							icon-class="icon-resolved"
 							label="Mark as Resolved"
-							@clicked="concernOrActionClick(scope.row, ACTION_BUTTONS.markAsResolved)"
+							@clicked="concernOrActionClick(scope.row, 'mark-as-resolved')"
 						/>
 						<ActionButton
 							icon-class="icon-remove"
 							label="Remove"
-							@clicked="concernOrActionClick(scope.row, ACTION_BUTTONS.remove)"
+							@clicked="concernOrActionClick(scope.row, 'remove')"
 						/>
 					</template>
 				</el-table-column>
@@ -142,8 +142,7 @@ export default defineComponent({
 		<EditConcernDialog
 			:visible="editConcernDialogVisible"
 			:concern="editConcern"
-			:clicked-action="clickedAction"
-			@change-action="clickedAction = $event"
+			:open-phase="dialogOpenPhase"
 			@close="editConcernDialogVisible = false;"
 		/>
 

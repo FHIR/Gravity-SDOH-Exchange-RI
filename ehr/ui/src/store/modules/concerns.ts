@@ -1,5 +1,5 @@
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import { getActiveConcerns, getResolvedConcerns, addConcernResponse } from "@/api";
+import { getActiveConcerns, getResolvedConcerns, addConcernResponse, resolveConcern } from "@/api";
 import store from "@/store";
 import { Concern, NewConcernPayload } from "@/types";
 
@@ -37,12 +37,7 @@ class Concerns extends VuexModule implements IConcerns {
 
 	@Mutation
 	removeConcernFormList(id: string) {
-		this.concerns = this.concerns.filter(concern => concern.id !== id);
-	}
-
-	@Mutation
-	promoteOrResolve(payload: Concern) {
-		this.concerns = this.concerns.map(el => el.id === payload.id ? payload : el);
+		this.activeConcerns = this.activeConcerns.filter(concern => concern.id !== id);
 	}
 
 	@Action
@@ -65,8 +60,8 @@ class Concerns extends VuexModule implements IConcerns {
 	}
 
 	@Action
-	promoteOrResolveConcern(concern: Concern) {
-		this.promoteOrResolve(concern);
+	async resolveConcern(id: string): Promise<void> {
+		await resolveConcern(id);
 	}
 }
 
