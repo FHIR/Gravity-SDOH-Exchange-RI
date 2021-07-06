@@ -12,7 +12,7 @@ import {
 	Coding,
 	Goal,
 	Problem,
-	newProblem,
+	newProblemPayload,
 	updateProblemPayload,
 	NewConcernPayload,
 	UpdateGoalPayload,
@@ -187,29 +187,6 @@ export const createGoal = async (payload: NewGoalPayload): Promise<NewGoalPayloa
 // const res = await axios.post("/goal", payload);
 // return res.data;
 
-export const getProblemCodes = async (code: string): Promise<{ isd: Coding[], snomed: Coding[] }> => {
-	// todo: call real request and remove mocked data
-	// const res = await axios.get(`/mappings/categories/${code}/condition/codings`);
-	//return res.data;
-
-	const res: { isd: Coding[], snomed: Coding[] } = {
-		isd: [{
-			code: "Z59.49",
-			display: "Lack of Adequate Food & Safe Drinking Water"
-		},
-		{
-			code: "Z59.4229",
-			display: "Lack of Adequate Food & Safe Drinking Water"
-		}],
-		snomed: [{
-			code: "385767005",
-			display: "Meals on wheels provision education"
-		}]
-	};
-
-	return res;
-};
-
 export const getGoalCodes = async (code: string): Promise<Coding[]> => {
 	// todo: call real request and remove mocked data
 	// const res = await axios.get(`/mappings/categories/${code}/goals/codings`);
@@ -262,11 +239,9 @@ export const getProblems = async(): Promise<Problem[]> => {
 };
 
 // todo: change and remove mocked data after sync with BE
-export const createProblem = async (payload: newProblem): Promise<newProblem> =>
-	// const res = await axios.post("/problem", payload);
-	// return res.data;
-	payload;
-
+export const createProblem = async (payload: newProblemPayload): Promise<newProblemPayload> => payload;
+// const res = await axios.post("/problem", payload);
+// return res.data;
 
 // todo: change and remove mocked data after sync with BE
 export const updateProblem = async ({ id, ...data }: updateProblemPayload): Promise<Problem> => {

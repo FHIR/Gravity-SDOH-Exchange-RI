@@ -180,13 +180,11 @@ export type Problem = {
 	category: string
 };
 
-export type newProblem = {
+export type newProblemPayload = {
 	name: string,
 	category: string,
-	codeISD: string,
-	codeSNOMED: string,
-	basedOn: string,
-	startDate: string
+	codeICD: string,
+	codeSNOMED: string
 }
 
 export type updateProblemPayload = {
