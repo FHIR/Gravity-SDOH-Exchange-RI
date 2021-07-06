@@ -78,11 +78,11 @@ export default defineComponent({
 		const saveInProgress = ref<boolean>(false);
 
 		const onFormSave = () => {
-			formEl.value?.validate((valid: boolean) => {
+			formEl.value?.validate(async (valid: boolean) => {
 				if (valid) {
 					saveInProgress.value = true;
 					try {
-						ConcernsModule.createConcern(formModel);
+						await ConcernsModule.createConcern(formModel);
 						emit("close");
 					} finally {
 						saveInProgress.value = false;
