@@ -19,7 +19,7 @@ public class ConsentToDtoConverter implements Converter<Consent, ConsentDto> {
         .consentDate(FhirUtil.toLocalDateTime(consent.getDateTimeElement()))
         .scope(consent.getScope().getCodingFirstRep().getDisplay())
         .status(consent.getStatus().getDisplay())
-        .organization(consent.getOrganization().get(0).getDisplay())
+        .organization(consent.getOrganizationFirstRep().getDisplay())
         .build();
   }
 }
