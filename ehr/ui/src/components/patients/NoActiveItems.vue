@@ -6,11 +6,11 @@ export default defineComponent({
 	props: {
 		message: {
 			type: String,
-			default: "Items"
+			default: "No Active Items"
 		},
 		buttonLabel: {
 			type: String,
-			default: "Item"
+			default: "Add Item"
 		}
 	},
 	emits: ["add-item"]
