@@ -26,7 +26,7 @@ import org.hl7.gravity.refimpl.sdohexchange.exception.HealthConcernCreateExcepti
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.ConditionInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernPrepareBundleExtractor.HealthConcernPrepareInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.HealthConcernBundleFactory;
@@ -123,7 +123,7 @@ public class HealthConcernService {
         .code(id))
         .returnBundle(Bundle.class)
         .execute();
-    Condition healthConcern = new HealthConcernInfoBundleExtractor().extract(responseBundle)
+    Condition healthConcern = new ConditionInfoBundleExtractor().extract(responseBundle)
         .stream()
         .findFirst()
         .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)))

@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Condition.ConditionEvidenceComponent;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernInfoBundleExtractor.HealthConcernInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.ConditionInfoBundleExtractor.ConditionInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 
 import java.util.ArrayList;
@@ -20,10 +20,10 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class HealthConcernInfoBundleExtractor extends BundleExtractor<List<HealthConcernInfoHolder>> {
+public class ConditionInfoBundleExtractor extends BundleExtractor<List<ConditionInfoHolder>> {
 
   @Override
-  public List<HealthConcernInfoHolder> extract(Bundle bundle) {
+  public List<ConditionInfoHolder> extract(Bundle bundle) {
     Map<String, Observation> allObservations = FhirUtil.getFromBundle(bundle, Observation.class)
         .stream()
         .collect(Collectors.toMap(observation -> observation.getIdElement()
@@ -65,7 +65,7 @@ public class HealthConcernInfoBundleExtractor extends BundleExtractor<List<Healt
               }
             }
           }
-          return new HealthConcernInfoHolder(condition, questionnaireResponse, observations);
+          return new ConditionInfoHolder(condition, questionnaireResponse, observations);
         })
         .collect(Collectors.toList());
   }
@@ -100,7 +100,7 @@ public class HealthConcernInfoBundleExtractor extends BundleExtractor<List<Healt
 
   @Getter
   @AllArgsConstructor
-  public static class HealthConcernInfoHolder {
+  public static class ConditionInfoHolder {
 
     private final Condition condition;
     private final QuestionnaireResponse questionnaireResponse;
