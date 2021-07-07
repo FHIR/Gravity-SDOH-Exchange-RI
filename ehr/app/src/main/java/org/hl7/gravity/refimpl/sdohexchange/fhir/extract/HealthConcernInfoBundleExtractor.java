@@ -1,13 +1,5 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
@@ -19,6 +11,15 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernInfoBundleExtractor.HealthConcernInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public class HealthConcernInfoBundleExtractor extends BundleExtractor<List<HealthConcernInfoHolder>> {
 
   @Override
@@ -27,11 +28,11 @@ public class HealthConcernInfoBundleExtractor extends BundleExtractor<List<Healt
         .stream()
         .collect(Collectors.toMap(observation -> observation.getIdElement()
             .getIdPart(), Function.identity()));
-    Map<String, QuestionnaireResponse> allQuestionnaireResponses =
-        FhirUtil.getFromBundle(bundle, QuestionnaireResponse.class)
-            .stream()
-            .collect(Collectors.toMap(qr -> qr.getIdElement()
-                .getIdPart(), Function.identity()));
+    Map<String, QuestionnaireResponse> allQuestionnaireResponses = FhirUtil.getFromBundle(bundle,
+        QuestionnaireResponse.class)
+        .stream()
+        .collect(Collectors.toMap(qr -> qr.getIdElement()
+            .getIdPart(), Function.identity()));
 
     return FhirUtil.getFromBundle(bundle, Condition.class)
         .stream()
@@ -50,15 +51,7 @@ public class HealthConcernInfoBundleExtractor extends BundleExtractor<List<Healt
                 .getIdPart());
             observations.add(evidenceObservation);
 
-            questionnaireResponse = evidenceObservation.getDerivedFrom()
-                .stream()
-                .filter(derivedFrom -> derivedFrom.getReferenceElement()
-                    .getResourceType()
-                    .equals(QuestionnaireResponse.class.getSimpleName()))
-                .findFirst()
-                .map(qrReference -> allQuestionnaireResponses.remove(qrReference.getReferenceElement()
-                    .getIdPart()))
-                .get();
+            questionnaireResponse = allQuestionnaireResponses.get(findQuestionnaireResponseId(evidenceObservation));
             String questionnaireResponseId = questionnaireResponse.getIdElement()
                 .getIdPart();
             Iterator<Entry<String, Observation>> iterator = allObservations.entrySet()
@@ -75,6 +68,24 @@ public class HealthConcernInfoBundleExtractor extends BundleExtractor<List<Healt
           return new HealthConcernInfoHolder(condition, questionnaireResponse, observations);
         })
         .collect(Collectors.toList());
+  }
+
+  //Search recursively through all Observations related to a Concern's evidence and find the first
+  // QuestionnaireResponse.
+  private String findQuestionnaireResponseId(Observation evidenceObservation) {
+    for (Reference ref : evidenceObservation.getDerivedFrom()) {
+      if (ref.getReferenceElement()
+          .getResourceType()
+          .equals(QuestionnaireResponse.class.getSimpleName())) {
+        return ref.getReferenceElement()
+            .getIdPart();
+      } else if (ref.getReferenceElement()
+          .getResourceType()
+          .equals(Observation.class.getSimpleName())) {
+        return findQuestionnaireResponseId((Observation) ref.getResource());
+      }
+    }
+    return null;
   }
 
   private boolean containsQuestionnaireReference(Observation observation, String questionnaireId) {

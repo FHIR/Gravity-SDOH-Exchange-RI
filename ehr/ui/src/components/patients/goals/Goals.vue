@@ -4,6 +4,8 @@ import { Goal, Coding, Comment } from "@/types";
 import { GoalsModule } from "@/store/modules/goals";
 import GoalsTable from "@/components/patients/goals/GoalsTable.vue";
 import NewGoalDialog from "@/components/patients/goals/NewGoalDialog.vue";
+import NoActiveItems from "@/components/patients/NoActiveItems.vue";
+import NoItems from "@/components/patients/NoItems.vue";
 
 export type TableData = {
 	name: string,
@@ -23,6 +25,8 @@ export default defineComponent({
 	name: "Goals",
 	components: {
 		NewGoalDialog,
+		NoItems,
+		NoActiveItems,
 		GoalsTable
 	},
 	setup() {
@@ -77,26 +81,22 @@ export default defineComponent({
 			status="active"
 			@add-goal="newGoalDialogVisible = true"
 		/>
+		<NoActiveItems
+			v-else-if="!activeGoals.length && completedGoals.length"
+			message="No Active Goals"
+			button-label="Add Goal"
+		/>
 		<GoalsTable
 			v-if="completedGoals.length > 0"
 			:data="completedGoals"
 			status="completed"
 		/>
-		<div
+		<NoItems
 			v-if="!isDataLoading && !(activeGoals.length > 0 || completedGoals.length > 0)"
-			class="no-data"
-		>
-			<h2>No Goals Yet</h2>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				@click="newGoalDialogVisible = true"
-			>
-				Add Goal
-			</el-button>
-		</div>
+			message="No Goals Yet"
+			button-label="Add Goal"
+			@add-item="newGoalDialogVisible = true"
+		/>
 		<NewGoalDialog
 			:visible="newGoalDialogVisible"
 			@close="newGoalDialogVisible = false"

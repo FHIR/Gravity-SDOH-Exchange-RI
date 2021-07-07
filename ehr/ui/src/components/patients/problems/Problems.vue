@@ -4,6 +4,8 @@ import ProblemsTable from "@/components/patients/problems/ProblemsTable.vue";
 import { Problem } from "@/types";
 import { ProblemsModule } from "@/store/modules/problems";
 import NewProblemDialog from "@/components/patients/problems/NewProblemDialog.vue";
+import NoActiveItems from "@/components/patients/NoActiveItems.vue";
+import NoItems from "@/components/patients/NoItems.vue";
 
 export type TableData = {
 	id: string,
@@ -25,6 +27,8 @@ export type TableData = {
 export default defineComponent({
 	name: "Problems",
 	components: {
+		NoItems,
+		NoActiveItems,
 		NewProblemDialog,
 		ProblemsTable
 	},
@@ -87,6 +91,12 @@ export default defineComponent({
 			@add-problem="newProblemsDialogVisible = true"
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
+		<NoActiveItems
+			v-else-if="!activeProblems.length && closedProblems.length"
+			message="No Active Problems"
+			button-label="Add Problem"
+			@add-item="newProblemsDialogVisible = true"
+		/>
 		<ProblemsTable
 			v-if="closedProblems.length"
 			:data="closedProblems"
@@ -94,21 +104,12 @@ export default defineComponent({
 			status="closed"
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
-		<div
-			v-if="!tableData.length"
-			class="no-data"
-		>
-			<h2>No Problems Yet</h2>
-			<el-button
-				plain
-				round
-				type="primary"
-				size="mini"
-				@click="newProblemsDialogVisible = true"
-			>
-				Add Problem
-			</el-button>
-		</div>
+		<NoItems
+			v-if="!isLoading && !tableData.length"
+			massage="No Problems Yet"
+			button-label="Add Problem"
+			@add-item="newProblemsDialogVisible = true"
+		/>
 		<NewProblemDialog
 			:visible="newProblemsDialogVisible"
 			@close="newProblemsDialogVisible = false"
@@ -116,22 +117,3 @@ export default defineComponent({
 	</div>
 </template>
 
-<style lang="scss" scoped>
-@import "~@/assets/scss/abstracts/variables";
-
-.no-data {
-	height: 240px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	background-color: $global-background;
-
-	h2 {
-		color: $whisper;
-		font-size: $global-xxxlarge-font-size;
-		font-weight: $global-font-weight-normal;
-		margin-bottom: 50px;
-	}
-}
-</style>

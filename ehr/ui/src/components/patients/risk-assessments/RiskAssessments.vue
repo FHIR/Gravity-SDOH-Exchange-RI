@@ -3,6 +3,7 @@ import { computed, defineComponent, ref } from "vue";
 import RiskAssessmentsTable from "@/components/patients/risk-assessments/RiskAssessmentsTable.vue";
 import { Assessment } from "@/types";
 import { AssessmentsModule } from "@/store/modules/assessments";
+import NoItems from "@/components/patients/NoItems.vue";
 
 export type TableData = {
 	name: string,
@@ -17,6 +18,7 @@ export type TableData = {
 export default defineComponent({
 	name: "RiskAssessments",
 	components: {
+		NoItems,
 		RiskAssessmentsTable
 	},
 	props: {
@@ -98,20 +100,11 @@ export default defineComponent({
 				:open-assessment-phase="openAssessmentPhase"
 				@stop-open-assessment="$emit('stop-open-assessment')"
 			/>
-			<div
+			<NoItems
 				v-if="!isRequestLoading && !pastAssessments.length"
-				class="no-request-data"
-			>
-				<h2>No Past Assessments Yet</h2>
-				<el-button
-					plain
-					round
-					type="primary"
-					size="mini"
-				>
-					Import Assessment
-				</el-button>
-			</div>
+				message="No Past Assessments Yet"
+				button-label="Import Assessment"
+			/>
 		</div>
 		<div
 			v-if="activeGroup === 'plannedAssessments'"
@@ -134,21 +127,5 @@ export default defineComponent({
 
 .planned-assessments {
 	min-height: 130px;
-}
-
-.no-request-data {
-	height: 240px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	background-color: $global-background;
-
-	h2 {
-		color: $whisper;
-		font-size: $global-xxxlarge-font-size;
-		font-weight: $global-font-weight-normal;
-		margin-bottom: 50px;
-	}
 }
 </style>

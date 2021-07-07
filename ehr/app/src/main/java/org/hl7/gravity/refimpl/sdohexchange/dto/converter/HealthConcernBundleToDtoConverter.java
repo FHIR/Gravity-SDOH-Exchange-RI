@@ -1,10 +1,5 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
-import static org.hl7.gravity.refimpl.sdohexchange.dto.converter.AssessmentInfoToDtoConverter.QUESTIONNAIRE_NAME_EXTENSION;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -21,6 +16,12 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.StringTypeDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.hl7.gravity.refimpl.sdohexchange.dto.converter.AssessmentInfoToDtoConverter.QUESTIONNAIRE_NAME_EXTENSION;
 
 public class HealthConcernBundleToDtoConverter implements Converter<Bundle, List<HealthConcernDto>> {
 
@@ -39,8 +40,13 @@ public class HealthConcernBundleToDtoConverter implements Converter<Bundle, List
           healthConcernDto.setId(condition.getIdElement()
               .getIdPart());
           healthConcernDto.setName(codeableConceptToStringConverter.convert(condition.getCode()));
-          Coding categoryCoding = FhirUtil.findCoding(condition.getCategory(), SDOHMappings.getInstance()
-              .getSystem());
+          Coding categoryCoding = FhirUtil.findCoding(condition.getCategory(),
+              SDOHMappings.getInstance().getSystem());
+          // TODO remove this in future. Fow now two different categories might be used before discussed.
+          if(categoryCoding == null){
+            categoryCoding = FhirUtil.findCoding(condition.getCategory(),
+                "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/SDOHCC-CodeSystemTemporaryCodes");
+          }
           if (categoryCoding == null) {
             healthConcernDto.getErrors()
                 .add("SDOH category is not found.");
@@ -68,14 +74,17 @@ public class HealthConcernBundleToDtoConverter implements Converter<Bundle, List
           if (questionnaireResponse != null) {
             healthConcernDto.setDate(FhirUtil.toLocalDateTime(questionnaireResponse.getAuthoredElement()));
             CanonicalType questionnaireElement = questionnaireResponse.getQuestionnaireElement();
-            Optional<String> questionnaireName =
-                Optional.ofNullable(questionnaireElement.getExtensionString(QUESTIONNAIRE_NAME_EXTENSION));
+            Optional<String> questionnaireName = Optional.ofNullable(
+                questionnaireElement.getExtensionString(QUESTIONNAIRE_NAME_EXTENSION));
             if (questionnaireName.isPresent()) {
               healthConcernDto.setBasedOn(new ReferenceDto(questionnaireResponse.getIdElement()
                   .getIdPart(), questionnaireName.get()));
             } else {
+              // If extension is not set - use ID instead.
+              healthConcernDto.setBasedOn(new ReferenceDto(questionnaireResponse.getIdElement()
+                  .getIdPart(), questionnaireElement.getValueAsString()));
               healthConcernDto.getErrors()
-                  .add("Based on QuestionnaireResponse doesn't have questionnaire name extension.");
+                  .add("Based on QuestionnaireResponse doesn't have questionnaire name extension. Using ID instead.");
             }
           } else {
             healthConcernDto.setBasedOn(new StringTypeDto(condition.getEvidenceFirstRep()

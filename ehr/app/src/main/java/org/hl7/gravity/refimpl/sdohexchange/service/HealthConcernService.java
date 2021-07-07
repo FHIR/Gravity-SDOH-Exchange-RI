@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Condition.ConditionClinicalStatus;
@@ -37,6 +36,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
@@ -49,8 +51,7 @@ public class HealthConcernService {
   public List<HealthConcernDto> listActive() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchHealthConcernQuery()
-        .include(Condition.INCLUDE_EVIDENCE_DETAIL)
+    Bundle responseBundle = searchHealthConcernQuery().include(Condition.INCLUDE_EVIDENCE_DETAIL)
         .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .returnBundle(Bundle.class)
         .execute();
@@ -60,22 +61,22 @@ public class HealthConcernService {
   public HealthConcernDto create(NewHealthConcernDto newHealthConcernDto, UserDto user) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    HealthConcernPrepareBundleFactory healthConcernPrepareBundleFactory =
-        new HealthConcernPrepareBundleFactory(smartOnFhirContext.getPatient(), user.getId());
+    HealthConcernPrepareBundleFactory healthConcernPrepareBundleFactory = new HealthConcernPrepareBundleFactory(
+        smartOnFhirContext.getPatient(), user.getId());
     Bundle healthConcernRelatedResources = ehrClient.transaction()
         .withBundle(healthConcernPrepareBundleFactory.createPrepareBundle())
         .execute();
-    HealthConcernPrepareInfoHolder healthConcernPrepareInfoHolder =
-        new HealthConcernPrepareBundleExtractor().extract(healthConcernRelatedResources);
+    HealthConcernPrepareInfoHolder healthConcernPrepareInfoHolder = new HealthConcernPrepareBundleExtractor().extract(
+        healthConcernRelatedResources);
 
     HealthConcernBundleFactory bundleFactory = new HealthConcernBundleFactory();
     bundleFactory.setName(newHealthConcernDto.getName());
     String category = newHealthConcernDto.getCategory();
     bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
-    bundleFactory.setIcdCode(sdohMappings.findCoding(category, Condition.class, System.ICD_10,
-        newHealthConcernDto.getIcdCode()));
-    bundleFactory.setSnomedCode(sdohMappings.findCoding(category, Condition.class, System.SNOMED,
-        newHealthConcernDto.getSnomedCode()));
+    bundleFactory.setIcdCode(
+        sdohMappings.findCoding(category, Condition.class, System.ICD_10, newHealthConcernDto.getIcdCode()));
+    bundleFactory.setSnomedCode(
+        sdohMappings.findCoding(category, Condition.class, System.SNOMED, newHealthConcernDto.getSnomedCode()));
     bundleFactory.setPatient(healthConcernPrepareInfoHolder.getPatient());
     bundleFactory.setPractitioner(healthConcernPrepareInfoHolder.getPractitioner());
 
@@ -84,9 +85,8 @@ public class HealthConcernService {
         .execute();
 
     IdType healthConcernId = FhirUtil.getFromResponseBundle(healthConcernCreateBundle, Condition.class);
-    Bundle responseBundle = searchHealthConcernQuery()
-        .where(Condition.RES_ID.exactly()
-            .code(healthConcernId.getIdPart()))
+    Bundle responseBundle = searchHealthConcernQuery().where(Condition.RES_ID.exactly()
+        .code(healthConcernId.getIdPart()))
         .returnBundle(Bundle.class)
         .execute();
     return new HealthConcernBundleToDtoConverter().convert(responseBundle)
@@ -98,16 +98,12 @@ public class HealthConcernService {
   public void promote(String id) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchHealthConcernQuery()
-        .where(Condition.RES_ID.exactly()
-            .code(id))
+    Bundle responseBundle = searchHealthConcernQuery().where(Condition.RES_ID.exactly()
+        .code(id))
         .returnBundle(Bundle.class)
         .execute();
-    Condition healthConcern = new HealthConcernInfoBundleExtractor().extract(responseBundle)
-        .stream()
-        .findFirst()
-        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)))
-        .getCondition();
+    Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
 
     UsCoreConditionCategory problem = UsCoreConditionCategory.PROBLEMLISTITEM;
     Coding coding = FhirUtil.findCoding(healthConcern.getCategory(), problem.getSystem());
@@ -123,9 +119,8 @@ public class HealthConcernService {
   public void resolve(String id) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchHealthConcernQuery()
-        .where(Condition.RES_ID.exactly()
-            .code(id))
+    Bundle responseBundle = searchHealthConcernQuery().where(Condition.RES_ID.exactly()
+        .code(id))
         .returnBundle(Bundle.class)
         .execute();
     Condition healthConcern = new HealthConcernInfoBundleExtractor().extract(responseBundle)
@@ -135,7 +130,8 @@ public class HealthConcernService {
         .getCondition();
 
     ConditionClinicalStatusCodes resolvedStatus = ConditionClinicalStatusCodes.RESOLVED;
-    Coding coding = healthConcern.getClinicalStatus().getCodingFirstRep();
+    Coding coding = healthConcern.getClinicalStatus()
+        .getCodingFirstRep();
     coding.setCode(resolvedStatus.toCode());
     coding.setDisplay(resolvedStatus.getDisplay());
     healthConcern.setOnset(DateTimeType.now());

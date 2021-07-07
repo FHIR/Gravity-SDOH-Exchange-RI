@@ -3,14 +3,12 @@ import { defineComponent, PropType, ref } from "vue";
 import EditConcernDialog from "@/components/patients/health-concerns/EditConcernDialog.vue";
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
-import NewConcernDialog from "@/components/patients/health-concerns/NewConcernDialog.vue";
 
 export type ConcernAction = "view" | "mark-as-resolved" | "promote-to-problem" | "remove";
 
 export default defineComponent({
 	name: "HealthConcernsTable",
 	components: {
-		NewConcernDialog,
 		EditConcernDialog,
 		ActionButton
 	},
@@ -28,7 +26,7 @@ export default defineComponent({
 			required: true
 		}
 	},
-	emits: ["trigger-open-assessment"],
+	emits: ["add-concern", "trigger-open-assessment"],
 	setup( props, { emit }) {
 		const editConcernDialogVisible = ref<boolean>(false);
 		const newConcernDialogVisible = ref<boolean>(false);
@@ -75,7 +73,7 @@ export default defineComponent({
 					round
 					type="primary"
 					size="mini"
-					@click="newConcernDialogVisible = true"
+					@click="$emit('add-concern')"
 				>
 					Add Health Concern
 				</el-button>
@@ -158,11 +156,6 @@ export default defineComponent({
 			:open-phase="dialogOpenPhase"
 			@close="editConcernDialogVisible = false;"
 			@trigger-open-assessment="handleOpenAssessment"
-		/>
-
-		<NewConcernDialog
-			:visible="newConcernDialogVisible"
-			@close="newConcernDialogVisible = false"
 		/>
 	</div>
 </template>
