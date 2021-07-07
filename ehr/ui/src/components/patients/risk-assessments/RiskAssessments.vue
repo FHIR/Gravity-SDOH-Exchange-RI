@@ -19,6 +19,21 @@ export default defineComponent({
 	components: {
 		RiskAssessmentsTable
 	},
+	props: {
+		assessmentToOpen: {
+			type: String,
+			default: ""
+		},
+		isActive: {
+			type: Boolean,
+			default: false
+		},
+		openAssessmentPhase: {
+			type: Boolean,
+			default: false
+		}
+	},
+	emits: ["stop-open-assessment"],
 	setup() {
 		const activeGroup = ref<string>("pastAssessments");
 		const isRequestLoading = ref<boolean>(false);
@@ -78,6 +93,10 @@ export default defineComponent({
 			<RiskAssessmentsTable
 				v-if="pastAssessments.length"
 				:data="pastAssessments"
+				:assessment-id="assessmentToOpen"
+				:is-active="isActive"
+				:open-assessment-phase="openAssessmentPhase"
+				@stop-open-assessment="$emit('stop-open-assessment')"
 			/>
 			<div
 				v-if="!isRequestLoading && !pastAssessments.length"

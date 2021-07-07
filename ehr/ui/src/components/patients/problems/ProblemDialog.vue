@@ -42,7 +42,7 @@ export default defineComponent({
 			default: "view"
 		}
 	},
-	emits: ["close"],
+	emits: ["close", "trigger-open-assessment"],
 	setup(props, { emit }) {
 		const formModel = reactive<FormModel>({
 			id: "",
@@ -151,7 +151,13 @@ export default defineComponent({
 				{{ formModel.codeSNOMED }}
 			</el-form-item>
 			<el-form-item label="Base on">
-				{{ formModel.basedOn }}
+				{{ formModel.basedOn.display }}
+				<span
+					v-if="formModel.basedOn.id"
+					class="icon-link"
+					@click="$emit('trigger-open-assessment', formModel.basedOn.id)"
+				>
+				</span>
 			</el-form-item>
 			<el-form-item label="Creation Date">
 				{{ $filters.formatDateTime(formModel.startDate) }}
@@ -218,6 +224,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+@import "~@/assets/scss/abstracts/mixins";
 
 .confirm-message {
 	margin-bottom: 20px;
@@ -225,4 +232,13 @@ export default defineComponent({
 	font-weight: $global-font-weight-medium;
 	font-size: $global-font-size;
 }
+
+.icon-link {
+	position: relative;
+	left: 7px;
+	cursor: pointer;
+
+	@include icon("~@/assets/images/link.svg", 14px, 14px);
+}
+
 </style>

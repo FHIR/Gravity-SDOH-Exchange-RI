@@ -22,6 +22,7 @@ export default defineComponent({
 	components: {
 		HealthConcernsTable
 	},
+	emits: ["trigger-open-assessment"],
 	setup() {
 		const isRequestLoading = ref<boolean>(false);
 		const activeConcerns = computed<Concern[]>(() => ConcernsModule.activeConcerns);
@@ -77,6 +78,7 @@ export default defineComponent({
 				v-if="activeConcernsTableData.length"
 				:data="activeConcernsTableData"
 				type="ActiveConcerns"
+				@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 			/>
 			<div
 				v-if="!isRequestLoading && !activeConcernsTableData.length"

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType, ref, watch } from "vue";
 import { TableData } from "@/components/patients/risk-assessments/RiskAssessments.vue";
 import EditAssessmentDialog from "@/components/patients/risk-assessments/EditAssessmentDialog.vue";
 
@@ -12,9 +12,22 @@ export default defineComponent({
 		data: {
 			type: Array as PropType<TableData[]>,
 			required: true
+		},
+		assessmentId: {
+			type: String,
+			required: true
+		},
+		isActive: {
+			type: Boolean,
+			default: false
+		},
+		openAssessmentPhase: {
+			type: Boolean,
+			default: false
 		}
 	},
-	setup() {
+	emits: ["stop-open-assessment"],
+	setup(props, { emit }) {
 		const editAssessmentDialogVisible = ref<boolean>(false);
 		const editAssessment = ref<TableData>();
 		const onRequestClick = (row: TableData) => {
@@ -22,10 +35,23 @@ export default defineComponent({
 			editAssessment.value = row;
 		};
 
+		const handleDialogClose = () => {
+			editAssessmentDialogVisible.value = false;
+			emit("stop-open-assessment");
+		};
+
+		watch(() => props.isActive, () => {
+			if (props.isActive) {
+				editAssessment.value = props.data.find(assessment => assessment.id === props.assessmentId);
+				editAssessmentDialogVisible.value = props.openAssessmentPhase;
+			}
+		});
+
 		return {
 			editAssessmentDialogVisible,
 			onRequestClick,
-			editAssessment
+			editAssessment,
+			handleDialogClose
 		};
 	}
 });
@@ -76,7 +102,7 @@ export default defineComponent({
 		<EditAssessmentDialog
 			:visible="editAssessmentDialogVisible"
 			:assessment="editAssessment"
-			@close="editAssessmentDialogVisible = false"
+			@close="handleDialogClose"
 		/>
 	</div>
 </template>

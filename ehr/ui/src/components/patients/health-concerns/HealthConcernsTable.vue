@@ -28,7 +28,8 @@ export default defineComponent({
 			required: true
 		}
 	},
-	setup() {
+	emits: ["trigger-open-assessment"],
+	setup( props, { emit }) {
 		const editConcernDialogVisible = ref<boolean>(false);
 		const newConcernDialogVisible = ref<boolean>(false);
 		const editConcern = ref<TableData>();
@@ -40,12 +41,18 @@ export default defineComponent({
 			editConcern.value = row;
 		};
 
+		const handleOpenAssessment = (id: string) => {
+			editConcernDialogVisible.value = false;
+			emit("trigger-open-assessment", id);
+		};
+
 		return {
 			editConcernDialogVisible,
 			newConcernDialogVisible,
 			concernOrActionClick,
 			editConcern,
-			dialogOpenPhase
+			dialogOpenPhase,
+			handleOpenAssessment
 		};
 	}
 });
@@ -98,6 +105,12 @@ export default defineComponent({
 				>
 					<template #default="scope">
 						{{ scope.row.basedOn.display ? scope.row.basedOn.display : scope.row.basedOn }}
+						<span
+							v-if="scope.row.basedOn.id"
+							class="icon-link"
+							@click="$emit('trigger-open-assessment', scope.row.basedOn.id)"
+						>
+						</span>
 					</template>
 				</el-table-column>
 				<el-table-column
@@ -144,6 +157,7 @@ export default defineComponent({
 			:concern="editConcern"
 			:open-phase="dialogOpenPhase"
 			@close="editConcernDialogVisible = false;"
+			@trigger-open-assessment="handleOpenAssessment"
 		/>
 
 		<NewConcernDialog
@@ -183,5 +197,13 @@ export default defineComponent({
 	border: 1px solid $global-base-border-color;
 	padding: 10px 20px;
 	min-height: 130px;
+}
+
+.icon-link {
+	position: relative;
+	left: 7px;
+	cursor: pointer;
+
+	@include icon("~@/assets/images/link.svg", 14px, 14px);
 }
 </style>

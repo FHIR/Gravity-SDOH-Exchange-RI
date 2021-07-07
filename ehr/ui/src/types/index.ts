@@ -170,7 +170,10 @@ export type Assessment = {
 export type Problem = {
 	id: string,
 	name: string,
-	basedOn: string,
+	basedOn: {
+		id: string,
+		display: string
+	},
 	onsetPeriod: Period,
 	goals: number,
 	actionSteps: number,

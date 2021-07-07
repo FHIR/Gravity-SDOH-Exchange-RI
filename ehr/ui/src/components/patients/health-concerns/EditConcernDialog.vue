@@ -31,7 +31,7 @@ export default defineComponent({
 			default: "view"
 		}
 	},
-	emits: ["close", "change-action"],
+	emits: ["close", "change-action", "trigger-open-assessment"],
 	setup(props, { emit }) {
 		const { concern, openPhase } = toRefs(props);
 		const saveInProgress = ref<boolean>(false);
@@ -104,6 +104,12 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item label="Based on">
 				{{ concern.basedOn.display ? concern.basedOn.display : concern.basedOn }}
+				<span
+					v-if="concern.basedOn.id"
+					class="icon-link"
+					@click="$emit('trigger-open-assessment', concern.basedOn.id)"
+				>
+				</span>
 			</el-form-item>
 			<el-form-item label="Assessment Date">
 				{{ $filters.formatDateTime(concern.assessmentDate) }}
@@ -153,11 +159,21 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+@import "~@/assets/scss/abstracts/mixins";
 
 .confirm-text {
 	text-align: left;
 	margin-bottom: 20px;
 	font-size: $global-font-size;
 	font-weight: $global-font-weight-medium;
+}
+
+.icon-link {
+	vertical-align: middle;
+	position: relative;
+	left: 7px;
+	cursor: pointer;
+
+	@include icon("~@/assets/images/link.svg", 14px, 14px);
 }
 </style>

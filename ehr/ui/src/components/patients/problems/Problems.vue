@@ -8,7 +8,10 @@ import NewProblemDialog from "@/components/patients/problems/NewProblemDialog.vu
 export type TableData = {
 	id: string,
 	name: string,
-	basedOn: string,
+	basedOn: string | {
+		display: string,
+		id: string,
+	},
 	startDate?: string,
 	closedDate?: string,
 	goals: number,
@@ -25,6 +28,7 @@ export default defineComponent({
 		NewProblemDialog,
 		ProblemsTable
 	},
+	emits: ["trigger-open-assessment"],
 	setup() {
 		const problems = computed<Problem[]>(() => ProblemsModule.problems);
 		const tableData = computed<TableData[]>(() =>
@@ -81,12 +85,14 @@ export default defineComponent({
 			title="Active Problems"
 			status="active"
 			@add-problem="newProblemsDialogVisible = true"
+			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 		<ProblemsTable
 			v-if="closedProblems.length"
 			:data="closedProblems"
 			title="Closed Problems"
 			status="closed"
+			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 		<div
 			v-if="!tableData.length"

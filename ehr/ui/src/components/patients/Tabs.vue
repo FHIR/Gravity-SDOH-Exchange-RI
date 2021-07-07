@@ -19,9 +19,20 @@ export default defineComponent({
 	},
 	setup() {
 		const activeTab = ref<string>("actionSteps");
+		const assessmentToOpenId = ref<string>("");
+		const openAssessmentPhase = ref<boolean>(false);
+
+		const openAssessment = (id: string) => {
+			assessmentToOpenId.value = id;
+			openAssessmentPhase.value = true;
+			activeTab.value = "socialRiskAssessments";
+		};
 
 		return {
-			activeTab
+			activeTab,
+			openAssessment,
+			assessmentToOpenId,
+			openAssessmentPhase
 		};
 	}
 });
@@ -33,13 +44,17 @@ export default defineComponent({
 			label="Health Concerns"
 			name="healthConcerns"
 		>
-			<HealthConcerns />
+			<HealthConcerns
+				@trigger-open-assessment="openAssessment"
+			/>
 		</el-tab-pane>
 		<el-tab-pane
 			label="Problems"
 			name="problems"
 		>
-			<Problems />
+			<Problems
+				@trigger-open-assessment="openAssessment"
+			/>
 		</el-tab-pane>
 		<el-tab-pane
 			label="Goals"
@@ -57,7 +72,12 @@ export default defineComponent({
 			label="Social Risk Assessments"
 			name="socialRiskAssessments"
 		>
-			<RiskAssessments />
+			<RiskAssessments
+				:open-assessment-phase="openAssessmentPhase"
+				:assessment-to-open="assessmentToOpenId"
+				:is-active="activeTab === 'socialRiskAssessments'"
+				@stop-open-assessment="openAssessmentPhase = false"
+			/>
 		</el-tab-pane>
 		<el-tab-pane
 			label="Consents"

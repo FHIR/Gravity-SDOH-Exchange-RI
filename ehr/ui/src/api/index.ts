@@ -235,7 +235,10 @@ export const getProblems = async(): Promise<Problem[]> => {
 	const res: Problem[] =  [{
 		id: "SDOHCC-Condition-HungerVitalSign-Example-1",
 		name: "Hunger Vital Signs 1",
-		basedOn: "Hunger Vital Signs assessment",
+		basedOn: {
+			id: "14647",
+			display: "Hunger Vital Signs assessment"
+		},
 		onsetPeriod: {
 			start: "2019-08-18T12:31:35.123Z"
 		},
@@ -249,7 +252,10 @@ export const getProblems = async(): Promise<Problem[]> => {
 	{
 		id: "SDOHCC-Condition-HungerVitalSign-Example-2",
 		name: "Hunger Vital Signs 2",
-		basedOn: "Hunger Vital Signs assessment",
+		basedOn: {
+			id: "14647",
+			display: "Hunger Vital Signs assessment"
+		},
 		onsetPeriod: {
 			start: "2019-08-18T12:31:35.123Z",
 			end: "2021-10-28T12:31:35.123Z"
@@ -280,7 +286,10 @@ export const updateProblem = async ({ id, ...data }: updateProblemPayload): Prom
 	const res: Problem = {
 		id: "SDOHCC-Condition-HungerVitalSign-Example-1",
 		name: "Hunger Vital Signs",
-		basedOn: "Hunger Vital Signs assessment",
+		basedOn: {
+			id: "14647",
+			display: "Hunger Vital Signs assessment"
+		},
 		onsetPeriod: {
 			start: "2019-08-18T12:31:35.123Z",
 			end: "2021-10-28T12:31:35.123Z"
