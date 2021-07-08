@@ -1,109 +1,60 @@
 <script lang="ts">
-import { defineComponent, PropType, ref, watch } from "vue";
-import { TableData } from "@/components/patients/risk-assessments/RiskAssessments.vue";
-import EditAssessmentDialog from "@/components/patients/risk-assessments/EditAssessmentDialog.vue";
+import { defineComponent, PropType, ref } from "vue";
+import { Assessment } from "@/types";
 
 export default defineComponent({
 	name: "RiskAssessmentsTable",
-	components: {
-		EditAssessmentDialog
-	},
 	props: {
 		data: {
-			type: Array as PropType<TableData[]>,
+			type: Array as PropType<Assessment[]>,
 			required: true
-		},
-		assessmentId: {
-			type: String,
-			required: true
-		},
-		isActive: {
-			type: Boolean,
-			default: false
-		},
-		openAssessmentPhase: {
-			type: Boolean,
-			default: false
 		}
 	},
-	emits: ["stop-open-assessment"],
-	setup(props, { emit }) {
-		const editAssessmentDialogVisible = ref<boolean>(false);
-		const editAssessment = ref<TableData>();
-		const onRequestClick = (row: TableData) => {
-			editAssessmentDialogVisible.value = true;
-			editAssessment.value = row;
-		};
-
-		const handleDialogClose = () => {
-			editAssessmentDialogVisible.value = false;
-			emit("stop-open-assessment");
-		};
-
-		watch(() => props.isActive, () => {
-			if (props.isActive) {
-				editAssessment.value = props.data.find(assessment => assessment.id === props.assessmentId);
-				editAssessmentDialogVisible.value = props.openAssessmentPhase;
-			}
-		});
-
-		return {
-			editAssessmentDialogVisible,
-			onRequestClick,
-			editAssessment,
-			handleDialogClose
-		};
-	}
+	emits: ["title-click"]
 });
 </script>
 
 <template>
-	<div>
-		<div
-			class="table-wrapper"
-		>
-			<el-table :data="data">
-				<el-table-column
-					label="Planned Assessment Name"
-				>
-					<template #default="scope">
-						<el-button
-							type="text"
-							@click="onRequestClick(scope.row)"
-						>
-							{{ scope.row.name }}
-						</el-button>
-					</template>
-				</el-table-column>
-				<el-table-column
-					label="Assessment Date"
-				>
-					<template #default="scope">
-						<div class="status-cell">
-							<div class="info">
-								<span>{{ $filters.formatDateTime(scope.row.createdAt) }}</span>
-							</div>
-						</div>
-					</template>
-				</el-table-column>
-				<el-table-column
-					label="Identified Health Concerns"
-				>
-					<template #default="scope">
-						<a :class="{underline: scope.row.concerns.length}">
-							{{ scope.row.concerns }}
-						</a>
-					</template>
-				</el-table-column>
-				<el-table-column />
-			</el-table>
-		</div>
+	<div
+		class="table-wrapper"
+	>
+		<el-table :data="data">
+			<el-table-column
+				label="Planned Assessment Name"
+			>
+				<template #default="scope">
+					<el-button
+						type="text"
+						@click="$emit('title-click', scope.row)"
+					>
+						{{ scope.row.name }}
+					</el-button>
+				</template>
+			</el-table-column>
 
-		<EditAssessmentDialog
-			:visible="editAssessmentDialogVisible"
-			:assessment="editAssessment"
-			@close="handleDialogClose"
-		/>
+			<el-table-column
+				label="Assessment Date"
+			>
+				<template #default="scope">
+					{{ $filters.formatDateTime(scope.row.date) }}
+				</template>
+			</el-table-column>
+
+			<el-table-column
+				label="Identified Health Concerns"
+			>
+				<template #default="scope">
+					<el-button
+						v-for="concern in scope.row.healthConcerns"
+						:key="concern.id"
+						type="text"
+					>
+						{{ concern.display }}
+					</el-button>
+				</template>
+			</el-table-column>
+			<el-table-column />
+		</el-table>
 	</div>
 </template>
 
@@ -125,9 +76,5 @@ export default defineComponent({
 	border: 1px solid $global-base-border-color;
 	padding: 10px 20px;
 	min-height: 130px;
-}
-
-.underline {
-	text-decoration: underline;
 }
 </style>

@@ -1,6 +1,7 @@
-import { VuexModule, Module, getModule } from "vuex-module-decorators";
+import { VuexModule, Module, getModule, Action, Mutation } from "vuex-module-decorators";
 import store from "@/store";
 import { Assessment } from "@/types";
+import { getPastAssessments } from "@/api";
 
 export interface IAssessments {
 	assessments: Assessment[]
@@ -8,7 +9,25 @@ export interface IAssessments {
 
 @Module({ dynamic: true, store, name: "assessment" })
 class Assessments extends VuexModule implements IAssessments {
-	assessments: Assessment[] = [{ id: "14647",  name: "Hunger Vital Signs", createdAt: "2021-05-18T14:15:08", concerns: "Food Insecurity", status: "Past", actions: "send to patient", questions: ["asgdagdj", "How do you do?"] }, { id: "123123",  name: "Hunger Vital Signs", createdAt: "2021-05-18T14:15:08", concerns: "Food Insecurity", status: "Past", actions: "send to patient", questions: ["asgdagdj", "How do you do?"] }];
+	assessments: Assessment[] = [];
+	assessmentsLoading: boolean = false;
+
+	@Mutation
+	setAssessments(data: Assessment[]) {
+		this.assessments = data;
+	}
+
+	@Mutation
+	setAssessmentsLoading(data: boolean) {
+		this.assessmentsLoading = data;
+	}
+
+	@Action
+	async loadPastAssessments() {
+		this.setAssessmentsLoading(true);
+		this.setAssessments(await getPastAssessments());
+		this.setAssessmentsLoading(false);
+	}
 }
 
 export const AssessmentsModule = getModule(Assessments);
