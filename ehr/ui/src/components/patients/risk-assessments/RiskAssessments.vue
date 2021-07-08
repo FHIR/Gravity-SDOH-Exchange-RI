@@ -1,48 +1,32 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from "vue";
 import RiskAssessmentsTable from "@/components/patients/risk-assessments/RiskAssessmentsTable.vue";
+import EditAssessmentDialog from "@/components/patients/risk-assessments/EditAssessmentDialog.vue";
 import { Assessment } from "@/types";
 import { AssessmentsModule } from "@/store/modules/assessments";
 import NoItems from "@/components/patients/NoItems.vue";
 
-export type TableData = {
-	name: string,
-	createdAt: string,
-	concerns: string
-	id: string,
-	questions: string[],
-	actions: string
-	status: string
-}
 
 export default defineComponent({
-	name: "RiskAssessments",
 	components: {
 		NoItems,
-		RiskAssessmentsTable
+		RiskAssessmentsTable,
+		EditAssessmentDialog
 	},
 	setup() {
-		const activeGroup = ref<string>("pastAssessments");
-		const isRequestLoading = ref<boolean>(false);
+		const activeGroup = ref<"pastAssessments" | "plannedAssessments">("pastAssessments");
+		const isRequestLoading = computed(() => AssessmentsModule.assessmentsLoading);
 		const assessments = computed<Assessment[]>(() => AssessmentsModule.assessments);
-		const tableData = computed<TableData[]>(() =>
-			assessments.value.map((assessment: Assessment) => ({
-				name: assessment.name,
-				createdAt: assessment.createdAt,
-				concerns: assessment.concerns,
-				id: assessment.id,
-				questions: assessment.questions,
-				actions: assessment.actions,
-				status: assessment.status
-			}))
-		);
 
-		const pastAssessments = computed<TableData[]>(() => tableData.value.filter(t => t.status === "Past"));
+		const viewingAssessment = ref<Assessment | undefined>(undefined);
+
+		AssessmentsModule.loadPastAssessments();
 
 		return {
 			activeGroup,
-			pastAssessments,
-			isRequestLoading
+			assessments,
+			isRequestLoading,
+			viewingAssessment
 		};
 	}
 });
@@ -63,7 +47,7 @@ export default defineComponent({
 				</el-radio-button>
 			</el-radio-group>
 			<el-button
-				v-if="activeGroup === 'pastAssessments' && pastAssessments.length"
+				v-if="activeGroup === 'pastAssessments'"
 				plain
 				round
 				type="primary"
@@ -72,27 +56,36 @@ export default defineComponent({
 				Import Assessment
 			</el-button>
 		</div>
+
 		<div
 			v-if="activeGroup === 'pastAssessments'"
 			v-loading="isRequestLoading"
 			class="planned-assessments"
 		>
 			<RiskAssessmentsTable
-				v-if="pastAssessments.length"
-				:data="pastAssessments"
+				v-if="assessments.length"
+				:data="assessments"
+				@title-click="viewingAssessment = $event"
 			/>
 			<NoItems
-				v-if="!isRequestLoading && !pastAssessments.length"
+				v-if="!isRequestLoading && !assessments.length"
 				message="No Past Assessments Yet"
 				button-label="Import Assessment"
 			/>
 		</div>
+
 		<div
 			v-if="activeGroup === 'plannedAssessments'"
 			class="plannedAssessments"
 		>
 			Planned Assessments
 		</div>
+
+		<EditAssessmentDialog
+			:visible="viewingAssessment !== undefined"
+			:assessment="viewingAssessment"
+			@close="viewingAssessment = undefined"
+		/>
 	</div>
 </template>
 

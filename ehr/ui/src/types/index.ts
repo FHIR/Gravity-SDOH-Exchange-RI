@@ -158,13 +158,19 @@ export type Comment = {
 };
 
 export type Assessment = {
-	name: string,
-	createdAt: string,
-	concerns: string
 	id: string,
-	questions: string[],
-	actions: string
-	status: "Past" | "Planned"
+	name: string,
+	questionnaireUrl: string,
+	date: string,
+	healthConcerns: {
+		id: string,
+		display: string
+	}[],
+	previous?: Assessment[],
+	assessmentResponse: {
+		question: string,
+		answer: string
+	}[]
 };
 
 export type Problem = {
