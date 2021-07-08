@@ -5,6 +5,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
@@ -13,6 +14,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.HealthConcernDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.StringTypeDto;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.ConditionInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
@@ -71,7 +73,7 @@ public class HealthConcernBundleToDtoConverter implements Converter<Bundle, List
 
           QuestionnaireResponse questionnaireResponse = healthConcernInfo.getQuestionnaireResponse();
           if (questionnaireResponse != null) {
-            healthConcernDto.setDate(FhirUtil.toLocalDateTime(questionnaireResponse.getAuthoredElement()));
+            healthConcernDto.setAssessmentDate(FhirUtil.toLocalDateTime(questionnaireResponse.getAuthoredElement()));
             CanonicalType questionnaireElement = questionnaireResponse.getQuestionnaireElement();
             Optional<String> questionnaireName = Optional.ofNullable(
                 questionnaireElement.getExtensionString(QUESTIONNAIRE_NAME_EXTENSION));
@@ -93,6 +95,20 @@ public class HealthConcernBundleToDtoConverter implements Converter<Bundle, List
             healthConcernDto.setAuthoredBy(new ReferenceDto(recorder.getReferenceElement()
                 .getIdPart(), recorder.getDisplay()));
           }
+
+          if (ConditionClinicalStatusCodes.RESOLVED.toCode()
+              .equals(condition.getClinicalStatus()
+                  .getCodingFirstRep()
+                  .getCode())) {
+            //TODO check whether we can rely on onset property to get a resololved time.
+            if (condition.getOnset() instanceof DateTimeType) {
+              healthConcernDto.setResolutionDate(FhirUtil.toLocalDateTime((DateTimeType) condition.getOnset()));
+            } else {
+              healthConcernDto.getErrors()
+                  .add("Condition is resolved but an onset property is not of a DateTimeType type.");
+            }
+          }
+
           return healthConcernDto;
         })
         .collect(Collectors.toList());

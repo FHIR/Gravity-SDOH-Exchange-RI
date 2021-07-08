@@ -82,6 +82,10 @@ public class ConditionInfoBundleExtractor extends BundleExtractor<List<Condition
       } else if (ref.getReferenceElement()
           .getResourceType()
           .equals(Observation.class.getSimpleName())) {
+        if (ref.getResource() == null) {
+          throw new IllegalStateException("Resource '" + ref.getReference()
+              + "' not found in response Bundle. Does your query contain all the includes?");
+        }
         return findQuestionnaireResponseId((Observation) ref.getResource());
       }
     }

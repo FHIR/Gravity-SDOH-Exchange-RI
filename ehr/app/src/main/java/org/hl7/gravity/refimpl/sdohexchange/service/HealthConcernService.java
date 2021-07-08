@@ -26,7 +26,6 @@ import org.hl7.gravity.refimpl.sdohexchange.exception.HealthConcernCreateExcepti
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.ConditionInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernPrepareBundleExtractor.HealthConcernPrepareInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.HealthConcernBundleFactory;
@@ -51,9 +50,7 @@ public class HealthConcernService {
   public List<HealthConcernDto> listActive() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchHealthConcernQuery().include(Condition.INCLUDE_EVIDENCE_DETAIL)
-        .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
-        .returnBundle(Bundle.class)
+    Bundle responseBundle = searchHealthConcernQuery().returnBundle(Bundle.class)
         .execute();
     return new HealthConcernBundleToDtoConverter().convert(responseBundle);
   }
@@ -95,13 +92,14 @@ public class HealthConcernService {
         .orElseThrow(() -> new HealthConcernCreateException("Health Concern is not found in the response bundle."));
   }
 
-  public void promote(String id) {
+  public HealthConcernDto promote(String id) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery().where(Condition.RES_ID.exactly()
         .code(id))
         .returnBundle(Bundle.class)
         .execute();
+
     Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
         .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
 
@@ -114,20 +112,23 @@ public class HealthConcernService {
     ehrClient.update()
         .resource(healthConcern)
         .execute();
+
+    //Since the condition was updated right within a bundle - we can proceed with a response generation.
+    return new HealthConcernBundleToDtoConverter().convert(responseBundle)
+        .stream()
+        .findFirst()
+        .get();
   }
 
-  public void resolve(String id) {
+  public HealthConcernDto resolve(String id) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery().where(Condition.RES_ID.exactly()
         .code(id))
         .returnBundle(Bundle.class)
         .execute();
-    Condition healthConcern = new ConditionInfoBundleExtractor().extract(responseBundle)
-        .stream()
-        .findFirst()
-        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)))
-        .getCondition();
+    Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
 
     ConditionClinicalStatusCodes resolvedStatus = ConditionClinicalStatusCodes.RESOLVED;
     Coding coding = healthConcern.getClinicalStatus()
@@ -139,6 +140,12 @@ public class HealthConcernService {
     ehrClient.update()
         .resource(healthConcern)
         .execute();
+
+    //Since the condition was updated right within a bundle - we can proceed with a response generation.
+    return new HealthConcernBundleToDtoConverter().convert(responseBundle)
+        .stream()
+        .findFirst()
+        .get();
   }
 
   private IQuery<IBaseBundle> searchHealthConcernQuery() {
@@ -151,6 +158,9 @@ public class HealthConcernService {
             .code(ConditionClinicalStatus.ACTIVE.toCode()))
         .where(Condition.CATEGORY.exactly()
             .systemAndCode(UsCoreConditionCategory.HEALTHCONCERN.getSystem(),
-                UsCoreConditionCategory.HEALTHCONCERN.toCode()));
+                UsCoreConditionCategory.HEALTHCONCERN.toCode()))
+        //We include all these resources since they are a part of a response DTO for all of the operations
+        .include(Condition.INCLUDE_EVIDENCE_DETAIL)
+        .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true));
   }
 }
