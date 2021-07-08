@@ -1,7 +1,16 @@
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { computed, defineComponent, PropType, ref, toRefs } from "vue";
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
 import DropButton from "@/components/DropButton.vue";
+import { ConcernsModule } from "@/store/modules/concerns";
+import { ConcernAction } from "@/components/patients/health-concerns/HealthConcernsTable.vue";
+
+const CONFIRM_TEXT = {
+	"view": "",
+	"promote-to-problem": "Please confirm this health concern can be promoted to a problem.",
+	"mark-as-resolved": "Please confirm that this health concern can be marked as resolved.",
+	"remove": "Please confirm that you want to remove this health concern."
+};
 
 export default defineComponent({
 	name: "EditConcernDialog",
@@ -14,21 +23,61 @@ export default defineComponent({
 			default: false
 		},
 		concern: {
-			type: Object as PropType<TableData>,
+			type: Object as PropType<TableData | undefined>,
 			default: undefined
+		},
+		openPhase: {
+			type: String as PropType<ConcernAction>,
+			default: "view"
 		}
 	},
-	emits: ["close"],
+	emits: ["close", "change-action", "trigger-open-assessment"],
 	setup(props, { emit }) {
+		const { concern, openPhase } = toRefs(props);
 		const saveInProgress = ref<boolean>(false);
+		const phase = ref<ConcernAction>("view");
+		const confirmActionText = computed<string>(() => CONFIRM_TEXT[phase.value]);
+		const showConfirm = computed<boolean>(() => phase.value !== "view");
 
 		const onDialogClose = () => {
 			emit("close");
 		};
 
+		const onDialogOpen = () => {
+			phase.value = openPhase.value;
+		};
+
+		const confirmActionClick = async () => {
+			saveInProgress.value = true;
+			try {
+				if (phase.value === "remove") {
+					await ConcernsModule.removeConcern(props.concern!.id);
+				} else if (phase.value === "mark-as-resolved") {
+					// TODO: BE should add response for this request
+					await ConcernsModule.resolveConcern(props.concern!.id);
+					// TODO: BE should add response for this request
+				} else if (phase.value === "promote-to-problem") {
+					await ConcernsModule.promoteConcern(props.concern!.id);
+				}
+				emit("close");
+			} finally {
+				saveInProgress.value = false;
+			}
+		};
+
+		const handleActionClick = (clickedAction: ConcernAction) => {
+			phase.value = clickedAction;
+		};
+
 		return {
 			saveInProgress,
-			onDialogClose
+			onDialogClose,
+			confirmActionText,
+			confirmActionClick,
+			handleActionClick,
+			onDialogOpen,
+			showConfirm,
+			phase
 		};
 	}
 });
@@ -42,6 +91,7 @@ export default defineComponent({
 		destroy-on-close
 		custom-class="edit-concern-dialog"
 		@close="onDialogClose"
+		@open="onDialogOpen"
 	>
 		<el-form
 			ref="formEl"
@@ -64,21 +114,77 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item label="Based on">
 				{{ concern.basedOn.display ? concern.basedOn.display : concern.basedOn }}
+				<span
+					v-if="concern.basedOn.id"
+					class="icon-link"
+					@click="$emit('trigger-open-assessment', concern.basedOn.id)"
+				>
+				</span>
 			</el-form-item>
 			<el-form-item label="Assessment Date">
 				{{ $filters.formatDateTime(concern.assessmentDate) }}
 			</el-form-item>
 		</el-form>
 		<template #footer>
+			<div
+				v-if="showConfirm"
+				class="confirm-text"
+			>
+				{{ confirmActionText }}
+			</div>
+			<el-button
+				v-if="showConfirm"
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="phase = 'view'"
+			>
+				Cancel
+			</el-button>
 			<DropButton
+				v-else-if="!showConfirm"
 				label="Close"
 				:items="[
-					{ id: '1', label: 'Promote to Problem', iconSrc: require('@/assets/images/concern-promote.svg') },
-					{ id: '2', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') },
-					{ id: '3', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
+					{ id: 'promote-to-problem', label: 'Promote to Problem', iconSrc: require('@/assets/images/concern-promote.svg') },
+					{ id: 'mark-as-resolved', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') },
+					{ id: 'remove', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
 				]"
 				@click="$emit('close')"
+				@item-click="handleActionClick"
 			/>
+			<el-button
+				v-if="showConfirm"
+				plain
+				round
+				type="primary"
+				size="mini"
+				:loading="saveInProgress"
+				@click="confirmActionClick"
+			>
+				Confirm
+			</el-button>
 		</template>
 	</el-dialog>
 </template>
+
+<style lang="scss" scoped>
+@import "~@/assets/scss/abstracts/variables";
+@import "~@/assets/scss/abstracts/mixins";
+
+.confirm-text {
+	text-align: left;
+	margin-bottom: 20px;
+	font-size: $global-font-size;
+	font-weight: $global-font-weight-medium;
+}
+
+.icon-link {
+	vertical-align: middle;
+	position: relative;
+	left: 7px;
+	cursor: pointer;
+
+	@include icon("~@/assets/images/link.svg", 14px, 14px);
+}
+</style>

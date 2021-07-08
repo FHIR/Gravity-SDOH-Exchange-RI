@@ -12,12 +12,16 @@ export default defineComponent({
 			type: String,
 			required: true
 		}
-	}
+	},
+	emits: ["clicked"]
 });
 </script>
 
 <template>
-	<button class="action-button">
+	<button
+		class="action-button"
+		@click="$emit('clicked')"
+	>
 		<span class="content">
 			<span
 				class="icon"
@@ -58,8 +62,7 @@ export default defineComponent({
 		overflow: hidden;
 	}
 
-	&:hover,
-	&:focus {
+	&:hover {
 		background-color: $global-background;
 		color: $global-text-color;
 		border-color: $global-primary-color;

@@ -10,7 +10,10 @@ import NoItems from "@/components/patients/NoItems.vue";
 export type TableData = {
 	id: string,
 	name: string,
-	basedOn: string,
+	basedOn: string | {
+		display: string,
+		id: string,
+	},
 	startDate?: string,
 	closedDate?: string,
 	goals: number,
@@ -29,7 +32,7 @@ export default defineComponent({
 		NewProblemDialog,
 		ProblemsTable
 	},
-	emits: ["trigger-add-goal"],
+	emits: ["trigger-open-assessment", "trigger-add-goal"],
 	setup() {
 		const problems = computed<Problem[]>(() => ProblemsModule.problems);
 		const tableData = computed<TableData[]>(() =>
@@ -87,6 +90,7 @@ export default defineComponent({
 			status="active"
 			@add-problem="newProblemsDialogVisible = true"
 			@trigger-add-goal="$emit('trigger-add-goal', $event)"
+			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 		<NoActiveItems
 			v-else-if="!activeProblems.length && closedProblems.length"
@@ -99,6 +103,7 @@ export default defineComponent({
 			:data="closedProblems"
 			title="Closed Problems"
 			status="closed"
+			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 		<NoItems
 			v-if="!isLoading && !tableData.length"

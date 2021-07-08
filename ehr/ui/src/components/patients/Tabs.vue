@@ -21,6 +21,14 @@ export default defineComponent({
 		const activeTab = ref<string>("actionSteps");
 		const addGoalPhase = ref<boolean>(false);
 		const newGoalProblems = ref<string[]>([]);
+		const assessmentToOpenId = ref<string>("");
+		const openAssessmentPhase = ref<boolean>(false);
+
+		const openAssessment = (id: string) => {
+			assessmentToOpenId.value = id;
+			openAssessmentPhase.value = true;
+			activeTab.value = "socialRiskAssessments";
+		};
 
 		const handleAddGoalFromProblem = (problemId: string) => {
 			activeTab.value = "goals";
@@ -38,7 +46,10 @@ export default defineComponent({
 			addGoalPhase,
 			newGoalProblems,
 			handleAddGoalFromProblem,
-			resetAddGoalPhase
+			resetAddGoalPhase,
+			openAssessment,
+			assessmentToOpenId,
+			openAssessmentPhase
 		};
 	}
 });
@@ -50,13 +61,18 @@ export default defineComponent({
 			label="Health Concerns"
 			name="healthConcerns"
 		>
-			<HealthConcerns />
+			<HealthConcerns
+				@trigger-open-assessment="openAssessment"
+			/>
 		</el-tab-pane>
 		<el-tab-pane
 			label="Problems"
 			name="problems"
 		>
-			<Problems @trigger-add-goal="handleAddGoalFromProblem" />
+			<Problems
+				@trigger-add-goal="handleAddGoalFromProblem"
+				@trigger-open-assessment="openAssessment"
+			/>
 		</el-tab-pane>
 		<el-tab-pane
 			label="Goals"
@@ -79,7 +95,12 @@ export default defineComponent({
 			label="Social Risk Assessments"
 			name="socialRiskAssessments"
 		>
-			<RiskAssessments />
+			<RiskAssessments
+				:open-assessment-phase="openAssessmentPhase"
+				:assessment-to-open="assessmentToOpenId"
+				:is-active="activeTab === 'socialRiskAssessments'"
+				@stop-open-assessment="openAssessmentPhase = false"
+			/>
 		</el-tab-pane>
 		<el-tab-pane
 			label="Consents"

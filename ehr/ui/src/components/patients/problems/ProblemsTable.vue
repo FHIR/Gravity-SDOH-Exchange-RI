@@ -24,7 +24,7 @@ export default defineComponent({
 			default: "active"
 		}
 	},
-	emits: ["add-problem", "trigger-add-goal"],
+	emits: ["add-problem", "trigger-open-assessment", "trigger-add-goal"],
 	setup(props, { emit }) {
 		const problemsDialogVisible = ref<boolean>(false);
 		const activeProblem = ref<TableData | null>(null);
@@ -42,11 +42,17 @@ export default defineComponent({
 			}
 		};
 
+		const handleOpenAssessment = (id: string) => {
+			problemsDialogVisible.value = false;
+			emit("trigger-open-assessment", id);
+		};
+
 		return {
 			problemsDialogVisible,
 			activeProblem,
 			problemsDialogOpenPhase,
-			handleActionClick
+			handleActionClick,
+			handleOpenAssessment
 		};
 	}
 });
@@ -88,7 +94,13 @@ export default defineComponent({
 				label="Based on"
 			>
 				<template #default="scope">
-					<span>{{ scope.row.basedOn }}</span>
+					{{ scope.row.basedOn.display ? scope.row.basedOn.display : scope.row.basedOn }}
+					<span
+						v-if="scope.row.basedOn.id"
+						class="icon-link"
+						@click="$emit('trigger-open-assessment', scope.row.basedOn.id)"
+					>
+					</span>
 				</template>
 			</el-table-column>
 			<el-table-column
@@ -151,12 +163,14 @@ export default defineComponent({
 			:open-phase="problemsDialogOpenPhase"
 			@close="problemsDialogVisible = false"
 			@trigger-add-goal="$emit('trigger-add-goal', activeProblem.id);"
+			@trigger-open-assessment="handleOpenAssessment"
 		/>
 	</div>
 </template>
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+@import "~@/assets/scss/abstracts/mixins";
 
 .title {
 	margin: 10px 20px 0;
@@ -179,5 +193,13 @@ export default defineComponent({
 	+ .table-wrapper {
 		margin-top: 30px;
 	}
+}
+
+.icon-link {
+	position: relative;
+	left: 7px;
+	cursor: pointer;
+
+	@include icon("~@/assets/images/link.svg", 14px, 14px);
 }
 </style>

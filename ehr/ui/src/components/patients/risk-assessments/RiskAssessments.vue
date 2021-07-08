@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, ref, watch } from "vue";
 import RiskAssessmentsTable from "@/components/patients/risk-assessments/RiskAssessmentsTable.vue";
 import EditAssessmentDialog from "@/components/patients/risk-assessments/EditAssessmentDialog.vue";
 import { Assessment } from "@/types";
@@ -13,7 +13,22 @@ export default defineComponent({
 		RiskAssessmentsTable,
 		EditAssessmentDialog
 	},
-	setup() {
+	props: {
+		assessmentToOpen: {
+			type: String,
+			default: ""
+		},
+		isActive: {
+			type: Boolean,
+			default: false
+		},
+		openAssessmentPhase: {
+			type: Boolean,
+			default: false
+		}
+	},
+	emits: ["stop-open-assessment"],
+	setup(props, { emit }) {
 		const activeGroup = ref<"pastAssessments" | "plannedAssessments">("pastAssessments");
 		const isRequestLoading = computed(() => AssessmentsModule.assessmentsLoading);
 		const assessments = computed<Assessment[]>(() => AssessmentsModule.assessments);
@@ -22,11 +37,23 @@ export default defineComponent({
 
 		AssessmentsModule.loadPastAssessments();
 
+		const handleDialogClose = () => {
+			viewingAssessment.value = undefined;
+			emit("stop-open-assessment");
+		};
+
+		watch(() => props.isActive, () => {
+			if (props.isActive && props.openAssessmentPhase) {
+				viewingAssessment.value = assessments.value.find(assessment => assessment.id === props.assessmentToOpen);
+			}
+		});
+
 		return {
 			activeGroup,
 			assessments,
 			isRequestLoading,
-			viewingAssessment
+			viewingAssessment,
+			handleDialogClose
 		};
 	}
 });
@@ -66,6 +93,7 @@ export default defineComponent({
 				v-if="assessments.length"
 				:data="assessments"
 				@title-click="viewingAssessment = $event"
+				@stop-open-assessment="$emit('stop-open-assessment')"
 			/>
 			<NoItems
 				v-if="!isRequestLoading && !assessments.length"
@@ -84,7 +112,7 @@ export default defineComponent({
 		<EditAssessmentDialog
 			:visible="viewingAssessment !== undefined"
 			:assessment="viewingAssessment"
-			@close="viewingAssessment = undefined"
+			@close="handleDialogClose"
 		/>
 	</div>
 </template>
