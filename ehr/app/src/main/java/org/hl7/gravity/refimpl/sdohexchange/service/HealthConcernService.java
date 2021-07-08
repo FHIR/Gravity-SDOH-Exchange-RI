@@ -50,7 +50,15 @@ public class HealthConcernService {
   public List<HealthConcernDto> listActive() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchHealthConcernQuery().returnBundle(Bundle.class)
+    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).returnBundle(Bundle.class)
+        .execute();
+    return new HealthConcernBundleToDtoConverter().convert(responseBundle);
+  }
+
+  public List<HealthConcernDto> listResolved() {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.RESOLVED).returnBundle(Bundle.class)
         .execute();
     return new HealthConcernBundleToDtoConverter().convert(responseBundle);
   }
@@ -82,7 +90,7 @@ public class HealthConcernService {
         .execute();
 
     IdType healthConcernId = FhirUtil.getFromResponseBundle(healthConcernCreateBundle, Condition.class);
-    Bundle responseBundle = searchHealthConcernQuery().where(Condition.RES_ID.exactly()
+    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
         .code(healthConcernId.getIdPart()))
         .returnBundle(Bundle.class)
         .execute();
@@ -95,7 +103,7 @@ public class HealthConcernService {
   public HealthConcernDto promote(String id) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchHealthConcernQuery().where(Condition.RES_ID.exactly()
+    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
         .code(id))
         .returnBundle(Bundle.class)
         .execute();
@@ -123,7 +131,7 @@ public class HealthConcernService {
   public HealthConcernDto resolve(String id) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchHealthConcernQuery().where(Condition.RES_ID.exactly()
+    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
         .code(id))
         .returnBundle(Bundle.class)
         .execute();
@@ -148,14 +156,14 @@ public class HealthConcernService {
         .get();
   }
 
-  private IQuery<IBaseBundle> searchHealthConcernQuery() {
+  private IQuery<IBaseBundle> searchHealthConcernQuery(ConditionClinicalStatus status) {
     return ehrClient.search()
         .forResource(Condition.class)
         .where(Condition.PATIENT.hasId(smartOnFhirContext.getPatient()))
         .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
             .value(SDOHProfiles.CONDITION))
         .where(Condition.CLINICAL_STATUS.exactly()
-            .code(ConditionClinicalStatus.ACTIVE.toCode()))
+            .code(status.toCode()))
         .where(Condition.CATEGORY.exactly()
             .systemAndCode(UsCoreConditionCategory.HEALTHCONCERN.getSystem(),
                 UsCoreConditionCategory.HEALTHCONCERN.toCode()))

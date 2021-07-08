@@ -41,6 +41,12 @@ public class HealthConcernsController {
     return healthConcernService.listActive();
   }
 
+  @GetMapping("/resolved")
+  @ApiOperation(value = "List of all resolved Health Concerns.")
+  public List<HealthConcernDto> listResolved() {
+    return healthConcernService.listResolved();
+  }
+
   @PostMapping()
   @ApiOperation(value = "Create new active Health Concern.")
   public HealthConcernDto create(@RequestBody @Valid NewHealthConcernDto newHealthConcernDto,
