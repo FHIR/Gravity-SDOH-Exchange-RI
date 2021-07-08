@@ -8,6 +8,7 @@ import NoActiveItems from "@/components/patients/NoActiveItems.vue";
 import NoItems from "@/components/patients/NoItems.vue";
 
 export type TableData = {
+	id: string,
 	name: string,
 	assessmentDate: string,
 	basedOn: string | {
@@ -27,12 +28,14 @@ export default defineComponent({
 		HealthConcernsTable,
 		NewConcernDialog
 	},
+	emits: ["trigger-open-assessment"],
 	setup() {
 		const isDataLoading = ref<boolean>(false);
 		const newConcernDialogVisible = ref<boolean>(false);
 		const activeConcerns = computed<Concern[]>(() => ConcernsModule.activeConcerns);
 		const activeConcernsTableData = computed<TableData[]>(() =>
 			activeConcerns.value.map((concern: Concern) => ({
+				id: concern.id,
 				name: concern.name,
 				assessmentDate: concern.date,
 				basedOn: concern.basedOn,
@@ -44,6 +47,7 @@ export default defineComponent({
 		const resolvedConcerns = computed<Concern[]>(() => ConcernsModule.resolvedConcerns);
 		const resolvedConcernsTableData = computed<TableData[]>(() =>
 			resolvedConcerns.value.map((concern: Concern) => ({
+				id: concern.id,
 				name: concern.name,
 				assessmentDate: concern.date,
 				basedOn: concern.basedOn,
@@ -83,6 +87,7 @@ export default defineComponent({
 			:data="activeConcernsTableData"
 			type="ActiveConcerns"
 			@add-concern="newConcernDialogVisible = true"
+			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 		<NoActiveItems
 			v-else-if="!activeConcernsTableData.length && resolvedConcernsTableData.length"

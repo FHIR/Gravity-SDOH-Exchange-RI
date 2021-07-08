@@ -4,6 +4,8 @@ import EditConcernDialog from "@/components/patients/health-concerns/EditConcern
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
 
+export type ConcernAction = "view" | "mark-as-resolved" | "promote-to-problem" | "remove";
+
 export default defineComponent({
 	name: "HealthConcernsTable",
 	components: {
@@ -24,19 +26,31 @@ export default defineComponent({
 			required: true
 		}
 	},
-	emits: ["add-concern"],
-	setup() {
+	emits: ["add-concern", "trigger-open-assessment"],
+	setup( props, { emit }) {
 		const editConcernDialogVisible = ref<boolean>(false);
+		const newConcernDialogVisible = ref<boolean>(false);
 		const editConcern = ref<TableData>();
-		const onConcernClick = (row: TableData) => {
+		const dialogOpenPhase = ref<ConcernAction>("view");
+
+		const concernOrActionClick = (row: TableData, phase: ConcernAction) => {
+			dialogOpenPhase.value = phase;
 			editConcernDialogVisible.value = true;
 			editConcern.value = row;
 		};
 
+		const handleOpenAssessment = (id: string) => {
+			editConcernDialogVisible.value = false;
+			emit("trigger-open-assessment", id);
+		};
+
 		return {
 			editConcernDialogVisible,
-			onConcernClick,
-			editConcern
+			newConcernDialogVisible,
+			concernOrActionClick,
+			editConcern,
+			dialogOpenPhase,
+			handleOpenAssessment
 		};
 	}
 });
@@ -71,7 +85,7 @@ export default defineComponent({
 					<template #default="scope">
 						<el-button
 							type="text"
-							@click="onConcernClick(scope.row)"
+							@click="concernOrActionClick(scope.row, 'view')"
 						>
 							{{ scope.row.name }}
 						</el-button>
@@ -89,6 +103,12 @@ export default defineComponent({
 				>
 					<template #default="scope">
 						{{ scope.row.basedOn.display ? scope.row.basedOn.display : scope.row.basedOn }}
+						<span
+							v-if="scope.row.basedOn.id"
+							class="icon-link"
+							@click="$emit('trigger-open-assessment', scope.row.basedOn.id)"
+						>
+						</span>
 					</template>
 				</el-table-column>
 				<el-table-column
@@ -103,18 +123,23 @@ export default defineComponent({
 					label="Actions"
 					width="350"
 				>
-					<ActionButton
-						icon-class="icon-promote"
-						label="Promote to Problem"
-					/>
-					<ActionButton
-						icon-class="icon-resolved"
-						label="Mark as Resolved"
-					/>
-					<ActionButton
-						icon-class="icon-remove"
-						label="Remove"
-					/>
+					<template #default="scope">
+						<ActionButton
+							icon-class="icon-promote"
+							label="Promote to Problem"
+							@clicked="concernOrActionClick(scope.row, 'promote-to-problem')"
+						/>
+						<ActionButton
+							icon-class="icon-resolved"
+							label="Mark as Resolved"
+							@clicked="concernOrActionClick(scope.row, 'mark-as-resolved')"
+						/>
+						<ActionButton
+							icon-class="icon-remove"
+							label="Remove"
+							@clicked="concernOrActionClick(scope.row, 'remove')"
+						/>
+					</template>
 				</el-table-column>
 				<el-table-column
 					v-if="type === 'PromotedOrResolvedConcerns'"
@@ -128,7 +153,9 @@ export default defineComponent({
 		<EditConcernDialog
 			:visible="editConcernDialogVisible"
 			:concern="editConcern"
-			@close="editConcernDialogVisible = false"
+			:open-phase="dialogOpenPhase"
+			@close="editConcernDialogVisible = false;"
+			@trigger-open-assessment="handleOpenAssessment"
 		/>
 	</div>
 </template>
@@ -163,5 +190,13 @@ export default defineComponent({
 	border: 1px solid $global-base-border-color;
 	padding: 10px 20px;
 	min-height: 130px;
+}
+
+.icon-link {
+	position: relative;
+	left: 7px;
+	cursor: pointer;
+
+	@include icon("~@/assets/images/link.svg", 14px, 14px);
 }
 </style>
