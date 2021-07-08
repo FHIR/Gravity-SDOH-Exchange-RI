@@ -29,6 +29,7 @@ export default defineComponent({
 		NewProblemDialog,
 		ProblemsTable
 	},
+	emits: ["trigger-add-goal"],
 	setup() {
 		const problems = computed<Problem[]>(() => ProblemsModule.problems);
 		const tableData = computed<TableData[]>(() =>
@@ -85,6 +86,7 @@ export default defineComponent({
 			title="Active Problems"
 			status="active"
 			@add-problem="newProblemsDialogVisible = true"
+			@trigger-add-goal="$emit('trigger-add-goal', $event)"
 		/>
 		<NoActiveItems
 			v-else-if="!activeProblems.length && closedProblems.length"

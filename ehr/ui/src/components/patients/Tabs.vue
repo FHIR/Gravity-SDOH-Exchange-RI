@@ -19,9 +19,26 @@ export default defineComponent({
 	},
 	setup() {
 		const activeTab = ref<string>("actionSteps");
+		const addGoalPhase = ref<boolean>(false);
+		const newGoalProblems = ref<string[]>([]);
+
+		const handleAddGoalFromProblem = (problemId: string) => {
+			activeTab.value = "goals";
+			addGoalPhase.value = true;
+			newGoalProblems.value = [problemId];
+		};
+
+		const resetAddGoalPhase = () => {
+			addGoalPhase.value = false;
+			newGoalProblems.value = [];
+		};
 
 		return {
-			activeTab
+			activeTab,
+			addGoalPhase,
+			newGoalProblems,
+			handleAddGoalFromProblem,
+			resetAddGoalPhase
 		};
 	}
 });
@@ -39,13 +56,18 @@ export default defineComponent({
 			label="Problems"
 			name="problems"
 		>
-			<Problems />
+			<Problems @trigger-add-goal="handleAddGoalFromProblem" />
 		</el-tab-pane>
 		<el-tab-pane
 			label="Goals"
 			name="goals"
 		>
-			<Goals />
+			<Goals
+				:add-goal-phase="addGoalPhase"
+				:new-goals-problems="newGoalProblems"
+				:is-active="activeTab === 'goals'"
+				@stop-add-goal="resetAddGoalPhase"
+			/>
 		</el-tab-pane>
 		<el-tab-pane
 			label="Action Steps"

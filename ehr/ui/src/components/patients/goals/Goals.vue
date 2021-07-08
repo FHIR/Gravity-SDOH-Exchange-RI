@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent, onMounted, PropType, ref, watch } from "vue";
 import { Goal, Coding, Comment } from "@/types";
 import { GoalsModule } from "@/store/modules/goals";
 import GoalsTable from "@/components/patients/goals/GoalsTable.vue";
@@ -29,7 +29,22 @@ export default defineComponent({
 		NoActiveItems,
 		GoalsTable
 	},
-	setup() {
+	props: {
+		isActive: {
+			type: Boolean,
+			default: false
+		},
+		addGoalPhase: {
+			type: Boolean,
+			default: false
+		},
+		newGoalsProblems: {
+			type: Array as PropType<string[]>,
+			default: () => []
+		}
+	},
+	emits: ["stop-add-goal"],
+	setup(props, { emit }) {
 		const isDataLoading = ref<boolean>(false);
 		const goals = computed<Goal[]>(() => GoalsModule.goals);
 		const tableData = computed<TableData[]>(() =>
@@ -60,11 +75,23 @@ export default defineComponent({
 			}
 		});
 
+		const handleDialogClose = () => {
+			newGoalDialogVisible.value = false;
+			emit("stop-add-goal");
+		};
+
+		watch(() => props.isActive, () => {
+			if (props.isActive) {
+				newGoalDialogVisible.value = props.addGoalPhase;
+			}
+		});
+
 		return {
 			activeGoals,
 			completedGoals,
 			isDataLoading,
-			newGoalDialogVisible
+			newGoalDialogVisible,
+			handleDialogClose
 		};
 	}
 });
@@ -98,8 +125,9 @@ export default defineComponent({
 			@add-item="newGoalDialogVisible = true"
 		/>
 		<NewGoalDialog
+			:new-goals-problems="newGoalsProblems"
 			:visible="newGoalDialogVisible"
-			@close="newGoalDialogVisible = false"
+			@close="handleDialogClose"
 		/>
 	</div>
 </template>

@@ -42,7 +42,7 @@ export default defineComponent({
 			default: "view"
 		}
 	},
-	emits: ["close"],
+	emits: ["close", "trigger-add-goal"],
 	setup(props, { emit }) {
 		const formModel = reactive<FormModel>({
 			id: "",
@@ -78,9 +78,8 @@ export default defineComponent({
 			}
 
 			if(action === "add-goal") {
-				// todo:
-				// emit("close");
-				// emit("trigger-add-goal", action, problem.value);
+				emit("trigger-add-goal", problem.value.id);
+				emit("close");
 			}
 		};
 
