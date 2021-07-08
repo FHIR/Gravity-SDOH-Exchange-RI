@@ -19,6 +19,8 @@ export default defineComponent({
 	},
 	setup() {
 		const activeTab = ref<string>("actionSteps");
+		const addGoalPhase = ref<boolean>(false);
+		const newGoalProblems = ref<string[]>([]);
 		const assessmentToOpenId = ref<string>("");
 		const openAssessmentPhase = ref<boolean>(false);
 
@@ -28,8 +30,23 @@ export default defineComponent({
 			activeTab.value = "socialRiskAssessments";
 		};
 
+		const handleAddGoalFromProblem = (problemId: string) => {
+			activeTab.value = "goals";
+			addGoalPhase.value = true;
+			newGoalProblems.value = [problemId];
+		};
+
+		const resetAddGoalPhase = () => {
+			addGoalPhase.value = false;
+			newGoalProblems.value = [];
+		};
+
 		return {
 			activeTab,
+			addGoalPhase,
+			newGoalProblems,
+			handleAddGoalFromProblem,
+			resetAddGoalPhase,
 			openAssessment,
 			assessmentToOpenId,
 			openAssessmentPhase
@@ -53,6 +70,7 @@ export default defineComponent({
 			name="problems"
 		>
 			<Problems
+				@trigger-add-goal="handleAddGoalFromProblem"
 				@trigger-open-assessment="openAssessment"
 			/>
 		</el-tab-pane>
@@ -60,7 +78,12 @@ export default defineComponent({
 			label="Goals"
 			name="goals"
 		>
-			<Goals />
+			<Goals
+				:add-goal-phase="addGoalPhase"
+				:new-goals-problems="newGoalProblems"
+				:is-active="activeTab === 'goals'"
+				@stop-add-goal="resetAddGoalPhase"
+			/>
 		</el-tab-pane>
 		<el-tab-pane
 			label="Action Steps"

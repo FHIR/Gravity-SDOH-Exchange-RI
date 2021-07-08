@@ -24,7 +24,7 @@ export default defineComponent({
 			default: "active"
 		}
 	},
-	emits: ["add-problem", "trigger-open-assessment"],
+	emits: ["add-problem", "trigger-open-assessment", "trigger-add-goal"],
 	setup(props, { emit }) {
 		const problemsDialogVisible = ref<boolean>(false);
 		const activeProblem = ref<TableData | null>(null);
@@ -37,9 +37,8 @@ export default defineComponent({
 				activeProblem.value = problem;
 			}
 			if (action === "add-goal") {
-				// todo: handle add goal behavior
-				// emit(action, problem);
-				// go to goal tab and show add goal dialog
+				// trigger event to open goal tab and show 'add goal' dialog
+				emit("trigger-add-goal", problem.id);
 			}
 		};
 
@@ -55,7 +54,6 @@ export default defineComponent({
 			handleActionClick,
 			handleOpenAssessment
 		};
-
 	}
 });
 </script>
@@ -164,6 +162,7 @@ export default defineComponent({
 			:problem="activeProblem"
 			:open-phase="problemsDialogOpenPhase"
 			@close="problemsDialogVisible = false"
+			@trigger-add-goal="$emit('trigger-add-goal', activeProblem.id);"
 			@trigger-open-assessment="handleOpenAssessment"
 		/>
 	</div>

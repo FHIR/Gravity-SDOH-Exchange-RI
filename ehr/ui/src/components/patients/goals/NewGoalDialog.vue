@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, ref, reactive, computed } from "vue";
+import { defineComponent, ref, reactive, computed, PropType } from "vue";
 import { Coding, Problem } from "@/types";
 import { RuleItem } from "async-validator";
 import { getCategories, getGoalCodes } from "@/api";
@@ -38,6 +38,10 @@ export default defineComponent({
 		visible: {
 			type: Boolean,
 			default: false
+		},
+		newGoalsProblems: {
+			type: Array as PropType<string[]>,
+			default: () => []
 		}
 	},
 	emits: ["close"],
@@ -75,6 +79,7 @@ export default defineComponent({
 			formModel.startDate = new Date().toDateString();
 			categoryOptions.value = await getCategories();
 			await ProblemsModule.getProblems();
+			formModel.problems = props.newGoalsProblems;
 		};
 
 

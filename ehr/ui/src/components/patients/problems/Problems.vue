@@ -32,7 +32,7 @@ export default defineComponent({
 		NewProblemDialog,
 		ProblemsTable
 	},
-	emits: ["trigger-open-assessment"],
+	emits: ["trigger-open-assessment", "trigger-add-goal"],
 	setup() {
 		const problems = computed<Problem[]>(() => ProblemsModule.problems);
 		const tableData = computed<TableData[]>(() =>
@@ -89,6 +89,7 @@ export default defineComponent({
 			title="Active Problems"
 			status="active"
 			@add-problem="newProblemsDialogVisible = true"
+			@trigger-add-goal="$emit('trigger-add-goal', $event)"
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 		<NoActiveItems

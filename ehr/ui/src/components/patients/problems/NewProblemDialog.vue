@@ -2,8 +2,7 @@
 import { defineComponent, ref, reactive } from "vue";
 import { Coding } from "@/types";
 import { RuleItem } from "async-validator";
-import { getCategories, getProblemCodes } from "@/api";
-import moment from "moment";
+import { getCategories, getConditionCodes } from "@/api";
 import { ProblemsModule } from "@/store/modules/problems";
 
 const DEFAULT_REQUIRED_RULE = {
@@ -14,19 +13,8 @@ const DEFAULT_REQUIRED_RULE = {
 export type FormModel = {
 	name: string,
 	category: string,
-	codeISD: string,
-	codeSNOMED: string,
-	basedOn: string,
-	startDate: string
-};
-
-const DEFAULT_FORM_MODEL = {
-	name: "",
-	category: "",
-	codeISD: "",
-	codeSNOMED: "",
-	basedOn: "Conversation with Patient",
-	startDate: ""
+	codeICD: string,
+	codeSNOMED: string
 };
 
 export default defineComponent({
@@ -40,21 +28,26 @@ export default defineComponent({
 	emits: ["close"],
 	setup(props, { emit }) {
 		const formEl = ref<HTMLFormElement>();
-		const formModel = reactive<FormModel>(DEFAULT_FORM_MODEL);
+		const formModel = reactive<FormModel>({
+			name: "",
+			category: "",
+			codeICD: "",
+			codeSNOMED: ""
+		});
 		const categoryOptions = ref<Coding[]>([]);
-		const codeISDOptions = ref<Coding[]>([]);
-		const codeSNOMEDOptions = ref<Coding[]>([]);
+		const icdCodesOptions = ref<Coding[]>([]);
+		const snomedCodesOptions = ref<Coding[]>([]);
 
 		//
 		// Clear code fields on every category change because they are connected.
 		//
-		const onCategoryChange = async (code: string) => {
-			formModel.codeISD = "";
+		const onCategoryChange = async (category: string) => {
+			formModel.codeICD = "";
 			formModel.codeSNOMED = "";
 
-			const codes = await getProblemCodes(code);
-			codeISDOptions.value = codes.isd;
-			codeSNOMEDOptions.value = codes.snomed;
+			const conditionCodes = await getConditionCodes(category);
+			icdCodesOptions.value = conditionCodes.find(item => item.display === "ICD-10-CM")?.codings || [];
+			snomedCodesOptions.value = conditionCodes.find(item => item.display === "SNOMED CT")?.codings || [];
 		};
 
 		const onDialogClose = () => {
@@ -72,7 +65,7 @@ export default defineComponent({
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: DEFAULT_REQUIRED_RULE,
 			category: DEFAULT_REQUIRED_RULE,
-			codeISD: DEFAULT_REQUIRED_RULE,
+			codeICD: DEFAULT_REQUIRED_RULE,
 			codeSNOMED: DEFAULT_REQUIRED_RULE
 		};
 
@@ -86,7 +79,6 @@ export default defineComponent({
 				if (valid) {
 					saveInProgress.value = true;
 					const payload = { ...formModel };
-					payload.startDate = moment(formModel.startDate).format("YYYY-MM-DD[T]HH:mm:ss");
 
 					try {
 						await ProblemsModule.createProblem(payload);
@@ -108,8 +100,8 @@ export default defineComponent({
 			formEl,
 			categoryOptions,
 			onCategoryChange,
-			codeISDOptions,
-			codeSNOMEDOptions
+			icdCodesOptions,
+			snomedCodesOptions
 		};
 	}
 });
@@ -163,14 +155,14 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="ICD-10 Code"
-				prop="codeISD"
+				prop="codeICD"
 			>
 				<el-select
-					v-model="formModel.codeISD"
+					v-model="formModel.codeICD"
 					placeholder="Select Code"
 				>
 					<el-option
-						v-for="item in codeISDOptions"
+						v-for="item in icdCodesOptions"
 						:key="item.code"
 						:label="`${item.display} (${item.code})`"
 						:value="item.code"
@@ -186,7 +178,7 @@ export default defineComponent({
 					placeholder="Select Code"
 				>
 					<el-option
-						v-for="item in codeSNOMEDOptions"
+						v-for="item in snomedCodesOptions"
 						:key="item.code"
 						:label="`${item.display} (${item.code})`"
 						:value="item.code"
@@ -197,8 +189,7 @@ export default defineComponent({
 				label="Based on"
 			>
 				<el-input
-					v-model="formModel.basedOn"
-					placeholder="Enter based on here..."
+					model-value="Conversation with Patient"
 					disabled
 				/>
 			</el-form-item>
@@ -207,8 +198,9 @@ export default defineComponent({
 				label="Creation Date"
 			>
 				<el-date-picker
-					v-model="formModel.startDate"
+					:model-value="new Date()"
 					type="date"
+					disabled
 				/>
 			</el-form-item>
 		</el-form>
