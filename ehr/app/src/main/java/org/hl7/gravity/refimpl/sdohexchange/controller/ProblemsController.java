@@ -28,4 +28,10 @@ public class ProblemsController {
   public List<ProblemDto> listActive() {
     return problemService.listActive();
   }
+
+  @GetMapping("/closed")
+  @ApiOperation(value = "List of all closed Problems.")
+  public List<ProblemDto> listClosed() {
+    return problemService.listClosed();
+  }
 }

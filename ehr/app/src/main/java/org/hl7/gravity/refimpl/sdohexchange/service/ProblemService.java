@@ -37,7 +37,8 @@ public class ProblemService {
   public List<ProblemDto> listActive() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchProblemQuery().include(Condition.INCLUDE_EVIDENCE_DETAIL)
+    Bundle responseBundle = searchProblemQuery(ConditionClinicalStatus.ACTIVE).include(
+        Condition.INCLUDE_EVIDENCE_DETAIL)
         .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .returnBundle(Bundle.class)
         .execute();
@@ -54,14 +55,35 @@ public class ProblemService {
         .collect(Collectors.toList());
   }
 
-  private IQuery<IBaseBundle> searchProblemQuery() {
+  public List<ProblemDto> listClosed() {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    Bundle responseBundle = searchProblemQuery(ConditionClinicalStatus.RESOLVED).include(
+        Condition.INCLUDE_EVIDENCE_DETAIL)
+        .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
+        .returnBundle(Bundle.class)
+        .execute();
+
+    // Reuse a HealthConcernBundleToDtoConverter for now. In future, when the Problem logic is refined - we will have
+    // a separate converter for that.
+    return new HealthConcernBundleToDtoConverter().convert(responseBundle)
+        .stream()
+        .map(hc -> {
+          ProblemDto problemDto = new ProblemDto();
+          BeanUtils.copyProperties(hc, problemDto);
+          return problemDto;
+        })
+        .collect(Collectors.toList());
+  }
+
+  private IQuery<IBaseBundle> searchProblemQuery(ConditionClinicalStatus status) {
     return ehrClient.search()
         .forResource(Condition.class)
         .where(Condition.PATIENT.hasId(smartOnFhirContext.getPatient()))
         .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
             .value(SDOHProfiles.CONDITION))
         .where(Condition.CLINICAL_STATUS.exactly()
-            .code(ConditionClinicalStatus.ACTIVE.toCode()))
+            .code(status.toCode()))
         .where(Condition.CATEGORY.exactly()
             .systemAndCode(UsCoreConditionCategory.PROBLEMLISTITEM.getSystem(),
                 UsCoreConditionCategory.PROBLEMLISTITEM.toCode()));

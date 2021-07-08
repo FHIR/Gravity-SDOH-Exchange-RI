@@ -50,7 +50,10 @@ public class HealthConcernService {
   public List<HealthConcernDto> listActive() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).returnBundle(Bundle.class)
+    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).include(
+        Condition.INCLUDE_EVIDENCE_DETAIL)
+        .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
+        .returnBundle(Bundle.class)
         .execute();
     return new HealthConcernBundleToDtoConverter().convert(responseBundle);
   }
@@ -58,7 +61,10 @@ public class HealthConcernService {
   public List<HealthConcernDto> listResolved() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.RESOLVED).returnBundle(Bundle.class)
+    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.RESOLVED).include(
+        Condition.INCLUDE_EVIDENCE_DETAIL)
+        .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
+        .returnBundle(Bundle.class)
         .execute();
     return new HealthConcernBundleToDtoConverter().convert(responseBundle);
   }
@@ -100,7 +106,7 @@ public class HealthConcernService {
         .orElseThrow(() -> new HealthConcernCreateException("Health Concern is not found in the response bundle."));
   }
 
-  public HealthConcernDto promote(String id) {
+  public void promote(String id) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
@@ -120,15 +126,9 @@ public class HealthConcernService {
     ehrClient.update()
         .resource(healthConcern)
         .execute();
-
-    //Since the condition was updated right within a bundle - we can proceed with a response generation.
-    return new HealthConcernBundleToDtoConverter().convert(responseBundle)
-        .stream()
-        .findFirst()
-        .get();
   }
 
-  public HealthConcernDto resolve(String id) {
+  public void resolve(String id) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
@@ -148,12 +148,6 @@ public class HealthConcernService {
     ehrClient.update()
         .resource(healthConcern)
         .execute();
-
-    //Since the condition was updated right within a bundle - we can proceed with a response generation.
-    return new HealthConcernBundleToDtoConverter().convert(responseBundle)
-        .stream()
-        .findFirst()
-        .get();
   }
 
   private IQuery<IBaseBundle> searchHealthConcernQuery(ConditionClinicalStatus status) {
@@ -166,9 +160,6 @@ public class HealthConcernService {
             .code(status.toCode()))
         .where(Condition.CATEGORY.exactly()
             .systemAndCode(UsCoreConditionCategory.HEALTHCONCERN.getSystem(),
-                UsCoreConditionCategory.HEALTHCONCERN.toCode()))
-        //We include all these resources since they are a part of a response DTO for all of the operations
-        .include(Condition.INCLUDE_EVIDENCE_DETAIL)
-        .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true));
+                UsCoreConditionCategory.HEALTHCONCERN.toCode()));
   }
 }

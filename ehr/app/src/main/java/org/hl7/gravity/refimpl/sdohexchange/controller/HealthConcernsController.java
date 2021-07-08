@@ -10,6 +10,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.HealthConcernDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.HealthConcernService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.validation.annotation.Validated;
@@ -57,13 +58,17 @@ public class HealthConcernsController {
 
   @PutMapping("/promote/{id}")
   @ApiOperation(value = "Promote an active Health Concern to a Problem.")
-  public HealthConcernDto promote(@PathVariable @NotBlank String id) {
-    return healthConcernService.promote(id);
+  public ResponseEntity<Void> promote(@PathVariable @NotBlank String id) {
+    healthConcernService.promote(id);
+    return ResponseEntity.noContent()
+        .build();
   }
 
   @PutMapping("/resolve/{id}")
   @ApiOperation(value = "Mark an active Health Concern as resolved.")
-  public HealthConcernDto resolve(@PathVariable @NotBlank String id) {
-    return healthConcernService.resolve(id);
+  public ResponseEntity<Void> resolve(@PathVariable @NotBlank String id) {
+    healthConcernService.resolve(id);
+    return ResponseEntity.noContent()
+        .build();
   }
 }
