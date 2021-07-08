@@ -13,7 +13,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.HealthConcernDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.StringTypeDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.ConditionInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
@@ -25,14 +25,13 @@ import static org.hl7.gravity.refimpl.sdohexchange.dto.converter.AssessmentInfoT
 
 public class HealthConcernBundleToDtoConverter implements Converter<Bundle, List<HealthConcernDto>> {
 
-  private final HealthConcernInfoBundleExtractor healthConcernInfoBundleExtractor =
-      new HealthConcernInfoBundleExtractor();
+  private final ConditionInfoBundleExtractor conditionInfoBundleExtractor = new ConditionInfoBundleExtractor();
   private final CodeableConceptToStringConverter codeableConceptToStringConverter =
       new CodeableConceptToStringConverter(", ");
 
   @Override
   public List<HealthConcernDto> convert(Bundle bundle) {
-    return healthConcernInfoBundleExtractor.extract(bundle)
+    return conditionInfoBundleExtractor.extract(bundle)
         .stream()
         .map(healthConcernInfo -> {
           HealthConcernDto healthConcernDto = new HealthConcernDto();
@@ -40,10 +39,10 @@ public class HealthConcernBundleToDtoConverter implements Converter<Bundle, List
           healthConcernDto.setId(condition.getIdElement()
               .getIdPart());
           healthConcernDto.setName(codeableConceptToStringConverter.convert(condition.getCode()));
-          Coding categoryCoding = FhirUtil.findCoding(condition.getCategory(),
-              SDOHMappings.getInstance().getSystem());
+          Coding categoryCoding = FhirUtil.findCoding(condition.getCategory(), SDOHMappings.getInstance()
+              .getSystem());
           // TODO remove this in future. Fow now two different categories might be used before discussed.
-          if(categoryCoding == null){
+          if (categoryCoding == null) {
             categoryCoding = FhirUtil.findCoding(condition.getCategory(),
                 "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/SDOHCC-CodeSystemTemporaryCodes");
           }
