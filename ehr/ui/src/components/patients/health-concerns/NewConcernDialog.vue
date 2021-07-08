@@ -220,7 +220,7 @@ export default defineComponent({
 				:loading="saveInProgress"
 				@click="onFormSave"
 			>
-				Add Health Concern
+				<span v-if="!saveInProgress">Add Health Concern</span>
 			</el-button>
 		</template>
 	</el-dialog>

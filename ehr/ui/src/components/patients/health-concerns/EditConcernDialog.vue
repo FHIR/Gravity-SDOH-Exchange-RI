@@ -47,11 +47,21 @@ export default defineComponent({
 			phase.value = openPhase.value;
 		};
 
-		const confirmActionClick = () => {
-			if (phase.value === "remove") {
-				ConcernsModule.removeConcern(props.concern!.id);
-			} else if (phase.value === "mark-as-resolved") {
-				ConcernsModule.resolveConcern(props.concern!.id);
+		const confirmActionClick = async () => {
+			saveInProgress.value = true;
+			try {
+				if (phase.value === "remove") {
+					await ConcernsModule.removeConcern(props.concern!.id);
+				} else if (phase.value === "mark-as-resolved") {
+					// TODO: BE should add response for this request
+					await ConcernsModule.resolveConcern(props.concern!.id);
+					// TODO: BE should add response for this request
+				} else if (phase.value === "promote-to-problem") {
+					await ConcernsModule.promoteConcern(props.concern!.id);
+				}
+				emit("close");
+			} finally {
+				saveInProgress.value = false;
 			}
 		};
 
@@ -149,6 +159,7 @@ export default defineComponent({
 				round
 				type="primary"
 				size="mini"
+				:loading="saveInProgress"
 				@click="confirmActionClick"
 			>
 				Confirm

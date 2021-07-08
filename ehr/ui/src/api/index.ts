@@ -47,6 +47,10 @@ export const resolveConcern = async (id: string) => {
 	await axios.put(`/health-concern/resolve/${id}`);
 };
 
+export const promoteConcern = async (id: string) => {
+	await axios.put(`/health-concern/promote/${id}`);
+};
+
 export const addConcernResponse = async (payload: NewConcernPayload): Promise<Concern> => {
 	const res = await axios.post("/health-concern", payload);
 

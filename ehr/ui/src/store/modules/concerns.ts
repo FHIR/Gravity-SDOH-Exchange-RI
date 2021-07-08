@@ -1,5 +1,5 @@
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import { getActiveConcerns, getResolvedConcerns, addConcernResponse, resolveConcern } from "@/api";
+import { getActiveConcerns, getResolvedConcerns, addConcernResponse, resolveConcern, promoteConcern } from "@/api";
 import store from "@/store";
 import { Concern, NewConcernPayload } from "@/types";
 
@@ -62,6 +62,11 @@ class Concerns extends VuexModule implements IConcerns {
 	@Action
 	async resolveConcern(id: string): Promise<void> {
 		await resolveConcern(id);
+	}
+
+	@Action
+	async promoteConcern(id: string): Promise<void> {
+		await promoteConcern(id);
 	}
 }
 
