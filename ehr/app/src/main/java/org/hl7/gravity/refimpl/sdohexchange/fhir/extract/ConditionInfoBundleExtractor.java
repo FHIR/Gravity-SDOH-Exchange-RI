@@ -108,6 +108,7 @@ public class ConditionInfoBundleExtractor extends BundleExtractor<List<Condition
 
     private final Condition condition;
     private final QuestionnaireResponse questionnaireResponse;
+    //TODO we do not need observation anywhere. Remove this when confirmed
     private final List<Observation> observations;
   }
 }

@@ -4,25 +4,32 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.dstu3.model.Condition.ConditionClinicalStatus;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.HealthConcernBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProblemDto;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,6 +81,30 @@ public class ProblemService {
           return problemDto;
         })
         .collect(Collectors.toList());
+  }
+
+  //TODO allow close for problems WITHOUT any active tasks!
+  public void close(String id) {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    Bundle responseBundle = searchProblemQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
+        .code(id))
+        .returnBundle(Bundle.class)
+        .execute();
+    Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
+
+    ConditionClinicalStatusCodes resolvedStatus = ConditionClinicalStatusCodes.RESOLVED;
+    Coding coding = healthConcern.getClinicalStatus()
+        .getCodingFirstRep();
+    coding.setCode(resolvedStatus.toCode());
+    coding.setDisplay(resolvedStatus.getDisplay());
+    // set time of resolution
+    healthConcern.setAbatement(DateTimeType.now());
+
+    ehrClient.update()
+        .resource(healthConcern)
+        .execute();
   }
 
   private IQuery<IBaseBundle> searchProblemQuery(ConditionClinicalStatus status) {

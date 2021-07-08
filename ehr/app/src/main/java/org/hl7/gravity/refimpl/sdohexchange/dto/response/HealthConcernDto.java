@@ -23,6 +23,7 @@ public class HealthConcernDto implements Validated {
   private TypeDto basedOn;
   private TypeDto authoredBy;
   private LocalDateTime assessmentDate;
+  private LocalDateTime startDate;
   private LocalDateTime resolutionDate;
 
   @Setter(AccessLevel.NONE)

@@ -15,6 +15,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.HealthConcernDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.StringTypeDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.ConditionInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
@@ -96,16 +97,30 @@ public class HealthConcernBundleToDtoConverter implements Converter<Bundle, List
                 .getIdPart(), recorder.getDisplay()));
           }
 
+          // abatement must be available for all resolved condition
           if (ConditionClinicalStatusCodes.RESOLVED.toCode()
               .equals(condition.getClinicalStatus()
                   .getCodingFirstRep()
                   .getCode())) {
-            //TODO check whether we can rely on onset property to get a resololved time.
-            if (condition.getOnset() instanceof DateTimeType) {
-              healthConcernDto.setResolutionDate(FhirUtil.toLocalDateTime((DateTimeType) condition.getOnset()));
+            if (condition.getAbatement() instanceof DateTimeType) {
+              healthConcernDto.setResolutionDate(FhirUtil.toLocalDateTime((DateTimeType) condition.getAbatement()));
             } else {
               healthConcernDto.getErrors()
-                  .add("Condition is resolved but an onset property is not of a DateTimeType type.");
+                  .add("Condition is resolved but an abatement property is missing or not of a DateTimeType type.");
+            }
+          }
+
+          //Onset must be available for the problem list items.
+          Coding category = FhirUtil.findCoding(condition.getCategory(),
+              UsCoreConditionCategory.PROBLEMLISTITEM.getSystem());
+          if (category != null && UsCoreConditionCategory.PROBLEMLISTITEM.toCode()
+              .equals(category.getCode())) {
+            if (condition.getOnset() != null) {
+              healthConcernDto.setStartDate(FhirUtil.toLocalDateTime((DateTimeType) condition.getOnset()));
+            } else {
+              healthConcernDto.getErrors()
+                  .add("Condition is a problem-list-item but an onset property is missing or not of a DateTimeType "
+                      + "type.");
             }
           }
 

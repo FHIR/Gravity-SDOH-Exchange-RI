@@ -71,4 +71,12 @@ public class HealthConcernsController {
     return ResponseEntity.noContent()
         .build();
   }
+
+  @PutMapping("/remove/{id}")
+  @ApiOperation(value = "Mark an active Health Concern as inactive.")
+  public ResponseEntity<Void> remove(@PathVariable @NotBlank String id) {
+    healthConcernService.remove(id);
+    return ResponseEntity.noContent()
+        .build();
+  }
 }

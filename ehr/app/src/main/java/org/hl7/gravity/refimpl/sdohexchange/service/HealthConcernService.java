@@ -121,6 +121,7 @@ public class HealthConcernService {
     Coding coding = FhirUtil.findCoding(healthConcern.getCategory(), problem.getSystem());
     coding.setCode(problem.toCode());
     coding.setDisplay(problem.getDisplay());
+    // set time when the problem becomes effective
     healthConcern.setOnset(DateTimeType.now());
 
     ehrClient.update()
@@ -143,7 +144,29 @@ public class HealthConcernService {
         .getCodingFirstRep();
     coding.setCode(resolvedStatus.toCode());
     coding.setDisplay(resolvedStatus.getDisplay());
-    healthConcern.setOnset(DateTimeType.now());
+    // set time of resolution
+    healthConcern.setAbatement(DateTimeType.now());
+
+    ehrClient.update()
+        .resource(healthConcern)
+        .execute();
+  }
+
+  public void remove(String id) {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
+        .code(id))
+        .returnBundle(Bundle.class)
+        .execute();
+    Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
+
+    ConditionClinicalStatusCodes resolvedStatus = ConditionClinicalStatusCodes.INACTIVE;
+    Coding coding = healthConcern.getClinicalStatus()
+        .getCodingFirstRep();
+    coding.setCode(resolvedStatus.toCode());
+    coding.setDisplay(resolvedStatus.getDisplay());
 
     ehrClient.update()
         .resource(healthConcern)
