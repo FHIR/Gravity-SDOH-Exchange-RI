@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+	Assessment,
 	Consent,
 	Concern,
 	ContextResponse,
@@ -48,6 +49,8 @@ export const addConcernResponse = async (payload: NewConcernPayload): Promise<Co
 
 	return res.data;
 };
+
+export const getPastAssessments = async () => (await axios.get<Assessment[]>("/assessment/past")).data;
 
 export const createTask = async (payload: newTaskPayload): Promise<{ taskId: string }> => {
 	const res = await axios.post("/task", payload);
