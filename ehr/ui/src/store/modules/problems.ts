@@ -1,6 +1,6 @@
 import { VuexModule, Module, getModule, Action, Mutation } from "vuex-module-decorators";
 import store from "@/store";
-import { newProblem, Problem, updateProblemPayload } from "@/types";
+import { newProblemPayload, Problem, updateProblemPayload } from "@/types";
 import { getProblems, createProblem, updateProblem } from "@/api";
 
 export interface IProblems {
@@ -29,7 +29,7 @@ class Problems extends VuexModule implements IProblems {
 	}
 
 	@Action
-	async createProblem(payload: newProblem): Promise<void> {
+	async createProblem(payload: newProblemPayload): Promise<void> {
 		await createProblem(payload);
 		// todo: check if we get response on create problem. if yes add new problem to list, if not get all problems again
 		await getProblems();
