@@ -220,7 +220,7 @@ export const getProblems = async(): Promise<Problem[]> => {
 		id: "SDOHCC-Condition-HungerVitalSign-Example-1",
 		name: "Hunger Vital Signs 1",
 		basedOn: {
-			id: "14647",
+			id: "14683",
 			display: "Hunger Vital Signs assessment"
 		},
 		onsetPeriod: {
@@ -237,7 +237,7 @@ export const getProblems = async(): Promise<Problem[]> => {
 		id: "SDOHCC-Condition-HungerVitalSign-Example-2",
 		name: "Hunger Vital Signs 2",
 		basedOn: {
-			id: "14647",
+			id: "14683",
 			display: "Hunger Vital Signs assessment"
 		},
 		onsetPeriod: {
