@@ -1,7 +1,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from "vue";
 import ProblemsTable from "@/components/patients/problems/ProblemsTable.vue";
-import { Problem } from "@/types";
+import { Coding, Problem } from "@/types";
 import { ProblemsModule } from "@/store/modules/problems";
 import NewProblemDialog from "@/components/patients/problems/NewProblemDialog.vue";
 import NoActiveItems from "@/components/patients/NoActiveItems.vue";
@@ -14,14 +14,14 @@ export type TableData = {
 		display: string,
 		id: string,
 	},
+	assessmentDate?: string,
 	startDate?: string,
-	closedDate?: string,
+	resolutionDate?: string,
 	goals: number,
 	actionSteps: number,
-	status: string,
-	codeISD: string,
-	codeSNOMED: string,
-	category: string
+	category: Coding,
+	icdCode: Coding,
+	snomedCode: Coding
 };
 
 export default defineComponent({
@@ -34,25 +34,38 @@ export default defineComponent({
 	},
 	emits: ["trigger-open-assessment", "trigger-add-goal"],
 	setup() {
-		const problems = computed<Problem[]>(() => ProblemsModule.problems);
-		const tableData = computed<TableData[]>(() =>
-			problems.value.map((problem: Problem) => ({
+		const activeProblems = computed<Problem[]>(() => ProblemsModule.activeProblems);
+		const closedProblems = computed<Problem[]>(() => ProblemsModule.closedProblems);
+		const activeProblemsTableData = computed<TableData[]>(() =>
+			activeProblems.value.map((problem: Problem) => ({
 				id: problem.id,
 				name: problem.name,
 				basedOn: problem.basedOn,
-				startDate: problem.onsetPeriod.start,
-				closedDate: problem.onsetPeriod.end,
-				goals: problem.goals,
-				actionSteps: problem.actionSteps,
-				status: problem.clinicalStatus,
-				codeISD: problem.codeISD,
-				codeSNOMED: problem.codeSNOMED,
+				assessmentDate: problem.assessmentDate || "",
+				startDate: problem.assessmentDate || "",
+				goals: 0,
+				actionSteps: 0,
+				icdCode: problem.icdCode,
+				snomedCode: problem.snomedCode,
+				category: problem.category
+			}))
+		);
+		const closedProblemsTableData = computed<TableData[]>(() =>
+			closedProblems.value.map((problem: Problem) => ({
+				id: problem.id,
+				name: problem.name,
+				basedOn: problem.basedOn,
+				assessmentDate: problem.assessmentDate || "",
+				startDate: problem.assessmentDate || "",
+				resolutionDate: problem.resolutionDate || "",
+				goals: 0,
+				actionSteps: 0,
+				icdCode: problem.icdCode,
+				snomedCode: problem.snomedCode,
 				category: problem.category
 			}))
 		);
 
-		const activeProblems = computed<TableData[]>(() => tableData.value.filter(t => t.status === "active"));
-		const closedProblems = computed<TableData[]>(() => tableData.value.filter(t => t.status === "resolved"));
 
 		const newProblemsDialogVisible = ref<boolean>(false);
 
@@ -61,7 +74,8 @@ export default defineComponent({
 		onMounted(async () => {
 			isLoading.value = true;
 			try {
-				await ProblemsModule.getProblems();
+				await ProblemsModule.getActiveProblems();
+				await ProblemsModule.getClosedProblems();
 			} finally {
 				isLoading.value = false;
 			}
@@ -69,9 +83,8 @@ export default defineComponent({
 
 		return {
 			isLoading,
-			tableData,
-			activeProblems,
-			closedProblems,
+			activeProblemsTableData,
+			closedProblemsTableData,
 			newProblemsDialogVisible
 		};
 	}
@@ -84,8 +97,8 @@ export default defineComponent({
 		class="problems"
 	>
 		<ProblemsTable
-			v-if="activeProblems.length"
-			:data="activeProblems"
+			v-if="activeProblemsTableData.length"
+			:data="activeProblemsTableData"
 			title="Active Problems"
 			status="active"
 			@add-problem="newProblemsDialogVisible = true"
@@ -93,20 +106,20 @@ export default defineComponent({
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 		<NoActiveItems
-			v-else-if="!activeProblems.length && closedProblems.length"
+			v-else-if="!activeProblemsTableData.length && closedProblemsTableData.length"
 			message="No Active Problems"
 			button-label="Add Problem"
 			@add-item="newProblemsDialogVisible = true"
 		/>
 		<ProblemsTable
-			v-if="closedProblems.length"
-			:data="closedProblems"
+			v-if="closedProblemsTableData.length"
+			:data="closedProblemsTableData"
 			title="Closed Problems"
 			status="closed"
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 		<NoItems
-			v-if="!isLoading && !tableData.length"
+			v-if="!isLoading && !activeProblemsTableData.length && !closedProblemsTableData.length"
 			massage="No Problems Yet"
 			button-label="Add Problem"
 			@add-item="newProblemsDialogVisible = true"

@@ -1,24 +1,9 @@
 <script lang="ts">
-import { computed, defineComponent, PropType, reactive, ref, toRefs } from "vue";
+import { computed, defineComponent, PropType, ref, toRefs } from "vue";
 import { TableData } from "@/components/patients/problems/Problems.vue";
 import { ProblemDialogPhase, ProblemActionType } from "@/components/patients/problems/ProblemsTable.vue";
 import DropButton from "@/components/DropButton.vue";
-import moment from "moment";
 import { ProblemsModule } from "@/store/modules/problems";
-
-export type FormModel = {
-	id: string,
-	name: string,
-	basedOn: string,
-	startDate: string,
-	closedDate?: string,
-	goals: number,
-	actionSteps: number,
-	clinicalStatus: string,
-	codeISD: string,
-	codeSNOMED: string,
-	category: string
-};
 
 const CONFIRM_MESSAGES = {
 	"view": "",
@@ -35,28 +20,19 @@ export default defineComponent({
 		},
 		problem: {
 			type: Object as PropType<TableData>,
-			default: undefined
+			required: true
 		},
 		openPhase: {
 			type: String as PropType<ProblemDialogPhase>,
 			default: "view"
+		},
+		status: {
+			type: String,
+			default: "active"
 		}
 	},
 	emits: ["close", "trigger-add-goal", "trigger-open-assessment"],
 	setup(props, { emit }) {
-		const formModel = reactive<FormModel>({
-			id: "",
-			name: "",
-			basedOn: "",
-			startDate: "",
-			closedDate: "",
-			category: "",
-			goals: 0,
-			actionSteps: 0,
-			clinicalStatus: "",
-			codeISD: "",
-			codeSNOMED: ""
-		});
 		const { problem, openPhase } = toRefs(props);
 		const phase = ref<ProblemDialogPhase>("view");
 		const confirmMessage = computed<string>(() => CONFIRM_MESSAGES[phase.value]);
@@ -65,7 +41,6 @@ export default defineComponent({
 
 		const onDialogOpen = () => {
 			phase.value = openPhase.value;
-			Object.assign(formModel, problem.value);
 		};
 
 		const onDialogClose = () => {
@@ -90,15 +65,9 @@ export default defineComponent({
 		};
 
 		const markAsClosed = async () => {
-			const payload = {
-				id: problem.value.id,
-				closeDate: moment(new Date()).format("YYYY-MM-DD[T]HH:mm:ss"),
-				status: "resolved"
-			};
-
 			actionInProgress.value = true;
 			try {
-				await ProblemsModule.updateProblem(payload);
+				await ProblemsModule.closeProblem(problem.value.id);
 				emit("close");
 			} finally {
 				actionInProgress.value = false;
@@ -107,7 +76,6 @@ export default defineComponent({
 
 		return {
 			phase,
-			formModel,
 			confirmMessage,
 			showConfirm,
 			actionInProgress,
@@ -131,41 +99,40 @@ export default defineComponent({
 		@open="onDialogOpen"
 	>
 		<el-form
-			:model="formModel"
 			label-width="155px"
 			label-position="left"
 			size="mini"
 			class="problem-form"
 		>
 			<el-form-item label="Problem">
-				{{ formModel.name }}
+				{{ problem.name }}
 			</el-form-item>
 			<el-form-item label="Category">
-				{{ formModel.category }}
+				{{ problem.category.display }}
 			</el-form-item>
 			<el-form-item label="ICD-10 Code">
-				{{ formModel.codeISD }}
+				{{ problem.icdCode ? `${problem.icdCode.display} (${problem.icdCode.code})` : "N/A" }}
 			</el-form-item>
 			<el-form-item label="SNOMED-CT Code">
-				{{ formModel.codeSNOMED }}
+				{{ problem.snomedCode ? `${problem.snomedCode.display} (${problem.snomedCode.code})` : "N/A" }}
 			</el-form-item>
 			<el-form-item label="Base on">
-				{{ formModel.basedOn.display }}
+				{{ problem.basedOn.display ? problem.basedOn.display : problem.basedOn }}
 				<span
-					v-if="formModel.basedOn.id"
+					v-if="problem.basedOn.id"
 					class="icon-link"
-					@click="$emit('trigger-open-assessment', formModel.basedOn.id)"
+					@click="$emit('trigger-open-assessment', problem.basedOn.id)"
 				>
 				</span>
 			</el-form-item>
 			<el-form-item label="Creation Date">
-				{{ $filters.formatDateTime(formModel.startDate) }}
+				{{ problem.assessmentDate ? $filters.formatDateTime(problem.assessmentDate) : $filters.formatDateTime(problem.startDate) }}
 			</el-form-item>
 			<el-form-item
-				v-if="formModel.closedDate"
+				v-if="status === 'closed'"
 				label="Closed Date"
 			>
-				{{ $filters.formatDateTime(formModel.closedDate) }}
+				{{ $filters.formatDateTime(problem.resolutionDate) }}
 			</el-form-item>
 		</el-form>
 		<template #footer>
@@ -187,7 +154,7 @@ export default defineComponent({
 				Cancel
 			</el-button>
 			<el-button
-				v-if="problem?.status === 'resolved'"
+				v-if="status === 'closed'"
 				plain
 				round
 				type="primary"

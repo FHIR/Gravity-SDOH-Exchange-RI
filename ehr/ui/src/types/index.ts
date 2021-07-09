@@ -176,17 +176,18 @@ export type Assessment = {
 export type Problem = {
 	id: string,
 	name: string,
-	basedOn: {
+	authoredBy?: {},
+	basedOn: string | {
+		display: string,
 		id: string,
-		display: string
 	},
-	onsetPeriod: Period,
-	goals: number,
-	actionSteps: number,
-	clinicalStatus: string,
-	codeISD: string,
-	codeSNOMED: string,
-	category: string
+	category: Coding,
+	assessmentDate?: string,
+	startDate?: string,
+	resolutionDate?: string,
+	errors: string[],
+	icdCode: Coding,
+	snomedCode: Coding
 };
 
 export type newProblemPayload = {
