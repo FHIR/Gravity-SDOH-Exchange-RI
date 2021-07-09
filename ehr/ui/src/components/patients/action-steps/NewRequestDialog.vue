@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, reactive, ref, watch } from "vue";
-import { getServiceRequestGoals, getServiceRequestConditions, getOrganizations, getCategories, getRequests } from "@/api";
+import { getServiceRequestGoals, getServiceRequestConditions, getOrganizations, getCategories, getRequests, getConsentList } from "@/api";
 import { ServiceRequestCondition, ServiceRequestGoal, newTaskPayload, Organization, Coding } from "@/types";
 import _ from "@/vendors/lodash";
 import { TasksModule } from "@/store/modules/tasks";
@@ -18,7 +18,7 @@ export type FormModel = {
 	conditionIds: string[],
 	goalIds: string[],
 	performerId: string,
-	consent: boolean
+	consent: string
 };
 
 export default defineComponent({
@@ -36,6 +36,7 @@ export default defineComponent({
 		const conditionOptions = ref<ServiceRequestCondition[]>([]);
 		const goalOptions = ref<ServiceRequestGoal[]>([]);
 		const performerOptions = ref<Organization[]>([]);
+		const consentOptions = ref<{ id: string, name: string }[]>([]);
 
 		const formModel = reactive<FormModel>({
 			name: "",
@@ -49,7 +50,7 @@ export default defineComponent({
 			conditionIds: [],
 			goalIds: [],
 			performerId: "",
-			consent: false
+			consent: ""
 		});
 		const occurrenceType = ref<string>("");
 		//todo: use element-ui form type
@@ -63,6 +64,7 @@ export default defineComponent({
 			performerOptions.value = await getOrganizations();
 			conditionOptions.value = await getServiceRequestConditions();
 			goalOptions.value = await getServiceRequestGoals();
+			consentOptions.value = await getConsentList();
 		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
@@ -120,8 +122,7 @@ export default defineComponent({
 			consent: {
 				required: true,
 				message: "This field is required",
-				trigger: "change",
-				validator: (rule, value: boolean): boolean => value
+				trigger: "change"
 			}
 		};
 		//
@@ -178,6 +179,7 @@ export default defineComponent({
 			conditionOptions,
 			goalOptions,
 			performerOptions,
+			consentOptions,
 			formRules,
 			formEl,
 			onFormSave,
@@ -388,7 +390,17 @@ export default defineComponent({
 				label="Consent"
 				prop="consent"
 			>
-				<el-checkbox v-model="formModel.consent" />
+				<el-select
+					v-model="formModel.consent"
+					placeholder="Select Consent"
+				>
+					<el-option
+						v-for="item in consentOptions"
+						:key="item.id"
+						:label="item.name"
+						:value="item.id"
+					/>
+				</el-select>
 			</el-form-item>
 		</el-form>
 		<template #footer>

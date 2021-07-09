@@ -109,7 +109,7 @@ export type ServiceRequest = {
 export type newTaskPayload = {
 	category: string,
 	conditionIds: string[],
-	consent: boolean,
+	consent: string,
 	comment: string,
 	goalIds: string[],
 	performerId: string,
