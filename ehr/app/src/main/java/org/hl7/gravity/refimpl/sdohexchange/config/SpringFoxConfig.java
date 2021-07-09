@@ -24,6 +24,7 @@ public class SpringFoxConfig {
   public static final String ASSESSMENT_API_TAG = "Social Risk Assessment Controller";
   public static final String HEALTH_CONCERN_API_TAG = "Health Concern Controller";
   public static final String PROBLEM_API_TAG = "Problem Controller";
+  public static final String GOAL_API_TAG = "Goal Controller";
   public static final String MAPPINGS_API_TAG = "Mappings Controller";
   public static final String CONSENT_API_TAG = "Consent Controller";
   public static final String ADMINISTRATION_API_TAG = "Administration Controller";
@@ -45,6 +46,7 @@ public class SpringFoxConfig {
             new Tag(ASSESSMENT_API_TAG, "Get details of past and planned Social Risk Assessments."),
             new Tag(HEALTH_CONCERN_API_TAG, "Get details of active and promoted/resolved Health Concerns."),
             new Tag(PROBLEM_API_TAG, "Get details of active and closed Problems."),
+            new Tag(GOAL_API_TAG, "Get details of active and resolved Goals."),
             new Tag(MAPPINGS_API_TAG, "Get details of SDOH categories and codes."),
             new Tag(ADMINISTRATION_API_TAG, "Perform operations and manipulations with FHIR resources, for example "
                 + "converts resources from one to another."),

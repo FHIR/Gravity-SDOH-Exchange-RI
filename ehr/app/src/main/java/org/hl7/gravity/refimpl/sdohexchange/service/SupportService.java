@@ -13,10 +13,10 @@ import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ConditionToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.GoalToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.GoalToInfoDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OrganizationToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
-import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalInfoDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OrganizationDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
@@ -50,7 +50,7 @@ public class SupportService {
         .collect(Collectors.toList());
   }
 
-  public List<GoalDto> listGoals() {
+  public List<GoalInfoDto> listGoals() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
     Bundle goalsBundle = ehrClient.search()
         .forResource(Goal.class)
@@ -63,7 +63,7 @@ public class SupportService {
         .execute();
     return FhirUtil.getFromBundle(goalsBundle, Goal.class)
         .stream()
-        .map(goal -> new GoalToDtoConverter().convert(goal))
+        .map(goal -> new GoalToInfoDtoConverter().convert(goal))
         .collect(Collectors.toList());
   }
 
