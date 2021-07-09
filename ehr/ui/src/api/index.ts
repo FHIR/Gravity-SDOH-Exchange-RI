@@ -111,62 +111,9 @@ export const getRequests = async (code: string): Promise<Coding[]> => {
 };
 
 export const getGoals = async (): Promise<Goal[]> => {
-	//todo: remove mock after BE sync
-	const res: Goal[] = [{
-		id: "1",
-		name: "Reduce Medication Const",
-		problems: ["Food Insecurity", "Food Security"],
-		addedBy: "test",
-		startDate: "2021-05-18T14:07:48",
-		endDate: "",
-		targets: ["fisrt", "second"],
-		comments: [{
-			author: {
-				display: "",
-				id: "",
-				resourceType: ""
-			},
-			text: "Some comments to share",
-			time: "2021-05-18T14:07:48"
-		}, {
-			author: {
-				display: "",
-				id: "",
-				resourceType: ""
-			},
-			text: "Another loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong comment",
-			time: "2021-05-18T14:07:48"
-		}],
-		category: {
-			code: "111",
-			display: "Food Insecurity"
-		},
-		code: {
-			code: "10782290009",
-			display: "Food Security"
-		},
-		status: "active"
-	}, {
-		id: "2",
-		name: "Reduce Medication Const",
-		problems: ["Food Insecurity"],
-		addedBy: "test",
-		startDate: "2021-05-18T14:07:48",
-		endDate: "2021-06-15T14:07:48",
-		targets: ["fisrt", "second"],
-		comments: [],
-		category: {
-			code: "111",
-			display: "Food Insecurity"
-		},
-		code: {
-			code: "10782290009",
-			display: "Food Security"
-		},
-		status: "completed"
-	}];
+	const res = await axios.get("/goal/active");
 
-	return res;
+	return res.data;
 };
 
 //todo: remove mock
