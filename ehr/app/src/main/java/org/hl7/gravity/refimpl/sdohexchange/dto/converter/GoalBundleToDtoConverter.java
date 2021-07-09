@@ -2,10 +2,12 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
@@ -73,6 +75,16 @@ public class GoalBundleToDtoConverter implements Converter<Bundle, List<GoalDto>
           goalDto.setComments(goal.getNote()
               .stream()
               .map(annotationToDtoConverter::convert)
+              .collect(Collectors.toList()));
+
+          goalDto.setProblems(goal.getAddresses()
+              .stream()
+              .filter(ref -> Condition.class.getSimpleName()
+                  .equals(ref.getReferenceElement()
+                      .getResourceType()))
+              .map(ref -> (Condition) ref.getResource())
+              .map(cond -> new ConditionDto(cond.getIdElement()
+                  .getIdPart(), codeableConceptToStringConverter.convert(cond.getCode())))
               .collect(Collectors.toList()));
           return goalDto;
         })
