@@ -135,7 +135,9 @@ export type Concern = {
 		display: string,
 		id: string,
 	},
-	date: string,
+	assessmentDate?: string,
+	startDate?: string,
+	resolutionDate?: string,
 	errors: string[]
 };
 

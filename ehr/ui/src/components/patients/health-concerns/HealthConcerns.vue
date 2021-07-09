@@ -10,7 +10,9 @@ import NoItems from "@/components/patients/NoItems.vue";
 export type TableData = {
 	id: string,
 	name: string,
-	assessmentDate: string,
+	assessmentDate?: string,
+	startDate?: string
+	resolutionDate?: string,
 	basedOn: string | {
 		display: string,
 		id: string,
@@ -37,7 +39,8 @@ export default defineComponent({
 			activeConcerns.value.map((concern: Concern) => ({
 				id: concern.id,
 				name: concern.name,
-				assessmentDate: concern.date,
+				assessmentDate: concern.assessmentDate || "",
+				startDate: concern.startDate || "",
 				basedOn: concern.basedOn,
 				category: concern.category,
 				icdCode: concern.icdCode,
@@ -49,7 +52,9 @@ export default defineComponent({
 			resolvedConcerns.value.map((concern: Concern) => ({
 				id: concern.id,
 				name: concern.name,
-				assessmentDate: concern.date,
+				assessmentDate: concern.assessmentDate || "",
+				startDate: concern.startDate || "",
+				resolutionDate: concern.resolutionDate || "",
 				basedOn: concern.basedOn,
 				category: concern.category,
 				icdCode: concern.icdCode,
@@ -85,7 +90,7 @@ export default defineComponent({
 		<HealthConcernsTable
 			v-if="activeConcernsTableData.length"
 			:data="activeConcernsTableData"
-			type="ActiveConcerns"
+			type="active"
 			@add-concern="newConcernDialogVisible = true"
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
@@ -98,7 +103,7 @@ export default defineComponent({
 		<HealthConcernsTable
 			v-if="resolvedConcernsTableData.length"
 			:data="resolvedConcernsTableData"
-			type="ResolvedConcerns"
+			type="resolved"
 			class="resolved-concerns"
 			title="Resolved Health Concerns"
 		/>

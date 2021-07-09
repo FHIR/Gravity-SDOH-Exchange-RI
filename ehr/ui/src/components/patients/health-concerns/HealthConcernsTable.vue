@@ -27,7 +27,7 @@ export default defineComponent({
 		}
 	},
 	emits: ["add-concern", "trigger-open-assessment"],
-	setup( props, { emit }) {
+	setup(props, { emit }) {
 		const editConcernDialogVisible = ref<boolean>(false);
 		const newConcernDialogVisible = ref<boolean>(false);
 		const editConcern = ref<TableData>();
@@ -57,103 +57,106 @@ export default defineComponent({
 </script>
 
 <template>
-	<div>
-		<div
-			class="table-wrapper"
-		>
-			<div class="header">
-				<div class="title">
-					<h3>
-						{{ title }}
-					</h3>
-				</div>
-				<el-button
-					v-if="type === 'ActiveConcerns'"
-					plain
-					round
-					type="primary"
-					size="mini"
-					@click="$emit('add-concern')"
-				>
-					Add Health Concern
-				</el-button>
+	<div
+		class="table-wrapper"
+	>
+		<div class="header">
+			<div class="title">
+				<h3>
+					{{ title }}
+				</h3>
 			</div>
-			<el-table :data="data">
-				<el-table-column
-					label="Health Concern"
-				>
-					<template #default="scope">
-						<el-button
-							type="text"
-							@click="concernOrActionClick(scope.row, 'view')"
-						>
-							{{ scope.row.name }}
-						</el-button>
-					</template>
-				</el-table-column>
-				<el-table-column
-					label="Category"
-				>
-					<template #default="scope">
-						{{ scope.row.category.display }}
-					</template>
-				</el-table-column>
-				<el-table-column
-					label="Based On"
-				>
-					<template #default="scope">
-						{{ scope.row.basedOn.display ? scope.row.basedOn.display : scope.row.basedOn }}
-						<span
-							v-if="scope.row.basedOn.id"
-							class="icon-link"
-							@click="$emit('trigger-open-assessment', scope.row.basedOn.id)"
-						>
-						</span>
-					</template>
-				</el-table-column>
-				<el-table-column
-					label="Assessment Date"
-				>
-					<template #default="scope">
-						{{ $filters.formatDateTime(scope.row.assessmentDate) }}
-					</template>
-				</el-table-column>
-				<el-table-column
-					v-if="type === 'ActiveConcerns'"
-					label="Actions"
-					width="350"
-				>
-					<template #default="scope">
-						<ActionButton
-							icon-class="icon-promote"
-							label="Promote to Problem"
-							@clicked="concernOrActionClick(scope.row, 'promote-to-problem')"
-						/>
-						<ActionButton
-							icon-class="icon-resolved"
-							label="Mark as Resolved"
-							@clicked="concernOrActionClick(scope.row, 'mark-as-resolved')"
-						/>
-						<ActionButton
-							icon-class="icon-remove"
-							label="Remove"
-							@clicked="concernOrActionClick(scope.row, 'remove')"
-						/>
-					</template>
-				</el-table-column>
-				<el-table-column
-					v-if="type === 'PromotedOrResolvedConcerns'"
-					label="Promotion/Resolution Date"
-				>
-					May 5, 2021, 10:00 AM
-				</el-table-column>
-			</el-table>
+			<el-button
+				v-if="type === 'active'"
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="$emit('add-concern')"
+			>
+				Add Health Concern
+			</el-button>
 		</div>
+		<el-table :data="data">
+			<el-table-column
+				label="Health Concern"
+			>
+				<template #default="scope">
+					<el-button
+						type="text"
+						@click="concernOrActionClick(scope.row, 'view')"
+					>
+						{{ scope.row.name }}
+					</el-button>
+				</template>
+			</el-table-column>
+			<el-table-column
+				label="Category"
+			>
+				<template #default="scope">
+					{{ scope.row.category.display }}
+				</template>
+			</el-table-column>
+			<el-table-column
+				label="Based On"
+			>
+				<template #default="scope">
+					{{ scope.row.basedOn.display ? scope.row.basedOn.display : scope.row.basedOn }}
+					<span
+						v-if="scope.row.basedOn.id"
+						class="icon-link"
+						@click="$emit('trigger-open-assessment', scope.row.basedOn.id)"
+					>
+					</span>
+				</template>
+			</el-table-column>
+			<el-table-column
+				label="Assessment Date"
+			>
+				<template #default="scope">
+					{{
+						scope.row.assessmentDate ? $filters.formatDateTime(scope.row.assessmentDate) : $filters.formatDateTime(scope.row.startDate)
+					}}
+				</template>
+			</el-table-column>
+			<el-table-column
+				v-if="type === 'resolved'"
+				label="Resolution Date"
+			>
+				<template #default="scope">
+					{{ $filters.formatDateTime(scope.row.resolutionDate) }}
+				</template>
+			</el-table-column>
+			<el-table-column
+				v-if="type === 'active'"
+				label="Actions"
+				width="350"
+			>
+				<template #default="scope">
+					<ActionButton
+						icon-class="icon-promote"
+						label="Promote to Problem"
+						@clicked="concernOrActionClick(scope.row, 'promote-to-problem')"
+					/>
+					<ActionButton
+						icon-class="icon-resolved"
+						label="Mark as Resolved"
+						@clicked="concernOrActionClick(scope.row, 'mark-as-resolved')"
+					/>
+					<ActionButton
+						icon-class="icon-remove"
+						label="Remove"
+						@clicked="concernOrActionClick(scope.row, 'remove')"
+					/>
+				</template>
+			</el-table-column>
+		</el-table>
 
 		<EditConcernDialog
 			:visible="editConcernDialogVisible"
 			:concern="editConcern"
 			:open-phase="dialogOpenPhase"
+			:type="type"
 			@close="editConcernDialogVisible = false;"
 			@trigger-open-assessment="handleOpenAssessment"
 		/>
@@ -190,6 +193,10 @@ export default defineComponent({
 	border: 1px solid $global-base-border-color;
 	padding: 10px 20px;
 	min-height: 130px;
+
+	+ .table-wrapper {
+		margin-top: 30px;
+	}
 }
 
 .icon-link {
