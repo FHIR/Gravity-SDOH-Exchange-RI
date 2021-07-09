@@ -48,6 +48,10 @@ export const resolveConcern = async (id: string) => {
 	await axios.put(`/health-concern/resolve/${id}`);
 };
 
+export const removeConcern = async (id: string) => {
+	await axios.put(`/health-concern/remove/${id}`);
+};
+
 export const promoteConcern = async (id: string) => {
 	await axios.put(`/health-concern/promote/${id}`);
 };
