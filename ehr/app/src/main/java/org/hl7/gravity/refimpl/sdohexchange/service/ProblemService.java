@@ -17,11 +17,18 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.HealthConcernBundleToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewProblemDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProblemDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
+import org.hl7.gravity.refimpl.sdohexchange.exception.HealthConcernCreateException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernPrepareBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.ConditionBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.HealthConcernPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +88,58 @@ public class ProblemService {
           return problemDto;
         })
         .collect(Collectors.toList());
+  }
+
+  //TODO almost copied from the HealthConcern service. TO REFACTOR!
+  public ProblemDto create(NewProblemDto newProblemDto, UserDto user) {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    HealthConcernPrepareBundleFactory healthConcernPrepareBundleFactory = new HealthConcernPrepareBundleFactory(
+        smartOnFhirContext.getPatient(), user.getId());
+    Bundle healthConcernRelatedResources = ehrClient.transaction()
+        .withBundle(healthConcernPrepareBundleFactory.createPrepareBundle())
+        .execute();
+    HealthConcernPrepareBundleExtractor.HealthConcernPrepareInfoHolder healthConcernPrepareInfoHolder =
+        new HealthConcernPrepareBundleExtractor().extract(healthConcernRelatedResources);
+
+    //TODO refactor and possibly get onSet from UI.
+    ConditionBundleFactory bundleFactory = new ConditionBundleFactory() {
+      @Override
+      protected Condition createCondition() {
+        Condition condition = super.createCondition();
+        condition.setOnset(DateTimeType.now());
+        return condition;
+      }
+    };
+    bundleFactory.setName(newProblemDto.getName());
+    String category = newProblemDto.getCategory();
+    bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
+    bundleFactory.setConditionType(UsCoreConditionCategory.PROBLEMLISTITEM);
+    bundleFactory.setIcdCode(
+        sdohMappings.findCoding(category, Condition.class, System.ICD_10, newProblemDto.getIcdCode()));
+    bundleFactory.setSnomedCode(
+        sdohMappings.findCoding(category, Condition.class, System.SNOMED, newProblemDto.getSnomedCode()));
+    bundleFactory.setPatient(healthConcernPrepareInfoHolder.getPatient());
+    bundleFactory.setPractitioner(healthConcernPrepareInfoHolder.getPractitioner());
+
+    Bundle healthConcernCreateBundle = ehrClient.transaction()
+        .withBundle(bundleFactory.createBundle())
+        .execute();
+
+    IdType healthConcernId = FhirUtil.getFromResponseBundle(healthConcernCreateBundle, Condition.class);
+    Bundle responseBundle = searchProblemQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
+        .code(healthConcernId.getIdPart()))
+        .returnBundle(Bundle.class)
+        .execute();
+    return new HealthConcernBundleToDtoConverter().convert(responseBundle)
+        .stream()
+        .map(hc -> {
+          ProblemDto problemDto = new ProblemDto();
+          BeanUtils.copyProperties(hc, problemDto);
+          return problemDto;
+        })
+        .findFirst()
+        .orElseThrow(() -> new HealthConcernCreateException("Problem is not found in the response bundle."));
   }
 
   //TODO allow close for problems WITHOUT any active tasks!
