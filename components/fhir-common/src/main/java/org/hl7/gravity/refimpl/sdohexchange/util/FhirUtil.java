@@ -2,19 +2,10 @@ package org.hl7.gravity.refimpl.sdohexchange.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
 import com.google.common.base.Strings;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.fluentpath.FhirPathR4;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -26,6 +17,15 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for operations on FHIR resources.
@@ -214,5 +214,29 @@ public class FhirUtil {
             .equals(reference.getReferenceElement()
                 .getResourceType()))
         .collect(Collectors.toList());
+  }
+
+  /**
+   * This method is useful when an original response bundle should be populated with additional includes, which are not
+   * supported by a search query.
+   *
+   * @param fhirContext FHIR Context.
+   * @param original    Original response bundle. All includes will be added to it.
+   * @param includes    All the includes to be added.
+   * @return Merged search set. Count of results is the same as in the original bundle.
+   */
+  public Bundle mergeBundles(FhirContext fhirContext, Bundle original, Bundle includes) {
+    if (original.getType() != Bundle.BundleType.SEARCHSET) {
+      throw new IllegalArgumentException("Original bundle is not a search set.");
+    }
+    if (includes.getType() != Bundle.BundleType.SEARCHSET) {
+      throw new IllegalArgumentException("Includes bundle is not a search set.");
+    }
+    original.getEntry()
+        .addAll(includes.getEntry());
+
+    IParser iParser = fhirContext.newJsonParser();
+    //Re-parse bundle to resolve all references as included resources (Reference.getResource())
+    return iParser.parseResource(Bundle.class, iParser.encodeResourceToString(original));
   }
 }

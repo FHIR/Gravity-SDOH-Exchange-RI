@@ -19,6 +19,7 @@
     <hapi_version>5.2.0</hapi_version>
   </properties>
 
+  <!-- TODO remove Spring dependency -->
   <dependencyManagement>
     <dependencies>
       <dependency>
