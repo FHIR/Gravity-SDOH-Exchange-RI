@@ -82,6 +82,7 @@ public class HealthConcernService {
 
     ConditionBundleFactory bundleFactory = new ConditionBundleFactory();
     bundleFactory.setName(newHealthConcernDto.getName());
+    bundleFactory.setBasedOnText(newHealthConcernDto.getBasedOnText());
     String category = newHealthConcernDto.getCategory();
     bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
     bundleFactory.setConditionType(UsCoreConditionCategory.HEALTHCONCERN);

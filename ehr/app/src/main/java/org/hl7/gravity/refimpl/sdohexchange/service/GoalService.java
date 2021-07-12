@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -83,6 +84,7 @@ public class GoalService {
     bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
     bundleFactory.setSnomedCode(
         sdohMappings.findCoding(category, Goal.class, System.SNOMED, newGoalDto.getSnomedCode()));
+    bundleFactory.setAchievementStatus(newGoalDto.getAchievementStatus());
     bundleFactory.setPatient(goalPrepareInfoHolder.getPatient());
     bundleFactory.setPractitioner(goalPrepareInfoHolder.getPractitioner());
     bundleFactory.setUser(user);
@@ -139,7 +141,8 @@ public class GoalService {
     Goal goal = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Goal.class))
         .orElseThrow(() -> new ResourceNotFoundException(new IdType(Goal.class.getSimpleName(), id)));
 
-    goal.setLifecycleStatus(Goal.GoalLifecycleStatus.REJECTED);
+    goal.setLifecycleStatus(Goal.GoalLifecycleStatus.CANCELLED);
+    goal.setStatusDate(new Date());
 
     ehrClient.update()
         .resource(goal)

@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
@@ -35,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.sql.Date;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -102,16 +105,22 @@ public class ProblemService {
     HealthConcernPrepareBundleExtractor.HealthConcernPrepareInfoHolder healthConcernPrepareInfoHolder =
         new HealthConcernPrepareBundleExtractor().extract(healthConcernRelatedResources);
 
-    //TODO refactor and possibly get onSet from UI.
+    //TODO refactor
     ConditionBundleFactory bundleFactory = new ConditionBundleFactory() {
       @Override
       protected Condition createCondition() {
         Condition condition = super.createCondition();
-        condition.setOnset(DateTimeType.now());
+        if (newProblemDto.getStartDate() != null) {
+          //TODO check conversion
+          condition.setOnset(new DateType().setValue(Date.from(newProblemDto.getStartDate()
+              .atStartOfDay(ZoneId.systemDefault())
+              .toInstant())));
+        }
         return condition;
       }
     };
     bundleFactory.setName(newProblemDto.getName());
+    bundleFactory.setBasedOnText(newProblemDto.getBasedOnText());
     String category = newProblemDto.getCategory();
     bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
     bundleFactory.setConditionType(UsCoreConditionCategory.PROBLEMLISTITEM);
