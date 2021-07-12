@@ -50,7 +50,7 @@ export default defineComponent({
 		const formModel = reactive<FormModel>(DEFAULT_FORM_MODEL);
 		const categoryOptions = ref<Coding[]>([]);
 		const codeOptions = ref<Coding[]>([]);
-		const problems = computed<Problem[]>(() => ProblemsModule.problems);
+		const problems = computed<Problem[]>(() => ProblemsModule.activeProblems);
 		const saveInProgress = ref<boolean>(false);
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: DEFAULT_REQUIRED_RULE,
@@ -78,7 +78,7 @@ export default defineComponent({
 		const onDialogOpen = async () => {
 			formModel.startDate = new Date().toDateString();
 			categoryOptions.value = await getCategories();
-			await ProblemsModule.getProblems();
+			await ProblemsModule.getActiveProblems();
 			formModel.problems = props.newGoalsProblems;
 		};
 

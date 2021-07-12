@@ -1,44 +1,59 @@
 import { VuexModule, Module, getModule, Action, Mutation } from "vuex-module-decorators";
 import store from "@/store";
-import { newProblemPayload, Problem, updateProblemPayload } from "@/types";
-import { getProblems, createProblem, updateProblem } from "@/api";
+import { newProblemPayload, Problem } from "@/types";
+import { createProblem, getActiveProblems, getClosedProblems, closeProblem } from "@/api";
 
 export interface IProblems {
-	problems: Problem[]
+	activeProblems: Problem[]
+	closedProblems: Problem[]
 }
 
 @Module({ dynamic: true, store, name: "problems" })
 class Problems extends VuexModule implements IProblems {
-	problems: Problem[] = []
+	activeProblems: Problem[] = []
+	closedProblems: Problem[] = []
 
 	@Mutation
-	setProblems(payload: Problem[]): void {
-		this.problems = payload;
+	setActiveProblems(payload: Problem[]): void {
+		this.activeProblems = payload;
 	}
 
 	@Mutation
-	changeProblem(payload: Problem) {
-		this.problems = this.problems.map(item => item.id === payload.id ? payload : item);
+	addActiveProblem(payload: Problem) {
+		this.activeProblems = [ ...this.activeProblems, payload ];
+	}
+
+	@Mutation
+	setClosedProblems(payload: Problem[]): void {
+		this.closedProblems = payload;
 	}
 
 	@Action
-	async getProblems(): Promise<void> {
-		const data = await getProblems();
+	async getActiveProblems(): Promise<void> {
+		const data = await getActiveProblems();
 
-		this.setProblems(data);
+		this.setActiveProblems(data);
+	}
+
+	@Action
+	async getClosedProblems(): Promise<void> {
+		const data = await getClosedProblems();
+
+		this.setClosedProblems(data);
 	}
 
 	@Action
 	async createProblem(payload: newProblemPayload): Promise<void> {
-		await createProblem(payload);
-		// todo: check if we get response on create problem. if yes add new problem to list, if not get all problems again
-		await getProblems();
+		const data = await createProblem(payload);
+		// todo: After sync with BE simply get active problems
+		this.addActiveProblem(data);
 	}
 
 	@Action
-	async updateProblem(payload: updateProblemPayload): Promise<void> {
-		const updatedProblem = await updateProblem(payload);
-		this.changeProblem(updatedProblem);
+	async closeProblem(payload: string): Promise<void> {
+		await closeProblem(payload);
+		await this.getActiveProblems();
+		await this.getClosedProblems();
 	}
 }
 

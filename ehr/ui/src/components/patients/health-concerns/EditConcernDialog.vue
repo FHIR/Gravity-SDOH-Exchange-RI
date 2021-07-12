@@ -29,12 +29,16 @@ export default defineComponent({
 		openPhase: {
 			type: String as PropType<ConcernAction>,
 			default: "view"
+		},
+		type: {
+			type: String,
+			required: true
 		}
 	},
 	emits: ["close", "change-action", "trigger-open-assessment"],
 	setup(props, { emit }) {
 		const { concern, openPhase } = toRefs(props);
-		const saveInProgress = ref<boolean>(false);
+		const actionInProgress = ref<boolean>(false);
 		const phase = ref<ConcernAction>("view");
 		const confirmActionText = computed<string>(() => CONFIRM_TEXT[phase.value]);
 		const showConfirm = computed<boolean>(() => phase.value !== "view");
@@ -48,20 +52,18 @@ export default defineComponent({
 		};
 
 		const confirmActionClick = async () => {
-			saveInProgress.value = true;
+			actionInProgress.value = true;
 			try {
 				if (phase.value === "remove") {
-					await ConcernsModule.removeConcern(props.concern!.id);
+					await ConcernsModule.removeConcern(concern.value!.id);
 				} else if (phase.value === "mark-as-resolved") {
-					// TODO: BE should add response for this request
-					await ConcernsModule.resolveConcern(props.concern!.id);
-					// TODO: BE should add response for this request
+					await ConcernsModule.resolveConcern(concern.value!.id);
 				} else if (phase.value === "promote-to-problem") {
-					await ConcernsModule.promoteConcern(props.concern!.id);
+					await ConcernsModule.promoteConcern(concern.value!.id);
 				}
 				emit("close");
 			} finally {
-				saveInProgress.value = false;
+				actionInProgress.value = false;
 			}
 		};
 
@@ -70,7 +72,7 @@ export default defineComponent({
 		};
 
 		return {
-			saveInProgress,
+			actionInProgress,
 			onDialogClose,
 			confirmActionText,
 			confirmActionClick,
@@ -122,7 +124,13 @@ export default defineComponent({
 				</span>
 			</el-form-item>
 			<el-form-item label="Assessment Date">
-				{{ $filters.formatDateTime(concern.assessmentDate) }}
+				{{ concern.assessmentDate ? $filters.formatDateTime(concern.assessmentDate) : $filters.formatDateTime(concern.startDate) }}
+			</el-form-item>
+			<el-form-item
+				v-if="type === 'resolved'"
+				label="Resolution Date"
+			>
+				{{ $filters.formatDateTime(concern.resolutionDate) }}
 			</el-form-item>
 		</el-form>
 		<template #footer>
@@ -142,6 +150,27 @@ export default defineComponent({
 			>
 				Cancel
 			</el-button>
+			<el-button
+				v-if="showConfirm"
+				plain
+				round
+				type="primary"
+				size="mini"
+				:loading="actionInProgress"
+				@click="confirmActionClick"
+			>
+				Confirm
+			</el-button>
+			<el-button
+				v-if="type === 'resolved'"
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="$emit('close')"
+			>
+				Close
+			</el-button>
 			<DropButton
 				v-else-if="!showConfirm"
 				label="Close"
@@ -153,17 +182,6 @@ export default defineComponent({
 				@click="$emit('close')"
 				@item-click="handleActionClick"
 			/>
-			<el-button
-				v-if="showConfirm"
-				plain
-				round
-				type="primary"
-				size="mini"
-				:loading="saveInProgress"
-				@click="confirmActionClick"
-			>
-				Confirm
-			</el-button>
 		</template>
 	</el-dialog>
 </template>
