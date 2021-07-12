@@ -1,8 +1,27 @@
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent } from "vue";
+import { ConcernsModule } from "@/store/modules/concerns";
+import { ProblemsModule } from "@/store/modules/problems";
+import { Goal, Problem, Task } from "@/types";
+import { GoalsModule } from "@/store/modules/goals";
+import { TasksModule } from "@/store/modules/tasks";
 
 export default defineComponent({
-	name: "PatientStats"
+	name: "PatientStats",
+	setup() {
+		const activeConcerns = computed<number>(() => ConcernsModule.activeConcerns.length);
+		const activeProblems = computed<Problem[]>(() => ProblemsModule.problems.filter(t => t.clinicalStatus === "active"));
+		const activeGoals = computed<Goal[]>(() => GoalsModule.goals.filter(t => t.status === "active"));
+		const activeActionSteps = computed<Task[]>(() => TasksModule.tasks.filter(t => t.status !== "Completed"));
+
+
+		return {
+			activeConcerns,
+			activeProblems,
+			activeGoals,
+			activeActionSteps
+		};
+	}
 });
 </script>
 
@@ -11,7 +30,7 @@ export default defineComponent({
 		<div class="info-block">
 			<div class="info-item">
 				<div class="value">
-					2
+					{{ activeConcerns }}
 				</div>
 				<div class="label">
 					Health Concerns
@@ -19,7 +38,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					4
+					{{ activeProblems.length }}
 				</div>
 				<div class="label">
 					Active Problems
@@ -27,7 +46,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					3
+					{{ activeGoals.length }}
 				</div>
 				<div class="label">
 					Active Goals
@@ -35,10 +54,10 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					5
+					{{ activeActionSteps.length }}
 				</div>
 				<div class="label">
-					Active Interventions
+					Active Action Steps
 				</div>
 			</div>
 		</div>
