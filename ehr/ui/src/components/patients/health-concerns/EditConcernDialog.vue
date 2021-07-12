@@ -23,8 +23,8 @@ export default defineComponent({
 			default: false
 		},
 		concern: {
-			type: Object as PropType<TableData>,
-			required: true
+			type: Object as PropType<TableData | undefined>,
+			default: undefined
 		},
 		openPhase: {
 			type: String as PropType<ConcernAction>,
@@ -55,11 +55,11 @@ export default defineComponent({
 			actionInProgress.value = true;
 			try {
 				if (phase.value === "remove") {
-					await ConcernsModule.removeConcern(concern.value.id);
+					await ConcernsModule.removeConcern(concern.value!.id);
 				} else if (phase.value === "mark-as-resolved") {
-					await ConcernsModule.resolveConcern(concern.value.id);
+					await ConcernsModule.resolveConcern(concern.value!.id);
 				} else if (phase.value === "promote-to-problem") {
-					await ConcernsModule.promoteConcern(concern.value.id);
+					await ConcernsModule.promoteConcern(concern.value!.id);
 				}
 				emit("close");
 			} finally {

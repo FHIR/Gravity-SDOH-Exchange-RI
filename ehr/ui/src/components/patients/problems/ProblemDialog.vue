@@ -19,8 +19,8 @@ export default defineComponent({
 			default: false
 		},
 		problem: {
-			type: Object as PropType<TableData>,
-			required: true
+			type: Object as PropType<TableData | undefined>,
+			default: undefined
 		},
 		openPhase: {
 			type: String as PropType<ProblemDialogPhase>,
@@ -53,7 +53,7 @@ export default defineComponent({
 			}
 
 			if(action === "add-goal") {
-				emit("trigger-add-goal", problem.value.id);
+				emit("trigger-add-goal", problem.value!.id);
 				emit("close");
 			}
 		};
@@ -67,7 +67,7 @@ export default defineComponent({
 		const markAsClosed = async () => {
 			actionInProgress.value = true;
 			try {
-				await ProblemsModule.closeProblem(problem.value.id);
+				await ProblemsModule.closeProblem(problem.value!.id);
 				emit("close");
 			} finally {
 				actionInProgress.value = false;
