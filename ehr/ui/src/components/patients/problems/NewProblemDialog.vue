@@ -13,8 +13,8 @@ const DEFAULT_REQUIRED_RULE = {
 export type FormModel = {
 	name: string,
 	category: string,
-	codeICD: string,
-	codeSNOMED: string
+	icdCode: string,
+	snomedCode: string
 };
 
 export default defineComponent({
@@ -31,8 +31,8 @@ export default defineComponent({
 		const formModel = reactive<FormModel>({
 			name: "",
 			category: "",
-			codeICD: "",
-			codeSNOMED: ""
+			icdCode: "",
+			snomedCode: ""
 		});
 		const categoryOptions = ref<Coding[]>([]);
 		const icdCodesOptions = ref<Coding[]>([]);
@@ -42,8 +42,8 @@ export default defineComponent({
 		// Clear code fields on every category change because they are connected.
 		//
 		const onCategoryChange = async (category: string) => {
-			formModel.codeICD = "";
-			formModel.codeSNOMED = "";
+			formModel.icdCode = "";
+			formModel.snomedCode = "";
 
 			const conditionCodes = await getConditionCodes(category);
 			icdCodesOptions.value = conditionCodes.find(item => item.display === "ICD-10-CM")?.codings || [];
@@ -65,8 +65,8 @@ export default defineComponent({
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: DEFAULT_REQUIRED_RULE,
 			category: DEFAULT_REQUIRED_RULE,
-			codeICD: DEFAULT_REQUIRED_RULE,
-			codeSNOMED: DEFAULT_REQUIRED_RULE
+			icdCode: DEFAULT_REQUIRED_RULE,
+			snomedCode: DEFAULT_REQUIRED_RULE
 		};
 
 		const saveInProgress = ref<boolean>(false);
@@ -155,10 +155,10 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="ICD-10 Code"
-				prop="codeICD"
+				prop="icdCode"
 			>
 				<el-select
-					v-model="formModel.codeICD"
+					v-model="formModel.icdCode"
 					placeholder="Select Code"
 				>
 					<el-option
@@ -171,10 +171,10 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="SNOMED-CT Code"
-				prop="codeSNOMED"
+				prop="snomedCode"
 			>
 				<el-select
-					v-model="formModel.codeSNOMED"
+					v-model="formModel.snomedCode"
 					placeholder="Select Code"
 				>
 					<el-option

@@ -195,8 +195,8 @@ export type Problem = {
 export type newProblemPayload = {
 	name: string,
 	category: string,
-	codeICD: string,
-	codeSNOMED: string
+	icdCode: string,
+	snomedCode: string
 }
 
 export type updateProblemPayload = {
