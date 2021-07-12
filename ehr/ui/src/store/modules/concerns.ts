@@ -2,6 +2,7 @@ import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-dec
 import { getActiveConcerns, getResolvedConcerns, addConcernResponse, resolveConcern, promoteConcern, removeConcern } from "@/api";
 import store from "@/store";
 import { Concern, NewConcernPayload } from "@/types";
+import { ProblemsModule } from "@/store/modules/problems";
 
 export interface IConcerns {
 	activeConcerns: Concern[],
@@ -58,11 +59,15 @@ class Concerns extends VuexModule implements IConcerns {
 	@Action
 	async resolveConcern(id: string): Promise<void> {
 		await resolveConcern(id);
+		await this.getActiveConcerns();
+		await this.getResolvedConcerns();
 	}
 
 	@Action
 	async promoteConcern(id: string): Promise<void> {
 		await promoteConcern(id);
+		await this.getActiveConcerns();
+		await ProblemsModule.getActiveProblems();
 	}
 }
 

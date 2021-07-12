@@ -28,7 +28,7 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernPrepareBundleExtractor.HealthConcernPrepareInfoHolder;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.HealthConcernBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.ConditionBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.HealthConcernPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,10 +80,11 @@ public class HealthConcernService {
     HealthConcernPrepareInfoHolder healthConcernPrepareInfoHolder = new HealthConcernPrepareBundleExtractor().extract(
         healthConcernRelatedResources);
 
-    HealthConcernBundleFactory bundleFactory = new HealthConcernBundleFactory();
+    ConditionBundleFactory bundleFactory = new ConditionBundleFactory();
     bundleFactory.setName(newHealthConcernDto.getName());
     String category = newHealthConcernDto.getCategory();
     bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
+    bundleFactory.setConditionType(UsCoreConditionCategory.HEALTHCONCERN);
     bundleFactory.setIcdCode(
         sdohMappings.findCoding(category, Condition.class, System.ICD_10, newHealthConcernDto.getIcdCode()));
     bundleFactory.setSnomedCode(

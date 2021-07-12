@@ -107,7 +107,7 @@ export default defineComponent({
 				label="Creation Date"
 			>
 				<template #default="scope">
-					<span>{{ $filters.formatDateTime(scope.row.startDate) }}</span>
+					{{ scope.row.assessmentDate ? $filters.formatDateTime(scope.row.assessmentDate) : $filters.formatDateTime(scope.row.startDate) || "N/A" }}
 				</template>
 			</el-table-column>
 			<el-table-column
@@ -161,6 +161,7 @@ export default defineComponent({
 			:visible="problemsDialogVisible"
 			:problem="activeProblem"
 			:open-phase="problemsDialogOpenPhase"
+			:status="status"
 			@close="problemsDialogVisible = false"
 			@trigger-add-goal="$emit('trigger-add-goal', activeProblem.id);"
 			@trigger-open-assessment="handleOpenAssessment"

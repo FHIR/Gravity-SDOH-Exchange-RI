@@ -14,7 +14,6 @@ import {
 	Goal,
 	Problem,
 	newProblemPayload,
-	updateProblemPayload,
 	NewConcernPayload,
 	UpdateGoalPayload,
 	NewGoalPayload
@@ -145,7 +144,19 @@ export const updateGoal = async ({ id }: UpdateGoalPayload): Promise<Goal> => {
 };
 
 // todo: change and remove mocked data after sync with BE
-export const createGoal = async (payload: NewGoalPayload): Promise<NewGoalPayload> => payload;
+export const createGoal = async (payload: NewGoalPayload): Promise<Goal> => ({
+	name: payload.name,
+	id: "123",
+	category: { code: payload.category, display: payload.category },
+	code: { code: payload.code, display: payload.code },
+	startDate: payload?.startDate || (new Date()).toDateString(),
+	comments: [],
+	endDate: "",
+	targets: [],
+	addedBy: payload?.addedBy || "",
+	problems: payload?.problems || [],
+	status: "active"
+});
 // const res = await axios.post("/goal", payload);
 // return res.data;
 
@@ -163,78 +174,33 @@ export const getGoalCodes = async (code: string): Promise<Coding[]> => {
 };
 
 
-export const getProblems = async(): Promise<Problem[]> => {
-	// todo: remove mocked data after BE sync
-	// const res = await axios.get("/problem");
-	// return res.data;
-	const res: Problem[] =  [{
-		id: "SDOHCC-Condition-HungerVitalSign-Example-1",
-		name: "Hunger Vital Signs 1",
-		basedOn: {
-			id: "14683",
-			display: "Hunger Vital Signs assessment"
-		},
-		onsetPeriod: {
-			start: "2019-08-18T12:31:35.123Z"
-		},
-		goals: 0,
-		actionSteps: 0,
-		clinicalStatus: "active",
-		codeISD: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
-		codeSNOMED: "Meals on wheels provision education (385767005)",
-		category: "test"
-	},
-	{
-		id: "SDOHCC-Condition-HungerVitalSign-Example-2",
-		name: "Hunger Vital Signs 2",
-		basedOn: {
-			id: "14683",
-			display: "Hunger Vital Signs assessment"
-		},
-		onsetPeriod: {
-			start: "2019-08-18T12:31:35.123Z",
-			end: "2021-10-28T12:31:35.123Z"
-		},
-		goals: 0,
-		actionSteps: 0,
-		clinicalStatus: "resolved",
-		codeISD: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
-		codeSNOMED: "Meals on wheels provision education (385767005)",
-		category: "test"
-	}];
+export const getActiveProblems = async(): Promise<Problem[]> => {
+	const res = await axios.get("/problem/active");
+	return res.data;
+};
 
-	return res;
+export const getClosedProblems = async(): Promise<Problem[]> => {
+	const res = await axios.get("/problem/closed");
+	return res.data;
 };
 
 // todo: change and remove mocked data after sync with BE
-export const createProblem = async (payload: newProblemPayload): Promise<newProblemPayload> => payload;
+export const createProblem = (payload: newProblemPayload): Problem => ({
+	name: payload.name,
+	id: "123",
+	category: { code: payload.category, display: payload.category },
+	icdCode: { code: payload.codeICD, display: payload.codeICD },
+	snomedCode: { code: payload.codeSNOMED, display: payload.codeSNOMED },
+	assessmentDate: (new Date()).toDateString(),
+	basedOn: "Conversation with Patient",
+	errors: []
+});
 // const res = await axios.post("/problem", payload);
 // return res.data;
 
-// todo: change and remove mocked data after sync with BE
-export const updateProblem = async ({ id, ...data }: updateProblemPayload): Promise<Problem> => {
-	//const res = await axios.put(`/problem/${id}`, data);
-	//return res.data;
-
-	const res: Problem = {
-		id: "SDOHCC-Condition-HungerVitalSign-Example-1",
-		name: "Hunger Vital Signs",
-		basedOn: {
-			id: "14647",
-			display: "Hunger Vital Signs assessment"
-		},
-		onsetPeriod: {
-			start: "2019-08-18T12:31:35.123Z",
-			end: "2021-10-28T12:31:35.123Z"
-		},
-		goals: 0,
-		actionSteps: 0,
-		clinicalStatus: "resolved",
-		codeISD: "Lack of Adequate Food & Safe Drinking Water (Z59.49)",
-		codeSNOMED: "Meals on wheels provision education (385767005)",
-		category: "test"
-	};
-	return res;
+export const closeProblem = async (id: string): Promise<Problem> => {
+	const res = await axios.put(`/problem/close/${id}`);
+	return res.data;
 };
 
 export const getConsents = async () => (await axios.get<Consent[]>("/consent")).data;
