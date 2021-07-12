@@ -142,7 +142,7 @@ public class ProblemService {
         .orElseThrow(() -> new HealthConcernCreateException("Problem is not found in the response bundle."));
   }
 
-  //TODO allow close for problems WITHOUT any active tasks!
+  //TODO forbid close for problems WITH active tasks!
   public void close(String id) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
