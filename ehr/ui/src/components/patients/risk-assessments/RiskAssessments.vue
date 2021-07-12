@@ -44,9 +44,24 @@ export default defineComponent({
 
 		watch(() => props.isActive, () => {
 			if (props.isActive && props.openAssessmentPhase) {
-				viewingAssessment.value = assessments.value.find(assessment => assessment.id === props.assessmentToOpen);
+				viewingAssessment.value = findAssessmentById(props.assessmentToOpen, assessments.value);
 			}
 		});
+
+		const findAssessmentById = (id: string, assessments: Assessment[]) => {
+			let assessment: Assessment | undefined;
+
+			assessment = assessments.find(assessment => assessment.id === id);
+
+			if (!assessment) {
+				assessment = assessments.reduce((result: Assessment | undefined, assessment: Assessment) => {
+					result = assessment.previous?.find(assessment => assessment.id === id);
+					return result;
+				}, undefined);
+			}
+
+			return assessment;
+		};
 
 		return {
 			activeGroup,

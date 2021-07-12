@@ -38,7 +38,6 @@ class Goals extends VuexModule implements IGoals {
 	@Action
 	async createGoal(payload: NewGoalPayload): Promise<void> {
 		await createGoal(payload);
-		// todo: check if we get response on create goal. if yes add new problem to list, if not get all problems again
 		await this.getGoals();
 	}
 }
