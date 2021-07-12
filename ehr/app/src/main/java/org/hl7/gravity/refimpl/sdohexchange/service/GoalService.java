@@ -181,6 +181,8 @@ public class GoalService {
         .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
             .value(SDOHProfiles.GOAL))
         .where(Goal.LIFECYCLE_STATUS.exactly()
-            .code(status.toCode()));
+            .code(status.toCode()))
+        .sort()
+        .descending(Constants.PARAM_LASTUPDATED);
   }
 }

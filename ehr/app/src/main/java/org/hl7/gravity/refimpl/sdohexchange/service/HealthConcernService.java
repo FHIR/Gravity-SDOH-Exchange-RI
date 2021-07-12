@@ -185,6 +185,8 @@ public class HealthConcernService {
             .code(status.toCode()))
         .where(Condition.CATEGORY.exactly()
             .systemAndCode(UsCoreConditionCategory.HEALTHCONCERN.getSystem(),
-                UsCoreConditionCategory.HEALTHCONCERN.toCode()));
+                UsCoreConditionCategory.HEALTHCONCERN.toCode()))
+        .sort()
+        .descending(Constants.PARAM_LASTUPDATED);
   }
 }

@@ -185,6 +185,8 @@ public class ProblemService {
             .code(status.toCode()))
         .where(Condition.CATEGORY.exactly()
             .systemAndCode(UsCoreConditionCategory.PROBLEMLISTITEM.getSystem(),
-                UsCoreConditionCategory.PROBLEMLISTITEM.toCode()));
+                UsCoreConditionCategory.PROBLEMLISTITEM.toCode()))
+        .sort()
+        .descending(Constants.PARAM_LASTUPDATED);
   }
 }
