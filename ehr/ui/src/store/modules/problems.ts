@@ -45,7 +45,7 @@ class Problems extends VuexModule implements IProblems {
 	@Action
 	async createProblem(payload: newProblemPayload): Promise<void> {
 		const data = await createProblem(payload);
-		// todo: After sync with BE simply get active problems
+
 		this.addActiveProblem(data);
 	}
 

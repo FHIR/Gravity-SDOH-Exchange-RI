@@ -237,19 +237,10 @@ export const getClosedProblems = async(): Promise<Problem[]> => {
 	return res.data;
 };
 
-// todo: change and remove mocked data after sync with BE
-export const createProblem = (payload: newProblemPayload): Problem => ({
-	name: payload.name,
-	id: "123",
-	category: { code: payload.category, display: payload.category },
-	icdCode: { code: payload.codeICD, display: payload.codeICD },
-	snomedCode: { code: payload.codeSNOMED, display: payload.codeSNOMED },
-	assessmentDate: (new Date()).toDateString(),
-	basedOn: "Conversation with Patient",
-	errors: []
-});
-// const res = await axios.post("/problem", payload);
-// return res.data;
+export const createProblem = async (payload: newProblemPayload): Promise<Problem> => {
+	const res = await axios.post("/problem", payload);
+	return res.data;
+};
 
 export const closeProblem = async (id: string): Promise<Problem> => {
 	const res = await axios.put(`/problem/close/${id}`);
