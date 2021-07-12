@@ -71,7 +71,7 @@ export default defineComponent({
 		const hasFormChanges = computed<boolean>(() =>
 			(
 				formModel.category !== goal.value?.category.code ||
-				formModel.code !== goal.value?.code.code ||
+				formModel.code !== goal.value?.snomedCode.code ||
 				formModel.name !== goal.value?.name ||
 				!_.isEqual(formModel.problems, goal.value?.problems)||
 				formModel.startDate !== goal.value?.startDate ||
@@ -84,7 +84,7 @@ export default defineComponent({
 		const onDialogOpen = async () => {
 			Object.assign(formModel, {
 				category: goal.value.category.code,
-				code: goal.value.code.code,
+				code: goal.value.snomedCode.code,
 				name: goal.value.name,
 				problems: [ ...goal.value.problems ],
 				startDate: goal.value.startDate,

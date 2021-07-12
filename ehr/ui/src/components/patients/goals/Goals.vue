@@ -16,7 +16,7 @@ export type TableData = {
 	targets: string[],
 	status: string,
 	category: Coding,
-	code: Coding,
+	snomedCode: Coding,
 	id: string,
 	comments: Comment[]
 };
@@ -57,7 +57,7 @@ export default defineComponent({
 				targets: goal.targets,
 				status: goal.status,
 				category: goal.category,
-				code: goal.code,
+				snomedCode: goal.snomedCode,
 				id: goal.id,
 				comments: goal.comments
 			}))
