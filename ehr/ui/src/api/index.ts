@@ -131,7 +131,7 @@ export const updateGoal = async ({ id }: UpdateGoalPayload): Promise<Goal> => {
 			code: "111",
 			display: "Food Insecurity"
 		},
-		code: {
+		snomedCode: {
 			code: "10782290009",
 			display: "Food Security"
 		},

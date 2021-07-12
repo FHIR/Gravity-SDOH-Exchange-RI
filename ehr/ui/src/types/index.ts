@@ -212,7 +212,7 @@ export type Goal = {
 	targets: string[],
 	comments: Comment[],
 	category: Coding,
-	code: Coding,
+	snomedCode: Coding,
 	status: GoalStatus
 };
 
