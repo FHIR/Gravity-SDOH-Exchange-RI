@@ -16,12 +16,13 @@ import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 
 @Setter
-public class HealthConcernBundleFactory {
+public class ConditionBundleFactory {
 
   private static final String BASED_ON = "Conversation with Patient";
 
   private String name;
   private Coding category;
+  private UsCoreConditionCategory conditionType;
   private Coding icdCode;
   private Coding snomedCode;
   private Patient patient;
@@ -30,6 +31,7 @@ public class HealthConcernBundleFactory {
   public Bundle createBundle() {
     Assert.notNull(name, "Name cannot be null.");
     Assert.notNull(category, "SDOH DomainCode cannot be null.");
+    Assert.notNull(conditionType, "UsCoreConditionCategory cannot be null.");
     Assert.notNull(icdCode, "ICD-10 code cannot be null.");
     Assert.notNull(snomedCode, "SNOMED-CT code cannot be null.");
     Assert.notNull(patient, "Patient cannot be null.");
@@ -38,13 +40,13 @@ public class HealthConcernBundleFactory {
     Bundle bundle = new Bundle();
     bundle.setType(Bundle.BundleType.TRANSACTION);
 
-    Condition healthConcern = createHealthConcern();
+    Condition healthConcern = createCondition();
     bundle.addEntry(FhirUtil.createPostEntry(healthConcern));
 
     return bundle;
   }
 
-  private Condition createHealthConcern() {
+  protected Condition createCondition() {
     Condition healthConcern = new Condition();
     healthConcern.getMeta()
         .addProfile(SDOHProfiles.CONDITION);
@@ -53,16 +55,16 @@ public class HealthConcernBundleFactory {
         .setSystem(clinicalStatus.getSystem())
         .setDisplay(clinicalStatus.getDisplay())));
     ConditionVerificationStatusCodes verificationStatus = ConditionVerificationStatusCodes.UNCONFIRMED;
-    healthConcern.setVerificationStatus(new CodeableConcept().addCoding(new Coding().setCode(verificationStatus.toCode())
+    healthConcern.setVerificationStatus(new CodeableConcept().addCoding(new Coding().setCode(
+        verificationStatus.toCode())
         .setSystem(verificationStatus.getSystem())
         .setDisplay(verificationStatus.getDisplay())));
-    UsCoreConditionCategory healthConcernCategory = UsCoreConditionCategory.HEALTHCONCERN;
     healthConcern.addCategory()
         .addCoding(category);
     healthConcern.addCategory()
-        .addCoding(new Coding().setSystem(healthConcernCategory.getSystem())
-            .setCode(healthConcernCategory.toCode())
-            .setDisplay(healthConcernCategory.getDisplay()));
+        .addCoding(new Coding().setSystem(conditionType.getSystem())
+            .setCode(conditionType.toCode())
+            .setDisplay(conditionType.getDisplay()));
     healthConcern.getCode()
         .setText(name);
     healthConcern.getCode()
