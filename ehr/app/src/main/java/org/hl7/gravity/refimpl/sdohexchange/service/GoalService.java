@@ -11,11 +11,18 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Goal;
-import org.hl7.fhir.r4.model.codesystems.GoalStatus;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.GoalBundleToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewGoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
+import org.hl7.gravity.refimpl.sdohexchange.exception.HealthConcernCreateException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.GoalPrepareBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.GoalBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.GoalPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,9 +43,58 @@ public class GoalService {
   public List<GoalDto> listActive() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchGoalQuery(GoalStatus.ACTIVE).returnBundle(Bundle.class)
+    Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.ACTIVE).returnBundle(Bundle.class)
         .execute();
 
+    Bundle merged = addConditionsToGoalBundle(responseBundle);
+
+    return new GoalBundleToDtoConverter().convert(merged);
+  }
+
+  public GoalDto create(NewGoalDto newGoalDto, UserDto user) {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    GoalPrepareBundleFactory goalPrepareBundleFactory = new GoalPrepareBundleFactory(smartOnFhirContext.getPatient(),
+        user.getId(), newGoalDto.getProblemIds());
+    Bundle goalRelatedResources = ehrClient.transaction()
+        .withBundle(goalPrepareBundleFactory.createPrepareBundle())
+        .execute();
+
+    GoalPrepareBundleExtractor.GoalPrepareInfoHolder goalPrepareInfoHolder = new GoalPrepareBundleExtractor().extract(
+        goalRelatedResources);
+
+    GoalBundleFactory bundleFactory = new GoalBundleFactory();
+    bundleFactory.setName(newGoalDto.getName());
+    String category = newGoalDto.getCategory();
+    bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
+    bundleFactory.setSnomedCode(
+        sdohMappings.findCoding(category, Goal.class, System.SNOMED, newGoalDto.getSnomedCode()));
+    bundleFactory.setPatient(goalPrepareInfoHolder.getPatient());
+    bundleFactory.setPractitioner(goalPrepareInfoHolder.getPractitioner());
+    bundleFactory.setUser(user);
+    bundleFactory.setComment(newGoalDto.getComment());
+    bundleFactory.setProblems(goalPrepareInfoHolder.getProblems(newGoalDto.getProblemIds()));
+    bundleFactory.setStartDate(newGoalDto.getStart());
+
+    Bundle goalCreateBundle = ehrClient.transaction()
+        .withBundle(bundleFactory.createBundle())
+        .execute();
+
+    IdType goalId = FhirUtil.getFromResponseBundle(goalCreateBundle, Goal.class);
+    Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.ACTIVE).where(Condition.RES_ID.exactly()
+        .code(goalId.getIdPart()))
+        .returnBundle(Bundle.class)
+        .execute();
+
+    Bundle merged = addConditionsToGoalBundle(responseBundle);
+
+    return new GoalBundleToDtoConverter().convert(merged)
+        .stream()
+        .findFirst()
+        .orElseThrow(() -> new HealthConcernCreateException("goal is not found in the response bundle."));
+  }
+
+  private Bundle addConditionsToGoalBundle(Bundle responseBundle) {
     // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
     List<String> ids = FhirUtil.getFromBundle(responseBundle, Goal.class)
         .stream()
@@ -60,11 +116,10 @@ public class GoalService {
         .execute();
 
     Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, conditions);
-
-    return new GoalBundleToDtoConverter().convert(merged);
+    return merged;
   }
 
-  private IQuery<IBaseBundle> searchGoalQuery(GoalStatus status) {
+  private IQuery<IBaseBundle> searchGoalQuery(Goal.GoalLifecycleStatus status) {
     return ehrClient.search()
         .forResource(Goal.class)
         .where(Condition.PATIENT.hasId(smartOnFhirContext.getPatient()))
