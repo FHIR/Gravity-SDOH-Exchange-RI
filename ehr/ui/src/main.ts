@@ -17,5 +17,8 @@ app.mount("#app");
 app.config.globalProperties.$filters = {
 	formatDateTime(value: string): string {
 		return moment.utc(value).format("MMM DD, YYYY, H:mm A");
+	},
+	formatDate(value: string): string {
+		return moment.utc(value).format("MMM DD, YYYY");
 	}
 };

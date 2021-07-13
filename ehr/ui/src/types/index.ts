@@ -196,7 +196,9 @@ export type newProblemPayload = {
 	name: string,
 	category: string,
 	icdCode: string,
-	snomedCode: string
+	snomedCode: string,
+	basedOnText: string,
+	startDate: string
 }
 
 export type Goal = {

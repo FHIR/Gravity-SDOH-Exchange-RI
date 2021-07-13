@@ -4,6 +4,7 @@ import { Coding } from "@/types";
 import { RuleItem } from "async-validator";
 import { getCategories, getConditionCodes } from "@/api";
 import { ProblemsModule } from "@/store/modules/problems";
+import moment from "moment";
 
 const DEFAULT_REQUIRED_RULE = {
 	required: true,
@@ -14,7 +15,9 @@ export type FormModel = {
 	name: string,
 	category: string,
 	icdCode: string,
-	snomedCode: string
+	snomedCode: string,
+	basedOnText: string,
+	startDate: string
 };
 
 export default defineComponent({
@@ -32,7 +35,9 @@ export default defineComponent({
 			name: "",
 			category: "",
 			icdCode: "",
-			snomedCode: ""
+			snomedCode: "",
+			basedOnText: "Conversation with Patient",
+			startDate: new Date().toDateString()
 		});
 		const categoryOptions = ref<Coding[]>([]);
 		const icdCodesOptions = ref<Coding[]>([]);
@@ -60,13 +65,16 @@ export default defineComponent({
 		//
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
+			formModel.startDate = new Date().toDateString();
+			formModel.basedOnText = "Conversation with Patient";
 		};
 
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: DEFAULT_REQUIRED_RULE,
 			category: DEFAULT_REQUIRED_RULE,
 			icdCode: DEFAULT_REQUIRED_RULE,
-			snomedCode: DEFAULT_REQUIRED_RULE
+			snomedCode: DEFAULT_REQUIRED_RULE,
+			basedOnText: DEFAULT_REQUIRED_RULE
 		};
 
 		const saveInProgress = ref<boolean>(false);
@@ -79,6 +87,7 @@ export default defineComponent({
 				if (valid) {
 					saveInProgress.value = true;
 					const payload = { ...formModel };
+					payload.startDate = formModel.startDate ? moment(formModel.startDate).format("YYYY-MM-DD") : "";
 
 					try {
 						await ProblemsModule.createProblem(payload);
@@ -110,7 +119,7 @@ export default defineComponent({
 <template>
 	<el-dialog
 		:model-value="visible"
-		title="Add Problem"
+		title="New Problem"
 		:width="700"
 		append-to-body
 		destroy-on-close
@@ -187,20 +196,19 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="Based on"
+				prop="basedOnText"
 			>
 				<el-input
-					model-value="Conversation with Patient"
-					disabled
+					v-model="formModel.basedOnText"
 				/>
 			</el-form-item>
 
 			<el-form-item
-				label="Creation Date"
+				label="Start Date"
 			>
 				<el-date-picker
-					:model-value="new Date()"
+					v-model="formModel.startDate"
 					type="date"
-					disabled
 				/>
 			</el-form-item>
 		</el-form>
