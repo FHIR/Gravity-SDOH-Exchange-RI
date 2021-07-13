@@ -126,7 +126,7 @@ export default defineComponent({
 				</span>
 			</el-form-item>
 			<el-form-item label="Start Date">
-				{{ problem.startDate ? $filters.formatDate(problem.startDate) : "N/A" }}
+				{{ problem.startDate ? $filters.formatDateTime(problem.startDate) : "N/A" }}
 			</el-form-item>
 			<el-form-item
 				v-if="status === 'closed'"

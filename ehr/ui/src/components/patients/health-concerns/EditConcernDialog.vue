@@ -124,13 +124,13 @@ export default defineComponent({
 				</span>
 			</el-form-item>
 			<el-form-item label="Assessment Date">
-				{{ concern.assessmentDate ? $filters.formatDate(concern.assessmentDate) : "N/A" }}
+				{{ concern.assessmentDate ? $filters.formatDateTime(concern.assessmentDate) : "N/A" }}
 			</el-form-item>
 			<el-form-item
 				v-if="type === 'resolved'"
 				label="Resolution Date"
 			>
-				{{ concern.resolutionDate ? $filters.formatDate(concern.resolutionDate) : "N/A" }}
+				{{ concern.resolutionDate ? $filters.formatDateTime(concern.resolutionDate) : "N/A" }}
 			</el-form-item>
 		</el-form>
 		<template #footer>

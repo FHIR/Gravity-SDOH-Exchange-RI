@@ -107,7 +107,7 @@ export default defineComponent({
 				label="Start Date"
 			>
 				<template #default="scope">
-					{{ scope.row.startDate ? $filters.formatDate(scope.row.startDate) : "N/A" }}
+					{{ scope.row.startDate ? $filters.formatDateTime(scope.row.startDate) : "N/A" }}
 				</template>
 			</el-table-column>
 			<el-table-column
@@ -152,7 +152,7 @@ export default defineComponent({
 				width="350"
 			>
 				<template #default="scope">
-					<span>{{ $filters.formatDate(scope.row?.closedDate) }}</span>
+					<span>{{ $filters.formatDateTime(scope.row?.closedDate) }}</span>
 				</template>
 			</el-table-column>
 		</el-table>
