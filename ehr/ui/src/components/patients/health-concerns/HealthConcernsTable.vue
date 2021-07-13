@@ -114,9 +114,7 @@ export default defineComponent({
 				label="Assessment Date"
 			>
 				<template #default="scope">
-					{{
-						scope.row.assessmentDate ? $filters.formatDateTime(scope.row.assessmentDate) : $filters.formatDateTime(scope.row.startDate)
-					}}
+					{{ scope.row.assessmentDate ? $filters.formatDate(scope.row.assessmentDate) : "N/A" }}
 				</template>
 			</el-table-column>
 			<el-table-column
@@ -124,7 +122,7 @@ export default defineComponent({
 				label="Resolution Date"
 			>
 				<template #default="scope">
-					{{ $filters.formatDateTime(scope.row.resolutionDate) }}
+					{{ scope.row.resolutionDate ? $filters.formatDate(scope.row.resolutionDate) : "N/A" }}
 				</template>
 			</el-table-column>
 			<el-table-column

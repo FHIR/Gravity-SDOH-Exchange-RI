@@ -9,7 +9,8 @@ export type FormModel = {
 	name: string,
 	category: string,
 	icdCode: string,
-	snomedCode: string
+	snomedCode: string,
+	basedOnText: string
 };
 
 export default defineComponent({
@@ -30,7 +31,8 @@ export default defineComponent({
 			name: "",
 			category: "",
 			icdCode: "",
-			snomedCode: ""
+			snomedCode: "",
+			basedOnText: "Conversation with Patient"
 		});
 		const assessmentDate = ref<string>("");
 
@@ -41,6 +43,7 @@ export default defineComponent({
 		//
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
+			formModel.basedOnText = "Conversation with Patient";
 		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
@@ -70,6 +73,10 @@ export default defineComponent({
 				message: "This field is required"
 			},
 			snomedCode: {
+				required: true,
+				message: "This field is required"
+			},
+			basedOnText: {
 				required: true,
 				message: "This field is required"
 			}
@@ -188,20 +195,9 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="Based on"
+				prop="basedOnText"
 			>
-				<el-input
-					model-value="Conversation with Patient"
-					disabled
-				/>
-			</el-form-item>
-			<el-form-item
-				label="Assessment Date"
-			>
-				<el-date-picker
-					:model-value="new Date()"
-					placeholder="Select date"
-					disabled
-				/>
+				<el-input v-model="formModel.basedOnText" />
 			</el-form-item>
 		</el-form>
 		<template #footer>
