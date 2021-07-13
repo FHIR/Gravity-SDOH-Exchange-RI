@@ -16,7 +16,9 @@ import {
 	newProblemPayload,
 	NewConcernPayload,
 	UpdateGoalPayload,
-	NewGoalPayload
+	NewGoalPayload,
+	GoalCoding,
+	GoalAsCompletedPayload
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -109,10 +111,24 @@ export const getRequests = async (code: string): Promise<Coding[]> => {
 	return res.data;
 };
 
-export const getGoals = async (): Promise<Goal[]> => {
+export const getActiveGoals = async (): Promise<Goal[]> => {
 	const res = await axios.get("/goal/active");
 
 	return res.data;
+};
+
+export const getCompletedGoals = async (): Promise<Goal[]> => {
+	const res = await axios.get("/goal/completed");
+
+	return res.data;
+};
+
+export const removeGoal = async (id: string) => {
+	await axios.put(`/goal/remove/${id}`);
+};
+
+export const markGoalAsCompleted = async ({ id, endDate  }: GoalAsCompletedPayload) => {
+	await axios.put(`/goal/complete/${id}`, { endDate });
 };
 
 //todo: remove mock
@@ -143,34 +159,14 @@ export const updateGoal = async ({ id }: UpdateGoalPayload): Promise<Goal> => {
 	// return res.data;
 };
 
-// todo: change and remove mocked data after sync with BE
-export const createGoal = async (payload: NewGoalPayload): Promise<Goal> => ({
-	name: payload.name,
-	id: "123",
-	category: { code: payload.category, display: payload.category },
-	code: { code: payload.code, display: payload.code },
-	startDate: payload?.startDate || (new Date()).toDateString(),
-	comments: [],
-	endDate: "",
-	targets: [],
-	addedBy: payload?.addedBy || "",
-	problems: payload?.problems || [],
-	status: "active"
-});
-// const res = await axios.post("/goal", payload);
-// return res.data;
+export const createGoal = async (payload: NewGoalPayload): Promise<Goal> => {
+	const res = await axios.post("/goal", payload);
+	return res.data;
+};
 
-export const getGoalCodes = async (code: string): Promise<Coding[]> => {
-	// todo: call real request and remove mocked data
-	// const res = await axios.get(`/mappings/categories/${code}/goals/codings`);
-	//return res.data;
-
-	const res: Coding[] = [{
-		code: "385767005",
-		display: "Meals on wheels provision education"
-	}];
-
-	return res;
+export const getGoalCodes = async (code: string): Promise<GoalCoding[]> => {
+	const res = await axios.get(`/mappings/categories/${code}/goal/codings`);
+	return res.data;
 };
 
 

@@ -48,18 +48,18 @@ export default defineComponent({
 		};
 
 		const handleActionClick = (action: ProblemActionType) => {
-			if(action === "mark-as-closed") {
+			if (action === "mark-as-closed") {
 				phase.value = action;
 			}
 
-			if(action === "add-goal") {
+			if (action === "add-goal") {
 				emit("trigger-add-goal", problem.value!.id);
 				emit("close");
 			}
 		};
 
 		const handleConfirm = () => {
-			if(phase.value === "mark-as-closed") {
+			if (phase.value === "mark-as-closed") {
 				markAsClosed();
 			}
 		};
