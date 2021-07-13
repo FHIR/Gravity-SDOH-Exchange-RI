@@ -4,12 +4,14 @@ import { getCategories, getConditionCodes } from "@/api";
 import { Coding } from "@/types";
 import { RuleItem } from "async-validator";
 import { ConcernsModule } from "@/store/modules/concerns";
+import { DEFAULT_BASED_ON_TEXT, DEFAULT_REQUIRED_FORM_RULE } from "@/utils/constants";
 
 export type FormModel = {
 	name: string,
 	category: string,
 	icdCode: string,
-	snomedCode: string
+	snomedCode: string,
+	basedOnText: string
 };
 
 export default defineComponent({
@@ -30,7 +32,8 @@ export default defineComponent({
 			name: "",
 			category: "",
 			icdCode: "",
-			snomedCode: ""
+			snomedCode: "",
+			basedOnText: DEFAULT_BASED_ON_TEXT
 		});
 		const assessmentDate = ref<string>("");
 
@@ -41,6 +44,7 @@ export default defineComponent({
 		//
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
+			formModel.basedOnText = DEFAULT_BASED_ON_TEXT;
 		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
@@ -57,22 +61,11 @@ export default defineComponent({
 		};
 
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
-			name: {
-				required: true,
-				message: "This field is required"
-			},
-			category: {
-				required: true,
-				message: "This field is required"
-			},
-			icdCode: {
-				required: true,
-				message: "This field is required"
-			},
-			snomedCode: {
-				required: true,
-				message: "This field is required"
-			}
+			name: DEFAULT_REQUIRED_FORM_RULE,
+			category: DEFAULT_REQUIRED_FORM_RULE,
+			icdCode: DEFAULT_REQUIRED_FORM_RULE,
+			snomedCode: DEFAULT_REQUIRED_FORM_RULE,
+			basedOnText: DEFAULT_REQUIRED_FORM_RULE
 		};
 
 		const saveInProgress = ref<boolean>(false);
@@ -188,20 +181,9 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="Based on"
+				prop="basedOnText"
 			>
-				<el-input
-					model-value="Conversation with Patient"
-					disabled
-				/>
-			</el-form-item>
-			<el-form-item
-				label="Assessment Date"
-			>
-				<el-date-picker
-					:model-value="new Date()"
-					placeholder="Select date"
-					disabled
-				/>
+				<el-input v-model="formModel.basedOnText" />
 			</el-form-item>
 		</el-form>
 		<template #footer>

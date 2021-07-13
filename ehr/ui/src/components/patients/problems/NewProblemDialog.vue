@@ -4,17 +4,16 @@ import { Coding } from "@/types";
 import { RuleItem } from "async-validator";
 import { getCategories, getConditionCodes } from "@/api";
 import { ProblemsModule } from "@/store/modules/problems";
-
-const DEFAULT_REQUIRED_RULE = {
-	required: true,
-	message: "This field is required"
-};
+import moment from "moment";
+import { DEFAULT_BASED_ON_TEXT, DEFAULT_REQUIRED_FORM_RULE } from "@/utils/constants";
 
 export type FormModel = {
 	name: string,
 	category: string,
-	codeICD: string,
-	codeSNOMED: string
+	icdCode: string,
+	snomedCode: string,
+	basedOnText: string,
+	startDate: string
 };
 
 export default defineComponent({
@@ -31,8 +30,10 @@ export default defineComponent({
 		const formModel = reactive<FormModel>({
 			name: "",
 			category: "",
-			codeICD: "",
-			codeSNOMED: ""
+			icdCode: "",
+			snomedCode: "",
+			basedOnText: DEFAULT_BASED_ON_TEXT,
+			startDate: new Date().toDateString()
 		});
 		const categoryOptions = ref<Coding[]>([]);
 		const icdCodesOptions = ref<Coding[]>([]);
@@ -42,8 +43,8 @@ export default defineComponent({
 		// Clear code fields on every category change because they are connected.
 		//
 		const onCategoryChange = async (category: string) => {
-			formModel.codeICD = "";
-			formModel.codeSNOMED = "";
+			formModel.icdCode = "";
+			formModel.snomedCode = "";
 
 			const conditionCodes = await getConditionCodes(category);
 			icdCodesOptions.value = conditionCodes.find(item => item.display === "ICD-10-CM")?.codings || [];
@@ -60,13 +61,16 @@ export default defineComponent({
 		//
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
+			formModel.startDate = new Date().toDateString();
+			formModel.basedOnText = DEFAULT_BASED_ON_TEXT;
 		};
 
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
-			name: DEFAULT_REQUIRED_RULE,
-			category: DEFAULT_REQUIRED_RULE,
-			codeICD: DEFAULT_REQUIRED_RULE,
-			codeSNOMED: DEFAULT_REQUIRED_RULE
+			name: DEFAULT_REQUIRED_FORM_RULE,
+			category: DEFAULT_REQUIRED_FORM_RULE,
+			icdCode: DEFAULT_REQUIRED_FORM_RULE,
+			snomedCode: DEFAULT_REQUIRED_FORM_RULE,
+			basedOnText: DEFAULT_REQUIRED_FORM_RULE
 		};
 
 		const saveInProgress = ref<boolean>(false);
@@ -79,6 +83,7 @@ export default defineComponent({
 				if (valid) {
 					saveInProgress.value = true;
 					const payload = { ...formModel };
+					payload.startDate = formModel.startDate ? moment(formModel.startDate).format("YYYY-MM-DD") : "";
 
 					try {
 						await ProblemsModule.createProblem(payload);
@@ -110,7 +115,7 @@ export default defineComponent({
 <template>
 	<el-dialog
 		:model-value="visible"
-		title="Add Problem"
+		title="New Problem"
 		:width="700"
 		append-to-body
 		destroy-on-close
@@ -155,10 +160,10 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="ICD-10 Code"
-				prop="codeICD"
+				prop="icdCode"
 			>
 				<el-select
-					v-model="formModel.codeICD"
+					v-model="formModel.icdCode"
 					placeholder="Select Code"
 				>
 					<el-option
@@ -171,10 +176,10 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="SNOMED-CT Code"
-				prop="codeSNOMED"
+				prop="snomedCode"
 			>
 				<el-select
-					v-model="formModel.codeSNOMED"
+					v-model="formModel.snomedCode"
 					placeholder="Select Code"
 				>
 					<el-option
@@ -187,20 +192,19 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="Based on"
+				prop="basedOnText"
 			>
 				<el-input
-					model-value="Conversation with Patient"
-					disabled
+					v-model="formModel.basedOnText"
 				/>
 			</el-form-item>
 
 			<el-form-item
-				label="Creation Date"
+				label="Start Date"
 			>
 				<el-date-picker
-					:model-value="new Date()"
+					v-model="formModel.startDate"
 					type="date"
-					disabled
 				/>
 			</el-form-item>
 		</el-form>

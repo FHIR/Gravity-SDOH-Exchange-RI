@@ -114,17 +114,16 @@ export default defineComponent({
 				label="Assessment Date"
 			>
 				<template #default="scope">
-					{{
-						scope.row.assessmentDate ? $filters.formatDateTime(scope.row.assessmentDate) : $filters.formatDateTime(scope.row.startDate)
-					}}
+					{{ scope.row.assessmentDate ? $filters.formatDateTime(scope.row.assessmentDate) : "N/A" }}
 				</template>
 			</el-table-column>
 			<el-table-column
 				v-if="type === 'resolved'"
 				label="Resolution Date"
+				width="350"
 			>
 				<template #default="scope">
-					{{ $filters.formatDateTime(scope.row.resolutionDate) }}
+					{{ scope.row.resolutionDate ? $filters.formatDateTime(scope.row.resolutionDate) : "N/A" }}
 				</template>
 			</el-table-column>
 			<el-table-column

@@ -195,14 +195,10 @@ export type Problem = {
 export type newProblemPayload = {
 	name: string,
 	category: string,
-	codeICD: string,
-	codeSNOMED: string
-}
-
-export type updateProblemPayload = {
-	id: string,
-	closeDate: string,
-	status: string
+	icdCode: string,
+	snomedCode: string,
+	basedOnText: string,
+	startDate: string
 }
 
 export type Goal = {
