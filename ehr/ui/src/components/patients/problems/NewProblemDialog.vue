@@ -5,11 +5,7 @@ import { RuleItem } from "async-validator";
 import { getCategories, getConditionCodes } from "@/api";
 import { ProblemsModule } from "@/store/modules/problems";
 import moment from "moment";
-
-const DEFAULT_REQUIRED_RULE = {
-	required: true,
-	message: "This field is required"
-};
+import { DEFAULT_BASED_ON_TEXT, DEFAULT_REQUIRED_FORM_RULE } from "@/utils/constants";
 
 export type FormModel = {
 	name: string,
@@ -36,7 +32,7 @@ export default defineComponent({
 			category: "",
 			icdCode: "",
 			snomedCode: "",
-			basedOnText: "Conversation with Patient",
+			basedOnText: DEFAULT_BASED_ON_TEXT,
 			startDate: new Date().toDateString()
 		});
 		const categoryOptions = ref<Coding[]>([]);
@@ -66,15 +62,15 @@ export default defineComponent({
 		const onDialogOpen = async () => {
 			categoryOptions.value = await getCategories();
 			formModel.startDate = new Date().toDateString();
-			formModel.basedOnText = "Conversation with Patient";
+			formModel.basedOnText = DEFAULT_BASED_ON_TEXT;
 		};
 
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
-			name: DEFAULT_REQUIRED_RULE,
-			category: DEFAULT_REQUIRED_RULE,
-			icdCode: DEFAULT_REQUIRED_RULE,
-			snomedCode: DEFAULT_REQUIRED_RULE,
-			basedOnText: DEFAULT_REQUIRED_RULE
+			name: DEFAULT_REQUIRED_FORM_RULE,
+			category: DEFAULT_REQUIRED_FORM_RULE,
+			icdCode: DEFAULT_REQUIRED_FORM_RULE,
+			snomedCode: DEFAULT_REQUIRED_FORM_RULE,
+			basedOnText: DEFAULT_REQUIRED_FORM_RULE
 		};
 
 		const saveInProgress = ref<boolean>(false);
