@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.codesystems.GoalAchievement;
 import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ public class GoalDto implements Validated {
 
   private String id;
   private String name;
+  private GoalAchievement achievementStatus;
   private CodingDto category;
   private CodingDto snomedCode;
 

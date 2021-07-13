@@ -49,7 +49,7 @@ public class ProblemsController {
   }
 
   @PostMapping()
-  @ApiOperation(value = "Create new active Health Concern.")
+  @ApiOperation(value = "Create new active Problem.")
   public ProblemDto create(@RequestBody @Valid NewProblemDto newProblemDto,
       @ApiIgnore @AuthenticationPrincipal OidcUser user) {
     UserDto userDto = new UserInfoToDtoConverter().convert(user.getClaims());
