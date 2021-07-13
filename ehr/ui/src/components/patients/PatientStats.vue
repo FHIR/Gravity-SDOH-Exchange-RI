@@ -2,7 +2,6 @@
 import { computed, defineComponent } from "vue";
 import { ConcernsModule } from "@/store/modules/concerns";
 import { ProblemsModule } from "@/store/modules/problems";
-import { Goal, Task } from "@/types";
 import { GoalsModule } from "@/store/modules/goals";
 import { TasksModule } from "@/store/modules/tasks";
 
@@ -11,8 +10,8 @@ export default defineComponent({
 	setup() {
 		const activeConcerns = computed<number>(() => ConcernsModule.activeConcerns.length);
 		const activeProblems = computed<number>(() => ProblemsModule.activeProblems.length);
-		const activeGoals = computed<Goal[]>(() => GoalsModule.goals.filter(t => t.status === "active"));
-		const activeActionSteps = computed<Task[]>(() => TasksModule.tasks.filter(t => t.status !== "Completed"));
+		const activeGoals = computed<number>(() => GoalsModule.goals.filter(t => t.status === "active").length);
+		const activeActionSteps = computed<number>(() => TasksModule.tasks.filter(t => t.status !== "Completed").length);
 
 
 		return {
@@ -46,7 +45,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					{{ activeGoals.length }}
+					{{ activeGoals }}
 				</div>
 				<div class="label">
 					Active Goals
@@ -54,7 +53,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					{{ activeActionSteps.length }}
+					{{ activeActionSteps }}
 				</div>
 				<div class="label">
 					Active Action Steps
