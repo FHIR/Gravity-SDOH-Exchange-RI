@@ -2,12 +2,9 @@ package org.hl7.gravity.refimpl.sdohexchange.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.Coding;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
@@ -21,6 +18,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.constraints.NotBlank;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Validated
 @RestController
@@ -54,6 +56,15 @@ public class MappingsController {
   public List<SystemDto> conditionCodings(
       @PathVariable @NotBlank(message = "Category can't be empty.") String category) {
     return sdohMappings.findResourceSystems(category, Condition.class, Arrays.asList(System.SNOMED, System.ICD_10))
+        .stream()
+        .map(system -> new SystemDto(system.getSystem(), system.getDisplay(), toCodingDto(system.getCodings())))
+        .collect(Collectors.toList());
+  }
+
+  @GetMapping("/categories/{category}/goal/codings")
+  @ApiOperation(value = "Get Goal codings based on SDOH category for SNOMED and ICD-10 systems.")
+  public List<SystemDto> goalCodings(@PathVariable @NotBlank(message = "Category can't be empty.") String category) {
+    return sdohMappings.findResourceSystems(category, Goal.class, Arrays.asList(System.SNOMED, System.ICD_10))
         .stream()
         .map(system -> new SystemDto(system.getSystem(), system.getDisplay(), toCodingDto(system.getCodings())))
         .collect(Collectors.toList());

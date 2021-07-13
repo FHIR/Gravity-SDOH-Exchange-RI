@@ -82,6 +82,7 @@ public class HealthConcernService {
 
     ConditionBundleFactory bundleFactory = new ConditionBundleFactory();
     bundleFactory.setName(newHealthConcernDto.getName());
+    bundleFactory.setBasedOnText(newHealthConcernDto.getBasedOnText());
     String category = newHealthConcernDto.getCategory();
     bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
     bundleFactory.setConditionType(UsCoreConditionCategory.HEALTHCONCERN);
@@ -184,6 +185,8 @@ public class HealthConcernService {
             .code(status.toCode()))
         .where(Condition.CATEGORY.exactly()
             .systemAndCode(UsCoreConditionCategory.HEALTHCONCERN.getSystem(),
-                UsCoreConditionCategory.HEALTHCONCERN.toCode()));
+                UsCoreConditionCategory.HEALTHCONCERN.toCode()))
+        .sort()
+        .descending(Constants.PARAM_LASTUPDATED);
   }
 }

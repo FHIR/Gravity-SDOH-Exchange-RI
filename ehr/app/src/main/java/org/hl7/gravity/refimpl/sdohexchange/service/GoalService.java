@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.GoalBundleToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.CompleteGoalRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewGoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
@@ -28,7 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,6 +48,17 @@ public class GoalService {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.ACTIVE).returnBundle(Bundle.class)
+        .execute();
+
+    Bundle merged = addConditionsToGoalBundle(responseBundle);
+
+    return new GoalBundleToDtoConverter().convert(merged);
+  }
+
+  public List<GoalDto> listCompleted() {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.COMPLETED).returnBundle(Bundle.class)
         .execute();
 
     Bundle merged = addConditionsToGoalBundle(responseBundle);
@@ -69,6 +84,7 @@ public class GoalService {
     bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
     bundleFactory.setSnomedCode(
         sdohMappings.findCoding(category, Goal.class, System.SNOMED, newGoalDto.getSnomedCode()));
+    bundleFactory.setAchievementStatus(newGoalDto.getAchievementStatus());
     bundleFactory.setPatient(goalPrepareInfoHolder.getPatient());
     bundleFactory.setPractitioner(goalPrepareInfoHolder.getPractitioner());
     bundleFactory.setUser(user);
@@ -92,6 +108,45 @@ public class GoalService {
         .stream()
         .findFirst()
         .orElseThrow(() -> new HealthConcernCreateException("goal is not found in the response bundle."));
+  }
+
+  //TODO forbid close for goals WITH active tasks!
+  public void complete(String id, CompleteGoalRequestDto dto) {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.ACTIVE).where(Condition.RES_ID.exactly()
+        .code(id))
+        .returnBundle(Bundle.class)
+        .execute();
+    Goal goal = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Goal.class))
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Goal.class.getSimpleName(), id)));
+
+    goal.setLifecycleStatus(Goal.GoalLifecycleStatus.COMPLETED);
+
+    // Is this really an endDate?
+    goal.setStatusDateElement(dto.getEnd());
+
+    ehrClient.update()
+        .resource(goal)
+        .execute();
+  }
+
+  public void remove(String id) {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.ACTIVE).where(Condition.RES_ID.exactly()
+        .code(id))
+        .returnBundle(Bundle.class)
+        .execute();
+    Goal goal = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Goal.class))
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Goal.class.getSimpleName(), id)));
+
+    goal.setLifecycleStatus(Goal.GoalLifecycleStatus.CANCELLED);
+    goal.setStatusDate(new Date());
+
+    ehrClient.update()
+        .resource(goal)
+        .execute();
   }
 
   private Bundle addConditionsToGoalBundle(Bundle responseBundle) {
@@ -126,6 +181,8 @@ public class GoalService {
         .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
             .value(SDOHProfiles.GOAL))
         .where(Goal.LIFECYCLE_STATUS.exactly()
-            .code(status.toCode()));
+            .code(status.toCode()))
+        .sort()
+        .descending(Constants.PARAM_LASTUPDATED);
   }
 }

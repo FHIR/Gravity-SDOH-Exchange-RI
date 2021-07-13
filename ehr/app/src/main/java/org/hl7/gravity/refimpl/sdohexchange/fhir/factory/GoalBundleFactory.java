@@ -13,11 +13,13 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.codesystems.GoalAchievement;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 
+import java.util.Date;
 import java.util.List;
 
 @Setter
@@ -26,6 +28,7 @@ public class GoalBundleFactory {
   private String name;
   private Coding category;
   private Coding snomedCode;
+  private GoalAchievement achievementStatus;
   private Patient patient;
   private Practitioner practitioner;
   private UserDto user;
@@ -38,6 +41,7 @@ public class GoalBundleFactory {
     Assert.notNull(name, "Name cannot be null.");
     Assert.notNull(category, "SDOH DomainCode cannot be null.");
     Assert.notNull(snomedCode, "SNOMED-CT code cannot be null.");
+    Assert.notNull(achievementStatus, "Achievement status cannot be null.");
     Assert.notNull(patient, "Patient cannot be null.");
     Assert.notNull(practitioner, "Practitioner cannot be null.");
     Assert.notNull(user, "User cannot be null.");
@@ -57,15 +61,17 @@ public class GoalBundleFactory {
         .addProfile(SDOHProfiles.GOAL);
 
     goal.setLifecycleStatus(Goal.GoalLifecycleStatus.ACTIVE);
+    goal.setStatusDate(new Date());
 
-    //TODO set achievementStatus?
+    goal.setAchievementStatus(new CodeableConcept().addCoding(
+        new Coding(achievementStatus.getSystem(), achievementStatus.toCode(), achievementStatus.getDisplay())));
 
     goal.addCategory()
         .addCoding(category);
 
-    //TODO set name
-
     goal.setDescription(new CodeableConcept().addCoding(snomedCode));
+    goal.getDescription()
+        .setText(name);
 
     goal.setSubject(getPatientReference());
     goal.setStart(startDate);
