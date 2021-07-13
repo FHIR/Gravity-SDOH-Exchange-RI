@@ -20,7 +20,7 @@ class Problems extends VuexModule implements IProblems {
 
 	@Mutation
 	addActiveProblem(payload: Problem) {
-		this.activeProblems = [ ...this.activeProblems, payload ];
+		this.activeProblems = [ payload, ...this.activeProblems ];
 	}
 
 	@Mutation
@@ -44,8 +44,9 @@ class Problems extends VuexModule implements IProblems {
 
 	@Action
 	async createProblem(payload: newProblemPayload): Promise<void> {
-		await createProblem(payload);
-		await this.getActiveProblems();
+		const data = await createProblem(payload);
+
+		this.addActiveProblem(data);
 	}
 
 	@Action
