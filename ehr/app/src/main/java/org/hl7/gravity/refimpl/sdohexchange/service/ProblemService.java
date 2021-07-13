@@ -14,7 +14,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
@@ -111,8 +110,7 @@ public class ProblemService {
       protected Condition createCondition() {
         Condition condition = super.createCondition();
         if (newProblemDto.getStartDate() != null) {
-          //TODO check conversion
-          condition.setOnset(new DateType().setValue(Date.from(newProblemDto.getStartDate()
+          condition.setOnset(new DateTimeType(Date.from(newProblemDto.getStartDate()
               .atStartOfDay(ZoneId.systemDefault())
               .toInstant())));
         }
