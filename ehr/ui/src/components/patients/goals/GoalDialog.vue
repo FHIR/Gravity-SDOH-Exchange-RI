@@ -89,7 +89,7 @@ export default defineComponent({
 				!!formModel.comment
 			)
 		);
-		const isFormDisabled = computed<boolean>(() => phase.value === "mark-as-completed");
+		const isFormDisabled = computed<boolean>(() => phase.value === "mark-as-completed" || phase.value === "remove");
 
 		const onDialogOpen = async () => {
 			Object.assign(formModel, {

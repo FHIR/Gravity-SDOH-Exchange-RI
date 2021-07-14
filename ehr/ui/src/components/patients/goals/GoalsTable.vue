@@ -80,7 +80,7 @@ export default defineComponent({
 			<el-table-column label="Problem(s)">
 				<template #default="scope">
 					<el-button type="text">
-						{{ scope.row.problems.length > 1 ? `${scope.row.problems.length} Problems` : scope.row.problems.length === 1 ? scope.row.problems[0].display : "--" }}
+						{{ scope.row.problems.length > 1 ? `${scope.row.problems.length} Problems` : scope.row.problems.length === 1 ? scope.row.problems[0].display : "0" }}
 					</el-button>
 				</template>
 			</el-table-column>
