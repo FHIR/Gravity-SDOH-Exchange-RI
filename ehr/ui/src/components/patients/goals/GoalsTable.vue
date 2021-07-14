@@ -5,7 +5,7 @@ import ActionButton from "@/components/patients/ActionButton.vue";
 import GoalDialog from "@/components/patients/goals/GoalDialog.vue";
 import { GoalStatus } from "@/types";
 
-export type GoalAction = "edit" | "mark-as-completed" | "view";
+export type GoalAction = "edit" | "mark-as-completed" | "view" | "remove";
 
 export default defineComponent({
 	name: "GoalsTable",
@@ -80,7 +80,7 @@ export default defineComponent({
 			<el-table-column label="Problem(s)">
 				<template #default="scope">
 					<el-button type="text">
-						{{ scope.row.problems.length > 1 ? `${scope.row.problems.length} Problems` : scope.row.problems.length === 1 ? scope.row.problems[0] : "--" }}
+						{{ scope.row.problems.length > 1 ? `${scope.row.problems.length} Problems` : scope.row.problems.length === 1 ? scope.row.problems[0].display : "0" }}
 					</el-button>
 				</template>
 			</el-table-column>
@@ -88,7 +88,11 @@ export default defineComponent({
 			<el-table-column
 				label="Added By"
 				prop="addedBy"
-			/>
+			>
+				<template #default="scope">
+					{{ scope.row.addedBy.display }}
+				</template>
+			</el-table-column>
 
 			<el-table-column label="Start Date">
 				<template #default="scope">
@@ -99,7 +103,7 @@ export default defineComponent({
 			<el-table-column label="Targets">
 				<template #default="scope">
 					<el-button type="text">
-						{{ scope.row.targets.length }}
+						{{ scope.row.targets ? scope.row.targets : "0" }}
 					</el-button>
 				</template>
 			</el-table-column>
@@ -115,14 +119,15 @@ export default defineComponent({
 						label="Mark as Completed"
 						@click="onGoalActionClick('mark-as-completed', scope.row)"
 					/>
-					<!--				<ActionButton-->
-					<!--					icon-class="remove-goal"-->
-					<!--					label="Remove"-->
-					<!--				/>-->
-					<!--				<ActionButton-->
-					<!--					icon-class="add-target"-->
-					<!--					label="Add Target"-->
-					<!--				/>-->
+					<ActionButton
+						icon-class="remove-goal"
+						label="Remove"
+						@click="onGoalActionClick('remove', scope.row)"
+					/>
+					<ActionButton
+						icon-class="add-target"
+						label="Add Target"
+					/>
 				</template>
 			</el-table-column>
 

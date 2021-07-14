@@ -1,31 +1,46 @@
-import { createGoal, getGoals, updateGoal } from "@/api";
+import { createGoal, getActiveGoals, getCompletedGoals, updateGoal, removeGoal, markGoalAsCompleted } from "@/api";
 import { VuexModule, Module, Action, Mutation, getModule } from "vuex-module-decorators";
 import store from "@/store";
-import { Goal, NewGoalPayload, UpdateGoalPayload } from "@/types";
+import { Goal, GoalAsCompletedPayload, NewGoalPayload, UpdateGoalPayload } from "@/types";
 
 export interface IGoals {
-	goals: Goal[]
+	activeGoals: Goal[]
+	completedGoals: Goal[]
 }
 
 @Module({ dynamic: true, store, name: "goals" })
 class Goals extends VuexModule implements IGoals {
-	goals: Goal[] = [];
+	activeGoals: Goal[] = [];
+	completedGoals: Goal[] = [];
 
 	@Mutation
-	setGoals(payload: Goal[]): void {
-		this.goals = payload;
+	setActiveGoals(payload: Goal[]): void {
+		this.activeGoals = payload;
 	}
+
+	@Mutation
+	setCompletedGoals(payload: Goal[]): void {
+		this.completedGoals = payload;
+	}
+
 
 	@Mutation
 	changeGoal(payload: Goal): void {
-		this.goals = this.goals.map(goal => goal.id === payload.id ? payload : goal);
+		this.activeGoals = this.activeGoals.map(goal => goal.id === payload.id ? payload : goal);
 	}
 
 	@Action
-	async getGoals(): Promise<void> {
-		const data = await getGoals();
+	async getActiveGoals(): Promise<void> {
+		const data = await getActiveGoals();
 
-		this.setGoals(data);
+		this.setActiveGoals(data);
+	}
+
+	@Action
+	async getCompletedGoals(): Promise<void> {
+		const data = await getCompletedGoals();
+
+		this.setCompletedGoals(data);
 	}
 
 	@Action
@@ -38,7 +53,20 @@ class Goals extends VuexModule implements IGoals {
 	@Action
 	async createGoal(payload: NewGoalPayload): Promise<void> {
 		await createGoal(payload);
-		await this.getGoals();
+		await this.getActiveGoals();
+	}
+
+	@Action
+	async removeGoal(id: string): Promise<void> {
+		await removeGoal(id);
+		await this.getActiveGoals();
+	}
+
+	@Action
+	async markGoalAsCompleted(payload: GoalAsCompletedPayload): Promise<void> {
+		await markGoalAsCompleted(payload);
+		await this.getCompletedGoals();
+		await this.getActiveGoals();
 	}
 }
 

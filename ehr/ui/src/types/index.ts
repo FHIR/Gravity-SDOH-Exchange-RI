@@ -75,9 +75,20 @@ export type ServiceRequestConsent = {
 	id: string
 }
 
+export type GoalAddedBy = {
+	id: string,
+	display: string
+}
+
 export type Coding = {
 	code: string,
 	display: string
+}
+
+export type GoalCoding = {
+	system: string,
+	display: string,
+	codings: Coding[]
 }
 
 export type ServiceRequestCondition = {
@@ -147,6 +158,11 @@ export type updateTaskPayload = {
 	id: string
 }
 
+export type GoalAsCompletedPayload = {
+	id: string,
+	endDate: string
+}
+
 export type TaskStatus = "Accepted" | "Cancelled" | "Completed" | "Draft" | "Entered In Error" | "Failed" | "In Progress" | "Null" | "On Hold" | "Ready" | "Received" | "Rejected" | "Requested"
 
 export type Comment = {
@@ -211,14 +227,15 @@ export type Goal = {
 	targets: string[],
 	comments: Comment[],
 	category: Coding,
-	code: Coding,
+	snomedCode: Coding,
 	status: GoalStatus
 };
 
 export type NewGoalPayload = {
+	achievementStatus: string,
 	name: string,
 	category: string,
-	code: string,
+	snomedCode: string,
 	problems?: string[],
 	addedBy?: string,
 	startDate?: string,
