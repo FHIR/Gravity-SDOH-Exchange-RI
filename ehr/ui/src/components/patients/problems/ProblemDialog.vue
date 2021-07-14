@@ -7,7 +7,9 @@ import { ProblemsModule } from "@/store/modules/problems";
 
 const CONFIRM_MESSAGES = {
 	"view": "",
-	"mark-as-closed": "Please confirm that this problem can be marked as closed."
+	"mark-as-closed": "Please confirm that this problem can be marked as closed.",
+	// todo: after Intervention action steps will be done
+	"add-action-step": "Please confirm that you want to add referral action step to this problem"
 };
 
 export default defineComponent({
@@ -31,7 +33,7 @@ export default defineComponent({
 			default: "active"
 		}
 	},
-	emits: ["close", "trigger-add-goal", "trigger-open-assessment"],
+	emits: ["close", "trigger-add-goal", "trigger-open-assessment", "trigger-add-action-step"],
 	setup(props, { emit }) {
 		const { problem, openPhase } = toRefs(props);
 		const phase = ref<ProblemDialogPhase>("view");
@@ -48,19 +50,26 @@ export default defineComponent({
 		};
 
 		const handleActionClick = (action: ProblemActionType) => {
-			if(action === "mark-as-closed") {
+			if (action === "mark-as-closed" || action === "add-action-step") {
 				phase.value = action;
+				return;
 			}
 
-			if(action === "add-goal") {
+			if (action === "add-goal") {
 				emit("trigger-add-goal", problem.value!.id);
 				emit("close");
 			}
 		};
 
 		const handleConfirm = () => {
-			if(phase.value === "mark-as-closed") {
+			if (phase.value === "mark-as-closed") {
 				markAsClosed();
+				return;
+			}
+
+			if (phase.value === "add-action-step") {
+				emit("trigger-add-action-step", problem.value!.id);
+				emit("close");
 			}
 		};
 

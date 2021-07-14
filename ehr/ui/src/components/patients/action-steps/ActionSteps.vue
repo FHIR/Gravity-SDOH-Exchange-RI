@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, ref, watch, h } from "vue";
+import { computed, defineComponent, onMounted, onUnmounted, ref, watch, h, PropType } from "vue";
 import RequestTable from "@/components/patients/action-steps/RequestTable.vue";
 import NewRequestDialog from "@/components/patients/action-steps/NewRequestDialog.vue";
 import { Comment, Occurrence, Task, ServiceRequestCondition, ServiceRequestGoal, Procedure, TaskStatus, Coding } from "@/types";
@@ -40,7 +40,21 @@ export default defineComponent({
 		RequestTable,
 		NewRequestDialog
 	},
-	setup() {
+	props: {
+		isActive: {
+			type: Boolean,
+			default: false
+		},
+		addActionPhase: {
+			type: Boolean,
+			default: false
+		},
+		newActionProblems: {
+			type: Array as PropType<string[]>,
+			default: () => []
+		}
+	},
+	setup(props) {
 		const activeGroup = ref<string>("referrals");
 		const newRequestDialogVisible = ref<boolean>(false);
 		const isRequestLoading = ref<boolean>(false);
@@ -138,6 +152,12 @@ export default defineComponent({
 			});
 		});
 
+		watch(() => props.isActive, () => {
+			if (props.isActive) {
+				newRequestDialogVisible.value = props.addActionPhase;
+			}
+		});
+
 		return {
 			activeGroup,
 			newRequestDialogVisible,
@@ -204,6 +224,7 @@ export default defineComponent({
 
 		<NewRequestDialog
 			:visible="newRequestDialogVisible"
+			:problems="newActionProblems"
 			@close="newRequestDialogVisible = false"
 		/>
 	</div>
