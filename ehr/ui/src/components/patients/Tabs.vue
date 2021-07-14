@@ -112,7 +112,7 @@ export default defineComponent({
 				:add-action-phase="addActionPhase"
 				:new-action-problems="newActionProblems"
 				:is-active="activeTab === 'actionSteps'"
-				@stop-add-goal="resetAddActionPhase"
+				@stop-add-action="resetAddActionPhase"
 			/>
 		</el-tab-pane>
 		<el-tab-pane

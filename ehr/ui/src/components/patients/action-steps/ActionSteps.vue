@@ -54,7 +54,8 @@ export default defineComponent({
 			default: () => []
 		}
 	},
-	setup(props) {
+	emits: ["stop-add-action"],
+	setup(props, { emit }) {
 		const activeGroup = ref<string>("referrals");
 		const newRequestDialogVisible = ref<boolean>(false);
 		const isRequestLoading = ref<boolean>(false);
@@ -158,12 +159,18 @@ export default defineComponent({
 			}
 		});
 
+		const handleDialogClose = () => {
+			newRequestDialogVisible.value = false;
+			emit("stop-add-action");
+		};
+
 		return {
 			activeGroup,
 			newRequestDialogVisible,
 			activeRequests,
 			completedRequests,
-			isRequestLoading
+			isRequestLoading,
+			handleDialogClose
 		};
 	}
 });
@@ -225,7 +232,7 @@ export default defineComponent({
 		<NewRequestDialog
 			:visible="newRequestDialogVisible"
 			:problems="newActionProblems"
-			@close="newRequestDialogVisible = false"
+			@close="handleDialogClose"
 		/>
 	</div>
 </template>
