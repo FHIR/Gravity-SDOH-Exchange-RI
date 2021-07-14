@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
@@ -48,6 +49,24 @@ public class ProblemInfoBundleExtractor extends ConditionInfoBundleExtractor {
               .add(new TaskInfoHolder(task.getIdElement()
                   .getIdPart(), task.getDescription(), task.getStatus())));
     }
+
+    for (Goal goal : FhirUtil.getFromBundle(bundle, Goal.class)) {
+      goal.getAddresses()
+          .stream()
+          .filter(ref -> Condition.class.getSimpleName()
+              .equals(ref.getReferenceElement()
+                  .getResourceType()) && idToHolderMap.containsKey(ref.getReferenceElement()
+              .getIdPart()))
+          .forEach(ref -> {
+            idToHolderMap.get(ref.getReferenceElement()
+                .getIdPart())
+                .getGoals()
+                .add(new GoalInfoHolder(goal.getIdElement()
+                    .getIdPart(), goal.getDescription()
+                    .getText(), goal.getLifecycleStatus()));
+          });
+    }
+
     return new ArrayList<>(idToHolderMap.values());
   }
 
@@ -55,6 +74,7 @@ public class ProblemInfoBundleExtractor extends ConditionInfoBundleExtractor {
   public static class ProblemInfoHolder extends ConditionInfoHolder {
 
     private List<TaskInfoHolder> tasks = new ArrayList<>();
+    private List<GoalInfoHolder> goals = new ArrayList<>();
 
     public ProblemInfoHolder(ConditionInfoHolder conditionInfoHolder) {
       super(conditionInfoHolder.getCondition(), conditionInfoHolder.getQuestionnaireResponse(),
@@ -69,5 +89,14 @@ public class ProblemInfoBundleExtractor extends ConditionInfoBundleExtractor {
     private final String id;
     private final String name;
     private final Task.TaskStatus status;
+  }
+
+  @Getter
+  @RequiredArgsConstructor
+  public static class GoalInfoHolder {
+
+    private final String id;
+    private final String name;
+    private final Goal.GoalLifecycleStatus status;
   }
 }

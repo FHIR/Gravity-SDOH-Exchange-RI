@@ -15,4 +15,5 @@ public class ProblemDto extends ConditionDtoBase {
 
   private LocalDateTime startDate;
   private List<TaskInfoDto> tasks = new ArrayList<>();
+  private List<GoalInfoDto> goals = new ArrayList<>();
 }

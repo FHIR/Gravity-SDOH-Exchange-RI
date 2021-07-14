@@ -2,6 +2,7 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalInfoDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProblemDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskInfoDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.ConditionInfoBundleExtractor;
@@ -34,6 +35,12 @@ public class ProblemBundleToDtoConverter extends ConditionBundleToDtoConverterBa
         .addAll(probleminfo.getTasks()
             .stream()
             .map(t -> new TaskInfoDto(t.getId(), t.getName(), t.getStatus()))
+            .collect(Collectors.toList()));
+
+    problemDto.getGoals()
+        .addAll(probleminfo.getGoals()
+            .stream()
+            .map(t -> new GoalInfoDto(t.getId(), t.getName(), t.getStatus()))
             .collect(Collectors.toList()));
     return problemDto;
   }
