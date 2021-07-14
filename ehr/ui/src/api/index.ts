@@ -127,7 +127,7 @@ export const removeGoal = async (id: string) => {
 	await axios.put(`/goal/remove/${id}`);
 };
 
-export const markGoalAsCompleted = async ({ id, endDate  }: GoalAsCompletedPayload) => {
+export const markGoalAsCompleted = async ({ id, endDate }: GoalAsCompletedPayload) => {
 	await axios.put(`/goal/complete/${id}`, { endDate });
 };
 

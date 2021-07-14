@@ -44,7 +44,7 @@ export default defineComponent({
 			default: false
 		},
 		goal: {
-			type: Object as PropType<TableData>,
+			type: Object as PropType<TableData | undefined>,
 			default: undefined
 		},
 		openPhase: {
@@ -57,7 +57,7 @@ export default defineComponent({
 		const { goal, openPhase } = toRefs(props);
 		const phase = ref<GoalAction>("edit");
 		const confirmMessage = computed<string>(() => CONFIRM_MESSAGES[phase.value]);
-		const showConfirm = computed<boolean>(() => phase.value !== "edit");
+		const showConfirm = computed<boolean>(() => phase.value === "mark-as-completed" || phase.value == "remove");
 		const categoryOptions = ref<Coding[]>([]);
 		const codeOptions = ref<Coding[]>([]);
 		const problemOptions = ref<ServiceRequestCondition[]>([]);
@@ -93,19 +93,19 @@ export default defineComponent({
 
 		const onDialogOpen = async () => {
 			Object.assign(formModel, {
-				category: goal.value.category.code,
-				code: goal.value.snomedCode.code,
-				name: goal.value.name,
-				problems: [ ...goal.value.problems ],
-				startDate: goal.value.startDate,
-				endDate: goal.value.endDate,
-				addedBy: goal.value.addedBy
+				category: goal.value?.category.code,
+				code: goal.value?.snomedCode.code,
+				name: goal.value?.name,
+				problems: [ ...goal.value!.problems ],
+				startDate: goal.value?.startDate,
+				endDate: goal.value?.endDate,
+				addedBy: goal.value?.addedBy
 			});
 			phase.value = openPhase.value;
 
 			if (phase.value !== "view") {
 				categoryOptions.value = await getCategories();
-				codeOptions.value = await getRequests(goal.value.category.code);
+				codeOptions.value = await getRequests(goal.value!.category.code);
 				problemOptions.value = await getServiceRequestConditions();
 			}
 		};
@@ -117,7 +117,7 @@ export default defineComponent({
 		const saveInProgress = ref<boolean>(false);
 		const saveGoal = async () => {
 			const payload: UpdateGoalPayload = {
-				id: goal.value.id,
+				id: goal.value!.id,
 				...formModel
 			};
 			saveInProgress.value = true;
@@ -148,11 +148,10 @@ export default defineComponent({
 			saveInProgress.value = true;
 			try {
 				if (phase.value === "remove") {
-					await GoalsModule.removeGoal(goal.value.id);
+					await GoalsModule.removeGoal(goal.value!.id);
 				} else if (phase.value === "mark-as-completed") {
-					console.log("mark");
 					const payload: GoalAsCompletedPayload = {
-						id: goal.value.id,
+						id: goal.value!.id,
 						endDate: moment(completionDate.value || new Date()).format("YYYY-MM-DD")
 					};
 					await GoalsModule.markGoalAsCompleted(payload);

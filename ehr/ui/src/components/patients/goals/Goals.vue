@@ -10,10 +10,7 @@ import NoItems from "@/components/patients/NoItems.vue";
 export type TableData = {
 	name: string,
 	problems: string[],
-	addedBy: string | {
-		display: string,
-		id: string
-	},
+	addedBy: string,
 	startDate: string,
 	endDate: string,
 	targets: string[],
