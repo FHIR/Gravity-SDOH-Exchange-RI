@@ -93,7 +93,7 @@ public class GoalService {
     bundleFactory.setStartDate(newGoalDto.getStart());
 
     Bundle goalCreateBundle = ehrClient.transaction()
-        .withBundle(bundleFactory.createBundle())
+        .withBundle(bundleFactory.createPrepareBundle())
         .execute();
 
     IdType goalId = FhirUtil.getFromResponseBundle(goalCreateBundle, Goal.class);

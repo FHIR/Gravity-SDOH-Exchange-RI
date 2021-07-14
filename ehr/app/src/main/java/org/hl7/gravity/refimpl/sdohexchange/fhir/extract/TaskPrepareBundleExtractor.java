@@ -1,8 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
 import com.google.common.base.Strings;
-import java.util.List;
-import java.util.Map;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
@@ -15,8 +13,11 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
-import org.hl7.gravity.refimpl.sdohexchange.exception.TaskPrepareException;
+import org.hl7.gravity.refimpl.sdohexchange.exception.PrepareBundleException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskPrepareBundleExtractor.TaskPrepareInfoHolder;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Transaction bundle parser of resources required for Task creation.
@@ -40,15 +41,13 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
     private final List<Goal> goals;
 
     public TaskPrepareInfoHolder(Map<? extends Class<? extends Resource>, List<Resource>> resources) {
-      this.patient = resourceList(resources, Patient.class)
-          .stream()
+      this.patient = resourceList(resources, Patient.class).stream()
           .findFirst()
-          .orElseThrow(() -> new TaskPrepareException("Patient not found."));
+          .orElseThrow(() -> new PrepareBundleException("Patient not found."));
       this.practitionerRole = getRole(resourceList(resources, PractitionerRole.class));
-      this.performerOrganization = resourceList(resources, Organization.class)
-          .stream()
+      this.performerOrganization = resourceList(resources, Organization.class).stream()
           .findFirst()
-          .orElseThrow(() -> new TaskPrepareException("Performer Organization not found."));
+          .orElseThrow(() -> new PrepareBundleException("Performer Organization not found."));
       this.endpoint = getEndpoint(resourceList(resources, Endpoint.class));
       this.conditions = resourceList(resources, Condition.class);
       this.goals = resourceList(resources, Goal.class);
@@ -61,24 +60,24 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
 
     public List<Condition> getConditions(List<String> conditionsIds) {
       if (conditionsIds != null && conditionsIds.size() != getConditions().size()) {
-        throw new TaskPrepareException("Conditions don't exist or are not supported.");
+        throw new PrepareBundleException("Conditions don't exist or are not supported.");
       }
       return getConditions();
     }
 
     public List<Goal> getGoals(List<String> goalIds) {
       if (goalIds != null && goalIds.size() != getGoals().size()) {
-        throw new TaskPrepareException("Goals don't exist or are not supported.");
+        throw new PrepareBundleException("Goals don't exist or are not supported.");
       }
       return getGoals();
     }
 
     private PractitionerRole getRole(List<PractitionerRole> roles) {
       if (roles.isEmpty()) {
-        throw new TaskPrepareException(
+        throw new PrepareBundleException(
             "No Practitioner role with US Core profile which references to US Core Organization have been found.");
       } else if (roles.size() > 1) {
-        throw new TaskPrepareException(
+        throw new PrepareBundleException(
             "More than one Practitioner role with US Core profile which references to US Core Organization have been "
                 + "found.");
       }
@@ -93,11 +92,11 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
       Endpoint endpoint = endpoints.stream()
           .findFirst()
           .map(Endpoint.class::cast)
-          .orElseThrow(() -> new TaskPrepareException(
+          .orElseThrow(() -> new PrepareBundleException(
               String.format("CP Organization resource with id '%s' does not contain endpoint of type '%s'.",
                   organizationId, EndpointConnectionType.HL7FHIRREST)));
       if (Strings.isNullOrEmpty(endpoint.getAddress())) {
-        throw new TaskPrepareException(
+        throw new PrepareBundleException(
             String.format("Endpoint resource with id '%s' for a CP organization '%s' does not contain an address.",
                 endpoint.getIdElement()
                     .getIdPart(), organizationId));
@@ -107,7 +106,7 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
 
     private Consent getConsent(List<Consent> consents) {
       if (consents.isEmpty()) {
-        throw new TaskPrepareException("No Consent have been found.");
+        throw new PrepareBundleException("No Consent have been found.");
       }
       return consents.stream()
           .findFirst()

@@ -20,10 +20,10 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ConditionInfoBundleExtractor extends BundleExtractor<List<ConditionInfoHolder>> {
+public class ConditionInfoBundleExtractor extends BundleExtractor<List<? extends ConditionInfoHolder>> {
 
   @Override
-  public List<ConditionInfoHolder> extract(Bundle bundle) {
+  public List<? extends ConditionInfoHolder> extract(Bundle bundle) {
     Map<String, Observation> allObservations = FhirUtil.getFromBundle(bundle, Observation.class)
         .stream()
         .collect(Collectors.toMap(observation -> observation.getIdElement()
