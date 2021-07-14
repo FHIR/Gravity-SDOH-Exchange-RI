@@ -257,4 +257,6 @@ export const createConsent = async (name: string, attachment: File) => {
 	return resp.data;
 };
 
+export const getConsentList = async () => (await axios.get<{ id: string, name: string }[]>("/consent/list")).data;
+
 export const getConsentAttachment = async (consentId: string) => (await axios.get<Blob>(`/consent/${consentId}/attachment`, { responseType: "blob" })).data;
