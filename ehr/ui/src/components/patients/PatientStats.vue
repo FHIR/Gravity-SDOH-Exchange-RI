@@ -10,7 +10,7 @@ export default defineComponent({
 	setup() {
 		const activeConcerns = computed<number>(() => ConcernsModule.activeConcerns.length);
 		const activeProblems = computed<number>(() => ProblemsModule.activeProblems.length);
-		const activeGoals = computed<number>(() => GoalsModule.goals.filter(t => t.status === "active").length);
+		const activeGoals = computed<number>(() => GoalsModule.activeGoals.length);
 		const activeActionSteps = computed<number>(() => TasksModule.tasks.filter(t => t.status !== "Completed").length);
 
 
