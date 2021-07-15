@@ -205,7 +205,19 @@ export type Problem = {
 	resolutionDate?: string,
 	errors: string[],
 	icdCode: Coding,
-	snomedCode: Coding
+	snomedCode: Coding,
+	goals: {
+		id: string,
+		name: string,
+		status: string,
+		errors: []
+	}[],
+	tasks: {
+		id: string,
+		name: string,
+		status: string,
+		errors: []
+	}[]
 };
 
 export type newProblemPayload = {

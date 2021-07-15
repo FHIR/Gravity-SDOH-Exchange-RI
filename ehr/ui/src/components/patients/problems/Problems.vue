@@ -43,8 +43,8 @@ export default defineComponent({
 				basedOn: problem.basedOn,
 				assessmentDate: problem.assessmentDate || "",
 				startDate: problem.startDate || "",
-				goals: 0,
-				actionSteps: 0,
+				goals: problem.goals.length,
+				actionSteps: problem.tasks.length,
 				icdCode: problem.icdCode,
 				snomedCode: problem.snomedCode,
 				category: problem.category
@@ -58,8 +58,8 @@ export default defineComponent({
 				assessmentDate: problem.assessmentDate || "",
 				startDate: problem.startDate || "",
 				resolutionDate: problem.resolutionDate || "",
-				goals: 0,
-				actionSteps: 0,
+				goals: problem.goals.length,
+				actionSteps: problem.tasks.length,
 				icdCode: problem.icdCode,
 				snomedCode: problem.snomedCode,
 				category: problem.category
