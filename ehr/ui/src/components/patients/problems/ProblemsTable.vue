@@ -142,6 +142,7 @@ export default defineComponent({
 					<ActionButton
 						icon-class="mark-as-closed"
 						label="Mark as Closed"
+						:disabled="scope.row.cannotBeClosed"
 						@click="handleActionClick('mark-as-closed', scope.row)"
 					/>
 				</template>
