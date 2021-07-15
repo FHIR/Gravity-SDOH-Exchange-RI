@@ -26,7 +26,7 @@ class Concerns extends VuexModule implements IConcerns {
 
 	@Mutation
 	addConcern(payload: Concern): void {
-		this.activeConcerns = [...this.activeConcerns, payload];
+		this.activeConcerns = [payload, ...this.activeConcerns];
 	}
 
 	@Action

@@ -1,11 +1,14 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.codesystems.GoalAchievement;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
@@ -14,6 +17,7 @@ import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GoalBundleToDtoConverter implements Converter<Bundle, List<GoalDto>> {
@@ -30,7 +34,23 @@ public class GoalBundleToDtoConverter implements Converter<Bundle, List<GoalDto>
           GoalDto goalDto = new GoalDto();
           goalDto.setId(goal.getIdElement()
               .getIdPart());
-          goalDto.setName(codeableConceptToStringConverter.convert(goal.getDescription()));
+          if (goal.hasDescription() && goal.getDescription()
+              .hasText()) {
+            goalDto.setName(goal.getDescription()
+                .getText());
+          } else {
+            goalDto.getErrors()
+                .add("Goal description.text not found. Name cannot be set.");
+          }
+
+          if (goal.hasAchievementStatus()) {
+            goalDto.setAchievementStatus(GoalAchievement.fromCode(goal.getAchievementStatus()
+                .getCodingFirstRep()
+                .getCode()));
+          } else {
+            goalDto.getErrors()
+                .add("No achievement status available.");
+          }
 
           //TODO reused from HealthConcernBundleToDtoConverter class. Refactor!
           Coding categoryCoding = FhirUtil.findCoding(goal.getCategory(), SDOHMappings.getInstance()
@@ -47,10 +67,14 @@ public class GoalBundleToDtoConverter implements Converter<Bundle, List<GoalDto>
             goalDto.setCategory(new CodingDto(categoryCoding.getCode(), categoryCoding.getDisplay()));
           }
 
-          //TODO this is invalid. To clarify!
-          Coding code = goal.getDescription()
-              .getCodingFirstRep();
-          goalDto.setSnomedCode(new CodingDto(code.getCode(), code.getDisplay()));
+          Optional<Coding> snomedCodeCodingOptional = findCode(goal.getDescription(), System.SNOMED);
+          if (snomedCodeCodingOptional.isPresent()) {
+            Coding snomedCodeCoding = snomedCodeCodingOptional.get();
+            goalDto.setSnomedCode(new CodingDto(snomedCodeCoding.getCode(), snomedCodeCoding.getDisplay()));
+          } else {
+            goalDto.getErrors()
+                .add("SNOMED-CT code is not found.");
+          }
 
           if (goal.hasExpressedBy()) {
             Reference expressedBy = goal.getExpressedBy();
@@ -89,5 +113,14 @@ public class GoalBundleToDtoConverter implements Converter<Bundle, List<GoalDto>
           return goalDto;
         })
         .collect(Collectors.toList());
+  }
+
+  //TODO copied from HealthConcernBundleToDtoConverter
+  private Optional<Coding> findCode(CodeableConcept code, String system) {
+    return code.getCoding()
+        .stream()
+        .filter(coding -> coding.getSystem()
+            .equals(system))
+        .findFirst();
   }
 }

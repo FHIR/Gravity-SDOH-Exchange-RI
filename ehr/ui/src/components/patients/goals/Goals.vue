@@ -16,7 +16,7 @@ export type TableData = {
 	targets: string[],
 	status: string,
 	category: Coding,
-	code: Coding,
+	snomedCode: Coding,
 	id: string,
 	comments: Comment[]
 };
@@ -46,9 +46,10 @@ export default defineComponent({
 	emits: ["stop-add-goal"],
 	setup(props, { emit }) {
 		const isDataLoading = ref<boolean>(false);
-		const goals = computed<Goal[]>(() => GoalsModule.goals);
-		const tableData = computed<TableData[]>(() =>
-			goals.value.map((goal: Goal) => ({
+		const activeGoals = computed<Goal[]>(() => GoalsModule.activeGoals);
+		const completedGoals = computed<Goal[]>(() => GoalsModule.completedGoals);
+		const activeGoalsTableData = computed<TableData[]>(() =>
+			activeGoals.value.map((goal: Goal) => ({
 				name: goal.name,
 				problems: goal.problems,
 				addedBy: goal.addedBy,
@@ -57,19 +58,35 @@ export default defineComponent({
 				targets: goal.targets,
 				status: goal.status,
 				category: goal.category,
-				code: goal.code,
+				snomedCode: goal.snomedCode,
 				id: goal.id,
 				comments: goal.comments
 			}))
 		);
-		const activeGoals = computed<TableData[]>(() => tableData.value.filter(goal => goal.status === "active"));
-		const completedGoals = computed<TableData[]>(() => tableData.value.filter(goal => goal.status === "completed"));
+
+		const completedGoalsTableData = computed<TableData[]>(() =>
+			completedGoals.value.map((goal: Goal) => ({
+				name: goal.name,
+				problems: goal.problems,
+				addedBy: goal.addedBy,
+				startDate: goal.startDate,
+				endDate: goal.endDate,
+				targets: goal.targets,
+				status: goal.status,
+				category: goal.category,
+				snomedCode: goal.snomedCode,
+				id: goal.id,
+				comments: goal.comments
+			}))
+		);
+
 		const newGoalDialogVisible = ref<boolean>(false);
 
 		onMounted(async () => {
 			isDataLoading.value = true;
 			try {
-				await GoalsModule.getGoals();
+				await GoalsModule.getActiveGoals();
+				await GoalsModule.getCompletedGoals();
 			} finally {
 				isDataLoading.value = false;
 			}
@@ -87,8 +104,8 @@ export default defineComponent({
 		});
 
 		return {
-			activeGoals,
-			completedGoals,
+			activeGoalsTableData,
+			completedGoalsTableData,
 			isDataLoading,
 			newGoalDialogVisible,
 			handleDialogClose
@@ -103,23 +120,24 @@ export default defineComponent({
 		class="goals"
 	>
 		<GoalsTable
-			v-if="activeGoals.length > 0"
-			:data="activeGoals"
+			v-if="activeGoalsTableData.length > 0"
+			:data="activeGoalsTableData"
 			status="active"
 			@add-goal="newGoalDialogVisible = true"
 		/>
 		<NoActiveItems
-			v-else-if="!activeGoals.length && completedGoals.length"
+			v-else-if="!activeGoalsTableData.length && completedGoalsTableData.length"
 			message="No Active Goals"
 			button-label="Add Goal"
+			@add-item="newGoalDialogVisible = true"
 		/>
 		<GoalsTable
-			v-if="completedGoals.length > 0"
-			:data="completedGoals"
+			v-if="completedGoalsTableData.length > 0"
+			:data="completedGoalsTableData"
 			status="completed"
 		/>
 		<NoItems
-			v-if="!isDataLoading && !(activeGoals.length > 0 || completedGoals.length > 0)"
+			v-if="!isDataLoading && !(activeGoalsTableData.length > 0 || completedGoalsTableData.length > 0)"
 			message="No Goals Yet"
 			button-label="Add Goal"
 			@add-item="newGoalDialogVisible = true"

@@ -2,7 +2,6 @@ package org.hl7.gravity.refimpl.sdohexchange.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Validated
 @RestController
 @RequestMapping("support")
@@ -25,17 +26,17 @@ public class SupportController {
   private final SupportService supportService;
 
   @GetMapping("conditions")
-  @ApiOperation(value = "List available Condition FHIR resources.",
+  @ApiOperation(value = "List active Problems (Condition FHIR resources of problem-list-item category).",
       notes = "Returned instances belong to a selected Patient and their category "
           + "field references a code from a code system 'http://hl7"
           + ".org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes'. Other Conditions are ignored! "
           + "Consider looking at 'errors' response field which holds additional conformance and validation checks.")
   public List<ConditionDto> listConditions() {
-    return supportService.listConditions();
+    return supportService.listProblems();
   }
 
   @GetMapping("goals")
-  @ApiOperation(value = "List available Goal FHIR resources.",
+  @ApiOperation(value = "List active Goal FHIR resources.",
       notes = "Returned instances belong to a selected Patient and their category "
           + "field references a code from a code system 'http://hl7"
           + ".org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes'. Other Goals are ignored! Consider "

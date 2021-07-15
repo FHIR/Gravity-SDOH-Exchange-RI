@@ -91,6 +91,13 @@ sdoh-mappings:
                   code: "Z59.42"
                 - display: "Severe food insecurity"
                   code: "Z59.43"
+        - resource: "Goal"
+          systems:
+            - system: "http://snomed.info/sct"
+              display: "SNOMED CT"
+              codings:
+                - display: "Food security"
+                  code: "1078229009"
     - code: "housing-instability-homelessness"
       display: "Housing Instability Homelessness"
       resources:

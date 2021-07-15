@@ -16,7 +16,9 @@ import {
 	newProblemPayload,
 	NewConcernPayload,
 	UpdateGoalPayload,
-	NewGoalPayload
+	NewGoalPayload,
+	GoalCoding,
+	GoalAsCompletedPayload
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -109,63 +111,24 @@ export const getRequests = async (code: string): Promise<Coding[]> => {
 	return res.data;
 };
 
-export const getGoals = async (): Promise<Goal[]> => {
-	//todo: remove mock after BE sync
-	const res: Goal[] = [{
-		id: "1",
-		name: "Reduce Medication Const",
-		problems: ["Food Insecurity", "Food Security"],
-		addedBy: "test",
-		startDate: "2021-05-18T14:07:48",
-		endDate: "",
-		targets: ["fisrt", "second"],
-		comments: [{
-			author: {
-				display: "",
-				id: "",
-				resourceType: ""
-			},
-			text: "Some comments to share",
-			time: "2021-05-18T14:07:48"
-		}, {
-			author: {
-				display: "",
-				id: "",
-				resourceType: ""
-			},
-			text: "Another loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong comment",
-			time: "2021-05-18T14:07:48"
-		}],
-		category: {
-			code: "111",
-			display: "Food Insecurity"
-		},
-		code: {
-			code: "10782290009",
-			display: "Food Security"
-		},
-		status: "active"
-	}, {
-		id: "2",
-		name: "Reduce Medication Const",
-		problems: ["Food Insecurity"],
-		addedBy: "test",
-		startDate: "2021-05-18T14:07:48",
-		endDate: "2021-06-15T14:07:48",
-		targets: ["fisrt", "second"],
-		comments: [],
-		category: {
-			code: "111",
-			display: "Food Insecurity"
-		},
-		code: {
-			code: "10782290009",
-			display: "Food Security"
-		},
-		status: "completed"
-	}];
+export const getActiveGoals = async (): Promise<Goal[]> => {
+	const res = await axios.get("/goal/active");
 
-	return res;
+	return res.data;
+};
+
+export const getCompletedGoals = async (): Promise<Goal[]> => {
+	const res = await axios.get("/goal/completed");
+
+	return res.data;
+};
+
+export const removeGoal = async (id: string) => {
+	await axios.put(`/goal/remove/${id}`);
+};
+
+export const markGoalAsCompleted = async ({ id, endDate }: GoalAsCompletedPayload) => {
+	await axios.put(`/goal/complete/${id}`, { endDate });
 };
 
 //todo: remove mock
@@ -183,7 +146,7 @@ export const updateGoal = async ({ id }: UpdateGoalPayload): Promise<Goal> => {
 			code: "111",
 			display: "Food Insecurity"
 		},
-		code: {
+		snomedCode: {
 			code: "10782290009",
 			display: "Food Security"
 		},
@@ -196,34 +159,14 @@ export const updateGoal = async ({ id }: UpdateGoalPayload): Promise<Goal> => {
 	// return res.data;
 };
 
-// todo: change and remove mocked data after sync with BE
-export const createGoal = async (payload: NewGoalPayload): Promise<Goal> => ({
-	name: payload.name,
-	id: "123",
-	category: { code: payload.category, display: payload.category },
-	code: { code: payload.code, display: payload.code },
-	startDate: payload?.startDate || (new Date()).toDateString(),
-	comments: [],
-	endDate: "",
-	targets: [],
-	addedBy: payload?.addedBy || "",
-	problems: payload?.problems || [],
-	status: "active"
-});
-// const res = await axios.post("/goal", payload);
-// return res.data;
+export const createGoal = async (payload: NewGoalPayload): Promise<Goal> => {
+	const res = await axios.post("/goal", payload);
+	return res.data;
+};
 
-export const getGoalCodes = async (code: string): Promise<Coding[]> => {
-	// todo: call real request and remove mocked data
-	// const res = await axios.get(`/mappings/categories/${code}/goals/codings`);
-	//return res.data;
-
-	const res: Coding[] = [{
-		code: "385767005",
-		display: "Meals on wheels provision education"
-	}];
-
-	return res;
+export const getGoalCodes = async (code: string): Promise<GoalCoding[]> => {
+	const res = await axios.get(`/mappings/categories/${code}/goal/codings`);
+	return res.data;
 };
 
 
@@ -237,19 +180,10 @@ export const getClosedProblems = async(): Promise<Problem[]> => {
 	return res.data;
 };
 
-// todo: change and remove mocked data after sync with BE
-export const createProblem = (payload: newProblemPayload): Problem => ({
-	name: payload.name,
-	id: "123",
-	category: { code: payload.category, display: payload.category },
-	icdCode: { code: payload.codeICD, display: payload.codeICD },
-	snomedCode: { code: payload.codeSNOMED, display: payload.codeSNOMED },
-	assessmentDate: (new Date()).toDateString(),
-	basedOn: "Conversation with Patient",
-	errors: []
-});
-// const res = await axios.post("/problem", payload);
-// return res.data;
+export const createProblem = async (payload: newProblemPayload): Promise<Problem> => {
+	const res = await axios.post("/problem", payload);
+	return res.data;
+};
 
 export const closeProblem = async (id: string): Promise<Problem> => {
 	const res = await axios.put(`/problem/close/${id}`);
@@ -265,5 +199,7 @@ export const createConsent = async (name: string, attachment: File) => {
 	const resp = await axios.post<Consent>("/consent", formData);
 	return resp.data;
 };
+
+export const getConsentList = async () => (await axios.get<{ id: string, name: string }[]>("/consent/list")).data;
 
 export const getConsentAttachment = async (consentId: string) => (await axios.get<Blob>(`/consent/${consentId}/attachment`, { responseType: "blob" })).data;

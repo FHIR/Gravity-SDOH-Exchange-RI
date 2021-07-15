@@ -26,10 +26,10 @@ import org.hl7.gravity.refimpl.sdohexchange.exception.HealthConcernCreateExcepti
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernPrepareBundleExtractor;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.HealthConcernPrepareBundleExtractor.HealthConcernPrepareInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.CurrentContextPrepareBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.CurrentContextPrepareBundleExtractor.CurrentContextPrepareInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.ConditionBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.HealthConcernPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.CurrentContextPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,16 +72,17 @@ public class HealthConcernService {
   public HealthConcernDto create(NewHealthConcernDto newHealthConcernDto, UserDto user) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    HealthConcernPrepareBundleFactory healthConcernPrepareBundleFactory = new HealthConcernPrepareBundleFactory(
+    CurrentContextPrepareBundleFactory healthConcernPrepareBundleFactory = new CurrentContextPrepareBundleFactory(
         smartOnFhirContext.getPatient(), user.getId());
     Bundle healthConcernRelatedResources = ehrClient.transaction()
         .withBundle(healthConcernPrepareBundleFactory.createPrepareBundle())
         .execute();
-    HealthConcernPrepareInfoHolder healthConcernPrepareInfoHolder = new HealthConcernPrepareBundleExtractor().extract(
+    CurrentContextPrepareInfoHolder healthConcernPrepareInfoHolder = new CurrentContextPrepareBundleExtractor().extract(
         healthConcernRelatedResources);
 
     ConditionBundleFactory bundleFactory = new ConditionBundleFactory();
     bundleFactory.setName(newHealthConcernDto.getName());
+    bundleFactory.setBasedOnText(newHealthConcernDto.getBasedOnText());
     String category = newHealthConcernDto.getCategory();
     bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
     bundleFactory.setConditionType(UsCoreConditionCategory.HEALTHCONCERN);
@@ -184,6 +185,8 @@ public class HealthConcernService {
             .code(status.toCode()))
         .where(Condition.CATEGORY.exactly()
             .systemAndCode(UsCoreConditionCategory.HEALTHCONCERN.getSystem(),
-                UsCoreConditionCategory.HEALTHCONCERN.toCode()));
+                UsCoreConditionCategory.HEALTHCONCERN.toCode()))
+        .sort()
+        .descending(Constants.PARAM_LASTUPDATED);
   }
 }

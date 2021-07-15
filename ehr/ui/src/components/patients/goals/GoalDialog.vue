@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, reactive, computed, toRefs } from "vue";
 import { TableData } from "@/components/patients/goals/Goals.vue";
-import { Coding, ServiceRequestCondition, UpdateGoalPayload } from "@/types";
+import { Coding, ServiceRequestCondition, UpdateGoalPayload,GoalAsCompletedPayload } from "@/types";
 import { RuleItem } from "async-validator";
 import { getCategories, getRequests, getServiceRequestConditions } from "@/api";
 import { GoalsModule } from "@/store/modules/goals";
@@ -26,6 +26,13 @@ const DEFAULT_REQUIRED_RULE = {
 	message: "This field is required"
 };
 
+const CONFIRM_MESSAGES = {
+	"edit": "",
+	"view": "",
+	"remove": "Please confirm that you want to remove this goal.",
+	"mark-as-completed": "Please enter goal completion date:"
+};
+
 export default defineComponent({
 	name: "GoalDialog",
 	components: {
@@ -37,7 +44,7 @@ export default defineComponent({
 			default: false
 		},
 		goal: {
-			type: Object as PropType<TableData>,
+			type: Object as PropType<TableData | undefined>,
 			default: undefined
 		},
 		openPhase: {
@@ -48,6 +55,9 @@ export default defineComponent({
 	emits: ["close"],
 	setup(props, { emit }) {
 		const { goal, openPhase } = toRefs(props);
+		const phase = ref<GoalAction>("edit");
+		const confirmMessage = computed<string>(() => CONFIRM_MESSAGES[phase.value]);
+		const showConfirm = computed<boolean>(() => phase.value === "mark-as-completed" || phase.value == "remove");
 		const categoryOptions = ref<Coding[]>([]);
 		const codeOptions = ref<Coding[]>([]);
 		const problemOptions = ref<ServiceRequestCondition[]>([]);
@@ -71,7 +81,7 @@ export default defineComponent({
 		const hasFormChanges = computed<boolean>(() =>
 			(
 				formModel.category !== goal.value?.category.code ||
-				formModel.code !== goal.value?.code.code ||
+				formModel.code !== goal.value?.snomedCode.code ||
 				formModel.name !== goal.value?.name ||
 				!_.isEqual(formModel.problems, goal.value?.problems)||
 				formModel.startDate !== goal.value?.startDate ||
@@ -79,23 +89,23 @@ export default defineComponent({
 				!!formModel.comment
 			)
 		);
-		const isFormDisabled = computed<boolean>(() => phase.value === "mark-as-completed");
+		const isFormDisabled = computed<boolean>(() => phase.value === "mark-as-completed" || phase.value === "remove");
 
 		const onDialogOpen = async () => {
 			Object.assign(formModel, {
-				category: goal.value.category.code,
-				code: goal.value.code.code,
-				name: goal.value.name,
-				problems: [ ...goal.value.problems ],
-				startDate: goal.value.startDate,
-				endDate: goal.value.endDate,
-				addedBy: goal.value.addedBy
+				category: goal.value?.category.code,
+				code: goal.value?.snomedCode.code,
+				name: goal.value?.name,
+				problems: [ ...goal.value!.problems ],
+				startDate: goal.value?.startDate,
+				endDate: goal.value?.endDate,
+				addedBy: goal.value?.addedBy
 			});
 			phase.value = openPhase.value;
 
 			if (phase.value !== "view") {
 				categoryOptions.value = await getCategories();
-				codeOptions.value = await getRequests(goal.value.category.code);
+				codeOptions.value = await getRequests(goal.value!.category.code);
 				problemOptions.value = await getServiceRequestConditions();
 			}
 		};
@@ -107,7 +117,7 @@ export default defineComponent({
 		const saveInProgress = ref<boolean>(false);
 		const saveGoal = async () => {
 			const payload: UpdateGoalPayload = {
-				id: goal.value.id,
+				id: goal.value!.id,
 				...formModel
 			};
 			saveInProgress.value = true;
@@ -123,32 +133,33 @@ export default defineComponent({
 			emit("close");
 		};
 
-		const phase = ref<GoalAction>("edit");
 		const onActionClick = async (action: string) => {
 			hasFormChanges.value && await formEl.value!.validate() && await saveGoal();
 
 			if (action === "mark-as-completed") {
 				phase.value = "mark-as-completed";
+			} else if (action === "remove") {
+				phase.value = "remove";
 			}
 		};
 
 		const completionDate = ref<string>("");
-		const markGoalAsCompleted = async () => {
-			const payload: UpdateGoalPayload = {
-				id: goal.value.id,
-				status: "completed",
-				endDate: moment(completionDate.value || new Date()).format("YYYY-MM-DD[T]HH:mm:ss")
-			};
+		const onCompletionConfirmClick = async () => {
 			saveInProgress.value = true;
 			try {
-				await GoalsModule.updateGoal(payload);
+				if (phase.value === "remove") {
+					await GoalsModule.removeGoal(goal.value!.id);
+				} else if (phase.value === "mark-as-completed") {
+					const payload: GoalAsCompletedPayload = {
+						id: goal.value!.id,
+						endDate: moment(completionDate.value || new Date()).format("YYYY-MM-DD")
+					};
+					await GoalsModule.markGoalAsCompleted(payload);
+				}
+				emit("close");
 			} finally {
 				saveInProgress.value = false;
 			}
-		};
-		const onCompletionConfirmClick = async () => {
-			await markGoalAsCompleted();
-			emit("close");
 		};
 
 		return {
@@ -167,7 +178,9 @@ export default defineComponent({
 			phase,
 			completionDate,
 			onCompletionConfirmClick,
-			isFormDisabled
+			isFormDisabled,
+			confirmMessage,
+			showConfirm
 		};
 	}
 });
@@ -305,11 +318,11 @@ export default defineComponent({
 				prop="addedBy"
 			>
 				<span v-if="phase === 'view'">
-					{{ formModel.addedBy }}
+					{{ formModel.addedBy.display }}
 				</span>
 				<el-input
 					v-else
-					v-model="formModel.addedBy"
+					v-model="formModel.addedBy.display"
 					placeholder="Add Author"
 				/>
 			</el-form-item>
@@ -333,7 +346,10 @@ export default defineComponent({
 			>
 				<el-divider />
 
-				<el-form-item label="Comment(s)">
+				<el-form-item
+					label="Comment(s)"
+					prop="comment"
+				>
 					<div
 						v-for="(item, index) in goal.comments"
 						:key="index"
@@ -345,10 +361,14 @@ export default defineComponent({
 			</div>
 		</el-form>
 		<template #footer>
-			<div v-if="phase === 'mark-as-completed'">
+			<div
+				v-if="showConfirm"
+				class="confirm-message"
+			>
 				<div class="completion-date">
-					<span>Please enter goal completion date:</span>
+					<span>{{ confirmMessage }}</span>
 					<el-date-picker
+						v-if="phase === 'mark-as-completed'"
 						v-model="completionDate"
 						placeholder="Select Date"
 						size="mini"
@@ -356,7 +376,10 @@ export default defineComponent({
 				</div>
 
 				<el-button
+					v-if="showConfirm"
+					plain
 					round
+					type="primary"
 					size="mini"
 					@click="phase = 'edit'"
 				>
@@ -368,6 +391,7 @@ export default defineComponent({
 					round
 					type="primary"
 					size="mini"
+					:loading="saveInProgress"
 					@click="onCompletionConfirmClick"
 				>
 					Confirm
@@ -384,8 +408,10 @@ export default defineComponent({
 				</el-button>
 
 				<DropButton
+					v-if="!showConfirm"
 					label="Save Changes"
-					:items="[{ id: 'mark-as-completed', label: 'Mark as Completed', iconSrc: require('@/assets/images/goal-mark-as-completed.svg') }]"
+					:items="[{ id: 'mark-as-completed', label: 'Mark as Completed', iconSrc: require('@/assets/images/goal-mark-as-completed.svg') },
+						{ id: 'remove', label: 'Remove', iconSrc: require('@/assets/images/goal-remove.svg') }]"
 					:disabled="!hasFormChanges"
 					@click="onSaveChangesClick"
 					@item-click="onActionClick"

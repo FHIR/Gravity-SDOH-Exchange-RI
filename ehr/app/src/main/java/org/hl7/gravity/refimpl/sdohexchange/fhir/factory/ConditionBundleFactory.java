@@ -18,8 +18,6 @@ import org.springframework.util.Assert;
 @Setter
 public class ConditionBundleFactory {
 
-  private static final String BASED_ON = "Conversation with Patient";
-
   private String name;
   private Coding category;
   private UsCoreConditionCategory conditionType;
@@ -27,6 +25,7 @@ public class ConditionBundleFactory {
   private Coding snomedCode;
   private Patient patient;
   private Practitioner practitioner;
+  private String basedOnText;
 
   public Bundle createBundle() {
     Assert.notNull(name, "Name cannot be null.");
@@ -36,6 +35,7 @@ public class ConditionBundleFactory {
     Assert.notNull(snomedCode, "SNOMED-CT code cannot be null.");
     Assert.notNull(patient, "Patient cannot be null.");
     Assert.notNull(practitioner, "Practitioner cannot be null.");
+    Assert.hasText(basedOnText, "BaseOn text cannot be null or empty.");
 
     Bundle bundle = new Bundle();
     bundle.setType(Bundle.BundleType.TRANSACTION);
@@ -78,7 +78,7 @@ public class ConditionBundleFactory {
         .getNameAsSingleString()));
     healthConcern.getEvidenceFirstRep()
         .getCodeFirstRep()
-        .setText(BASED_ON);
+        .setText(basedOnText);
     return healthConcern;
   }
 

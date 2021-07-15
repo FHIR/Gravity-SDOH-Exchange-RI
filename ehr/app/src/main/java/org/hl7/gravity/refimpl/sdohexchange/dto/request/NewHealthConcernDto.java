@@ -16,4 +16,6 @@ public class NewHealthConcernDto {
   private String icdCode;
   @NotBlank
   private String snomedCode;
+  @NotBlank
+  private String basedOnText;
 }

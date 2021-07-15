@@ -10,15 +10,18 @@ import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 
 /**
- * Create a transaction bundle to retrieve all necessary resources for Health Concern creation.
+ * Create a transaction bundle to retrieve the resources related to a current context - Patient and Practitioner.
  */
 @AllArgsConstructor
-public class HealthConcernPrepareBundleFactory extends PrepareBundleFactory {
+public class CurrentContextPrepareBundleFactory extends PrepareBundleFactory {
 
-  private final String patient;
-  private final String practitioner;
+  protected final String patient;
+  protected final String practitioner;
 
   public Bundle createPrepareBundle() {
+    Assert.notNull(patient, "Patient cannot be null.");
+    Assert.notNull(practitioner, "Practitioner cannot be null.");
+
     Bundle prepareBundle = new Bundle();
     prepareBundle.setType(BundleType.TRANSACTION);
 

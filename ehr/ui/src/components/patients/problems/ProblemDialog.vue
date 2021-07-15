@@ -48,18 +48,18 @@ export default defineComponent({
 		};
 
 		const handleActionClick = (action: ProblemActionType) => {
-			if(action === "mark-as-closed") {
+			if (action === "mark-as-closed") {
 				phase.value = action;
 			}
 
-			if(action === "add-goal") {
+			if (action === "add-goal") {
 				emit("trigger-add-goal", problem.value!.id);
 				emit("close");
 			}
 		};
 
 		const handleConfirm = () => {
-			if(phase.value === "mark-as-closed") {
+			if (phase.value === "mark-as-closed") {
 				markAsClosed();
 			}
 		};
@@ -125,8 +125,8 @@ export default defineComponent({
 				>
 				</span>
 			</el-form-item>
-			<el-form-item label="Creation Date">
-				{{ problem.assessmentDate ? $filters.formatDateTime(problem.assessmentDate) : $filters.formatDateTime(problem.startDate) }}
+			<el-form-item label="Start Date">
+				{{ problem.startDate ? $filters.formatDateTime(problem.startDate) : "N/A" }}
 			</el-form-item>
 			<el-form-item
 				v-if="status === 'closed'"

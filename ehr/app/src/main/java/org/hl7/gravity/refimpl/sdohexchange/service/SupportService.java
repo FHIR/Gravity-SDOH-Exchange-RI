@@ -4,8 +4,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
@@ -18,11 +16,16 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OrganizationToDtoConve
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalInfoDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OrganizationDto;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -31,9 +34,7 @@ public class SupportService {
   private final SmartOnFhirContext smartOnFhirContext;
   private final IGenericClient ehrClient;
 
-  public List<ConditionDto> listConditions() {
-    // TODO possibly support filtering only for problem-list-item, health-concern categories. Currently _filter is
-    //  not supported by Logica sandbox.
+  public List<ConditionDto> listProblems() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
     Bundle conditionsBundle = ehrClient.search()
         .forResource(Condition.class)
@@ -42,6 +43,11 @@ public class SupportService {
         .where(Condition.PATIENT.hasId(smartOnFhirContext.getPatient()))
         .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
             .value(SDOHProfiles.CONDITION))
+        .where(Condition.CLINICAL_STATUS.exactly()
+            .code(ConditionClinicalStatusCodes.ACTIVE.toCode()))
+        .where(Condition.CATEGORY.exactly()
+            .systemAndCode(UsCoreConditionCategory.PROBLEMLISTITEM.getSystem(),
+                UsCoreConditionCategory.PROBLEMLISTITEM.toCode()))
         .returnBundle(Bundle.class)
         .execute();
     return FhirUtil.getFromBundle(conditionsBundle, Condition.class)
@@ -59,6 +65,8 @@ public class SupportService {
         .where(Goal.PATIENT.hasId(smartOnFhirContext.getPatient()))
         .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
             .value(SDOHProfiles.GOAL))
+        .where(Goal.LIFECYCLE_STATUS.exactly()
+            .code(Goal.GoalLifecycleStatus.ACTIVE.toCode()))
         .returnBundle(Bundle.class)
         .execute();
     return FhirUtil.getFromBundle(goalsBundle, Goal.class)
