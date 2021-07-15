@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.HealthConcernBundleToDtoConverter;
@@ -37,6 +39,7 @@ import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -55,6 +58,8 @@ public class HealthConcernService {
         .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .returnBundle(Bundle.class)
         .execute();
+
+    responseBundle = addQuestionnairesToConditionBundle(responseBundle);
     return new HealthConcernBundleToDtoConverter().convert(responseBundle);
   }
 
@@ -66,6 +71,7 @@ public class HealthConcernService {
         .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .returnBundle(Bundle.class)
         .execute();
+    responseBundle = addQuestionnairesToConditionBundle(responseBundle);
     return new HealthConcernBundleToDtoConverter().convert(responseBundle);
   }
 
@@ -173,6 +179,25 @@ public class HealthConcernService {
     ehrClient.update()
         .resource(healthConcern)
         .execute();
+  }
+
+  //TODO refactor. This fragment is used across 3 services
+  private Bundle addQuestionnairesToConditionBundle(Bundle responseBundle) {
+    // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
+    List<String> urls = FhirUtil.getFromBundle(responseBundle, QuestionnaireResponse.class)
+        .stream()
+        .map(q -> q.getQuestionnaire())
+        .collect(Collectors.toList());
+
+    Bundle questionnaires = ehrClient.search()
+        .forResource(Questionnaire.class)
+        .where(Questionnaire.URL.matches()
+            .values(urls))
+        .returnBundle(Bundle.class)
+        .execute();
+
+    Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+    return merged;
   }
 
   private IQuery<IBaseBundle> searchHealthConcernQuery(ConditionClinicalStatus status) {

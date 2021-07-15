@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
@@ -37,6 +39,7 @@ import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -60,6 +63,7 @@ public class ProblemService {
     responseBundle = addTasksAndSRsToConditionBundle(responseBundle);
     responseBundle = addGoalsToConditionBundle(responseBundle);
 
+    responseBundle = addQuestionnairesToConditionBundle(responseBundle);
     return new ProblemBundleToDtoConverter().convert(responseBundle);
   }
 
@@ -72,6 +76,7 @@ public class ProblemService {
         .returnBundle(Bundle.class)
         .execute();
 
+    responseBundle = addQuestionnairesToConditionBundle(responseBundle);
     return new ProblemBundleToDtoConverter().convert(responseBundle);
   }
 
@@ -177,6 +182,25 @@ public class ProblemService {
               + "there is a small amount of goals in your FHIR store.");
     }
     Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, goals);
+    return merged;
+  }
+
+  //TODO refactor. This fragment is used across 3 services
+  private Bundle addQuestionnairesToConditionBundle(Bundle responseBundle) {
+    // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
+    List<String> urls = FhirUtil.getFromBundle(responseBundle, QuestionnaireResponse.class)
+        .stream()
+        .map(q -> q.getQuestionnaire())
+        .collect(Collectors.toList());
+
+    Bundle questionnaires = ehrClient.search()
+        .forResource(Questionnaire.class)
+        .where(Questionnaire.URL.matches()
+            .values(urls))
+        .returnBundle(Bundle.class)
+        .execute();
+
+    Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
     return merged;
   }
 
