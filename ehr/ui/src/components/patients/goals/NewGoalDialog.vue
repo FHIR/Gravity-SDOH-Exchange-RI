@@ -7,6 +7,7 @@ import moment from "moment";
 import { GoalsModule } from "@/store/modules/goals";
 import { ProblemsModule } from "@/store/modules/problems";
 import _ from "@/vendors/lodash";
+import { ACHIEVEMENT_STATUSES } from "@/components/patients/goals/Goals.vue";
 
 const DEFAULT_REQUIRED_RULE = {
 	required: true,
@@ -52,6 +53,7 @@ export default defineComponent({
 		const formEl = ref<HTMLFormElement>();
 		const formModel = reactive<FormModel>(DEFAULT_FORM_MODEL);
 		const categoryOptions = ref<Coding[]>([]);
+		const achievementStatus = ref<Coding[]>([]);
 		const codeOptions = ref<Coding[]>([]);
 		const problems = computed<Problem[]>(() => ProblemsModule.activeProblems);
 		const saveInProgress = ref<boolean>(false);
@@ -82,6 +84,7 @@ export default defineComponent({
 		const onDialogOpen = async () => {
 			formModel.startDate = new Date().toDateString();
 			categoryOptions.value = await getCategories();
+			achievementStatus.value = ACHIEVEMENT_STATUSES;
 			await ProblemsModule.getActiveProblems();
 
 			formModel.problemIds = props.newGoalsProblems;
@@ -96,7 +99,6 @@ export default defineComponent({
 				if (valid) {
 					saveInProgress.value = true;
 					const payload = _.omit(formModel, ["addedBy"]);
-					payload.achievementStatus = "ACHIEVED";
 
 					payload.startDate = moment(formModel.startDate).format("YYYY-MM-DDTHH:mm");
 
@@ -121,7 +123,8 @@ export default defineComponent({
 			categoryOptions,
 			onCategoryChange,
 			codeOptions,
-			problems
+			problems,
+			achievementStatus
 		};
 	}
 });
@@ -184,6 +187,22 @@ export default defineComponent({
 						v-for="item in codeOptions"
 						:key="item.code"
 						:label="`${item.display} (${item.code})`"
+						:value="item.code"
+					/>
+				</el-select>
+			</el-form-item>
+			<el-form-item
+				label="Achievement Status"
+				prop="achievementStatus"
+			>
+				<el-select
+					v-model="formModel.achievementStatus"
+					placeholder="Select Status"
+				>
+					<el-option
+						v-for="item in achievementStatus"
+						:key="item.code"
+						:label="item.display"
 						:value="item.code"
 					/>
 				</el-select>

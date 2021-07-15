@@ -142,6 +142,7 @@ export const updateGoal = async ({ id }: UpdateGoalPayload): Promise<Goal> => {
 		endDate: "2021-06-15T14:07:48",
 		targets: ["fisrt", "second"],
 		comments: [],
+		achievementStatus: "ACHIEVED",
 		category: {
 			code: "111",
 			display: "Food Insecurity"

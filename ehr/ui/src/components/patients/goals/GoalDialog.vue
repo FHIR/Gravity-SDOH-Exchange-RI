@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, reactive, computed, toRefs } from "vue";
-import { TableData } from "@/components/patients/goals/Goals.vue";
+import { TableData, ACHIEVEMENT_STATUSES } from "@/components/patients/goals/Goals.vue";
 import { Coding, ServiceRequestCondition, UpdateGoalPayload,GoalAsCompletedPayload } from "@/types";
 import { RuleItem } from "async-validator";
 import { getCategories, getRequests, getServiceRequestConditions } from "@/api";
@@ -18,7 +18,8 @@ export type FormModel = {
 	startDate: string,
 	endDate: string,
 	addedBy: string,
-	comment: string
+	comment: string,
+	achievementStatus: string
 };
 
 const DEFAULT_REQUIRED_RULE = {
@@ -61,6 +62,7 @@ export default defineComponent({
 		const categoryOptions = ref<Coding[]>([]);
 		const codeOptions = ref<Coding[]>([]);
 		const problemOptions = ref<ServiceRequestCondition[]>([]);
+		const achievementStatus = ref<Coding[]>([]);
 
 		const formModel = reactive<FormModel>({
 			category: "",
@@ -70,7 +72,8 @@ export default defineComponent({
 			startDate: "",
 			endDate: "",
 			addedBy: "",
-			comment: ""
+			comment: "",
+			achievementStatus: ""
 		});
 		const formEl = ref<HTMLFormElement>();
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
@@ -92,6 +95,7 @@ export default defineComponent({
 		const isFormDisabled = computed<boolean>(() => phase.value === "mark-as-completed" || phase.value === "remove");
 
 		const onDialogOpen = async () => {
+			const chosenAchievement: any = ACHIEVEMENT_STATUSES.find(item => item.code === goal.value?.achievementStatus);
 			Object.assign(formModel, {
 				category: goal.value?.category.code,
 				code: goal.value?.snomedCode.code,
@@ -99,7 +103,8 @@ export default defineComponent({
 				problems: [ ...goal.value!.problems ],
 				startDate: goal.value?.startDate,
 				endDate: goal.value?.endDate,
-				addedBy: goal.value?.addedBy
+				addedBy: goal.value?.addedBy,
+				achievementStatus: chosenAchievement.display
 			});
 			phase.value = openPhase.value;
 
@@ -107,6 +112,7 @@ export default defineComponent({
 				categoryOptions.value = await getCategories();
 				codeOptions.value = await getRequests(goal.value!.category.code);
 				problemOptions.value = await getServiceRequestConditions();
+				achievementStatus.value = ACHIEVEMENT_STATUSES;
 			}
 		};
 		const onDialogClose = () => {
@@ -180,7 +186,8 @@ export default defineComponent({
 			onCompletionConfirmClick,
 			isFormDisabled,
 			confirmMessage,
-			showConfirm
+			showConfirm,
+			achievementStatus
 		};
 	}
 });
@@ -263,6 +270,26 @@ export default defineComponent({
 					/>
 				</el-select>
 			</el-form-item>
+			<el-form-item
+				label="Achievement Status"
+				prop="achievementStatus"
+			>
+				<span v-if="phase === 'view'">
+					{{ formModel.achievementStatus }}
+				</span>
+				<el-select
+					v-else
+					v-model="formModel.achievementStatus"
+					placeholder="Select Status"
+				>
+					<el-option
+						v-for="item in achievementStatus"
+						:key="item.code"
+						:label="item.display"
+						:value="item.code"
+					/>
+				</el-select>
+			</el-form-item>
 
 			<el-form-item
 				label="Problem(s)"
@@ -273,7 +300,7 @@ export default defineComponent({
 						v-for="(item, index) in formModel.problems"
 						:key="index"
 					>
-						<span class="problem">{{ item }}</span>
+						<span class="problem">{{ item.display }}</span>
 					</div>
 				</div>
 				<el-select
