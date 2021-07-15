@@ -3,7 +3,6 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +21,10 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewGoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.HealthConcernCreateException;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.GoalPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.GoalBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.GoalPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.GoalQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -199,11 +198,7 @@ public class GoalService {
   }
 
   private IQuery<IBaseBundle> searchGoalQuery(Goal.GoalLifecycleStatus status) {
-    return ehrClient.search()
-        .forResource(Goal.class)
-        .where(Condition.PATIENT.hasId(smartOnFhirContext.getPatient()))
-        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
-            .value(SDOHProfiles.GOAL))
+    return new GoalQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .where(Goal.LIFECYCLE_STATUS.exactly()
             .code(status.toCode()))
         .sort()

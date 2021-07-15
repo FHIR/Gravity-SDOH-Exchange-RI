@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.ActiveResourcesDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalInfoDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OrganizationDto;
@@ -53,4 +54,12 @@ public class SupportController {
   public List<OrganizationDto> listOrganizations() {
     return supportService.listOrganizations();
   }
+
+  @GetMapping("activeResources")
+  @ApiOperation(value = "List the counts of all active resources.",
+      notes = "Returns the count of active Health Concerns, Problems, Goals and Action Steps.")
+  public ActiveResourcesDto activeResources() {
+    return supportService.getActiveResources();
+  }
+
 }

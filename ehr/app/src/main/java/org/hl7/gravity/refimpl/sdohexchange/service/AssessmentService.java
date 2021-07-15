@@ -1,9 +1,7 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.AssessmentBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.AssessmentDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.ProblemQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,7 +51,7 @@ public class AssessmentService {
         .execute();
 
     responseBundle = addQuestionnairesToAssessmentBundle(responseBundle);
-    
+
     return new AssessmentBundleToDtoConverter().convert(responseBundle)
         .stream()
         .findFirst()
@@ -81,11 +79,7 @@ public class AssessmentService {
   }
 
   private IQuery<IBaseBundle> searchAssessmentQuery() {
-    return ehrClient.search()
-        .forResource(QuestionnaireResponse.class)
-        .where(QuestionnaireResponse.PATIENT.hasId(smartOnFhirContext.getPatient()))
-        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
-            .value(SDOHProfiles.QUESTIONNAIRE_RESPONSE))
+    return new ProblemQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .revInclude(Observation.INCLUDE_DERIVED_FROM)
         .revInclude(Condition.INCLUDE_EVIDENCE_DETAIL.setRecurse(true));
   }

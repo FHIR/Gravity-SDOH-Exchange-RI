@@ -1,10 +1,8 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +21,6 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskCreateException;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskPrepareBundleExtractor;
@@ -34,6 +31,7 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskFailBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.TaskQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.service.CpService.CpClientException;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +92,8 @@ public class TaskService {
       log.warn("Task '{}' creation failed at CP. Failing a local Task and related ServiceRequest.", task.getIdElement()
           .getIdPart(), exc);
       ehrClient.transaction()
-          .withBundle(new TaskFailBundleFactory(task, createInfo.getServiceRequest(), exc.getMessage()).createFailBundle())
+          .withBundle(
+              new TaskFailBundleFactory(task, createInfo.getServiceRequest(), exc.getMessage()).createFailBundle())
           .execute();
     }
     return task.getIdElement()
@@ -111,13 +110,7 @@ public class TaskService {
   public List<TaskDto> listTasks() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    Bundle tasksBundle = ehrClient.search()
-        .forResource(Task.class)
-        .sort()
-        .descending(Constants.PARAM_LASTUPDATED)
-        .where(Task.PATIENT.hasId(smartOnFhirContext.getPatient()))
-        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
-            .value(SDOHProfiles.TASK))
+    Bundle tasksBundle = new TaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .include(Task.INCLUDE_FOCUS)
         .returnBundle(Bundle.class)
         .execute();
@@ -125,8 +118,8 @@ public class TaskService {
   }
 
   public void update(String id, UpdateTaskRequestDto update, UserDto user) {
-    Bundle taskBundle =
-        getTask(id, Task.INCLUDE_FOCUS, Task.INCLUDE_OWNER, Organization.INCLUDE_ENDPOINT.setRecurse(true));
+    Bundle taskBundle = getTask(id, Task.INCLUDE_FOCUS, Task.INCLUDE_OWNER,
+        Organization.INCLUDE_ENDPOINT.setRecurse(true));
     TaskUpdateInfoHolder updateInfo = new TaskUpdateBundleExtractor(id).extract(taskBundle);
     Task task = updateInfo.getTask();
     ServiceRequest serviceRequest = updateInfo.getServiceRequest();
@@ -158,8 +151,7 @@ public class TaskService {
             .codes(id));
     Arrays.stream(includes)
         .forEach(query::include);
-    return query
-        .returnBundle(Bundle.class)
+    return query.returnBundle(Bundle.class)
         .execute();
   }
 }
