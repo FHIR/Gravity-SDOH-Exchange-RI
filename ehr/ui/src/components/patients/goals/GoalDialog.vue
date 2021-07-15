@@ -95,7 +95,7 @@ export default defineComponent({
 		const isFormDisabled = computed<boolean>(() => phase.value === "mark-as-completed" || phase.value === "remove");
 
 		const onDialogOpen = async () => {
-			const chosenAchievement: any = ACHIEVEMENT_STATUSES.find(item => item.code === goal.value?.achievementStatus);
+			const chosenAchievement = ACHIEVEMENT_STATUSES.find(item => item.code === goal.value?.achievementStatus);
 			Object.assign(formModel, {
 				category: goal.value?.category.code,
 				code: goal.value?.snomedCode.code,
@@ -104,7 +104,7 @@ export default defineComponent({
 				startDate: goal.value?.startDate,
 				endDate: goal.value?.endDate,
 				addedBy: goal.value?.addedBy,
-				achievementStatus: chosenAchievement.display
+				achievementStatus: chosenAchievement?.display
 			});
 			phase.value = openPhase.value;
 
@@ -198,7 +198,6 @@ export default defineComponent({
 		:model-value="visible"
 		title="Goal Details"
 		:width="700"
-		append-to-body
 		destroy-on-close
 		custom-class="goal-dialog"
 		@close="onDialogClose"
