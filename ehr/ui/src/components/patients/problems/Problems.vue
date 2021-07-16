@@ -17,15 +17,22 @@ export type TableData = {
 	assessmentDate?: string,
 	startDate?: string,
 	resolutionDate?: string,
-	goals: number,
-	actionSteps: number,
+	goals: {
+		id: string,
+		name: string,
+		status: string,
+		errors: []
+	}[],
+	tasks: {
+		id: string,
+		name: string,
+		status: string,
+		errors: []
+	}[],
 	category: Coding,
 	icdCode: Coding,
 	snomedCode: Coding,
-	cannotBeClosed?: boolean
 };
-
-const ACTIVE_TASK_STATUSES = ["ACCEPTED", "DRAFT", "IN PROGRESS", "ON HOLD", "READY", "RECEIVED", "REQUESTED"];
 
 export default defineComponent({
 	name: "Problems",
@@ -46,12 +53,11 @@ export default defineComponent({
 				basedOn: problem.basedOn,
 				assessmentDate: problem.assessmentDate || "",
 				startDate: problem.startDate || "",
-				goals: problem.goals.length,
-				actionSteps: problem.tasks.length,
+				goals: problem.goals,
+				tasks: problem.tasks,
 				icdCode: problem.icdCode,
 				snomedCode: problem.snomedCode,
-				category: problem.category,
-				cannotBeClosed: problem.goals.some(item => item.status === "ACTIVE") || problem.tasks.some(item => ACTIVE_TASK_STATUSES.includes(item.status))
+				category: problem.category
 			}))
 		);
 		const closedProblemsTableData = computed<TableData[]>(() =>
@@ -62,8 +68,8 @@ export default defineComponent({
 				assessmentDate: problem.assessmentDate || "",
 				startDate: problem.startDate || "",
 				resolutionDate: problem.resolutionDate || "",
-				goals: problem.goals.length,
-				actionSteps: problem.tasks.length,
+				goals: problem.goals,
+				tasks: problem.tasks,
 				icdCode: problem.icdCode,
 				snomedCode: problem.snomedCode,
 				category: problem.category
