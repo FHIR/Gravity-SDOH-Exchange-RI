@@ -2,23 +2,31 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r5.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ConditionToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.GoalToInfoDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OrganizationToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.ActiveResourcesDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalInfoDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OrganizationDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.GoalQueryFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.HealthConcernQueryFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.ProblemQueryFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.TaskQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,5 +95,35 @@ public class SupportService {
         .stream()
         .map(org -> new OrganizationToDtoConverter().convert(org))
         .collect(Collectors.toList());
+  }
+
+  //TODO do this in parallel.
+  public ActiveResourcesDto getActiveResources() {
+    IQuery hcQuery = new HealthConcernQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+        .where(Condition.CLINICAL_STATUS.exactly()
+            .code(ConditionClinicalStatusCodes.ACTIVE.toCode()));
+
+    IQuery problemQuery = new ProblemQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+        .where(Condition.CLINICAL_STATUS.exactly()
+            .code(ConditionClinicalStatusCodes.ACTIVE.toCode()));
+
+    IQuery goalQuery = new GoalQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+        .where(Goal.LIFECYCLE_STATUS.exactly()
+            .code(Goal.GoalLifecycleStatus.ACTIVE.toCode()));
+
+    IQuery taskQuery = new TaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+        .where(Task.STATUS.exactly()
+            .codes(Task.TaskStatus.ACCEPTED.toCode(), Task.TaskStatus.DRAFT.toCode(),
+                Task.TaskStatus.INPROGRESS.toCode(), Task.TaskStatus.ONHOLD.toCode(), Task.TaskStatus.READY.toCode(),
+                Task.TaskStatus.RECEIVED.toCode(), Task.TaskStatus.REQUESTED.toCode()));
+
+    return new ActiveResourcesDto(getTotal(hcQuery), getTotal(problemQuery), getTotal(goalQuery), getTotal(taskQuery));
+  }
+
+  private int getTotal(IQuery<IBaseBundle> query) {
+    return query.count(0)
+        .returnBundle(Bundle.class)
+        .execute()
+        .getTotal();
   }
 }

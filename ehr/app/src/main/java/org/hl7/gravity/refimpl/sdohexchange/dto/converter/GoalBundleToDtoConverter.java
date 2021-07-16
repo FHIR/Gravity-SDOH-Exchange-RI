@@ -6,6 +6,8 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.GoalAchievement;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
@@ -13,11 +15,14 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskInfoDto;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class GoalBundleToDtoConverter implements Converter<Bundle, List<GoalDto>> {
@@ -28,7 +33,8 @@ public class GoalBundleToDtoConverter implements Converter<Bundle, List<GoalDto>
 
   @Override
   public List<GoalDto> convert(Bundle bundle) {
-    return FhirUtil.getFromBundle(bundle, Goal.class)
+
+    List<GoalDto> result = FhirUtil.getFromBundle(bundle, Goal.class)
         .stream()
         .map(goal -> {
           GoalDto goalDto = new GoalDto();
@@ -113,6 +119,32 @@ public class GoalBundleToDtoConverter implements Converter<Bundle, List<GoalDto>
           return goalDto;
         })
         .collect(Collectors.toList());
+
+    //TODO refactor. method too long.
+    //TODO refactor. Almost the same fragmen exists in a ProblemInfoBundleExtractor
+    Map<String, GoalDto> idToDtoMap = result.stream()
+        .collect(Collectors.toMap(g -> g.getId(), Function.identity()));
+
+    for (Task task : FhirUtil.getFromBundle(bundle, Task.class)) {
+      if (!task.hasFocus() || !(task.getFocus()
+          .getResource() instanceof ServiceRequest)) {
+        continue;
+      }
+      ServiceRequest sr = (ServiceRequest) task.getFocus()
+          .getResource();
+      sr.getSupportingInfo()
+          .stream()
+          .filter(ref -> Goal.class.getSimpleName()
+              .equals(ref.getReferenceElement()
+                  .getResourceType()) && idToDtoMap.containsKey(ref.getReferenceElement()
+              .getIdPart()))
+          .forEach(ref -> idToDtoMap.get(ref.getReferenceElement()
+              .getIdPart())
+              .getTasks()
+              .add(new TaskInfoDto(task.getIdElement()
+                  .getIdPart(), task.getDescription(), task.getStatus())));
+    }
+    return result;
   }
 
   //TODO copied from HealthConcernBundleToDtoConverter

@@ -3,7 +3,6 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,8 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
@@ -25,11 +26,11 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProblemDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.ProblemCreateException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.CurrentContextPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.CurrentContextPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.ProblemBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.ProblemQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -60,6 +62,7 @@ public class ProblemService {
     responseBundle = addTasksAndSRsToConditionBundle(responseBundle);
     responseBundle = addGoalsToConditionBundle(responseBundle);
 
+    responseBundle = addQuestionnairesToConditionBundle(responseBundle);
     return new ProblemBundleToDtoConverter().convert(responseBundle);
   }
 
@@ -72,6 +75,7 @@ public class ProblemService {
         .returnBundle(Bundle.class)
         .execute();
 
+    responseBundle = addQuestionnairesToConditionBundle(responseBundle);
     return new ProblemBundleToDtoConverter().convert(responseBundle);
   }
 
@@ -180,17 +184,29 @@ public class ProblemService {
     return merged;
   }
 
+  //TODO refactor. This fragment is used across 3 services
+  private Bundle addQuestionnairesToConditionBundle(Bundle responseBundle) {
+    // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
+    List<String> urls = FhirUtil.getFromBundle(responseBundle, QuestionnaireResponse.class)
+        .stream()
+        .map(q -> q.getQuestionnaire())
+        .collect(Collectors.toList());
+
+    Bundle questionnaires = ehrClient.search()
+        .forResource(Questionnaire.class)
+        .where(Questionnaire.URL.matches()
+            .values(urls))
+        .returnBundle(Bundle.class)
+        .execute();
+
+    Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+    return merged;
+  }
+
   private IQuery<IBaseBundle> searchProblemQuery(ConditionClinicalStatusCodes status) {
-    return ehrClient.search()
-        .forResource(Condition.class)
-        .where(Condition.PATIENT.hasId(smartOnFhirContext.getPatient()))
-        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
-            .value(SDOHProfiles.CONDITION))
+    return new ProblemQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .where(Condition.CLINICAL_STATUS.exactly()
             .code(status.toCode()))
-        .where(Condition.CATEGORY.exactly()
-            .systemAndCode(UsCoreConditionCategory.PROBLEMLISTITEM.getSystem(),
-                UsCoreConditionCategory.PROBLEMLISTITEM.toCode()))
         .sort()
         .descending(Constants.PARAM_LASTUPDATED);
   }

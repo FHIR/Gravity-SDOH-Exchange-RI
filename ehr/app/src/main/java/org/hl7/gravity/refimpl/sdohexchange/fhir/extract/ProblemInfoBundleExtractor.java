@@ -77,8 +77,8 @@ public class ProblemInfoBundleExtractor extends ConditionInfoBundleExtractor {
     private List<GoalInfoHolder> goals = new ArrayList<>();
 
     public ProblemInfoHolder(ConditionInfoHolder conditionInfoHolder) {
-      super(conditionInfoHolder.getCondition(), conditionInfoHolder.getQuestionnaireResponse(),
-          conditionInfoHolder.getObservations());
+      super(conditionInfoHolder.getCondition(), conditionInfoHolder.getQuestionnaire(),
+          conditionInfoHolder.getQuestionnaireResponse(), conditionInfoHolder.getObservations());
     }
   }
 

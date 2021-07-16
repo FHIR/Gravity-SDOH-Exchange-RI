@@ -3,7 +3,6 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,8 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.HealthConcernBundleToDtoConverter;
@@ -24,12 +25,12 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.HealthConcernDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.HealthConcernCreateException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.CurrentContextPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.CurrentContextPrepareBundleExtractor.CurrentContextPrepareInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.ConditionBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.CurrentContextPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.HealthConcernQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -55,6 +57,8 @@ public class HealthConcernService {
         .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .returnBundle(Bundle.class)
         .execute();
+
+    responseBundle = addQuestionnairesToConditionBundle(responseBundle);
     return new HealthConcernBundleToDtoConverter().convert(responseBundle);
   }
 
@@ -66,6 +70,7 @@ public class HealthConcernService {
         .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .returnBundle(Bundle.class)
         .execute();
+    responseBundle = addQuestionnairesToConditionBundle(responseBundle);
     return new HealthConcernBundleToDtoConverter().convert(responseBundle);
   }
 
@@ -175,17 +180,29 @@ public class HealthConcernService {
         .execute();
   }
 
+  //TODO refactor. This fragment is used across 3 services
+  private Bundle addQuestionnairesToConditionBundle(Bundle responseBundle) {
+    // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
+    List<String> urls = FhirUtil.getFromBundle(responseBundle, QuestionnaireResponse.class)
+        .stream()
+        .map(q -> q.getQuestionnaire())
+        .collect(Collectors.toList());
+
+    Bundle questionnaires = ehrClient.search()
+        .forResource(Questionnaire.class)
+        .where(Questionnaire.URL.matches()
+            .values(urls))
+        .returnBundle(Bundle.class)
+        .execute();
+
+    Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+    return merged;
+  }
+
   private IQuery<IBaseBundle> searchHealthConcernQuery(ConditionClinicalStatus status) {
-    return ehrClient.search()
-        .forResource(Condition.class)
-        .where(Condition.PATIENT.hasId(smartOnFhirContext.getPatient()))
-        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
-            .value(SDOHProfiles.CONDITION))
+    return new HealthConcernQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .where(Condition.CLINICAL_STATUS.exactly()
             .code(status.toCode()))
-        .where(Condition.CATEGORY.exactly()
-            .systemAndCode(UsCoreConditionCategory.HEALTHCONCERN.getSystem(),
-                UsCoreConditionCategory.HEALTHCONCERN.toCode()))
         .sort()
         .descending(Constants.PARAM_LASTUPDATED);
   }

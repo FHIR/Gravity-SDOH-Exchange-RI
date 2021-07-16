@@ -1,22 +1,31 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Condition.ConditionEvidenceComponent;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.AseessmentInfoBundleExtractor.AssessmentInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AseessmentInfoBundleExtractor extends BundleExtractor<List<AssessmentInfoHolder>> {
 
   @Override
   public List<AssessmentInfoHolder> extract(Bundle bundle) {
+    Map<String, Questionnaire> questionnaires = new HashMap<>();
+    FhirUtil.getFromBundle(bundle, Questionnaire.class)
+        .stream()
+        .forEach(q -> questionnaires.put(q.getUrl(), q));
+
     return FhirUtil.getFromBundle(bundle, QuestionnaireResponse.class)
         .stream()
         .map(questionnaireResponse -> {
@@ -29,7 +38,8 @@ public class AseessmentInfoBundleExtractor extends BundleExtractor<List<Assessme
               .stream()
               .filter(condition -> containsObservationReference(condition, observations))
               .collect(Collectors.toList());
-          return new AssessmentInfoHolder(questionnaireResponse, observations, conditions);
+          Questionnaire questionnaire = questionnaires.get(questionnaireResponse.getQuestionnaire());
+          return new AssessmentInfoHolder(questionnaireResponse, questionnaire, observations, conditions);
         })
         .collect(Collectors.toList());
   }
@@ -64,6 +74,7 @@ public class AseessmentInfoBundleExtractor extends BundleExtractor<List<Assessme
   public static class AssessmentInfoHolder implements Comparable<AssessmentInfoHolder> {
 
     private final QuestionnaireResponse questionnaireResponse;
+    private final Questionnaire questionnaire;
     private final List<Observation> observations;
     private final List<Condition> conditions;
 

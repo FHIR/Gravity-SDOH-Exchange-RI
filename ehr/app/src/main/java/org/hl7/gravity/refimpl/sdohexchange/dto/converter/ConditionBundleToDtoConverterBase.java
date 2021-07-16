@@ -1,11 +1,11 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
@@ -22,8 +22,6 @@ import org.springframework.core.convert.converter.Converter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static org.hl7.gravity.refimpl.sdohexchange.dto.converter.AssessmentInfoToDtoConverter.QUESTIONNAIRE_NAME_EXTENSION;
 
 //TODO refactor this class. It is very poorly designed.
 public abstract class ConditionBundleToDtoConverterBase<T extends ConditionDtoBase>
@@ -81,18 +79,16 @@ public abstract class ConditionBundleToDtoConverterBase<T extends ConditionDtoBa
     QuestionnaireResponse questionnaireResponse = conditionInfo.getQuestionnaireResponse();
     if (questionnaireResponse != null) {
       conditionDto.setAssessmentDate(FhirUtil.toLocalDateTime(questionnaireResponse.getAuthoredElement()));
-      CanonicalType questionnaireElement = questionnaireResponse.getQuestionnaireElement();
-      Optional<String> questionnaireName = Optional.ofNullable(
-          questionnaireElement.getExtensionString(QUESTIONNAIRE_NAME_EXTENSION));
-      if (questionnaireName.isPresent()) {
+      Questionnaire questionnaire = conditionInfo.getQuestionnaire();
+      if (questionnaire != null) {
         conditionDto.setBasedOn(new ReferenceDto(questionnaireResponse.getIdElement()
-            .getIdPart(), questionnaireName.get()));
+            .getIdPart(), questionnaire.getTitle()));
       } else {
-        // If extension is not set - use ID instead.
         conditionDto.setBasedOn(new ReferenceDto(questionnaireResponse.getIdElement()
-            .getIdPart(), questionnaireElement.getValueAsString()));
+            .getIdPart(), questionnaireResponse.getQuestionnaire()));
         conditionDto.getErrors()
-            .add("Based on QuestionnaireResponse doesn't have questionnaire name extension. Using ID instead.");
+            .add("Based on QuestionnaireResponse doesn't have a matching Questionnaire to get a title from. Using URL "
+                + "instead.");
       }
     } else {
       conditionDto.setBasedOn(new StringTypeDto(condition.getEvidenceFirstRep()
