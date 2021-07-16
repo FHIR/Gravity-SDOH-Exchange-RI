@@ -24,7 +24,7 @@ class Resources extends VuexModule implements IResources {
 	@Action
 	async loadActiveResources() {
 		const data = await getActiveResources();
-		await this.setActiveResources(data);
+		this.setActiveResources(data);
 	}
 }
 
