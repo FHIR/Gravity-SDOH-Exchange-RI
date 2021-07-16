@@ -198,6 +198,7 @@ export default defineComponent({
 				<el-select
 					v-model="formModel.achievementStatus"
 					placeholder="Select Status"
+					class="achievement-status"
 				>
 					<el-option
 						v-for="item in achievementStatus"
@@ -283,7 +284,7 @@ export default defineComponent({
 @import "~@/assets/scss/abstracts/mixins";
 
 .new-goal-form {
-	.el-select {
+	.el-select:not(.achievement-status) {
 		width: 100%;
 	}
 }
