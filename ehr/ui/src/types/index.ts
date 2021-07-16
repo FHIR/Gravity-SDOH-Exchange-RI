@@ -266,3 +266,10 @@ export type Consent = {
 	organization: string,
 	consentDate: string
 };
+
+export type ActiveResources = {
+	activeConcernsCount: number,
+	activeGoalsCount: number,
+	activeInterventionsCount: number,
+	activeProblemsCount: number
+}

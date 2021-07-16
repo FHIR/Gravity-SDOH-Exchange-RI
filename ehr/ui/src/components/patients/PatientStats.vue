@@ -1,24 +1,19 @@
 <script lang="ts">
-import { computed, defineComponent } from "vue";
-import { ConcernsModule } from "@/store/modules/concerns";
-import { ProblemsModule } from "@/store/modules/problems";
-import { GoalsModule } from "@/store/modules/goals";
-import { TasksModule } from "@/store/modules/tasks";
+import { computed, defineComponent, onMounted } from "vue";
+import { ActiveResourcesModule } from "@/store/modules/activeResources";
+import { ActiveResources } from "@/types";
 
 export default defineComponent({
 	name: "PatientStats",
 	setup() {
-		const activeConcerns = computed<number>(() => ConcernsModule.activeConcerns.length);
-		const activeProblems = computed<number>(() => ProblemsModule.activeProblems.length);
-		const activeGoals = computed<number>(() => GoalsModule.activeGoals.length);
-		const activeActionSteps = computed<number>(() => TasksModule.tasks.filter(t => t.status !== "Completed").length);
+		const activeResources = computed<ActiveResources>(() => ActiveResourcesModule.activeResources);
 
+		onMounted(async () => {
+			await ActiveResourcesModule.loadActiveResources();
+		});
 
 		return {
-			activeConcerns,
-			activeProblems,
-			activeGoals,
-			activeActionSteps
+			activeResources
 		};
 	}
 });
@@ -29,7 +24,7 @@ export default defineComponent({
 		<div class="info-block">
 			<div class="info-item">
 				<div class="value">
-					{{ activeConcerns }}
+					{{ activeResources.activeConcernsCount }}
 				</div>
 				<div class="label">
 					Health Concerns
@@ -37,7 +32,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					{{ activeProblems }}
+					{{ activeResources.activeProblemsCount }}
 				</div>
 				<div class="label">
 					Active Problems
@@ -45,7 +40,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					{{ activeGoals }}
+					{{ activeResources.activeGoalsCount }}
 				</div>
 				<div class="label">
 					Active Goals
@@ -53,7 +48,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					{{ activeActionSteps }}
+					{{ activeResources.activeInterventionsCount }}
 				</div>
 				<div class="label">
 					Active Action Steps
