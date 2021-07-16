@@ -50,7 +50,6 @@ export default defineComponent({
 		const formEl = ref<HTMLFormElement>();
 		const formModel = reactive<FormModel>(DEFAULT_FORM_MODEL);
 		const categoryOptions = ref<Coding[]>([]);
-		const achievementStatus = ref<Coding[]>([]);
 		const codeOptions = ref<Coding[]>([]);
 		const problems = computed<Problem[]>(() => ProblemsModule.activeProblems);
 		const saveInProgress = ref<boolean>(false);
@@ -81,7 +80,6 @@ export default defineComponent({
 		const onDialogOpen = async () => {
 			formModel.startDate = new Date().toDateString();
 			categoryOptions.value = await getCategories();
-			achievementStatus.value = ACHIEVEMENT_STATUSES;
 			await ProblemsModule.getActiveProblems();
 
 			formModel.problemIds = props.newGoalsProblems;
@@ -121,7 +119,7 @@ export default defineComponent({
 			onCategoryChange,
 			codeOptions,
 			problems,
-			achievementStatus
+			ACHIEVEMENT_STATUSES
 		};
 	}
 });
@@ -198,7 +196,7 @@ export default defineComponent({
 					class="achievement-status"
 				>
 					<el-option
-						v-for="item in achievementStatus"
+						v-for="item in ACHIEVEMENT_STATUSES"
 						:key="item.code"
 						:label="item.display"
 						:value="item.code"

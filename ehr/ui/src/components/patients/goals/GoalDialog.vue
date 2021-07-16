@@ -62,7 +62,6 @@ export default defineComponent({
 		const categoryOptions = ref<Coding[]>([]);
 		const codeOptions = ref<Coding[]>([]);
 		const problemOptions = ref<ServiceRequestCondition[]>([]);
-		const achievementStatus = ref<Coding[]>([]);
 
 		const formModel = reactive<FormModel>({
 			category: "",
@@ -112,7 +111,6 @@ export default defineComponent({
 				categoryOptions.value = await getCategories();
 				codeOptions.value = await getRequests(goal.value!.category.code);
 				problemOptions.value = await getServiceRequestConditions();
-				achievementStatus.value = ACHIEVEMENT_STATUSES;
 			}
 		};
 		const onDialogClose = () => {
@@ -187,7 +185,7 @@ export default defineComponent({
 			isFormDisabled,
 			confirmMessage,
 			showConfirm,
-			achievementStatus
+			ACHIEVEMENT_STATUSES
 		};
 	}
 });
@@ -283,7 +281,7 @@ export default defineComponent({
 					class="achievement-status"
 				>
 					<el-option
-						v-for="item in achievementStatus"
+						v-for="item in ACHIEVEMENT_STATUSES"
 						:key="item.code"
 						:label="item.display"
 						:value="item.code"
