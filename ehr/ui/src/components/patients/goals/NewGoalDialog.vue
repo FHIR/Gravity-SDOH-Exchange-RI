@@ -6,7 +6,6 @@ import { getCategories, getGoalCodes } from "@/api";
 import moment from "moment";
 import { GoalsModule } from "@/store/modules/goals";
 import { ProblemsModule } from "@/store/modules/problems";
-import _ from "@/vendors/lodash";
 import { ACHIEVEMENT_STATUSES } from "@/components/patients/goals/Goals.vue";
 
 const DEFAULT_REQUIRED_RULE = {
@@ -21,7 +20,6 @@ export type FormModel = {
 	snomedCode: string,
 	problemIds: string[],
 	startDate: string,
-	addedBy: string,
 	comment: string
 };
 
@@ -32,7 +30,6 @@ const DEFAULT_FORM_MODEL = {
 	snomedCode: "",
 	problemIds: [],
 	startDate: "",
-	addedBy: "",
 	comment: ""
 };
 
@@ -98,7 +95,7 @@ export default defineComponent({
 			formEl.value?.validate(async (valid: boolean) => {
 				if (valid) {
 					saveInProgress.value = true;
-					const payload = _.omit(formModel, ["addedBy"]);
+					const payload = { ...formModel };
 
 					payload.startDate = moment(formModel.startDate).format("YYYY-MM-DDTHH:mm");
 
@@ -233,16 +230,6 @@ export default defineComponent({
 				<el-date-picker
 					v-model="formModel.startDate"
 					type="date"
-				/>
-			</el-form-item>
-
-			<el-form-item
-				label="Added by"
-				prop="addedBy"
-			>
-				<el-input
-					v-model="formModel.addedBy"
-					placeholder="Enter Added by name"
 				/>
 			</el-form-item>
 
