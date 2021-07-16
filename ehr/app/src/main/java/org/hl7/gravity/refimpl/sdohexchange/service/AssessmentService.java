@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.AssessmentBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.AssessmentDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.query.ProblemQueryFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.AssessmentQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,7 +79,7 @@ public class AssessmentService {
   }
 
   private IQuery<IBaseBundle> searchAssessmentQuery() {
-    return new ProblemQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    return new AssessmentQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .revInclude(Observation.INCLUDE_DERIVED_FROM)
         .revInclude(Condition.INCLUDE_EVIDENCE_DETAIL.setRecurse(true));
   }
