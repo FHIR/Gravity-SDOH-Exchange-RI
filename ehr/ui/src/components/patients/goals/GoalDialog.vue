@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, reactive, computed, toRefs } from "vue";
-import { TableData } from "@/components/patients/goals/Goals.vue";
+import { TableData, ACHIEVEMENT_STATUSES } from "@/components/patients/goals/Goals.vue";
 import { Coding, ServiceRequestCondition, UpdateGoalPayload,GoalAsCompletedPayload } from "@/types";
 import { RuleItem } from "async-validator";
 import { getCategories, getRequests, getServiceRequestConditions } from "@/api";
@@ -9,6 +9,7 @@ import _ from "@/vendors/lodash";
 import moment from "moment";
 import { GoalAction } from "@/components/patients/goals/GoalsTable.vue";
 import DropButton from "@/components/DropButton.vue";
+import { showDefaultNotification } from "@/utils/utils";
 
 export type FormModel = {
 	category: string,
@@ -18,7 +19,8 @@ export type FormModel = {
 	startDate: string,
 	endDate: string,
 	addedBy: string,
-	comment: string
+	comment: string,
+	achievementStatus: string
 };
 
 const DEFAULT_REQUIRED_RULE = {
@@ -70,7 +72,8 @@ export default defineComponent({
 			startDate: "",
 			endDate: "",
 			addedBy: "",
-			comment: ""
+			comment: "",
+			achievementStatus: ""
 		});
 		const formEl = ref<HTMLFormElement>();
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
@@ -92,6 +95,7 @@ export default defineComponent({
 		const isFormDisabled = computed<boolean>(() => phase.value === "mark-as-completed" || phase.value === "remove");
 
 		const onDialogOpen = async () => {
+			const chosenAchievement = ACHIEVEMENT_STATUSES.find(item => item.code === goal.value?.achievementStatus);
 			Object.assign(formModel, {
 				category: goal.value?.category.code,
 				code: goal.value?.snomedCode.code,
@@ -99,7 +103,8 @@ export default defineComponent({
 				problems: [ ...goal.value!.problems ],
 				startDate: goal.value?.startDate,
 				endDate: goal.value?.endDate,
-				addedBy: goal.value?.addedBy
+				addedBy: goal.value?.addedBy,
+				achievementStatus: chosenAchievement?.display
 			});
 			phase.value = openPhase.value;
 
@@ -123,6 +128,7 @@ export default defineComponent({
 			saveInProgress.value = true;
 			try {
 				await GoalsModule.updateGoal(payload);
+				showDefaultNotification("Goal was updated.");
 			} finally {
 				saveInProgress.value = false;
 			}
@@ -149,12 +155,14 @@ export default defineComponent({
 			try {
 				if (phase.value === "remove") {
 					await GoalsModule.removeGoal(goal.value!.id);
+					showDefaultNotification("Goal was Removed.");
 				} else if (phase.value === "mark-as-completed") {
 					const payload: GoalAsCompletedPayload = {
 						id: goal.value!.id,
 						endDate: moment(completionDate.value || new Date()).format("YYYY-MM-DD")
 					};
 					await GoalsModule.markGoalAsCompleted(payload);
+					showDefaultNotification("Goal was Marked as Completed.");
 				}
 				emit("close");
 			} finally {
@@ -180,7 +188,8 @@ export default defineComponent({
 			onCompletionConfirmClick,
 			isFormDisabled,
 			confirmMessage,
-			showConfirm
+			showConfirm,
+			ACHIEVEMENT_STATUSES
 		};
 	}
 });
@@ -191,7 +200,6 @@ export default defineComponent({
 		:model-value="visible"
 		title="Goal Details"
 		:width="700"
-		append-to-body
 		destroy-on-close
 		custom-class="goal-dialog"
 		@close="onDialogClose"
@@ -263,6 +271,27 @@ export default defineComponent({
 					/>
 				</el-select>
 			</el-form-item>
+			<el-form-item
+				label="Achievement Status"
+				prop="achievementStatus"
+			>
+				<span v-if="phase === 'view'">
+					{{ formModel.achievementStatus }}
+				</span>
+				<el-select
+					v-else
+					v-model="formModel.achievementStatus"
+					placeholder="Select Status"
+					class="achievement-status"
+				>
+					<el-option
+						v-for="item in ACHIEVEMENT_STATUSES"
+						:key="item.code"
+						:label="item.display"
+						:value="item.code"
+					/>
+				</el-select>
+			</el-form-item>
 
 			<el-form-item
 				label="Problem(s)"
@@ -273,7 +302,7 @@ export default defineComponent({
 						v-for="(item, index) in formModel.problems"
 						:key="index"
 					>
-						<span class="problem">{{ item }}</span>
+						<span class="problem">{{ item.display }}</span>
 					</div>
 				</div>
 				<el-select
@@ -438,7 +467,7 @@ export default defineComponent({
 @import "~@/assets/scss/abstracts/mixins";
 
 .goal-form {
-	.el-select {
+	.el-select:not(.achievement-status) {
 		width: 100%;
 	}
 

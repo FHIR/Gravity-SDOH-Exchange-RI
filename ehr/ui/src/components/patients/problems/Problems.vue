@@ -17,11 +17,21 @@ export type TableData = {
 	assessmentDate?: string,
 	startDate?: string,
 	resolutionDate?: string,
-	goals: number,
-	actionSteps: number,
+	goals: {
+		id: string,
+		name: string,
+		status: string,
+		errors: []
+	}[],
+	tasks: {
+		id: string,
+		name: string,
+		status: string,
+		errors: []
+	}[],
 	category: Coding,
 	icdCode: Coding,
-	snomedCode: Coding
+	snomedCode: Coding,
 };
 
 export default defineComponent({
@@ -32,7 +42,7 @@ export default defineComponent({
 		NewProblemDialog,
 		ProblemsTable
 	},
-	emits: ["trigger-open-assessment", "trigger-add-goal"],
+	emits: ["trigger-open-assessment", "trigger-add-goal", "trigger-add-action-step"],
 	setup() {
 		const activeProblems = computed<Problem[]>(() => ProblemsModule.activeProblems);
 		const closedProblems = computed<Problem[]>(() => ProblemsModule.closedProblems);
@@ -43,8 +53,8 @@ export default defineComponent({
 				basedOn: problem.basedOn,
 				assessmentDate: problem.assessmentDate || "",
 				startDate: problem.startDate || "",
-				goals: 0,
-				actionSteps: 0,
+				goals: problem.goals,
+				tasks: problem.tasks,
 				icdCode: problem.icdCode,
 				snomedCode: problem.snomedCode,
 				category: problem.category
@@ -58,8 +68,8 @@ export default defineComponent({
 				assessmentDate: problem.assessmentDate || "",
 				startDate: problem.startDate || "",
 				resolutionDate: problem.resolutionDate || "",
-				goals: 0,
-				actionSteps: 0,
+				goals: problem.goals,
+				tasks: problem.tasks,
 				icdCode: problem.icdCode,
 				snomedCode: problem.snomedCode,
 				category: problem.category
@@ -104,6 +114,7 @@ export default defineComponent({
 			@add-problem="newProblemsDialogVisible = true"
 			@trigger-add-goal="$emit('trigger-add-goal', $event)"
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
+			@trigger-add-action-step="$emit('trigger-add-action-step', $event)"
 		/>
 		<NoActiveItems
 			v-else-if="!activeProblemsTableData.length && closedProblemsTableData.length"
@@ -120,7 +131,7 @@ export default defineComponent({
 		/>
 		<NoItems
 			v-if="!isLoading && !activeProblemsTableData.length && !closedProblemsTableData.length"
-			massage="No Problems Yet"
+			message="No Problems Yet"
 			button-label="Add Problem"
 			@add-item="newProblemsDialogVisible = true"
 		/>

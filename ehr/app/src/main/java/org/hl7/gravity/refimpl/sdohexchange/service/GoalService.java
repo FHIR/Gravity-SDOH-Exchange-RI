@@ -3,7 +3,6 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.GoalBundleToDtoConverter;
@@ -21,10 +21,10 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewGoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.HealthConcernCreateException;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.GoalPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.GoalBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.GoalPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.GoalQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,9 +50,10 @@ public class GoalService {
     Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.ACTIVE).returnBundle(Bundle.class)
         .execute();
 
-    Bundle merged = addConditionsToGoalBundle(responseBundle);
+    responseBundle = addConditionsToGoalBundle(responseBundle);
+    responseBundle = addTasksAndSRsToGoalBundle(responseBundle);
 
-    return new GoalBundleToDtoConverter().convert(merged);
+    return new GoalBundleToDtoConverter().convert(responseBundle);
   }
 
   public List<GoalDto> listCompleted() {
@@ -61,9 +62,10 @@ public class GoalService {
     Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.COMPLETED).returnBundle(Bundle.class)
         .execute();
 
-    Bundle merged = addConditionsToGoalBundle(responseBundle);
+    responseBundle = addConditionsToGoalBundle(responseBundle);
+    responseBundle = addTasksAndSRsToGoalBundle(responseBundle);
 
-    return new GoalBundleToDtoConverter().convert(merged);
+    return new GoalBundleToDtoConverter().convert(responseBundle);
   }
 
   public GoalDto create(NewGoalDto newGoalDto, UserDto user) {
@@ -149,6 +151,27 @@ public class GoalService {
         .execute();
   }
 
+  //TODO refactor. this fragmet ins used in a ProblemService as well.
+  private Bundle addTasksAndSRsToGoalBundle(Bundle responseBundle) {
+    Bundle tasksWithServiceRequests = ehrClient.search()
+        .forResource(Task.class)
+        .include(Task.INCLUDE_FOCUS)
+        //Handle as much tasks as possible without pagination..
+        //TODO use pagination
+        .count(1000)
+        .returnBundle(Bundle.class)
+        .execute();
+
+    if (tasksWithServiceRequests.getLink(IBaseBundle.LINK_NEXT) != null) {
+      throw new RuntimeException(
+          "Multi-page Task results returned for the List Problems operation. Pagination not supported yet. Make sure "
+              + "there is a small amount of tasks in your FHIR store.");
+    }
+
+    Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, tasksWithServiceRequests);
+    return merged;
+  }
+
   private Bundle addConditionsToGoalBundle(Bundle responseBundle) {
     // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
     List<String> ids = FhirUtil.getFromBundle(responseBundle, Goal.class)
@@ -175,11 +198,7 @@ public class GoalService {
   }
 
   private IQuery<IBaseBundle> searchGoalQuery(Goal.GoalLifecycleStatus status) {
-    return ehrClient.search()
-        .forResource(Goal.class)
-        .where(Condition.PATIENT.hasId(smartOnFhirContext.getPatient()))
-        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
-            .value(SDOHProfiles.GOAL))
+    return new GoalQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .where(Goal.LIFECYCLE_STATUS.exactly()
             .code(status.toCode()))
         .sort()

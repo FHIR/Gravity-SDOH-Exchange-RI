@@ -18,7 +18,8 @@ import {
 	UpdateGoalPayload,
 	NewGoalPayload,
 	GoalCoding,
-	GoalAsCompletedPayload
+	GoalAsCompletedPayload,
+	ActiveResources
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -142,6 +143,7 @@ export const updateGoal = async ({ id }: UpdateGoalPayload): Promise<Goal> => {
 		endDate: "2021-06-15T14:07:48",
 		targets: ["fisrt", "second"],
 		comments: [],
+		achievementStatus: "ACHIEVED",
 		category: {
 			code: "111",
 			display: "Food Insecurity"
@@ -203,3 +205,8 @@ export const createConsent = async (name: string, attachment: File) => {
 export const getConsentList = async () => (await axios.get<{ id: string, name: string }[]>("/consent/list")).data;
 
 export const getConsentAttachment = async (consentId: string) => (await axios.get<Blob>(`/consent/${consentId}/attachment`, { responseType: "blob" })).data;
+
+export const getActiveResources = async (): Promise<ActiveResources> => {
+	const res = await axios.get("/support/activeResources");
+	return res.data;
+};

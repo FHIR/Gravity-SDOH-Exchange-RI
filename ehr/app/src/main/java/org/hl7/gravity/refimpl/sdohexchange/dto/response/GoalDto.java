@@ -26,6 +26,7 @@ public class GoalDto implements Validated {
   private LocalDate endDate;
   private TypeDto addedBy;
   private List<ConditionDto> problems = new ArrayList<>();
+  private List<TaskInfoDto> tasks = new ArrayList<>();
   private List<CommentDto> comments = new ArrayList<>();
 
   @Setter(AccessLevel.NONE)

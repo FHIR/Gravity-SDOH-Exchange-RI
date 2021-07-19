@@ -205,7 +205,19 @@ export type Problem = {
 	resolutionDate?: string,
 	errors: string[],
 	icdCode: Coding,
-	snomedCode: Coding
+	snomedCode: Coding,
+	goals: {
+		id: string,
+		name: string,
+		status: string,
+		errors: []
+	}[],
+	tasks: {
+		id: string,
+		name: string,
+		status: string,
+		errors: []
+	}[]
 };
 
 export type newProblemPayload = {
@@ -228,7 +240,8 @@ export type Goal = {
 	comments: Comment[],
 	category: Coding,
 	snomedCode: Coding,
-	status: GoalStatus
+	status: GoalStatus,
+	achievementStatus: string
 };
 
 export type NewGoalPayload = {
@@ -266,3 +279,10 @@ export type Consent = {
 	organization: string,
 	consentDate: string
 };
+
+export type ActiveResources = {
+	activeConcernsCount: number,
+	activeGoalsCount: number,
+	activeInterventionsCount: number,
+	activeProblemsCount: number
+}

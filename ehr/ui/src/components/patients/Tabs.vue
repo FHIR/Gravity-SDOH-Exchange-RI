@@ -19,7 +19,7 @@ export default defineComponent({
 		Consents
 	},
 	setup() {
-		const activeTab = ref<string>("actionSteps");
+		const activeTab = ref<string>("healthConcerns");
 		const addGoalPhase = ref<boolean>(false);
 		const newGoalProblems = ref<string[]>([]);
 		const assessmentToOpenId = ref<string>("");
@@ -47,12 +47,30 @@ export default defineComponent({
 			activeTab.value = "healthConcerns";
 		};
 
+		const addActionPhase = ref<boolean>(false);
+		const newActionProblems = ref<string[]>([]);
+
+		const handleAddActionFromProblem = (problemId: string) => {
+			activeTab.value = "actionSteps";
+			addActionPhase.value = true;
+			newActionProblems.value = [problemId];
+		};
+
+		const resetAddActionPhase =  () => {
+			addActionPhase.value = false;
+			newActionProblems.value = [];
+		};
+
 		return {
 			activeTab,
 			addGoalPhase,
 			newGoalProblems,
 			handleAddGoalFromProblem,
 			resetAddGoalPhase,
+			addActionPhase,
+			newActionProblems,
+			handleAddActionFromProblem,
+			resetAddActionPhase,
 			openAssessment,
 			openConcern,
 			assessmentToOpenId,
@@ -79,6 +97,7 @@ export default defineComponent({
 			<Problems
 				@trigger-add-goal="handleAddGoalFromProblem"
 				@trigger-open-assessment="openAssessment"
+				@trigger-add-action-step="handleAddActionFromProblem"
 			/>
 		</el-tab-pane>
 		<el-tab-pane
@@ -96,7 +115,12 @@ export default defineComponent({
 			label="Action Steps"
 			name="actionSteps"
 		>
-			<ActionSteps />
+			<ActionSteps
+				:add-action-phase="addActionPhase"
+				:new-action-problems="newActionProblems"
+				:is-active="activeTab === 'actionSteps'"
+				@stop-add-action="resetAddActionPhase"
+			/>
 		</el-tab-pane>
 		<el-tab-pane
 			label="Social Risk Assessments"
@@ -149,6 +173,10 @@ export default defineComponent({
 
 	::v-deep(.el-tab-pane) {
 		padding: 20px;
+
+		> div {
+			min-height: 130px;
+		}
 	}
 
 	::v-deep(.el-tabs__item) {

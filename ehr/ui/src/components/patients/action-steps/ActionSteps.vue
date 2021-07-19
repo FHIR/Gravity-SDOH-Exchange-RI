@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, ref, watch, h } from "vue";
+import { computed, defineComponent, onMounted, onUnmounted, ref, watch, h, PropType } from "vue";
 import RequestTable from "@/components/patients/action-steps/RequestTable.vue";
 import NewRequestDialog from "@/components/patients/action-steps/NewRequestDialog.vue";
 import { Comment, Occurrence, Task, ServiceRequestCondition, ServiceRequestGoal, Procedure, TaskStatus, Coding } from "@/types";
@@ -40,7 +40,22 @@ export default defineComponent({
 		RequestTable,
 		NewRequestDialog
 	},
-	setup() {
+	props: {
+		isActive: {
+			type: Boolean,
+			default: false
+		},
+		addActionPhase: {
+			type: Boolean,
+			default: false
+		},
+		newActionProblems: {
+			type: Array as PropType<string[]>,
+			default: () => []
+		}
+	},
+	emits: ["stop-add-action"],
+	setup(props, { emit }) {
 		const activeGroup = ref<string>("referrals");
 		const newRequestDialogVisible = ref<boolean>(false);
 		const isRequestLoading = ref<boolean>(false);
@@ -138,12 +153,24 @@ export default defineComponent({
 			});
 		});
 
+		watch(() => props.isActive, () => {
+			if (props.isActive) {
+				newRequestDialogVisible.value = props.addActionPhase;
+			}
+		});
+
+		const handleDialogClose = () => {
+			newRequestDialogVisible.value = false;
+			emit("stop-add-action");
+		};
+
 		return {
 			activeGroup,
 			newRequestDialogVisible,
 			activeRequests,
 			completedRequests,
-			isRequestLoading
+			isRequestLoading,
+			handleDialogClose
 		};
 	}
 });
@@ -204,7 +231,8 @@ export default defineComponent({
 
 		<NewRequestDialog
 			:visible="newRequestDialogVisible"
-			@close="newRequestDialogVisible = false"
+			:problems="newActionProblems"
+			@close="handleDialogClose"
 		/>
 	</div>
 </template>

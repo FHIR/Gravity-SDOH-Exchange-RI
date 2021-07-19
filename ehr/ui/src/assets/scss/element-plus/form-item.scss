@@ -17,3 +17,7 @@
 .el-form-item__content {
 	@include dont-break-out();
 }
+
+.el-form-item .achievement-status {
+	width: 200px;
+}

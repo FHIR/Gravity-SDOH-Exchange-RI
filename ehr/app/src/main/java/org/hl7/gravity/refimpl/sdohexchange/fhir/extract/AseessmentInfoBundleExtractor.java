@@ -29,14 +29,23 @@ public class AseessmentInfoBundleExtractor extends BundleExtractor<List<Assessme
     return FhirUtil.getFromBundle(bundle, QuestionnaireResponse.class)
         .stream()
         .map(questionnaireResponse -> {
+
           List<Observation> observations = FhirUtil.getFromBundle(bundle, Observation.class)
               .stream()
               .filter(observation -> containsQuestionnaireReference(observation, questionnaireResponse.getIdElement()
                   .getIdPart()))
               .collect(Collectors.toList());
+
+          //Observations might be derived not only from the Questionnaire, but also from other Observations.
+          // If we do not include these "intermediate" observations - the link between the QuestionnaireResponse and
+          // Condition will not be found.
+          List<Observation> allObservations = FhirUtil.getFromBundle(bundle, Observation.class)
+              .stream()
+              .filter(observation -> containsObservationReference(observation, observations))
+              .collect(Collectors.toList());
           List<Condition> conditions = FhirUtil.getFromBundle(bundle, Condition.class)
               .stream()
-              .filter(condition -> containsObservationReference(condition, observations))
+              .filter(condition -> containsObservationReference(condition, allObservations))
               .collect(Collectors.toList());
           Questionnaire questionnaire = questionnaires.get(questionnaireResponse.getQuestionnaire());
           return new AssessmentInfoHolder(questionnaireResponse, questionnaire, observations, conditions);
@@ -52,6 +61,20 @@ public class AseessmentInfoBundleExtractor extends BundleExtractor<List<Assessme
             .equals(QuestionnaireResponse.class.getSimpleName()) && reference.getReferenceElement()
             .getIdPart()
             .equals(questionnaireId));
+  }
+
+  //TODO possibly improve the algorithm.
+  private boolean containsObservationReference(Observation observation, List<Observation> observations) {
+    List<String> observationIds = observations.stream()
+        .map(o -> o.getIdElement()
+            .getIdPart())
+        .collect(Collectors.toList());
+    return observation.getDerivedFrom()
+        .stream()
+        .anyMatch(reference -> reference.getReferenceElement()
+            .getResourceType()
+            .equals(Observation.class.getSimpleName()) && observationIds.contains(reference.getReferenceElement()
+            .getIdPart()));
   }
 
   private boolean containsObservationReference(Condition condition, List<Observation> observations) {

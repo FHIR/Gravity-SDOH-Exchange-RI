@@ -4,10 +4,13 @@ import { TableData } from "@/components/patients/problems/Problems.vue";
 import { ProblemDialogPhase, ProblemActionType } from "@/components/patients/problems/ProblemsTable.vue";
 import DropButton from "@/components/DropButton.vue";
 import { ProblemsModule } from "@/store/modules/problems";
+import { showDefaultNotification } from "@/utils/utils";
 
 const CONFIRM_MESSAGES = {
 	"view": "",
-	"mark-as-closed": "Please confirm that this problem can be marked as closed."
+	"mark-as-closed": "Please confirm that this problem can be marked as closed.",
+	// todo: after Intervention action steps will be done
+	"add-action-step": "Please confirm that you want to add referral action step to this problem"
 };
 
 export default defineComponent({
@@ -31,7 +34,7 @@ export default defineComponent({
 			default: "active"
 		}
 	},
-	emits: ["close", "trigger-add-goal", "trigger-open-assessment"],
+	emits: ["close", "trigger-add-goal", "trigger-open-assessment", "trigger-add-action-step"],
 	setup(props, { emit }) {
 		const { problem, openPhase } = toRefs(props);
 		const phase = ref<ProblemDialogPhase>("view");
@@ -48,8 +51,9 @@ export default defineComponent({
 		};
 
 		const handleActionClick = (action: ProblemActionType) => {
-			if (action === "mark-as-closed") {
+			if (action === "mark-as-closed" || action === "add-action-step") {
 				phase.value = action;
+				return;
 			}
 
 			if (action === "add-goal") {
@@ -61,6 +65,12 @@ export default defineComponent({
 		const handleConfirm = () => {
 			if (phase.value === "mark-as-closed") {
 				markAsClosed();
+				return;
+			}
+
+			if (phase.value === "add-action-step") {
+				emit("trigger-add-action-step", problem.value!.id);
+				emit("close");
 			}
 		};
 
@@ -68,6 +78,7 @@ export default defineComponent({
 			actionInProgress.value = true;
 			try {
 				await ProblemsModule.closeProblem(problem.value!.id);
+				showDefaultNotification("Problem was Marked as Closed.");
 				emit("close");
 			} finally {
 				actionInProgress.value = false;
@@ -175,7 +186,7 @@ export default defineComponent({
 			/>
 			<el-button
 				v-else
-				v-loading="actionInProgress"
+				:loading="actionInProgress"
 				plain
 				round
 				type="primary"
