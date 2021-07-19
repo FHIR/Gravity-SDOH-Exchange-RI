@@ -1,9 +1,9 @@
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, toRefs } from "vue";
-import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
+import { computed, defineComponent, ref } from "vue";
 import DropButton from "@/components/DropButton.vue";
 import { ConcernsModule } from "@/store/modules/concerns";
 import { ConcernAction } from "@/components/patients/health-concerns/HealthConcernsTable.vue";
+import { Concern } from "@/types";
 
 const CONFIRM_TEXT = {
 	"view": "",
@@ -13,42 +13,25 @@ const CONFIRM_TEXT = {
 };
 
 export default defineComponent({
-	name: "EditConcernDialog",
 	components: {
 		DropButton
 	},
-	props: {
-		visible: {
-			type: Boolean,
-			default: false
-		},
-		concern: {
-			type: Object as PropType<TableData | undefined>,
-			default: undefined
-		},
-		openPhase: {
-			type: String as PropType<ConcernAction>,
-			default: "view"
-		},
-		type: {
-			type: String,
-			required: true
-		}
-	},
-	emits: ["close", "change-action", "trigger-open-assessment"],
+	emits: ["trigger-open-assessment"],
 	setup(props, { emit }) {
-		const { concern, openPhase } = toRefs(props);
+		const concern = computed<Concern | undefined>(() => ConcernsModule.editingConcern?.concern);
+		const visible = computed(() => concern.value !== undefined);
 		const actionInProgress = ref<boolean>(false);
 		const phase = ref<ConcernAction>("view");
 		const confirmActionText = computed<string>(() => CONFIRM_TEXT[phase.value]);
 		const showConfirm = computed<boolean>(() => phase.value !== "view");
+		const isResolved = computed<boolean>(() => ConcernsModule.editingConcern?.isResolved || false);
 
-		const onDialogClose = () => {
-			emit("close");
+		const close = () => {
+			ConcernsModule.setEditingConcernId(undefined);
 		};
 
 		const onDialogOpen = () => {
-			phase.value = openPhase.value;
+			phase.value = ConcernsModule.editingConcern?.openAction || "view";
 		};
 
 		const confirmActionClick = async () => {
@@ -61,7 +44,7 @@ export default defineComponent({
 				} else if (phase.value === "promote-to-problem") {
 					await ConcernsModule.promoteConcern(concern.value!.id);
 				}
-				emit("close");
+				close();
 			} finally {
 				actionInProgress.value = false;
 			}
@@ -71,14 +54,23 @@ export default defineComponent({
 			phase.value = clickedAction;
 		};
 
+		const openAssessment = (id: string) => {
+			close();
+			emit("trigger-open-assessment", id);
+		};
+
 		return {
+			concern,
+			visible,
 			actionInProgress,
-			onDialogClose,
+			close,
 			confirmActionText,
 			confirmActionClick,
 			handleActionClick,
+			openAssessment,
 			onDialogOpen,
 			showConfirm,
+			isResolved,
 			phase
 		};
 	}
@@ -92,10 +84,11 @@ export default defineComponent({
 		:width="700"
 		destroy-on-close
 		custom-class="edit-concern-dialog"
-		@close="onDialogClose"
+		@close="close"
 		@open="onDialogOpen"
 	>
 		<el-form
+			v-if="concern"
 			ref="formEl"
 			label-width="155px"
 			label-position="left"
@@ -119,7 +112,7 @@ export default defineComponent({
 				<span
 					v-if="concern.basedOn.id"
 					class="icon-link"
-					@click="$emit('trigger-open-assessment', concern.basedOn.id)"
+					@click="openAssessment(concern.basedOn.id)"
 				>
 				</span>
 			</el-form-item>
@@ -127,7 +120,7 @@ export default defineComponent({
 				{{ concern.assessmentDate ? $filters.formatDateTime(concern.assessmentDate) : "N/A" }}
 			</el-form-item>
 			<el-form-item
-				v-if="type === 'resolved'"
+				v-if="isResolved"
 				label="Resolution Date"
 			>
 				{{ concern.resolutionDate ? $filters.formatDateTime(concern.resolutionDate) : "N/A" }}
@@ -162,12 +155,12 @@ export default defineComponent({
 				Confirm
 			</el-button>
 			<el-button
-				v-if="type === 'resolved'"
+				v-if="isResolved"
 				plain
 				round
 				type="primary"
 				size="mini"
-				@click="$emit('close')"
+				@click="close"
 			>
 				Close
 			</el-button>
@@ -179,7 +172,7 @@ export default defineComponent({
 					{ id: 'mark-as-resolved', label: 'Mark As Resolved', iconSrc: require('@/assets/images/concern-resolved.svg') },
 					{ id: 'remove', label: 'Remove', iconSrc: require('@/assets/images/concern-remove.svg') }
 				]"
-				@click="$emit('close')"
+				@click="close"
 				@item-click="handleActionClick"
 			/>
 		</template>

@@ -1,16 +1,17 @@
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType } from "vue";
 import { Assessment } from "@/types";
+import ExternalLink from "@/components/ExternalLink.vue";
 
 export default defineComponent({
-	name: "RiskAssessmentsTable",
+	components: { ExternalLink },
 	props: {
 		data: {
 			type: Array as PropType<Assessment[]>,
 			required: true
 		}
 	},
-	emits: ["title-click"]
+	emits: ["title-click", "open-concern"]
 });
 </script>
 
@@ -20,7 +21,7 @@ export default defineComponent({
 	>
 		<el-table :data="data">
 			<el-table-column
-				label="Planned Assessment Name"
+				label="Assessment Name"
 			>
 				<template #default="scope">
 					<el-button
@@ -44,13 +45,13 @@ export default defineComponent({
 				label="Identified Health Concerns"
 			>
 				<template #default="scope">
-					<el-button
+					<ExternalLink
 						v-for="concern in scope.row.healthConcerns"
 						:key="concern.id"
-						type="text"
+						@click="$emit('open-concern', concern.id)"
 					>
 						{{ concern.display }}
-					</el-button>
+					</ExternalLink>
 				</template>
 			</el-table-column>
 			<el-table-column />

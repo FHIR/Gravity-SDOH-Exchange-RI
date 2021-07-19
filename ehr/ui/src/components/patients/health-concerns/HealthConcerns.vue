@@ -2,10 +2,11 @@
 import { computed, defineComponent, onMounted, ref } from "vue";
 import { Coding, Concern } from "@/types";
 import { ConcernsModule } from "@/store/modules/concerns";
-import HealthConcernsTable from "@/components/patients/health-concerns/HealthConcernsTable.vue";
+import HealthConcernsTable, { ConcernAction } from "@/components/patients/health-concerns/HealthConcernsTable.vue";
 import NewConcernDialog from "@/components/patients/health-concerns/NewConcernDialog.vue";
 import NoActiveItems from "@/components/patients/NoActiveItems.vue";
 import NoItems from "@/components/patients/NoItems.vue";
+import EditConcernDialog from "./EditConcernDialog.vue";
 
 export type TableData = {
 	id: string,
@@ -28,7 +29,8 @@ export default defineComponent({
 		NoItems,
 		NoActiveItems,
 		HealthConcernsTable,
-		NewConcernDialog
+		NewConcernDialog,
+		EditConcernDialog
 	},
 	emits: ["trigger-open-assessment"],
 	setup() {
@@ -72,11 +74,16 @@ export default defineComponent({
 			}
 		});
 
+		const onConcernAction = ({ id, action }: { id: string, action: ConcernAction }) => {
+			ConcernsModule.setEditingConcernId({ id, openAction: action });
+		};
+
 		return {
 			activeConcernsTableData,
 			resolvedConcernsTableData,
 			isDataLoading,
-			newConcernDialogVisible
+			newConcernDialogVisible,
+			onConcernAction
 		};
 	}
 });
@@ -93,6 +100,7 @@ export default defineComponent({
 			type="active"
 			@add-concern="newConcernDialogVisible = true"
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
+			@concern-action="onConcernAction"
 		/>
 		<NoActiveItems
 			v-else-if="!activeConcernsTableData.length && resolvedConcernsTableData.length"
@@ -116,6 +124,9 @@ export default defineComponent({
 		<NewConcernDialog
 			:visible="newConcernDialogVisible"
 			@close="newConcernDialogVisible = false"
+		/>
+		<EditConcernDialog
+			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 	</div>
 </template>

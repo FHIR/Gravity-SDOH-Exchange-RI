@@ -6,6 +6,7 @@ import RiskAssessments from "@/components/patients/risk-assessments/RiskAssessme
 import Problems from "@/components/patients/problems/Problems.vue";
 import Goals from "@/components/patients/goals/Goals.vue";
 import Consents from "@/components/patients/consents/Consents.vue";
+import { ConcernsModule } from "@/store/modules/concerns";
 
 export default defineComponent({
 	name: "Tabs",
@@ -41,6 +42,11 @@ export default defineComponent({
 			newGoalProblems.value = [];
 		};
 
+		const openConcern = (id: string) => {
+			ConcernsModule.setEditingConcernId({ id, openAction: "view" });
+			activeTab.value = "healthConcerns";
+		};
+
 		return {
 			activeTab,
 			addGoalPhase,
@@ -48,6 +54,7 @@ export default defineComponent({
 			handleAddGoalFromProblem,
 			resetAddGoalPhase,
 			openAssessment,
+			openConcern,
 			assessmentToOpenId,
 			openAssessmentPhase
 		};
@@ -100,6 +107,7 @@ export default defineComponent({
 				:assessment-to-open="assessmentToOpenId"
 				:is-active="activeTab === 'socialRiskAssessments'"
 				@stop-open-assessment="openAssessmentPhase = false"
+				@open-concern="openConcern"
 			/>
 		</el-tab-pane>
 		<el-tab-pane

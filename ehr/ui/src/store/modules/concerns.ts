@@ -3,6 +3,7 @@ import { getActiveConcerns, getResolvedConcerns, addConcernResponse, resolveConc
 import store from "@/store";
 import { Concern, NewConcernPayload } from "@/types";
 import { ProblemsModule } from "@/store/modules/problems";
+import { ConcernAction } from "@/components/patients/health-concerns/HealthConcernsTable.vue";
 
 export interface IConcerns {
 	activeConcerns: Concern[],
@@ -13,6 +14,32 @@ export interface IConcerns {
 class Concerns extends VuexModule implements IConcerns {
 	activeConcerns: Concern[] = [];
 	resolvedConcerns: Concern[] = [];
+	editingConcernId: undefined | { id: string, openAction: ConcernAction } = undefined;
+
+	get editingConcern(): undefined | { concern: Concern, openAction: ConcernAction, isResolved: boolean } {
+		const active = this.activeConcerns.find(c => c.id === this.editingConcernId?.id);
+		if (active) {
+			return {
+				concern: active,
+				openAction: this.editingConcernId?.openAction || "view",
+				isResolved: false
+			};
+		}
+		const resolved = this.resolvedConcerns.find(c => c.id === this.editingConcernId?.id);
+		if (resolved) {
+			return {
+				concern: resolved,
+				openAction: this.editingConcernId?.openAction || "view",
+				isResolved: true
+			};
+		}
+		return undefined;
+	}
+
+	@Mutation
+	setEditingConcernId(payload: undefined | { id: string, openAction: ConcernAction }) {
+		this.editingConcernId = payload;
+	}
 
 	@Mutation
 	setActiveConcerns(payload: Concern[]): void {

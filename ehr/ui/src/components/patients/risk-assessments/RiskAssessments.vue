@@ -27,7 +27,7 @@ export default defineComponent({
 			default: false
 		}
 	},
-	emits: ["stop-open-assessment"],
+	emits: ["stop-open-assessment", "open-concern"],
 	setup(props, { emit }) {
 		const activeGroup = ref<"pastAssessments" | "plannedAssessments">("pastAssessments");
 		const isRequestLoading = computed(() => AssessmentsModule.assessmentsLoading);
@@ -63,12 +63,18 @@ export default defineComponent({
 			return assessment;
 		};
 
+		const openConcern = (id: string) => {
+			viewingAssessment.value = undefined;
+			emit("open-concern", id);
+		};
+
 		return {
 			activeGroup,
 			assessments,
 			isRequestLoading,
 			viewingAssessment,
-			handleDialogClose
+			handleDialogClose,
+			openConcern
 		};
 	}
 });
@@ -109,6 +115,7 @@ export default defineComponent({
 				:data="assessments"
 				@title-click="viewingAssessment = $event"
 				@stop-open-assessment="$emit('stop-open-assessment')"
+				@open-concern="openConcern"
 			/>
 			<NoItems
 				v-if="!isRequestLoading && !assessments.length"
@@ -128,6 +135,7 @@ export default defineComponent({
 			:visible="viewingAssessment !== undefined"
 			:assessment="viewingAssessment"
 			@close="handleDialogClose"
+			@open-concern="openConcern"
 		/>
 	</div>
 </template>

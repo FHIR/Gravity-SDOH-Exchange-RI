@@ -1,8 +1,10 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed } from "vue";
 import { Assessment } from "@/types";
+import ExternalLink from "@/components/ExternalLink.vue";
 
 export default defineComponent({
+	components: { ExternalLink },
 	props: {
 		visible: {
 			type: Boolean,
@@ -13,7 +15,7 @@ export default defineComponent({
 			default: undefined
 		}
 	},
-	emits: ["close"],
+	emits: ["close", "open-concern"],
 	setup(props, { emit }) {
 		const onDialogClose = () => {
 			emit("close");
@@ -49,8 +51,13 @@ export default defineComponent({
 			currentVersionIx.value -= 1;
 		};
 
+		const onDialogOpen = () => {
+			currentVersionIx.value = 0;
+		};
+
 		return {
 			onDialogClose,
+			onDialogOpen,
 			previousAssessment,
 			nextAssessment,
 			currentAssessment,
@@ -68,6 +75,7 @@ export default defineComponent({
 			title="Observations"
 			:width="700"
 			@close="onDialogClose"
+			@open="onDialogOpen"
 		>
 			<div class="dialog-body">
 				<el-form
@@ -86,12 +94,13 @@ export default defineComponent({
 						{{ $filters.formatDateTime(currentAssessment.date) }}
 					</el-form-item>
 					<el-form-item label="Health Concern(s)">
-						<span
+						<ExternalLink
 							v-for="concern in currentAssessment.healthConcerns"
 							:key="concern.id"
+							@click="$emit('open-concern', concern.id)"
 						>
 							{{ concern.display }}
-						</span>
+						</ExternalLink>
 					</el-form-item>
 					<el-form-item
 						v-if="previousAssessment"
@@ -170,6 +179,7 @@ export default defineComponent({
 .edit-assessment-dialog {
 	::v-deep(.el-dialog__body) {
 		padding: 0;
+		overflow-y: hidden;
 
 		.el-button--text {
 			padding-left: 0;

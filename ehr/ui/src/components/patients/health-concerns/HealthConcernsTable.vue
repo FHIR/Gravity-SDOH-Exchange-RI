@@ -1,6 +1,5 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from "vue";
-import EditConcernDialog from "@/components/patients/health-concerns/EditConcernDialog.vue";
 import { TableData } from "@/components/patients/health-concerns/HealthConcerns.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
 
@@ -9,7 +8,6 @@ export type ConcernAction = "view" | "mark-as-resolved" | "promote-to-problem" |
 export default defineComponent({
 	name: "HealthConcernsTable",
 	components: {
-		EditConcernDialog,
 		ActionButton
 	},
 	props: {
@@ -26,31 +24,14 @@ export default defineComponent({
 			required: true
 		}
 	},
-	emits: ["add-concern", "trigger-open-assessment"],
+	emits: ["add-concern", "trigger-open-assessment", "concern-action"],
 	setup(props, { emit }) {
-		const editConcernDialogVisible = ref<boolean>(false);
-		const newConcernDialogVisible = ref<boolean>(false);
-		const editConcern = ref<TableData>();
-		const dialogOpenPhase = ref<ConcernAction>("view");
-
-		const concernOrActionClick = (row: TableData, phase: ConcernAction) => {
-			dialogOpenPhase.value = phase;
-			editConcernDialogVisible.value = true;
-			editConcern.value = row;
-		};
-
-		const handleOpenAssessment = (id: string) => {
-			editConcernDialogVisible.value = false;
-			emit("trigger-open-assessment", id);
+		const concernOrActionClick = (id: string, action: ConcernAction) => {
+			emit("concern-action", { id, action });
 		};
 
 		return {
-			editConcernDialogVisible,
-			newConcernDialogVisible,
-			concernOrActionClick,
-			editConcern,
-			dialogOpenPhase,
-			handleOpenAssessment
+			concernOrActionClick
 		};
 	}
 });
@@ -84,7 +65,7 @@ export default defineComponent({
 				<template #default="scope">
 					<el-button
 						type="text"
-						@click="concernOrActionClick(scope.row, 'view')"
+						@click="concernOrActionClick(scope.row.id, 'view')"
 					>
 						{{ scope.row.name }}
 					</el-button>
@@ -135,30 +116,21 @@ export default defineComponent({
 					<ActionButton
 						icon-class="icon-promote"
 						label="Promote to Problem"
-						@clicked="concernOrActionClick(scope.row, 'promote-to-problem')"
+						@clicked="concernOrActionClick(scope.row.id, 'promote-to-problem')"
 					/>
 					<ActionButton
 						icon-class="icon-resolved"
 						label="Mark as Resolved"
-						@clicked="concernOrActionClick(scope.row, 'mark-as-resolved')"
+						@clicked="concernOrActionClick(scope.row.id, 'mark-as-resolved')"
 					/>
 					<ActionButton
 						icon-class="icon-remove"
 						label="Remove"
-						@clicked="concernOrActionClick(scope.row, 'remove')"
+						@clicked="concernOrActionClick(scope.row.id, 'remove')"
 					/>
 				</template>
 			</el-table-column>
 		</el-table>
-
-		<EditConcernDialog
-			:visible="editConcernDialogVisible"
-			:concern="editConcern"
-			:open-phase="dialogOpenPhase"
-			:type="type"
-			@close="editConcernDialogVisible = false;"
-			@trigger-open-assessment="handleOpenAssessment"
-		/>
 	</div>
 </template>
 
