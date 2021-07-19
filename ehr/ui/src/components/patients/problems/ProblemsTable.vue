@@ -4,7 +4,7 @@ import { TableData } from "@/components/patients/problems/Problems.vue";
 import ActionButton from "@/components/patients/ActionButton.vue";
 import ProblemDialog from "@/components/patients/problems/ProblemDialog.vue";
 
-export type ProblemDialogPhase = "view" | "mark-as-closed";
+export type ProblemDialogPhase = "view" | "mark-as-closed" | "add-action-step";
 export type ProblemActionType = "view" | "add-goal" | "add-action-step" | "mark-as-closed";
 export const ACTIVE_TASK_STATUSES = ["ACCEPTED", "DRAFT", "IN PROGRESS", "ON HOLD", "READY", "RECEIVED", "REQUESTED"];
 
@@ -25,18 +25,19 @@ export default defineComponent({
 			default: "active"
 		}
 	},
-	emits: ["add-problem", "trigger-open-assessment", "trigger-add-goal"],
+	emits: ["add-problem", "trigger-open-assessment", "trigger-add-goal", "trigger-add-action-step"],
 	setup(props, { emit }) {
 		const problemsDialogVisible = ref<boolean>(false);
 		const activeProblem = ref<TableData | null>(null);
 		const problemsDialogOpenPhase = ref<ProblemActionType>("view");
 
 		const handleActionClick = (action: ProblemActionType, problem: TableData) => {
-			if (action === "mark-as-closed" || action === "view") {
+			if (action === "mark-as-closed" || action === "view" || action === "add-action-step") {
 				problemsDialogOpenPhase.value = action;
 				problemsDialogVisible.value = true;
 				activeProblem.value = problem;
 			}
+
 			if (action === "add-goal") {
 				// trigger event to open goal tab and show 'add goal' dialog
 				emit("trigger-add-goal", problem.id);
@@ -142,6 +143,7 @@ export default defineComponent({
 					<ActionButton
 						icon-class="add-action-step"
 						label="Add Action Step"
+						@click="handleActionClick('add-action-step', scope.row)"
 					/>
 					<ActionButton
 						icon-class="mark-as-closed"
@@ -168,7 +170,8 @@ export default defineComponent({
 			:open-phase="problemsDialogOpenPhase"
 			:status="status"
 			@close="problemsDialogVisible = false"
-			@trigger-add-goal="$emit('trigger-add-goal', activeProblem.id);"
+			@trigger-add-goal="$emit('trigger-add-goal', $event);"
+			@trigger-add-action-step="$emit('trigger-add-action-step', $event)"
 			@trigger-open-assessment="handleOpenAssessment"
 		/>
 	</div>

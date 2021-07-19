@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, reactive, ref, watch } from "vue";
+import { defineComponent, PropType, reactive, ref, watch } from "vue";
 import { getServiceRequestGoals, getServiceRequestConditions, getOrganizations, getCategories, getRequests, getConsentList } from "@/api";
 import { ServiceRequestCondition, ServiceRequestGoal, newTaskPayload, Organization, Coding } from "@/types";
 import _ from "@/vendors/lodash";
@@ -27,6 +27,10 @@ export default defineComponent({
 		visible: {
 			type: Boolean,
 			default: false
+		},
+		problems: {
+			type: Array as PropType<string[]>,
+			default: () => []
 		}
 	},
 	emits: ["close"],
@@ -65,6 +69,7 @@ export default defineComponent({
 			conditionOptions.value = await getServiceRequestConditions();
 			goalOptions.value = await getServiceRequestGoals();
 			consentOptions.value = await getConsentList();
+			formModel.conditionIds = props.problems;
 		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();

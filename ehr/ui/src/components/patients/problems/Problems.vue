@@ -42,7 +42,7 @@ export default defineComponent({
 		NewProblemDialog,
 		ProblemsTable
 	},
-	emits: ["trigger-open-assessment", "trigger-add-goal"],
+	emits: ["trigger-open-assessment", "trigger-add-goal", "trigger-add-action-step"],
 	setup() {
 		const activeProblems = computed<Problem[]>(() => ProblemsModule.activeProblems);
 		const closedProblems = computed<Problem[]>(() => ProblemsModule.closedProblems);
@@ -114,6 +114,7 @@ export default defineComponent({
 			@add-problem="newProblemsDialogVisible = true"
 			@trigger-add-goal="$emit('trigger-add-goal', $event)"
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
+			@trigger-add-action-step="$emit('trigger-add-action-step', $event)"
 		/>
 		<NoActiveItems
 			v-else-if="!activeProblemsTableData.length && closedProblemsTableData.length"
