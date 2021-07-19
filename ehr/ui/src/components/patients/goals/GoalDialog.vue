@@ -9,6 +9,7 @@ import _ from "@/vendors/lodash";
 import moment from "moment";
 import { GoalAction } from "@/components/patients/goals/GoalsTable.vue";
 import DropButton from "@/components/DropButton.vue";
+import { showDefaultNotification } from "@/utils/utils";
 
 export type FormModel = {
 	category: string,
@@ -127,6 +128,7 @@ export default defineComponent({
 			saveInProgress.value = true;
 			try {
 				await GoalsModule.updateGoal(payload);
+				showDefaultNotification("Goal was updated.");
 			} finally {
 				saveInProgress.value = false;
 			}
@@ -153,12 +155,14 @@ export default defineComponent({
 			try {
 				if (phase.value === "remove") {
 					await GoalsModule.removeGoal(goal.value!.id);
+					showDefaultNotification("Goal was Removed.");
 				} else if (phase.value === "mark-as-completed") {
 					const payload: GoalAsCompletedPayload = {
 						id: goal.value!.id,
 						endDate: moment(completionDate.value || new Date()).format("YYYY-MM-DD")
 					};
 					await GoalsModule.markGoalAsCompleted(payload);
+					showDefaultNotification("Goal was Marked as Completed.");
 				}
 				emit("close");
 			} finally {

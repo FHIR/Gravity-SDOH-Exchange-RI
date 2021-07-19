@@ -7,6 +7,7 @@ import moment from "moment";
 import { GoalsModule } from "@/store/modules/goals";
 import { ProblemsModule } from "@/store/modules/problems";
 import { ACHIEVEMENT_STATUSES } from "@/components/patients/goals/Goals.vue";
+import { showDefaultNotification } from "@/utils/utils";
 
 const DEFAULT_REQUIRED_RULE = {
 	required: true,
@@ -99,6 +100,7 @@ export default defineComponent({
 
 					try {
 						await GoalsModule.createGoal(payload);
+						showDefaultNotification("Goal was added.");
 						emit("close");
 					} finally {
 						saveInProgress.value = false;

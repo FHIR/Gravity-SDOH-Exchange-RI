@@ -6,6 +6,7 @@ import { getCategories, getConditionCodes } from "@/api";
 import { ProblemsModule } from "@/store/modules/problems";
 import moment from "moment";
 import { DEFAULT_BASED_ON_TEXT, DEFAULT_REQUIRED_FORM_RULE } from "@/utils/constants";
+import { showDefaultNotification } from "@/utils/utils";
 
 export type FormModel = {
 	name: string,
@@ -87,6 +88,7 @@ export default defineComponent({
 
 					try {
 						await ProblemsModule.createProblem(payload);
+						showDefaultNotification("Problem was added.");
 						emit("close");
 					} finally {
 						saveInProgress.value = false;

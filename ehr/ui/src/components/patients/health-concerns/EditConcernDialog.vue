@@ -4,6 +4,7 @@ import { TableData } from "@/components/patients/health-concerns/HealthConcerns.
 import DropButton from "@/components/DropButton.vue";
 import { ConcernsModule } from "@/store/modules/concerns";
 import { ConcernAction } from "@/components/patients/health-concerns/HealthConcernsTable.vue";
+import { showDefaultNotification } from "@/utils/utils";
 
 const CONFIRM_TEXT = {
 	"view": "",
@@ -56,10 +57,13 @@ export default defineComponent({
 			try {
 				if (phase.value === "remove") {
 					await ConcernsModule.removeConcern(concern.value!.id);
+					showDefaultNotification("Health Concern was Removed.");
 				} else if (phase.value === "mark-as-resolved") {
 					await ConcernsModule.resolveConcern(concern.value!.id);
+					showDefaultNotification("Health Concern was Marked as Resolved.");
 				} else if (phase.value === "promote-to-problem") {
 					await ConcernsModule.promoteConcern(concern.value!.id);
+					showDefaultNotification("Health Concern was Promoted to Problem.");
 				}
 				emit("close");
 			} finally {

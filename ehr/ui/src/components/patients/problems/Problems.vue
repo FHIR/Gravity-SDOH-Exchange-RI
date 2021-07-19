@@ -130,7 +130,7 @@ export default defineComponent({
 		/>
 		<NoItems
 			v-if="!isLoading && !activeProblemsTableData.length && !closedProblemsTableData.length"
-			massage="No Problems Yet"
+			message="No Problems Yet"
 			button-label="Add Problem"
 			@add-item="newProblemsDialogVisible = true"
 		/>

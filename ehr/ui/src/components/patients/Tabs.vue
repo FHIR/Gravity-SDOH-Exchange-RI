@@ -18,7 +18,7 @@ export default defineComponent({
 		Consents
 	},
 	setup() {
-		const activeTab = ref<string>("actionSteps");
+		const activeTab = ref<string>("healthConcerns");
 		const addGoalPhase = ref<boolean>(false);
 		const newGoalProblems = ref<string[]>([]);
 		const assessmentToOpenId = ref<string>("");
@@ -141,6 +141,10 @@ export default defineComponent({
 
 	::v-deep(.el-tab-pane) {
 		padding: 20px;
+
+		> div {
+			min-height: 130px;
+		}
 	}
 
 	::v-deep(.el-tabs__item) {

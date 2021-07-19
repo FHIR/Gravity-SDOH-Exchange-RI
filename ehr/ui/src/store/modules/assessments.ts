@@ -25,8 +25,11 @@ class Assessments extends VuexModule implements IAssessments {
 	@Action
 	async loadPastAssessments() {
 		this.setAssessmentsLoading(true);
-		this.setAssessments(await getPastAssessments());
-		this.setAssessmentsLoading(false);
+		try {
+			this.setAssessments(await getPastAssessments());
+		} finally {
+			this.setAssessmentsLoading(false);
+		}
 	}
 }
 
