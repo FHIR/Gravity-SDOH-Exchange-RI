@@ -7,6 +7,18 @@ import NewGoalDialog from "@/components/patients/goals/NewGoalDialog.vue";
 import NoActiveItems from "@/components/patients/NoActiveItems.vue";
 import NoItems from "@/components/patients/NoItems.vue";
 
+export const ACHIEVEMENT_STATUSES = [
+	{ code: "INPROGRESS", display: "In progress" },
+	{ code: "IMPROVING", display: "Improving" },
+	{ code: "WORSENING", display: "Worsening" },
+	{ code: "NOCHANGE", display: "No Change" },
+	{ code: "ACHIEVED", display: "Achieved" },
+	{ code: "SUSTAINING", display: "Sustaining" },
+	{ code: "NOTACHIEVED", display: "Not Achieved" },
+	{ code: "NOPROGRESS", display: "No Progress" },
+	{ code: "NOTATTAINABLE", display: "Not Attainable" }
+];
+
 export type TableData = {
 	name: string,
 	problems: string[],
@@ -19,6 +31,7 @@ export type TableData = {
 	snomedCode: Coding,
 	id: string,
 	comments: Comment[]
+	achievementStatus: string
 };
 
 export default defineComponent({
@@ -60,7 +73,8 @@ export default defineComponent({
 				category: goal.category,
 				snomedCode: goal.snomedCode,
 				id: goal.id,
-				comments: goal.comments
+				comments: goal.comments,
+				achievementStatus: goal.achievementStatus
 			}))
 		);
 
@@ -76,7 +90,8 @@ export default defineComponent({
 				category: goal.category,
 				snomedCode: goal.snomedCode,
 				id: goal.id,
-				comments: goal.comments
+				comments: goal.comments,
+				achievementStatus: goal.achievementStatus
 			}))
 		);
 

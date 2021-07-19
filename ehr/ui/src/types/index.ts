@@ -228,7 +228,8 @@ export type Goal = {
 	comments: Comment[],
 	category: Coding,
 	snomedCode: Coding,
-	status: GoalStatus
+	status: GoalStatus,
+	achievementStatus: string
 };
 
 export type NewGoalPayload = {
