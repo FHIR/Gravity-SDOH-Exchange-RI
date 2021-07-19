@@ -4,6 +4,7 @@ import NewConsentDialog from "./NewConsentDialog.vue";
 import { Consent } from "@/types";
 import { getConsents, getConsentAttachment } from "@/api";
 import NoItems from "@/components/patients/NoItems.vue";
+import { showDefaultNotification } from "@/utils/utils";
 
 
 export default defineComponent({
@@ -13,8 +14,9 @@ export default defineComponent({
 		const consentsLoading = ref(true);
 
 		getConsents().then(resp => {
-			consentsLoading.value = false;
 			consents.value = resp;
+		}).finally(() => {
+			consentsLoading.value = false;
 		});
 
 		const dialogOpened = ref(false);
@@ -26,6 +28,7 @@ export default defineComponent({
 		const onConsentCreated = (newOne: Consent) => {
 			dialogOpened.value = false;
 			consents.value = [...consents.value, newOne];
+			showDefaultNotification("Consent was added.");
 		};
 
 		const viewAttachment = async (consentId: string) => {
@@ -140,8 +143,6 @@ export default defineComponent({
 @import "~@/assets/scss/abstracts/variables";
 
 .consents {
-	min-height: 340px;
-
 	&.wait-cursor * {
 		cursor: wait;
 	}

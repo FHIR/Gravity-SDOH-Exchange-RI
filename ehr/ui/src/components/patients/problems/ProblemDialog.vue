@@ -4,6 +4,7 @@ import { TableData } from "@/components/patients/problems/Problems.vue";
 import { ProblemDialogPhase, ProblemActionType } from "@/components/patients/problems/ProblemsTable.vue";
 import DropButton from "@/components/DropButton.vue";
 import { ProblemsModule } from "@/store/modules/problems";
+import { showDefaultNotification } from "@/utils/utils";
 
 const CONFIRM_MESSAGES = {
 	"view": "",
@@ -77,6 +78,7 @@ export default defineComponent({
 			actionInProgress.value = true;
 			try {
 				await ProblemsModule.closeProblem(problem.value!.id);
+				showDefaultNotification("Problem was Marked as Closed.");
 				emit("close");
 			} finally {
 				actionInProgress.value = false;
@@ -184,7 +186,7 @@ export default defineComponent({
 			/>
 			<el-button
 				v-else
-				v-loading="actionInProgress"
+				:loading="actionInProgress"
 				plain
 				round
 				type="primary"

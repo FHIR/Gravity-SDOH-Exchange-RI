@@ -5,6 +5,7 @@ import { Coding } from "@/types";
 import { RuleItem } from "async-validator";
 import { ConcernsModule } from "@/store/modules/concerns";
 import { DEFAULT_BASED_ON_TEXT, DEFAULT_REQUIRED_FORM_RULE } from "@/utils/constants";
+import { showDefaultNotification } from "@/utils/utils";
 
 export type FormModel = {
 	name: string,
@@ -76,6 +77,7 @@ export default defineComponent({
 					saveInProgress.value = true;
 					try {
 						await ConcernsModule.createConcern(formModel);
+						showDefaultNotification("Health Concern was added.");
 						emit("close");
 					} finally {
 						saveInProgress.value = false;
