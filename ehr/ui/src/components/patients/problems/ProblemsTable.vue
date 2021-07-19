@@ -6,6 +6,7 @@ import ProblemDialog from "@/components/patients/problems/ProblemDialog.vue";
 
 export type ProblemDialogPhase = "view" | "mark-as-closed";
 export type ProblemActionType = "view" | "add-goal" | "add-action-step" | "mark-as-closed";
+export const ACTIVE_TASK_STATUSES = ["ACCEPTED", "DRAFT", "IN PROGRESS", "ON HOLD", "READY", "RECEIVED", "REQUESTED"];
 
 export default defineComponent({
 	name: "ProblemsTable",
@@ -47,12 +48,15 @@ export default defineComponent({
 			emit("trigger-open-assessment", id);
 		};
 
+		const canProblemBeClosed = (problem: TableData): boolean => problem.goals.some(item => item.status === "ACTIVE") || problem.tasks.some(item => ACTIVE_TASK_STATUSES.includes(item.status));
+
 		return {
 			problemsDialogVisible,
 			activeProblem,
 			problemsDialogOpenPhase,
 			handleActionClick,
-			handleOpenAssessment
+			handleOpenAssessment,
+			canProblemBeClosed
 		};
 	}
 });
@@ -114,14 +118,14 @@ export default defineComponent({
 				label="Goal(s)"
 			>
 				<template #default="scope">
-					<span>{{ scope.row.goals }}</span>
+					<span>{{ scope.row.goals.length }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column
 				label="Action Steps"
 			>
 				<template #default="scope">
-					<span>{{ scope.row.actionSteps }}</span>
+					<span>{{ scope.row.tasks.length }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column
@@ -142,6 +146,7 @@ export default defineComponent({
 					<ActionButton
 						icon-class="mark-as-closed"
 						label="Mark as Closed"
+						:disabled="canProblemBeClosed(scope.row)"
 						@click="handleActionClick('mark-as-closed', scope.row)"
 					/>
 				</template>

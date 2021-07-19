@@ -17,11 +17,21 @@ export type TableData = {
 	assessmentDate?: string,
 	startDate?: string,
 	resolutionDate?: string,
-	goals: number,
-	actionSteps: number,
+	goals: {
+		id: string,
+		name: string,
+		status: string,
+		errors: []
+	}[],
+	tasks: {
+		id: string,
+		name: string,
+		status: string,
+		errors: []
+	}[],
 	category: Coding,
 	icdCode: Coding,
-	snomedCode: Coding
+	snomedCode: Coding,
 };
 
 export default defineComponent({
@@ -43,8 +53,8 @@ export default defineComponent({
 				basedOn: problem.basedOn,
 				assessmentDate: problem.assessmentDate || "",
 				startDate: problem.startDate || "",
-				goals: 0,
-				actionSteps: 0,
+				goals: problem.goals,
+				tasks: problem.tasks,
 				icdCode: problem.icdCode,
 				snomedCode: problem.snomedCode,
 				category: problem.category
@@ -58,8 +68,8 @@ export default defineComponent({
 				assessmentDate: problem.assessmentDate || "",
 				startDate: problem.startDate || "",
 				resolutionDate: problem.resolutionDate || "",
-				goals: 0,
-				actionSteps: 0,
+				goals: problem.goals,
+				tasks: problem.tasks,
 				icdCode: problem.icdCode,
 				snomedCode: problem.snomedCode,
 				category: problem.category
