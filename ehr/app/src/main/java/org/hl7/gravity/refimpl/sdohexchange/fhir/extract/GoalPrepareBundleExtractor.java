@@ -6,8 +6,7 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.gravity.refimpl.sdohexchange.exception.HealthConcernPrepareException;
-import org.hl7.gravity.refimpl.sdohexchange.exception.TaskPrepareException;
+import org.hl7.gravity.refimpl.sdohexchange.exception.PrepareBundleException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.GoalPrepareBundleExtractor.GoalPrepareInfoHolder;
 
 import java.util.List;
@@ -30,16 +29,16 @@ public class GoalPrepareBundleExtractor extends BundleExtractor<GoalPrepareInfoH
     public GoalPrepareInfoHolder(Map<? extends Class<? extends Resource>, List<Resource>> resources) {
       this.patient = resourceList(resources, Patient.class).stream()
           .findFirst()
-          .orElseThrow(() -> new HealthConcernPrepareException("Patient not found."));
+          .orElseThrow(() -> new PrepareBundleException("Patient not found."));
       this.practitioner = resourceList(resources, Practitioner.class).stream()
           .findFirst()
-          .orElseThrow(() -> new HealthConcernPrepareException("Practitioner not found."));
+          .orElseThrow(() -> new PrepareBundleException("Practitioner not found."));
       this.problems = resourceList(resources, Condition.class);
     }
 
     public List<Condition> getProblems(List<String> problemIds) {
       if (problemIds != null && problemIds.size() != getProblems().size()) {
-        throw new TaskPrepareException("Problems don't exist or are not supported.");
+        throw new PrepareBundleException("Problems don't exist or are not supported.");
       }
       return getProblems();
     }

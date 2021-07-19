@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Condition.ConditionEvidenceComponent;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.ConditionInfoBundleExtractor.ConditionInfoHolder;
@@ -20,10 +21,10 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ConditionInfoBundleExtractor extends BundleExtractor<List<ConditionInfoHolder>> {
+public class ConditionInfoBundleExtractor extends BundleExtractor<List<? extends ConditionInfoHolder>> {
 
   @Override
-  public List<ConditionInfoHolder> extract(Bundle bundle) {
+  public List<? extends ConditionInfoHolder> extract(Bundle bundle) {
     Map<String, Observation> allObservations = FhirUtil.getFromBundle(bundle, Observation.class)
         .stream()
         .collect(Collectors.toMap(observation -> observation.getIdElement()
@@ -33,6 +34,10 @@ public class ConditionInfoBundleExtractor extends BundleExtractor<List<Condition
         .stream()
         .collect(Collectors.toMap(qr -> qr.getIdElement()
             .getIdPart(), Function.identity()));
+
+    Map<String, Questionnaire> allQuestionnaires = FhirUtil.getFromBundle(bundle, Questionnaire.class)
+        .stream()
+        .collect(Collectors.toMap(q -> q.getUrl(), Function.identity()));
 
     return FhirUtil.getFromBundle(bundle, Condition.class)
         .stream()
@@ -45,6 +50,7 @@ public class ConditionInfoBundleExtractor extends BundleExtractor<List<Condition
               .orElse(null);
 
           QuestionnaireResponse questionnaireResponse = null;
+          Questionnaire questionnaire = null;
           List<Observation> observations = new ArrayList<>();
           if (evidenceReference != null) {
             Observation evidenceObservation = allObservations.remove(evidenceReference.getReferenceElement()
@@ -64,8 +70,10 @@ public class ConditionInfoBundleExtractor extends BundleExtractor<List<Condition
                 iterator.remove();
               }
             }
+
+            questionnaire = allQuestionnaires.get(questionnaireResponse.getQuestionnaire());
           }
-          return new ConditionInfoHolder(condition, questionnaireResponse, observations);
+          return new ConditionInfoHolder(condition, questionnaire, questionnaireResponse, observations);
         })
         .collect(Collectors.toList());
   }
@@ -107,6 +115,7 @@ public class ConditionInfoBundleExtractor extends BundleExtractor<List<Condition
   public static class ConditionInfoHolder {
 
     private final Condition condition;
+    private final Questionnaire questionnaire;
     private final QuestionnaireResponse questionnaireResponse;
     //TODO we do not need observation anywhere. Remove this when confirmed
     private final List<Observation> observations;

@@ -1,35 +1,54 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Condition.ConditionEvidenceComponent;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.AseessmentInfoBundleExtractor.AssessmentInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AseessmentInfoBundleExtractor extends BundleExtractor<List<AssessmentInfoHolder>> {
 
   @Override
   public List<AssessmentInfoHolder> extract(Bundle bundle) {
+    Map<String, Questionnaire> questionnaires = new HashMap<>();
+    FhirUtil.getFromBundle(bundle, Questionnaire.class)
+        .stream()
+        .forEach(q -> questionnaires.put(q.getUrl(), q));
+
     return FhirUtil.getFromBundle(bundle, QuestionnaireResponse.class)
         .stream()
         .map(questionnaireResponse -> {
+
           List<Observation> observations = FhirUtil.getFromBundle(bundle, Observation.class)
               .stream()
               .filter(observation -> containsQuestionnaireReference(observation, questionnaireResponse.getIdElement()
                   .getIdPart()))
               .collect(Collectors.toList());
+
+          //Observations might be derived not only from the Questionnaire, but also from other Observations.
+          // If we do not include these "intermediate" observations - the link between the QuestionnaireResponse and
+          // Condition will not be found.
+          List<Observation> allObservations = FhirUtil.getFromBundle(bundle, Observation.class)
+              .stream()
+              .filter(observation -> containsObservationReference(observation, observations))
+              .collect(Collectors.toList());
           List<Condition> conditions = FhirUtil.getFromBundle(bundle, Condition.class)
               .stream()
-              .filter(condition -> containsObservationReference(condition, observations))
+              .filter(condition -> containsObservationReference(condition, allObservations))
               .collect(Collectors.toList());
-          return new AssessmentInfoHolder(questionnaireResponse, observations, conditions);
+          Questionnaire questionnaire = questionnaires.get(questionnaireResponse.getQuestionnaire());
+          return new AssessmentInfoHolder(questionnaireResponse, questionnaire, observations, conditions);
         })
         .collect(Collectors.toList());
   }
@@ -42,6 +61,20 @@ public class AseessmentInfoBundleExtractor extends BundleExtractor<List<Assessme
             .equals(QuestionnaireResponse.class.getSimpleName()) && reference.getReferenceElement()
             .getIdPart()
             .equals(questionnaireId));
+  }
+
+  //TODO possibly improve the algorithm.
+  private boolean containsObservationReference(Observation observation, List<Observation> observations) {
+    List<String> observationIds = observations.stream()
+        .map(o -> o.getIdElement()
+            .getIdPart())
+        .collect(Collectors.toList());
+    return observation.getDerivedFrom()
+        .stream()
+        .anyMatch(reference -> reference.getReferenceElement()
+            .getResourceType()
+            .equals(Observation.class.getSimpleName()) && observationIds.contains(reference.getReferenceElement()
+            .getIdPart()));
   }
 
   private boolean containsObservationReference(Condition condition, List<Observation> observations) {
@@ -64,6 +97,7 @@ public class AseessmentInfoBundleExtractor extends BundleExtractor<List<Assessme
   public static class AssessmentInfoHolder implements Comparable<AssessmentInfoHolder> {
 
     private final QuestionnaireResponse questionnaireResponse;
+    private final Questionnaire questionnaire;
     private final List<Observation> observations;
     private final List<Condition> conditions;
 

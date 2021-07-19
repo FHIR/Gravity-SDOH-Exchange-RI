@@ -13,9 +13,12 @@ public class GoalToInfoDtoConverter implements Converter<Goal, GoalInfoDto> {
   public GoalInfoDto convert(Goal goal) {
     String id = goal.getIdElement()
         .getIdPart();
-    String display = goal.getDescription()
-        .getCodingFirstRep()
-        .getDisplay();
-    return new GoalInfoDto(id, display);
+    String display = null;
+    if (goal.hasDescription() && goal.getDescription()
+        .hasText()) {
+      display = goal.getDescription()
+          .getText();
+    }
+    return new GoalInfoDto(id, display, goal.getLifecycleStatus());
   }
 }

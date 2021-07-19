@@ -1,8 +1,21 @@
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent, onMounted } from "vue";
+import { ActiveResourcesModule } from "@/store/modules/activeResources";
+import { ActiveResources } from "@/types";
 
 export default defineComponent({
-	name: "PatientStats"
+	name: "PatientStats",
+	setup() {
+		const activeResources = computed<ActiveResources>(() => ActiveResourcesModule.activeResources);
+
+		onMounted(async () => {
+			await ActiveResourcesModule.loadActiveResources();
+		});
+
+		return {
+			activeResources
+		};
+	}
 });
 </script>
 
@@ -11,7 +24,7 @@ export default defineComponent({
 		<div class="info-block">
 			<div class="info-item">
 				<div class="value">
-					2
+					{{ activeResources.activeConcernsCount }}
 				</div>
 				<div class="label">
 					Health Concerns
@@ -19,7 +32,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					4
+					{{ activeResources.activeProblemsCount }}
 				</div>
 				<div class="label">
 					Active Problems
@@ -27,7 +40,7 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					3
+					{{ activeResources.activeGoalsCount }}
 				</div>
 				<div class="label">
 					Active Goals
@@ -35,10 +48,10 @@ export default defineComponent({
 			</div>
 			<div class="info-item">
 				<div class="value">
-					5
+					{{ activeResources.activeInterventionsCount }}
 				</div>
 				<div class="label">
-					Active Interventions
+					Active Action Steps
 				</div>
 			</div>
 		</div>

@@ -78,6 +78,14 @@ export default defineComponent({
 	+ .action-button {
 		margin-left: 20px;
 	}
+
+	&[disabled] {
+		opacity: 0.5;
+
+		&:hover {
+			border-color: $global-base-border-color;
+		}
+	}
 }
 
 .add-goal {

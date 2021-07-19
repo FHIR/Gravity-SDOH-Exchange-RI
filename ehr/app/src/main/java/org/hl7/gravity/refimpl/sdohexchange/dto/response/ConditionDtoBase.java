@@ -13,27 +13,18 @@ import java.util.List;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AssessmentDto implements Validated {
+public abstract class ConditionDtoBase implements Validated {
 
   private String id;
   private String name;
-  private String questionnaireUrl;
-  private LocalDateTime date;
-  private List<TypeDto> healthConcerns;
-  private List<AssessmentResponse> assessmentResponse;
-  private List<AssessmentDto> previous;
+  private CodingDto category;
+  private CodingDto icdCode;
+  private CodingDto snomedCode;
+  private TypeDto basedOn;
+  private TypeDto authoredBy;
+  private LocalDateTime assessmentDate;
+  private LocalDateTime resolutionDate;
 
   @Setter(AccessLevel.NONE)
   private List<String> errors = new ArrayList<>();
-
-  @Getter
-  @Setter
-  public static class AssessmentResponse implements Validated {
-
-    private TypeDto question;
-    private TypeDto answer;
-
-    @Setter(AccessLevel.NONE)
-    private List<String> errors = new ArrayList<>();
-  }
 }

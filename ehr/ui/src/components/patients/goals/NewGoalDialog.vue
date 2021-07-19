@@ -6,6 +6,7 @@ import { getCategories, getGoalCodes } from "@/api";
 import moment from "moment";
 import { GoalsModule } from "@/store/modules/goals";
 import { ProblemsModule } from "@/store/modules/problems";
+import { ACHIEVEMENT_STATUSES } from "@/components/patients/goals/Goals.vue";
 
 const DEFAULT_REQUIRED_RULE = {
 	required: true,
@@ -13,22 +14,22 @@ const DEFAULT_REQUIRED_RULE = {
 };
 
 export type FormModel = {
+	achievementStatus: string,
 	name: string,
 	category: string,
-	code: string,
-	problems: string[],
+	snomedCode: string,
+	problemIds: string[],
 	startDate: string,
-	addedBy: string,
 	comment: string
 };
 
 const DEFAULT_FORM_MODEL = {
+	achievementStatus: "",
 	name: "",
 	category: "",
-	code: "",
-	problems: [],
+	snomedCode: "",
+	problemIds: [],
 	startDate: "",
-	addedBy: "",
 	comment: ""
 };
 
@@ -55,16 +56,17 @@ export default defineComponent({
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: DEFAULT_REQUIRED_RULE,
 			category: DEFAULT_REQUIRED_RULE,
-			code: DEFAULT_REQUIRED_RULE
+			snomedCode: DEFAULT_REQUIRED_RULE
 		};
 
 		//
 		// Clear code fields on every category change because they are connected.
 		//
 		const onCategoryChange = async (code: string) => {
-			formModel.code = "";
+			formModel.snomedCode = "";
 
-			codeOptions.value = await getGoalCodes(code);
+			const codes = await getGoalCodes(code);
+			codeOptions.value = codes[0].codings;
 		};
 
 		const onDialogClose = () => {
@@ -79,7 +81,8 @@ export default defineComponent({
 			formModel.startDate = new Date().toDateString();
 			categoryOptions.value = await getCategories();
 			await ProblemsModule.getActiveProblems();
-			formModel.problems = props.newGoalsProblems;
+
+			formModel.problemIds = props.newGoalsProblems;
 		};
 
 
@@ -91,7 +94,8 @@ export default defineComponent({
 				if (valid) {
 					saveInProgress.value = true;
 					const payload = { ...formModel };
-					payload.startDate = moment(formModel.startDate).format("YYYY-MM-DD[T]HH:mm:ss");
+
+					payload.startDate = moment(formModel.startDate).format("YYYY-MM-DDTHH:mm");
 
 					try {
 						await GoalsModule.createGoal(payload);
@@ -114,7 +118,8 @@ export default defineComponent({
 			categoryOptions,
 			onCategoryChange,
 			codeOptions,
-			problems
+			problems,
+			ACHIEVEMENT_STATUSES
 		};
 	}
 });
@@ -167,10 +172,10 @@ export default defineComponent({
 			</el-form-item>
 			<el-form-item
 				label="Code"
-				prop="code"
+				prop="snomedCode"
 			>
 				<el-select
-					v-model="formModel.code"
+					v-model="formModel.snomedCode"
 					placeholder="Select Code"
 				>
 					<el-option
@@ -181,9 +186,29 @@ export default defineComponent({
 					/>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="Problem(s)">
+			<el-form-item
+				label="Achievement Status"
+				prop="achievementStatus"
+			>
 				<el-select
-					v-model="formModel.problems"
+					v-model="formModel.achievementStatus"
+					placeholder="Select Status"
+					class="achievement-status"
+				>
+					<el-option
+						v-for="item in ACHIEVEMENT_STATUSES"
+						:key="item.code"
+						:label="item.display"
+						:value="item.code"
+					/>
+				</el-select>
+			</el-form-item>
+			<el-form-item
+				prop="problemIds"
+				label="Problem(s)"
+			>
+				<el-select
+					v-model="formModel.problemIds"
 					multiple
 					placeholder="Select Problem(s)"
 				>
@@ -191,26 +216,25 @@ export default defineComponent({
 						v-for="item in problems"
 						:key="item.id"
 						:label="item.name"
-						:value="item.name"
+						:value="item.id"
 					/>
 				</el-select>
 			</el-form-item>
 
-			<el-form-item label="Creation Date">
+			<el-form-item
+				label="Creation Date"
+				prop="startDate"
+			>
 				<el-date-picker
 					v-model="formModel.startDate"
 					type="date"
 				/>
 			</el-form-item>
 
-			<el-form-item label="Added by">
-				<el-input
-					v-model="formModel.addedBy"
-					placeholder="Enter Added by name"
-				/>
-			</el-form-item>
-
-			<el-form-item label="Comment">
+			<el-form-item
+				prop="comments"
+				label="Comment"
+			>
 				<el-input
 					v-model="formModel.comment"
 					type="textarea"
@@ -245,7 +269,7 @@ export default defineComponent({
 @import "~@/assets/scss/abstracts/mixins";
 
 .new-goal-form {
-	.el-select {
+	.el-select:not(.achievement-status) {
 		width: 100%;
 	}
 }

@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 @Setter
-public class GoalBundleFactory {
+public class GoalBundleFactory extends PrepareBundleFactory {
 
   private String name;
   private Coding category;
@@ -37,7 +37,8 @@ public class GoalBundleFactory {
   private List<Condition> problems;
   private String comment;
 
-  public Bundle createBundle() {
+  @Override
+  public Bundle createPrepareBundle() {
     Assert.notNull(name, "Name cannot be null.");
     Assert.notNull(category, "SDOH DomainCode cannot be null.");
     Assert.notNull(snomedCode, "SNOMED-CT code cannot be null.");
