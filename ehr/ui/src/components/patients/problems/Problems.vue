@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent, watch, ref } from "vue";
 import ProblemsTable from "@/components/patients/problems/ProblemsTable.vue";
 import { Coding, Problem } from "@/types";
 import { ProblemsModule } from "@/store/modules/problems";
@@ -35,15 +35,20 @@ export type TableData = {
 };
 
 export default defineComponent({
-	name: "Problems",
 	components: {
 		NoItems,
 		NoActiveItems,
 		NewProblemDialog,
 		ProblemsTable
 	},
+	props: {
+		isActive: {
+			type: Boolean,
+			required: true
+		}
+	},
 	emits: ["trigger-open-assessment", "trigger-add-goal", "trigger-add-action-step"],
-	setup() {
+	setup(props) {
 		const activeProblems = computed<Problem[]>(() => ProblemsModule.activeProblems);
 		const closedProblems = computed<Problem[]>(() => ProblemsModule.closedProblems);
 		const activeProblemsTableData = computed<TableData[]>(() =>
@@ -81,15 +86,17 @@ export default defineComponent({
 
 		const isLoading = ref<boolean>(false);
 
-		onMounted(async () => {
-			isLoading.value = true;
-			try {
-				await ProblemsModule.getActiveProblems();
-				await ProblemsModule.getClosedProblems();
-			} finally {
-				isLoading.value = false;
+		watch(() => props.isActive, async active => {
+			if (active) {
+				isLoading.value = true;
+				try {
+					await ProblemsModule.getActiveProblems();
+					await ProblemsModule.getClosedProblems();
+				} finally {
+					isLoading.value = false;
+				}
 			}
-		});
+		}, { immediate: true });
 
 		return {
 			isLoading,
@@ -141,4 +148,3 @@ export default defineComponent({
 		/>
 	</div>
 </template>
-

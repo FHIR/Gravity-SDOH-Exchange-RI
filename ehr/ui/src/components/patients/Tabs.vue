@@ -81,6 +81,7 @@ export default defineComponent({
 			:lazy="true"
 		>
 			<HealthConcerns
+				:is-active="activeTab === 'healthConcerns'"
 				@trigger-open-assessment="openAssessment"
 			/>
 		</el-tab-pane>
@@ -90,6 +91,7 @@ export default defineComponent({
 			:lazy="true"
 		>
 			<Problems
+				:is-active="activeTab === 'problems'"
 				@trigger-add-goal="handleAddGoalFromProblem"
 				@trigger-open-assessment="openAssessment"
 				@trigger-add-action-step="handleAddActionFromProblem"

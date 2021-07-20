@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType } from "vue";
 import { Assessment } from "@/types";
 
 export default defineComponent({

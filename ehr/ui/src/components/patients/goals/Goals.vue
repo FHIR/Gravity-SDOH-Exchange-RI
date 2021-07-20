@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, watch } from "vue";
+import { computed, defineComponent, PropType, ref, watch } from "vue";
 import { Goal, Coding, Comment } from "@/types";
 import { GoalsModule } from "@/store/modules/goals";
 import GoalsTable from "@/components/patients/goals/GoalsTable.vue";
@@ -97,26 +97,23 @@ export default defineComponent({
 
 		const newGoalDialogVisible = ref<boolean>(false);
 
-		onMounted(async () => {
-			isDataLoading.value = true;
-			try {
-				await GoalsModule.getActiveGoals();
-				await GoalsModule.getCompletedGoals();
-			} finally {
-				isDataLoading.value = false;
-			}
-		});
-
 		const handleDialogClose = () => {
 			newGoalDialogVisible.value = false;
 			emit("stop-add-goal");
 		};
 
-		watch(() => props.isActive, () => {
-			if (props.isActive) {
-				newGoalDialogVisible.value = props.addGoalPhase;
+		watch(() => props.isActive, async active => {
+			if (active) {
+				isDataLoading.value = true;
+				try {
+					await GoalsModule.getActiveGoals();
+					await GoalsModule.getCompletedGoals();
+					newGoalDialogVisible.value = props.addGoalPhase;
+				} finally {
+					isDataLoading.value = false;
+				}
 			}
-		});
+		}, { immediate: true });
 
 		return {
 			activeGoalsTableData,
