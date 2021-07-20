@@ -78,6 +78,7 @@ export default defineComponent({
 		<el-tab-pane
 			label="Health Concerns"
 			name="healthConcerns"
+			:lazy="true"
 		>
 			<HealthConcerns
 				@trigger-open-assessment="openAssessment"
@@ -86,6 +87,7 @@ export default defineComponent({
 		<el-tab-pane
 			label="Problems"
 			name="problems"
+			:lazy="true"
 		>
 			<Problems
 				@trigger-add-goal="handleAddGoalFromProblem"
@@ -96,6 +98,7 @@ export default defineComponent({
 		<el-tab-pane
 			label="Goals"
 			name="goals"
+			:lazy="true"
 		>
 			<Goals
 				:add-goal-phase="addGoalPhase"
@@ -107,6 +110,7 @@ export default defineComponent({
 		<el-tab-pane
 			label="Action Steps"
 			name="actionSteps"
+			:lazy="true"
 		>
 			<ActionSteps
 				:add-action-phase="addActionPhase"
@@ -118,6 +122,7 @@ export default defineComponent({
 		<el-tab-pane
 			label="Social Risk Assessments"
 			name="socialRiskAssessments"
+			:lazy="true"
 		>
 			<RiskAssessments
 				:open-assessment-phase="openAssessmentPhase"
@@ -129,6 +134,7 @@ export default defineComponent({
 		<el-tab-pane
 			label="Consents"
 			name="consents"
+			:lazy="true"
 		>
 			<Consents />
 		</el-tab-pane>

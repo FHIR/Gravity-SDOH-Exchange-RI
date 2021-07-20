@@ -30,7 +30,9 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.CurrentContextPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.CurrentContextPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.ProblemBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.GoalQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.query.ProblemQueryFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.TaskQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -144,12 +146,10 @@ public class ProblemService {
   }
 
   private Bundle addTasksAndSRsToConditionBundle(Bundle responseBundle) {
-    Bundle tasksWithServiceRequests = ehrClient.search()
-        .forResource(Task.class)
+    Bundle tasksWithServiceRequests = new TaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .include(Task.INCLUDE_FOCUS)
         //Handle as much tasks as possible without pagination..
         //TODO use pagination
-        .count(1000)
         .returnBundle(Bundle.class)
         .execute();
 
@@ -164,14 +164,12 @@ public class ProblemService {
   }
 
   private Bundle addGoalsToConditionBundle(Bundle responseBundle) {
-    Bundle goals = ehrClient.search()
-        .forResource(Goal.class)
+    Bundle goals = new GoalQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         //We request only the ones showed on UI
         .where(Goal.LIFECYCLE_STATUS.exactly()
             .codes(Goal.GoalLifecycleStatus.ACTIVE.toCode(), Goal.GoalLifecycleStatus.COMPLETED.toCode()))
         //Handle as much goals as possible without pagination.
         //TODO use pagination
-        .count(1000)
         .returnBundle(Bundle.class)
         .execute();
 

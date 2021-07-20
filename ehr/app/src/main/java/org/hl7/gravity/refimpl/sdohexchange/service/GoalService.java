@@ -25,6 +25,7 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.GoalPrepareBundleExtrac
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.GoalBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.GoalPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.query.GoalQueryFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.TaskQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -153,12 +154,10 @@ public class GoalService {
 
   //TODO refactor. this fragmet ins used in a ProblemService as well.
   private Bundle addTasksAndSRsToGoalBundle(Bundle responseBundle) {
-    Bundle tasksWithServiceRequests = ehrClient.search()
-        .forResource(Task.class)
+    Bundle tasksWithServiceRequests = new TaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .include(Task.INCLUDE_FOCUS)
         //Handle as much tasks as possible without pagination..
         //TODO use pagination
-        .count(1000)
         .returnBundle(Bundle.class)
         .execute();
 
