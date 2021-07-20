@@ -1,12 +1,5 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.reference;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Condition;
@@ -17,6 +10,14 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.reference.util.ServiceRequestReferenceCollector;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Reference resolver for {@link ServiceRequest} resource.
@@ -151,17 +152,20 @@ public class ServiceRequestReferenceResolver implements ReferenceResolver {
   }
 
   public Consent getConsent(IIdType iIdType) {
-    Consent consent = externalConsents.get(iIdType.getIdPart())
-        .copy();
-    // Remove SDOH profile, Logica does not support this.
-    // TODO Use SDOH Profiles.
-    consent.setMeta(null);
-    // Set identifier to link resource from EHR
-    consent.addIdentifier()
-        .setSystem(identifierSystem)
-        .setValue(consent.getIdElement()
-            .getIdPart());
-    consent.setId(IdType.newRandomUuid());
+    Consent consent = localConsents.get(iIdType.getIdPart());
+    if (consent == null) {
+      consent = externalConsents.get(iIdType.getIdPart())
+          .copy();
+      // Remove SDOH profile, Logica does not support this.
+      // TODO Use SDOH Profiles.
+      consent.setMeta(null);
+      // Set identifier to link resource from EHR
+      consent.addIdentifier()
+          .setSystem(identifierSystem)
+          .setValue(consent.getIdElement()
+              .getIdPart());
+      consent.setId(IdType.newRandomUuid());
+    }
     return consent;
   }
 

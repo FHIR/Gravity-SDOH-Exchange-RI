@@ -2,9 +2,6 @@ package org.hl7.gravity.refimpl.sdohexchange.fhir.reference;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -22,6 +19,10 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.ResourceLoader;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -51,8 +52,8 @@ public class TaskReferenceResourcesLoader {
       Bundle bundle) {
     TaskReferenceResolver referenceResolver = new TaskReferenceResolver(task, identifierSystem);
     // Load local references in one transaction
-    referenceResolver.setLocalResources(resourceLoader.getResourcesBySystem(openCpClient, identifierSystem,
-        referenceResolver.getLocalReferences()));
+    referenceResolver.setLocalResources(
+        resourceLoader.getResourcesBySystem(openCpClient, identifierSystem, referenceResolver.getLocalReferences()));
     // Load EHR references in one transaction
     referenceResolver.setExternalResources(
         resourceLoader.getResources(ehrClient, referenceResolver.getExternalReferences()));
@@ -87,11 +88,11 @@ public class TaskReferenceResourcesLoader {
 
   private void processServiceRequestReferences(IGenericClient ehrClient, TaskReferencesHolder taskReferencesHolder,
       String identifierSystem, Bundle bundle) {
-    ServiceRequestReferenceResolver referenceResolver =
-        new ServiceRequestReferenceResolver(taskReferencesHolder.getServiceRequest(), identifierSystem);
+    ServiceRequestReferenceResolver referenceResolver = new ServiceRequestReferenceResolver(
+        taskReferencesHolder.getServiceRequest(), identifierSystem);
     // Load local references in one transaction
-    referenceResolver.setLocalResources(resourceLoader.getResourcesBySystem(openCpClient, identifierSystem,
-        referenceResolver.getLocalReferences()));
+    referenceResolver.setLocalResources(
+        resourceLoader.getResourcesBySystem(openCpClient, identifierSystem, referenceResolver.getLocalReferences()));
     // Load EHR references in one transaction
     referenceResolver.setExternalResources(
         resourceLoader.getResources(ehrClient, referenceResolver.getExternalReferences()));
@@ -132,7 +133,8 @@ public class TaskReferenceResourcesLoader {
       processedConditions.put(condition.getIdentifierFirstRep()
           .getValue(), condition);
     }
-    referenceConsumers.put(Condition.class.getSimpleName(), new ConditionReferenceConsumer(processedConditions));
+    referenceConsumers.put(Condition.class.getSimpleName(),
+        new ConditionReferenceConsumer(ehrClient.getServerBase(), processedConditions));
 
     for (Reference serviceRequestRef : referenceResolver.getGoalsRefs()) {
       IIdType serviceRequestEl = serviceRequestRef.getReferenceElement();
@@ -178,13 +180,20 @@ public class TaskReferenceResourcesLoader {
   @AllArgsConstructor
   private static class ConditionReferenceConsumer implements Consumer<IIdType> {
 
+    private final String serverBase;
     private final Map<String, Condition> processedConditions;
 
     @Override
     public void accept(IIdType resourceEl) {
       Condition condition = processedConditions.get(resourceEl.getIdPart());
-      resourceEl.setParts(null, resourceEl.getResourceType(), condition.getIdElement()
-          .getIdPart(), null);
+      //Condition can be null in case it is indirectly referenced. For example by an underlying Goal resource.
+      //TODO do we need to fetch Goal conditions as well?
+      if (condition == null) {
+        resourceEl.setParts(serverBase, resourceEl.getResourceType(), resourceEl.getIdPart(), null);
+      } else {
+        resourceEl.setParts(null, resourceEl.getResourceType(), condition.getIdElement()
+            .getIdPart(), null);
+      }
     }
   }
 }
