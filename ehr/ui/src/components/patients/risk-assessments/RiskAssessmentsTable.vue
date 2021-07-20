@@ -20,7 +20,7 @@ export default defineComponent({
 	>
 		<el-table :data="data">
 			<el-table-column
-				label="Planned Assessment Name"
+				label="Assessment Name"
 			>
 				<template #default="scope">
 					<el-button

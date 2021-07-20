@@ -67,7 +67,7 @@ export default defineComponent({
 				category: task.serviceRequest.category,
 				problems: task.serviceRequest.conditions,
 				goals: task.serviceRequest.goals,
-				performer: task.organization?.name,
+				performer: task.organization?.display,
 				consent: task.serviceRequest.consent.display,
 				outcomes: task.outcome,
 				comments: task.comments,
