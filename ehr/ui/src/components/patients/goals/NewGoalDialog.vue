@@ -224,7 +224,7 @@ export default defineComponent({
 			</el-form-item>
 
 			<el-form-item
-				label="Creation Date"
+				label="Start Date"
 				prop="startDate"
 			>
 				<el-date-picker

@@ -44,7 +44,7 @@ export type Task = {
 	id: string,
 	lastModified: string | null,
 	name: string,
-	organization: Organization | null,
+	organization: TaskOrganization | null,
 	outcome: string | null,
 	priority: "ASAP" | "Routine" | "Urgent" | null,
 	procedures: Procedure[]
@@ -58,6 +58,11 @@ export type Organization = {
 	name: string,
 	id: string,
 	type: "CBO" | "CBRO"
+};
+
+export type TaskOrganization = {
+	id: string,
+	display: string
 };
 
 export type Occurrence = {
