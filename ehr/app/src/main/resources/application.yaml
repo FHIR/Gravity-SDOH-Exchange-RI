@@ -37,4 +37,4 @@ swagger:
     name: Gravity Project
     url: https://www.hl7.org/gravity/
 scheduling:
-  task-polling-delay-millis: 10000
+  task-polling-delay-millis: 30000
