@@ -1,0 +1,39 @@
+@import "~@/assets/scss/abstracts/mixins";
+@import "~@/assets/scss/abstracts/variables";
+
+// change default content model
+html {
+	box-sizing: border-box;
+	font-size: 16px;
+	color: $global-text-color;
+
+	@include scrollbar(5px, $silver);
+}
+
+img,
+svg {
+	box-sizing: content-box;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+}
+
+.text-muted {
+	color: $global-text-muted-color;
+}
+
+a,
+a:hover,
+a:active,
+a:focus {
+	color: $global-primary-color;
+}
+
+ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}

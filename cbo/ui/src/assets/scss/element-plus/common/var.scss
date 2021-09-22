@@ -1,0 +1,29 @@
+@import "~@/assets/scss/abstracts/variables";
+
+/* Font
+-------------------------- */
+$--font-path: '~element-plus/lib/theme-chalk/fonts';
+$--font-weight-primary: $global-font-weight-normal;
+
+/* Color
+-------------------------- */
+$--color-primary: $global-primary-color;
+$--color-text-primary: $global-text-color;
+$--color-text-regular: $global-text-color;
+$--border-color-light: $global-base-border-color;
+$--background-color-base: $global-background;
+$--border-color-base: $global-base-border-color;
+
+/* Header
+  -------------------------- */
+$--header-padding: 0 45px;
+
+/* Main
+-------------------------- */
+$--main-padding: 30px 45px;
+
+/* Card
+-------------------------- */
+$--card-border-color: none;
+$--card-border-radius: 5px;
+$--card-padding: 20px;
