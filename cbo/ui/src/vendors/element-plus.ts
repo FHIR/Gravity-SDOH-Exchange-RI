@@ -3,6 +3,9 @@ import "@/assets/scss/element-plus/index.scss";
 import "element-plus/packages/theme-chalk/src/tabs.scss";
 import "element-plus/packages/theme-chalk/src/tab-pane.scss";
 import "element-plus/packages/theme-chalk/src/popover.scss";
+import "element-plus/packages/theme-chalk/src/container.scss";
+import "element-plus/packages/theme-chalk/src/main.scss";
+import "element-plus/packages/theme-chalk/src/button.scss";
 
 import {
 	ElContainer,
@@ -10,7 +13,8 @@ import {
 	ElMain,
 	ElPopover,
 	ElTabs,
-	ElTabPane
+	ElTabPane,
+	ElButton
 } from "element-plus";
 
 export default (app: App) => {
@@ -20,4 +24,5 @@ export default (app: App) => {
 	app.use(ElPopover);
 	app.use(ElTabs);
 	app.use(ElTabPane);
+	app.use(ElButton);
 };

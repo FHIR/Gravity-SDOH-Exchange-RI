@@ -1,0 +1,173 @@
+<script lang="ts">
+import { defineComponent } from "vue";
+import { ActiveTabModule } from "@/store/activeTab";
+
+export default defineComponent({
+	name: "MainHeader",
+	setup() {
+		const handleTabClick = (tab: any) => ActiveTabModule.setActiveTab(tab.paneName);
+
+		return {
+			activeTabName : ActiveTabModule.activeTab,
+			handleTabClick
+		};
+	}
+});
+</script>
+
+<template>
+	<div class="app-header">
+		<div class="cbo">
+			<img
+				class="gravity-logo"
+				src="~@/assets/images/logo.svg"
+				alt="logo"
+			>
+			<div class="title">
+				CBO A
+			</div>
+		</div>
+		<div class="nav-tabs">
+			<el-tabs
+				v-model="activeTabName"
+				@tab-click="handleTabClick"
+			>
+				<el-tab-pane
+					name="ar"
+				>
+					<template #label>
+						<div class="label-wrap">
+							Active Requests
+						</div>
+					</template>
+				</el-tab-pane>
+				<el-tab-pane
+					name="ir"
+				>
+					<template #label>
+						<div class="label-wrap">
+							Inactive Requests
+						</div>
+					</template>
+				</el-tab-pane>
+			</el-tabs>
+		</div>
+		<div class="sync">
+			Synchronization:
+		</div>
+		<div class="right-container">
+			<el-button
+				plain
+				round
+			>
+				Synchronize
+			</el-button>
+			<el-button
+				plain
+				round
+			>
+				Manage Servers
+			</el-button>
+		</div>
+	</div>
+</template>
+
+<style lang="scss" scoped>
+@import "~@/assets/scss/abstracts/variables";
+
+.app-header {
+	height: 80px;
+	flex-shrink: 0;
+	border: $global-border;
+	display: flex;
+	align-items: center;
+	background-color: $alice-blue;
+	padding-right: 45px;
+	box-shadow: 0 2px 5px 0 #33333340;
+
+	.cbo {
+		border-right: $global-border;
+		padding: 10px 45px 0 45px;
+		height: 100%;
+
+		.gravity-logo {
+			width: 56px;
+		}
+
+		.title {
+			margin-top: 4px;
+			font-size: $global-font-size;
+			font-weight: 500;
+			line-height: 16px;
+
+			.secondary {
+				color: $grey;
+			}
+		}
+	}
+
+	.nav-tabs {
+		height: 100%;
+
+		::v-deep(.el-tabs) {
+			height: 100%;
+
+			.el-tabs__header {
+				height: 100%;
+				margin: 0;
+			}
+
+			.el-tabs__nav-wrap {
+				height: 100%;
+			}
+
+			.el-tabs__nav-wrap::after {
+				display: none;
+			}
+
+			.el-tabs__nav-scroll {
+				height: 100%;
+			}
+
+			.el-tabs__nav {
+				height: 100%;
+			}
+
+			.el-tabs__active-bar {
+				background-color: $global-primary-color;
+			}
+
+			.el-tabs__item {
+				height: 100%;
+				padding: 20px 0 0 0;
+				width: 50%;
+			}
+
+			.el-tabs__item .label-wrap {
+				padding: 0 45px;
+				height: 40px;
+				font-size: $global-medium-font-size;
+				font-weight: $global-font-weight-normal;
+				color: $global-text-color;
+			}
+
+			.el-tabs__item.is-active .label-wrap {
+				font-weight: $global-font-weight-medium;
+			}
+
+			.el-tabs__item:not(:last-child) .label-wrap {
+				border-right: $global-border;
+			}
+		}
+	}
+
+	.sync {
+		margin-left: 130px;
+	}
+
+	.right-container {
+		margin-left: auto;
+		display: flex;
+	}
+}
+</style>
