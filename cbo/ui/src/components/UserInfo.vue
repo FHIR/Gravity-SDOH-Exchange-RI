@@ -1,8 +1,19 @@
 <script lang="ts">
-import { defineComponent } from "vue";
+import "@/assets/scss/styles.scss";
+import { defineComponent, computed } from "vue";
+import { ContextModule } from "@/store/context";
 
 export default defineComponent({
-	name: "UserInfo"
+	name: "UserInfo",
+	setup() {
+		const userName = computed<string | null | undefined>(() => ContextModule.user?.name);
+		const userType = computed<string | null | undefined>(() => ContextModule.user?.userType);
+
+		return {
+			userName,
+			userType
+		};
+	}
 });
 </script>
 
@@ -28,8 +39,7 @@ export default defineComponent({
 			>Logout</a>
 			<template #reference>
 				<div class="details">
-					<span class="name">Colin</span>
-					<span class="surname">Brooks</span>
+					<span class="name">{{ userName }}</span>
 				</div>
 			</template>
 		</el-popover>
@@ -63,7 +73,7 @@ export default defineComponent({
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	margin-right: 20px;
+	margin-right: 15px;
 
 	.image {
 		width: 42px;

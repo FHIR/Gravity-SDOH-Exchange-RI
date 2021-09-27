@@ -3,9 +3,11 @@ import { defineComponent, computed } from "vue";
 import { ActiveTabModule } from "@/store/activeTab";
 import router from "@/router";
 import { useRoute } from "vue-router";
+import UserInfo from "@/components/UserInfo.vue";
 
 export default defineComponent({
 	name: "MainHeader",
+	components: { UserInfo },
 	setup() {
 		const route = useRoute();
 		const handleTabClick = (tab: any) => ActiveTabModule.setActiveTab(tab.paneName);
@@ -83,11 +85,12 @@ export default defineComponent({
 			<el-button
 				plain
 				round
-				@click=" currentRoute === '/' ? router.push('/servers') : router.push('/')"
+				@click="currentRoute === '/' ? router.push('/servers') : router.push('/')"
 			>
 				{{ currentRoute === "/" ? "Manage Servers" : "Back to Requests" }}
 			</el-button>
 		</div>
+		<UserInfo />
 	</div>
 </template>
 
