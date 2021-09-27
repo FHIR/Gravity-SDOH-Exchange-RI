@@ -1,15 +1,21 @@
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
 import { ActiveTabModule } from "@/store/activeTab";
+import router from "@/router";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
 	name: "MainHeader",
 	setup() {
+		const route = useRoute();
 		const handleTabClick = (tab: any) => ActiveTabModule.setActiveTab(tab.paneName);
+		const currentRoute = computed<string>(() => route.path);
 
 		return {
 			activeTabName : ActiveTabModule.activeTab,
-			handleTabClick
+			handleTabClick,
+			router,
+			currentRoute
 		};
 	}
 });
@@ -27,7 +33,10 @@ export default defineComponent({
 				CBO A
 			</div>
 		</div>
-		<div class="nav-tabs">
+		<div
+			v-if="currentRoute === '/'"
+			class="nav-tabs"
+		>
 			<el-tabs
 				v-model="activeTabName"
 				@tab-click="handleTabClick"
@@ -52,7 +61,16 @@ export default defineComponent({
 				</el-tab-pane>
 			</el-tabs>
 		</div>
-		<div class="sync">
+		<div
+			v-if="currentRoute === '/servers'"
+			class="sub-header"
+		>
+			Manage Servers
+		</div>
+		<div
+			class="sync"
+			:class="{ 'sync-margin' : currentRoute === '/servers' }"
+		>
 			Synchronization:
 		</div>
 		<div class="right-container">
@@ -65,8 +83,9 @@ export default defineComponent({
 			<el-button
 				plain
 				round
+				@click=" currentRoute === '/' ? router.push('/servers') : router.push('/')"
 			>
-				Manage Servers
+				{{ currentRoute === "/" ? "Manage Servers" : "Back to Requests" }}
 			</el-button>
 		</div>
 	</div>
@@ -161,8 +180,19 @@ export default defineComponent({
 		}
 	}
 
+	.sub-header {
+		padding: 0 45px;
+		color: $global-text-color;
+		font-weight: $global-font-weight-medium;
+		font-size: $global-medium-font-size;
+	}
+
 	.sync {
 		margin-left: 130px;
+	}
+
+	.sync-margin {
+		margin-left: 320px;
 	}
 
 	.right-container {

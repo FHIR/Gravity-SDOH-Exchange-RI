@@ -1,11 +1,9 @@
 <script lang="ts">
 import "@/assets/scss/styles.scss";
 import { defineComponent } from "vue";
-import MainHeader from "@/components/MainHeader.vue";
 
 export default defineComponent({
-	name: "App",
-	components: { MainHeader }
+	name: "App"
 });
 </script>
 
@@ -13,9 +11,15 @@ export default defineComponent({
 	<el-container
 		direction="vertical"
 	>
-		<MainHeader />
 		<el-main>
 			<router-view />
 		</el-main>
 	</el-container>
 </template>
+
+<style lang="scss" scoped>
+
+::v-deep(.el-main) {
+	padding: 0;
+}
+</style>
