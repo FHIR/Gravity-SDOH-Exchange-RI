@@ -1,11 +1,5 @@
 import { App } from "vue";
 import "@/assets/scss/element-plus/index.scss";
-import "element-plus/packages/theme-chalk/src/tabs.scss";
-import "element-plus/packages/theme-chalk/src/tab-pane.scss";
-import "element-plus/packages/theme-chalk/src/popover.scss";
-import "element-plus/packages/theme-chalk/src/container.scss";
-import "element-plus/packages/theme-chalk/src/main.scss";
-import "element-plus/packages/theme-chalk/src/button.scss";
 
 import {
 	ElContainer,
@@ -14,8 +8,24 @@ import {
 	ElPopover,
 	ElTabs,
 	ElTabPane,
-	ElButton
+	ElForm,
+	ElFormItem,
+	ElButton,
+	ElInput,
+	ElAlert
 } from "element-plus";
+//todo: use unplugin-vue-components
+import "element-plus/es/components/container/style/css";
+import "element-plus/es/components/header/style/css";
+import "element-plus/es/components/main/style/css";
+import "element-plus/es/components/popover/style/css";
+import "element-plus/es/components/tabs/style/css";
+import "element-plus/es/components/tab-pane/style/css";
+import "element-plus/es/components/form/style/css";
+import "element-plus/es/components/form-item/style/css";
+import "element-plus/es/components/button/style/css";
+import "element-plus/es/components/input/style/css";
+import "element-plus/es/components/alert/style/css";
 
 export default (app: App) => {
 	app.use(ElContainer);
@@ -24,5 +34,9 @@ export default (app: App) => {
 	app.use(ElPopover);
 	app.use(ElTabs);
 	app.use(ElTabPane);
+	app.use(ElForm);
+	app.use(ElFormItem);
 	app.use(ElButton);
+	app.use(ElInput);
+	app.use(ElAlert);
 };

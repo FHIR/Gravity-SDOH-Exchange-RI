@@ -2,6 +2,8 @@
 import "@/assets/scss/styles.scss";
 import { defineComponent, computed } from "vue";
 import { ContextModule } from "@/store/context";
+import { AuthModule } from "@/store/modules/auth";
+import router from "@/router/index";
 
 export default defineComponent({
 	name: "UserInfo",
@@ -9,9 +11,15 @@ export default defineComponent({
 		const userName = computed<string | null | undefined>(() => ContextModule.user?.name);
 		const userType = computed<string | null | undefined>(() => ContextModule.user?.userType);
 
+		const handleLogout = (): void => {
+			AuthModule.logout();
+			router.push("/login");
+		};
+
 		return {
 			userName,
-			userType
+			userType,
+			handleLogout
 		};
 	}
 });
@@ -33,10 +41,13 @@ export default defineComponent({
 			trigger="click"
 			:append-to-body="false"
 		>
-			<a
+			<el-button
 				class="logout"
-				href="/logout"
-			>Logout</a>
+				type="text"
+				@click="handleLogout"
+			>
+				Logout
+			</el-button>
 			<template #reference>
 				<div class="details">
 					<span class="name">{{ userName }}</span>
