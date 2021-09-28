@@ -1,0 +1,13 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-button {
+	&.is-round {
+		font-weight: $global-font-weight-normal;
+	}
+}
+
+.el-button.is-plain.is-round:hover,
+.el-button.is-plain.is-round:focus {
+	color: $night-rider;
+	box-shadow: 0 2px 5px 0 #33333340;
+}
