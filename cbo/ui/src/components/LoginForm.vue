@@ -62,7 +62,7 @@ export default defineComponent({
 
 			<el-button
 				class="log-in-button"
-				type="primary"
+				round
 				plain
 				:disabled="!loginButtonEnabled"
 				@click="handleLogin"
