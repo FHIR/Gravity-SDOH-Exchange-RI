@@ -106,6 +106,7 @@ export default defineComponent({
 	background-color: $alice-blue;
 	padding-right: 45px;
 	box-shadow: 0 2px 5px 0 #33333340;
+	margin-bottom: 40px;
 
 	.cbo {
 		border-right: $global-border;
