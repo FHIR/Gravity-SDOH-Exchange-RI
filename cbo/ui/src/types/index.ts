@@ -73,3 +73,24 @@ export type Occurrence = {
 	end: string,
 	start?: string
 }
+
+export type UpdatedStatus =
+	| "Accepted"
+	| "In Progress"
+	| "On Hold"
+	| "Rejected"
+	| "Cancelled"
+	| "Completed"
+
+export type UpdateTaskPayload = {
+	comment?: string,
+	outcome?: string,
+	statusReason?: string,
+	procedureCodes?: string[],
+	status: UpdatedStatus
+}
+
+export type Procedure = {
+	code: string,
+	display: string
+}

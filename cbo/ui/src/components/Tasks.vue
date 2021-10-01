@@ -3,6 +3,7 @@ import { defineComponent, ref, h } from "vue";
 import { Task, TaskWithState } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
+import TaskEditDialog from "@/components/TaskEditDialog.vue";
 
 const poll = <T>(
 	makeRequest: () => Promise<T>,
@@ -26,7 +27,7 @@ const poll = <T>(
 
 
 export default defineComponent({
-	components: { TaskTable },
+	components: { TaskTable, TaskEditDialog },
 	props: {
 		requestType: {
 			type: String,
@@ -44,8 +45,22 @@ export default defineComponent({
 			tasks.value = activeRequests.map((task: Task) => ({ task, isNew: false })) :
 			tasks.value = inactiveRequests.map((task: Task) => ({ task, isNew: false }));
 
+		const taskInEdit = ref<Task | null>(null);
+
+		const editTask = (taskToEdit: TaskWithState) => {
+			// markTaskAsNotNew(taskToEdit.task.id);
+			taskInEdit.value = taskToEdit.task;
+		};
+
+		const closeDialog = () => {
+			taskInEdit.value = null;
+		};
+
 		return {
-			tasks
+			tasks,
+			editTask,
+			closeDialog,
+			taskInEdit
 		};
 	}
 });
@@ -53,6 +68,11 @@ export default defineComponent({
 
 <template>
 	<div class="tasks">
+		<TaskEditDialog
+			:task="taskInEdit"
+			@close="closeDialog"
+			@task-updated="updateTaskFromDialog"
+		/>
 		<div class="filters">
 			<label>Search:</label>
 			<el-input
@@ -69,6 +89,7 @@ export default defineComponent({
 		<div class="table-card">
 			<TaskTable
 				:tasks="tasks"
+				@task-name-click="editTask"
 			/>
 		</div>
 	</div>

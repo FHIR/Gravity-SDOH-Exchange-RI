@@ -8,7 +8,7 @@ const dataOnly = <T>({ data }: { data: T }): T => data;
 export const getTasks = () => ([
 	{
 		id: "1",
-		name: "first task",
+		name: "Task number 1",
 		createdAt: "29.01.1987",
 		lastModified: "12.12.1234",
 		priority: "high",
@@ -60,8 +60,61 @@ export const getTasks = () => ([
 		}]
 	},
 	{
-		id: "1",
-		name: "first task",
+		id: "2",
+		name: "Task number 2",
+		createdAt: "29.01.1987",
+		lastModified: "12.12.1234",
+		priority: "high",
+		status: "Received",
+		syncStatus: "Sep 15, 2021, 10:30 AM",
+		requestType: "active",
+		serviceRequest: {
+			id: "12",
+			occurrence: {
+				end: "12313",
+				start: "123131"
+			},
+			category: {
+				code: "1231",
+				display: "Nutrition"
+			},
+			code: {
+				code: "code",
+				display: "Bybluk"
+			}
+		},
+		requester: {
+			resourceType: "1231",
+			id: "13131",
+			display: "131313"
+		},
+		patient: {
+			resourceType: "2we2f",
+			id: "werwrw",
+			display: "Supers Racca"
+		},
+		consent: "consent",
+		comments: [
+			{
+				author: {
+					resourceType: "dahjkhdk",
+					id: "dasdasda",
+					display: "asdasda"
+				},
+				time: "123131231",
+				text: "31231313"
+			}
+		],
+		outcome: "outcome text",
+		statusReason: "Status reason text",
+		procedures: [{
+			id: "131231",
+			display: "1312313"
+		}]
+	},
+	{
+		id: "3",
+		name: "Task number 3",
 		createdAt: "29.01.1987",
 		lastModified: "12.12.1234",
 		priority: "high",
@@ -113,61 +166,8 @@ export const getTasks = () => ([
 		}]
 	},
 	{
-		id: "1",
-		name: "first task",
-		createdAt: "29.01.1987",
-		lastModified: "12.12.1234",
-		priority: "high",
-		status: "Received",
-		syncStatus: "Sep 15, 2021, 10:30 AM",
-		requestType: "active",
-		serviceRequest: {
-			id: "12",
-			occurrence: {
-				end: "12313",
-				start: "123131"
-			},
-			category: {
-				code: "1231",
-				display: "Nutrition"
-			},
-			code: {
-				code: "code",
-				display: "Bybluk"
-			}
-		},
-		requester: {
-			resourceType: "1231",
-			id: "13131",
-			display: "131313"
-		},
-		patient: {
-			resourceType: "2we2f",
-			id: "werwrw",
-			display: "werwrwerw"
-		},
-		consent: "consent",
-		comments: [
-			{
-				author: {
-					resourceType: "dahjkhdk",
-					id: "dasdasda",
-					display: "asdasda"
-				},
-				time: "123131231",
-				text: "31231313"
-			}
-		],
-		outcome: "outcome text",
-		statusReason: "Status reason text",
-		procedures: [{
-			id: "131231",
-			display: "1312313"
-		}]
-	},
-	{
-		id: "1",
-		name: "first task",
+		id: "4",
+		name: "Task number 4",
 		createdAt: "29.01.1987",
 		lastModified: "12.12.1234",
 		priority: "high",
@@ -219,8 +219,8 @@ export const getTasks = () => ([
 		}]
 	},
 	{
-		id: "1",
-		name: "first task",
+		id: "5",
+		name: "Task number 5",
 		createdAt: "29.01.1987",
 		lastModified: "12.12.1234",
 		priority: "high",
@@ -272,8 +272,8 @@ export const getTasks = () => ([
 		}]
 	},
 	{
-		id: "1",
-		name: "first task",
+		id: "6",
+		name: "Task number 6",
 		createdAt: "29.01.1987",
 		lastModified: "12.12.1234",
 		priority: "high",

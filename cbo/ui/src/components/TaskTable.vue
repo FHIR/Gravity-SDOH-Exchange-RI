@@ -64,13 +64,19 @@ export default defineComponent({
 			required: true
 		}
 	},
-	emits: ["task-name-click", "view-resources"],
+	emits: ["task-name-click"],
 	setup(props, ctx) {
 		const tasksInOrder = computed(() => [...props.tasks].sort(orderOnTasks));
 		const tableData = computed(() => tasksInOrder.value.map(displayTask));
 
+		const taskNameClick = (taskId: string) => {
+			const task: TaskWithState = props.tasks.find(taskState => taskState.task.id === taskId)!;
+			ctx.emit("task-name-click", task);
+		};
+
 		return {
-			tableData
+			tableData,
+			taskNameClick
 		};
 	}
 });
