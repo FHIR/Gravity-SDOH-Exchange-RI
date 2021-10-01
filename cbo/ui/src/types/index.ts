@@ -20,6 +20,8 @@ export type Task = {
 	lastModified: string,
 	priority: string,
 	status: any,
+	syncStatus: string,
+	requestType: string,
 	serviceRequest: {
 		id: string,
 		occurrence: Occurrence,

@@ -3,9 +3,6 @@ import { defineComponent, ref, h } from "vue";
 import { Task, TaskWithState } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
-import TaskEditDialog from "@/components/TaskEditDialog.vue";
-import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
-
 
 const poll = <T>(
 	makeRequest: () => Promise<T>,
@@ -30,65 +27,22 @@ const poll = <T>(
 
 export default defineComponent({
 	components: { TaskTable },
-	setup() {
+	props: {
+		requestType: {
+			type: String,
+			required: true
+		}
+	},
+	setup(props) {
 		const tasks = ref<TaskWithState[]>([]);
 
 		const foo = getTasks();
-		console.log(foo);
-		tasks.value = foo.map(task => ({ task, isNew: false }));
-		// getTasks().then(resp => {
-		// 	tasks.value = resp.map(task => ({ task, isNew: false }));
-		// });
+		const activeRequests = foo.filter((task: Task) => task.requestType === "active");
+		const inactiveRequests = foo.filter((task: Task) => task.requestType === "inactive");
 
-		const isTaskNew = (task: Task) => {
-			const existingTask = tasks.value.find(ts => ts.task.id === task.id);
-			return existingTask === undefined || existingTask.isNew;
-		};
-
-		const updateTasks = (newList: Task[]) => {
-			tasks.value = newList.map(task => ({
-				task,
-				isNew: isTaskNew(task)
-			}));
-		};
-
-		const findUpdates = (newList: Task[]): { name: string, oldStatus: string, newStatus: string }[] =>
-			newList.flatMap(task => {
-				const existingTask = tasks.value.find(ts => ts.task.id === task.id);
-				if (!existingTask) {
-					return [];
-				}
-				const oldStatus = existingTask.task.status;
-				const newStatus = task.status;
-				if (oldStatus === newStatus) {
-					return [];
-				}
-				return [{
-					name: task.name,
-					oldStatus,
-					newStatus
-				}];
-			});
-
-		const showUpdates = (newList: Task[]) => {
-			findUpdates(newList).forEach(update => {
-				const message = h("p", [
-					`EHR changed status of task "${update.name}" from `,
-					//todo: for some reason ts pops up error about incorrect import
-					// @ts-ignore
-					h(TaskStatusDisplay, {
-						status: update.oldStatus,
-						small: true
-					}),
-					" to ",
-					// @ts-ignore
-					h(TaskStatusDisplay,{
-						status: update.newStatus,
-						small: true
-					})
-				]);
-			});
-		};
+		props.requestType === "active" ?
+			tasks.value = activeRequests.map((task: Task) => ({ task, isNew: false })) :
+			tasks.value = inactiveRequests.map((task: Task) => ({ task, isNew: false }));
 
 		return {
 			tasks
@@ -115,7 +69,6 @@ export default defineComponent({
 		<div class="table-card">
 			<TaskTable
 				:tasks="tasks"
-				@task-name-click="editTask"
 			/>
 		</div>
 	</div>
@@ -154,7 +107,6 @@ export default defineComponent({
 
 	.table-card {
 		margin-top: 30px;
-		//flex: 1;
 		height: calc(100% - 210px);
 		width: 100%;
 		background-color: $global-background;

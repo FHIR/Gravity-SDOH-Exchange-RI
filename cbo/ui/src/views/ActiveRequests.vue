@@ -10,7 +10,7 @@ export default defineComponent({
 
 <template>
 	<div class="active-requests">
-		<Tasks />
+		<Tasks request-type="active" />
 	</div>
 </template>
 

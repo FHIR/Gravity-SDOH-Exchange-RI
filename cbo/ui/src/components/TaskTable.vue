@@ -19,7 +19,9 @@ type TaskDisplayFields = {
 	performingCBO: string,
 	payer: string,
 	comment: string,
-	outcome: string
+	outcome: string,
+	syncStatus: string,
+	requestType: string
 }
 
 
@@ -30,6 +32,8 @@ const displayTask = ({ task, isNew }: TaskWithState): TaskDisplayFields => ({
 	requestDate: showDate(task.createdAt),
 	priority: task.priority,
 	status: task.status,
+	syncStatus: task.syncStatus,
+	requestType: task.requestType,
 	category: task.serviceRequest.category.display,
 	requestor: task.requester.display,
 	patient: task.patient.display,
@@ -65,19 +69,8 @@ export default defineComponent({
 		const tasksInOrder = computed(() => [...props.tasks].sort(orderOnTasks));
 		const tableData = computed(() => tasksInOrder.value.map(displayTask));
 
-		const taskNameClick = (taskId: string) => {
-			const task: TaskWithState = props.tasks.find(taskState => taskState.task.id === taskId)!;
-			ctx.emit("task-name-click", task);
-		};
-
-		const taskViewResourcesClick = (taskId: string) => {
-			ctx.emit("view-resources", taskId);
-		};
-
 		return {
-			tableData,
-			taskNameClick,
-			taskViewResourcesClick
+			tableData
 		};
 	}
 });
@@ -114,18 +107,18 @@ export default defineComponent({
 			<el-table-column
 				prop="requestDate"
 				label="Request Date"
-				:width="120"
+				width="120"
 			/>
 
 			<el-table-column
 				prop="priority"
 				label="Priority"
-				:width="90"
+				width="90"
 			/>
 
 			<el-table-column
 				label="Status"
-				:width="130"
+				width="130"
 			>
 				<template #default="{ row }">
 					<!-- scope.row is empty on first render for some reason -->
@@ -136,57 +129,63 @@ export default defineComponent({
 				</template>
 			</el-table-column>
 
-<!--			<el-table-column-->
-<!--				prop="category"-->
-<!--				label="Category"-->
-<!--			/>-->
-
 			<el-table-column
 				prop="requestor"
 				label="Requestor"
-				class-name="column-interactive"
-			/>
+				width="140"
+			>
+				<template #default="{ row }">
+					<span class="clickable-text"> {{ row.requestor }} </span>
+				</template>
+			</el-table-column>
 
 			<el-table-column
 				prop="patient"
 				label="Patient"
-			/>
+				width="140"
+			>
+				<template #default="{ row }">
+					<span class="clickable-text">{{ row.patient }}</span>
+				</template>
+			</el-table-column>
 
 			<el-table-column
 				prop="consent"
 				label="Consent"
-				:width="80"
+				width="80"
 			/>
 
 			<el-table-column
 				prop="comment"
 				label="Comment"
+				width="100"
 			/>
 
 			<el-table-column
 				prop="performingCBO"
 				label="Outcome/Reason"
-				class-name="column-interactive"
+				width="160"
 			/>
 
 			<el-table-column
 				label="Resources"
-				:width="90"
+				width="120"
 			>
-				<template #default="{ row }">
-					<el-button
-						type="text"
-						@click="taskViewResourcesClick(row.id)"
-					>
-						view
-					</el-button>
-				</template>
+				<span class="clickable-text">view</span>
 			</el-table-column>
 
 			<el-table-column
-				prop="payer"
+				prop="syncStatus"
 				label="Synchronization Status"
-			/>
+				class-name="sync-cell"
+			>
+				<template #default="{ row }">
+					<div class="sync-wrapper">
+						<div class="sync-icon"></div>
+						Synced <span class="sync-date"> {{ row.syncStatus }} </span>
+					</div>
+				</template>
+			</el-table-column>
 		</el-table>
 	</div>
 </template>
@@ -260,9 +259,12 @@ export default defineComponent({
 				}
 			}
 
-			.el-button--text {
+			.clickable-text {
 				color: $global-primary-color;
 				text-decoration: underline;
+				font-weight: $global-font-weight-normal;
+				font-size: $global-medium-font-size;
+				cursor: pointer;
 			}
 
 			.cell:empty::after {
@@ -301,6 +303,22 @@ export default defineComponent({
 				border-radius: 1px;
 				user-select: none;
 			}
+		}
+	}
+
+	.sync-wrapper {
+		display: flex;
+		align-items: center;
+
+		.sync-icon {
+			background-image: url("~@/assets/images/sync-icon.svg");
+			width: 16px;
+			height: 16px;
+			margin-right: 5px;
+		}
+
+		.sync-date {
+			margin-left: 40px;
 		}
 	}
 }
