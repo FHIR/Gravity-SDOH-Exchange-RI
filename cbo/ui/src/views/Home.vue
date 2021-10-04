@@ -28,3 +28,12 @@ export default defineComponent({
 		<InactiveRequests v-else />
 	</div>
 </template>
+
+<style scoped lang="scss">
+@import "~@/assets/scss/abstracts/variables";
+
+.home {
+	height: 100%;
+	background-color: $alice-blue;
+}
+</style>

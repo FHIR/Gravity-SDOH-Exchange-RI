@@ -18,7 +18,7 @@ class Context extends VuexModule implements IContext {
 
 	@Action
 	async getContext(): Promise<void> {
-		const user: User = getContext();
+		const user: User = await getContext();
 
 		this.setUser(user);
 	}

@@ -12,18 +12,33 @@ export default defineComponent({
 </script>
 
 <template>
-	<el-container
-		direction="vertical"
-	>
-		<el-main>
-			<router-view />
-		</el-main>
-	</el-container>
+	<div class="app-container">
+		<div class="body">
+			<div class="main">
+				<router-view />
+			</div>
+		</div>
+	</div>
 </template>
 
 <style lang="scss" scoped>
+@import "~@/assets/scss/abstracts/variables";
 
-::v-deep(.el-main) {
-	padding: 0;
+.app-container {
+	width: 100vw;
+	height: 100vh;
+	background-color: $alice-blue;
+	display: flex;
+	flex-direction: column;
+
+	.body {
+		flex: 1;
+		overflow: hidden;
+
+		.main {
+			height: 100%;
+			width: 100%;
+		}
+	}
 }
 </style>

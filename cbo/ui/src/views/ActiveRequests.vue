@@ -1,13 +1,23 @@
 <script lang="ts">
 import { defineComponent } from "vue";
+import Tasks from "@/components/Tasks.vue";
 
 export default defineComponent({
-	name: "ActiveRequests"
+	name: "ActiveRequests",
+	components: { Tasks }
 });
 </script>
 
 <template>
 	<div class="active-requests">
-		Active
+		<Tasks request-type="active" />
 	</div>
 </template>
+
+<style scoped lang="scss">
+
+.active-requests {
+	height: 100%;
+	padding: 0 45px 45px 45px;
+}
+</style>
