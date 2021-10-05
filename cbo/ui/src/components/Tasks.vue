@@ -36,14 +36,17 @@ export default defineComponent({
 	},
 	setup(props) {
 		const tasks = ref<TaskWithState[]>([]);
+		const activeRequests = ref<Task[]>([]);
+		const inactiveRequests = ref<Task[]>([]);
 
-		const foo = getTasks();
-		const activeRequests = foo.filter((task: Task) => task.requestType === "active");
-		const inactiveRequests = foo.filter((task: Task) => task.requestType === "inactive");
+		getTasks().then((resp: Task[]) => {
+			activeRequests.value = resp.filter((task: Task) => task.requestType === "active");
+			inactiveRequests.value = resp.filter((task: Task) => task.requestType === "inactive");
 
-		props.requestType === "active" ?
-			tasks.value = activeRequests.map((task: Task) => ({ task, isNew: false })) :
-			tasks.value = inactiveRequests.map((task: Task) => ({ task, isNew: false }));
+			props.requestType === "active" ?
+				tasks.value = activeRequests.value.map((task: Task) => ({ task, isNew: false })) :
+				tasks.value = inactiveRequests.value.map((task: Task) => ({ task, isNew: false }));
+		});
 
 		const taskInEdit = ref<Task | null>(null);
 

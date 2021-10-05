@@ -1,11 +1,10 @@
-import { Task, TaskStatus } from "@/types";
+import { Task, User } from "@/types";
 
-export const getContext = () => ({ id: "vidsmok4uVBobra", name: "Colin Brooks", userType: "CEO" });
-
+export const getContext = async (): Promise<User> => ({ id: "vidsmok4uVBobra", name: "Colin Brooks", userType: "CEO" });
 const dataOnly = <T>({ data }: { data: T }): T => data;
 // export const getTasks = () => axios.get<Task[]>("/task").then(dataOnly);
 // TODO: Mock data while we don't have BE
-export const getTasks = () => ([
+export const getTasks = async (): Promise<Task[]> => ([
 	{
 		id: "1",
 		name: "Task number 1",
@@ -13,7 +12,6 @@ export const getTasks = () => ([
 		lastModified: "12.12.1234",
 		priority: "high",
 		status: "Accepted",
-		syncStatus: "Sep 15, 2021, 10:30 AM",
 		requestType: "active",
 		serviceRequest: {
 			id: "12",
@@ -66,7 +64,6 @@ export const getTasks = () => ([
 		lastModified: "12.12.1234",
 		priority: "high",
 		status: "Received",
-		syncStatus: "Sep 15, 2021, 10:30 AM",
 		requestType: "active",
 		serviceRequest: {
 			id: "12",
@@ -119,7 +116,6 @@ export const getTasks = () => ([
 		lastModified: "12.12.1234",
 		priority: "high",
 		status: "Received",
-		syncStatus: "Sep 15, 2021, 10:30 AM",
 		requestType: "active",
 		serviceRequest: {
 			id: "12",
@@ -172,7 +168,6 @@ export const getTasks = () => ([
 		lastModified: "12.12.1234",
 		priority: "high",
 		status: "Received",
-		syncStatus: "Sep 15, 2021, 10:30 AM",
 		requestType: "inactive",
 		serviceRequest: {
 			id: "12",
@@ -225,7 +220,6 @@ export const getTasks = () => ([
 		lastModified: "12.12.1234",
 		priority: "high",
 		status: "Received",
-		syncStatus: "Sep 15, 2021, 10:30 AM",
 		requestType: "inactive",
 		serviceRequest: {
 			id: "12",
@@ -278,7 +272,6 @@ export const getTasks = () => ([
 		lastModified: "12.12.1234",
 		priority: "high",
 		status: "Received",
-		syncStatus: "Sep 15, 2021, 10:30 AM",
 		requestType: "inactive",
 		serviceRequest: {
 			id: "12",

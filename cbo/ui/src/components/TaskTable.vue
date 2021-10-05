@@ -20,7 +20,6 @@ type TaskDisplayFields = {
 	payer: string,
 	comment: string,
 	outcome: string,
-	syncStatus: string,
 	requestType: string
 }
 
@@ -32,7 +31,6 @@ const displayTask = ({ task, isNew }: TaskWithState): TaskDisplayFields => ({
 	requestDate: showDate(task.createdAt),
 	priority: task.priority,
 	status: task.status,
-	syncStatus: task.syncStatus,
 	requestType: task.requestType,
 	category: task.serviceRequest.category.display,
 	requestor: task.requester.display,
@@ -168,7 +166,7 @@ export default defineComponent({
 			/>
 
 			<el-table-column
-				prop="performingCBO"
+				prop="outcome"
 				label="Outcome/Reason"
 				width="160"
 			/>
@@ -181,14 +179,13 @@ export default defineComponent({
 			</el-table-column>
 
 			<el-table-column
-				prop="syncStatus"
 				label="Synchronization Status"
 				class-name="sync-cell"
 			>
 				<template #default="{ row }">
 					<div class="sync-wrapper">
 						<div class="sync-icon"></div>
-						Synced <span class="sync-date"> {{ row.syncStatus }} </span>
+						Synced <span class="sync-date"> Sep 12, 2021, 10:00 AM </span>
 					</div>
 				</template>
 			</el-table-column>
