@@ -3,6 +3,8 @@ import { defineComponent, ref, h } from "vue";
 import { Task, TaskWithState } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
+import Filters from "@/components/Filters.vue";
+import TableCard from "@/components/TableCard.vue";
 import TaskEditDialog from "@/components/TaskEditDialog.vue";
 
 const poll = <T>(
@@ -27,7 +29,12 @@ const poll = <T>(
 
 
 export default defineComponent({
-	components: { TaskTable, TaskEditDialog },
+	components: {
+		TableCard,
+		Filters,
+		TaskTable,
+		TaskEditDialog
+	},
 	props: {
 		requestType: {
 			type: String,
@@ -71,6 +78,8 @@ export default defineComponent({
 
 <template>
 	<div class="tasks">
+		<Filters />
+		<TableCard>
 		<TaskEditDialog
 			:task="taskInEdit"
 			@close="closeDialog"
@@ -94,7 +103,7 @@ export default defineComponent({
 				:tasks="tasks"
 				@task-name-click="editTask"
 			/>
-		</div>
+		</TableCard>
 	</div>
 </template>
 
@@ -108,36 +117,11 @@ export default defineComponent({
 	background-color: $alice-blue;
 
 	.filters {
-		flex-shrink: 0;
-		width: 100%;
-		padding: 20px;
-		background-color: $global-background;
-		box-shadow: 0 2px 5px rgba(51, 51, 51, 0.25);
-		border-radius: 5px;
-		display: flex;
-		align-items: center;
-
-		label {
-			margin-right: 10px;
-			font-size: $global-font-size;
-			font-weight: 400;
-		}
-
-		::v-deep(.el-input) {
-			width: 350px;
-			margin-right: 50px;
-		}
+		margin-bottom: 30px;
 	}
 
 	.table-card {
-		margin-top: 30px;
-		height: calc(100% - 210px);
-		width: 100%;
-		background-color: $global-background;
-		box-shadow: 0 2px 5px rgba(51, 51, 51, 0.25);
-		border-radius: 5px;
-		overflow: auto;
-		padding: 0 20px;
+		flex-grow: 1;
 	}
 }
 </style>

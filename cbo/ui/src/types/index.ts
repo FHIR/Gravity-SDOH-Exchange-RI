@@ -93,3 +93,10 @@ export type Procedure = {
 	code: string,
 	display: string
 }
+
+export type Server = {
+	name: string,
+	url: string,
+	authUrl: string,
+	clientId: string
+}

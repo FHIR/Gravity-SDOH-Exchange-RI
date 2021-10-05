@@ -33,7 +33,8 @@ export default defineComponent({
 @import "~@/assets/scss/abstracts/variables";
 
 .home {
+	display: flex;
+	flex-direction: column;
 	height: 100%;
-	background-color: $alice-blue;
 }
 </style>

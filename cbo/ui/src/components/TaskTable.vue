@@ -3,6 +3,7 @@ import { defineComponent, PropType, computed } from "vue";
 import { Task, TaskStatus, TaskWithState } from "@/types";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate } from "@/utils";
+import TableWrapper from "@/components/TableWrapper.vue";
 
 
 type TaskDisplayFields = {
@@ -55,7 +56,10 @@ const orderOnTasks = (left: TaskWithState, right: TaskWithState): number => {
 
 
 export default defineComponent({
-	components: { TaskStatusDisplay },
+	components: {
+		TableWrapper,
+		TaskStatusDisplay
+	},
 	props: {
 		tasks: {
 			type: Array as PropType<TaskWithState[]>,
@@ -81,7 +85,7 @@ export default defineComponent({
 </script>
 
 <template>
-	<div class="task-table">
+	<TableWrapper>
 		<el-table
 			:data="tableData"
 			:row-class-name="({ row }) => row.isNew ? 'new-task' : ''"
@@ -190,139 +194,62 @@ export default defineComponent({
 				</template>
 			</el-table-column>
 		</el-table>
-	</div>
+	</TableWrapper>
 </template>
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
 
-.task-table {
-	height: 100%;
+.new-task {
+	font-weight: $global-font-weight-medium;
+}
 
-	::v-deep(.el-table) {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		font-size: $global-medium-font-size;
-		font-weight: 400;
-		color: $global-text-color;
+.column-interactive .cell:not(:empty) {
+	color: $global-primary-color;
+	text-decoration: underline;
+	cursor: pointer;
+}
 
-		.el-table__header-wrapper {
-			flex-shrink: 0;
-		}
+.task-name-cell {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	cursor: pointer;
 
-		.el-table__body-wrapper {
-			flex: 1;
-			overflow: overlay;
-		}
-
-		&::before {
-			display: none;
-		}
-
-		.cell {
-			overflow-x: hidden;
-			white-space: nowrap;
-		}
-
-		.el-table__header {
-			th {
-				padding: 0;
-				height: 65px;
-				border: none;
-				font-weight: 400;
-				color: $grey;
-			}
-		}
-
-		.el-table__body {
-			border-spacing: 0 10px;
-			margin: -9px 0 -9px 0;
-
-			tr.new-task {
-				font-weight: 500;
-			}
-
-			td {
-				padding: 0;
-				height: 50px;
-				border-top: $global-border;
-				border-bottom: $global-border;
-
-				&:first-child {
-					border-left: $global-border;
-					border-top-left-radius: 5px;
-					border-bottom-left-radius: 5px;
-				}
-
-				&:last-child {
-					border-right: $global-border;
-					border-top-right-radius: 5px;
-					border-bottom-right-radius: 5px;
-				}
-			}
-
-			.clickable-text {
-				color: $global-primary-color;
-				text-decoration: underline;
-				font-weight: $global-font-weight-normal;
-				font-size: $global-medium-font-size;
-				cursor: pointer;
-			}
-
-			.cell:empty::after {
-				content: "--";
-			}
-
-			.column-interactive .cell:not(:empty) {
-				color: $global-primary-color;
-				text-decoration: underline;
-				cursor: pointer;
-			}
-		}
-
-		.task-name-cell {
-			width: 100%;
-			display: flex;
-			justify-content: space-between;
-			cursor: pointer;
-
-			.name {
-				flex-shrink: 1;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				color: $global-primary-color;
-				text-decoration: underline;
-			}
-
-			.new-mark {
-				line-height: 11px;
-				display: inline-block;
-				padding: 4px;
-				background-color: #e04558;
-				font-size: $global-font-size;
-				font-weight: 400;
-				color: $white;
-				border-radius: 1px;
-				user-select: none;
-			}
-		}
+	.name {
+		flex-shrink: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		color: $global-primary-color;
+		text-decoration: underline;
 	}
 
-	.sync-wrapper {
-		display: flex;
-		align-items: center;
+	.new-mark {
+		line-height: 11px;
+		display: inline-block;
+		padding: 4px;
+		background-color: #e04558;
+		font-size: $global-font-size;
+		font-weight: 400;
+		color: $white;
+		border-radius: 1px;
+		user-select: none;
+	}
+}
 
-		.sync-icon {
-			background-image: url("~@/assets/images/sync-icon.svg");
-			width: 16px;
-			height: 16px;
-			margin-right: 5px;
-		}
+.sync-wrapper {
+	display: flex;
+	align-items: center;
 
-		.sync-date {
-			margin-left: 40px;
-		}
+	.sync-icon {
+		background-image: url("~@/assets/images/sync-icon.svg");
+		width: 16px;
+		height: 16px;
+		margin-right: 5px;
+	}
+
+	.sync-date {
+		margin-left: 40px;
 	}
 }
 </style>
