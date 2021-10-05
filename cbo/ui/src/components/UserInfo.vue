@@ -1,5 +1,4 @@
 <script lang="ts">
-import "@/assets/scss/styles.scss";
 import { defineComponent, computed } from "vue";
 import { ContextModule } from "@/store/context";
 import { AuthModule } from "@/store/modules/auth";
