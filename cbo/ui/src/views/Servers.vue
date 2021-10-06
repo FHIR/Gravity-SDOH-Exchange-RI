@@ -3,28 +3,41 @@ import { defineComponent, onMounted, ref } from "vue";
 import MainHeader from "@/components/MainHeader.vue";
 import Filters from "@/components/Filters.vue";
 import TableCard from "@/components/TableCard.vue";
-import ServeTable from "@/components/ServerTable.vue";
+import ServerTable from "@/components/ServerTable.vue";
+import ServerEditDialog from "@/components/ServerEditDialog.vue";
 import { Server } from "@/types";
 import { getServers } from "@/api";
 
 export default defineComponent({
 	name: "Servers",
 	components: {
-		ServeTable,
+		ServerTable,
 		TableCard,
 		Filters,
-		MainHeader
+		MainHeader,
+		ServerEditDialog
 	},
 	setup() {
 		const data = ref<Server[]>([]);
+		const serverInEdit = ref<Server | null>(null);
 
 		onMounted(async () => {
 			const res = await getServers();
 			data.value = [...res];
 		});
 
+		const editServer = (server: Server) => {
+			serverInEdit.value = server;
+		};
+		const closeEditDialog = () => {
+			serverInEdit.value = null;
+		};
+
 		return {
-			data
+			data,
+			serverInEdit,
+			editServer,
+			closeEditDialog
 		};
 	}
 });
@@ -36,9 +49,17 @@ export default defineComponent({
 		<div class="page-body">
 			<Filters />
 			<TableCard>
-				<ServeTable :data="data" />
+				<ServerTable
+					:data="data"
+					@server-name-click="editServer"
+				/>
 			</TableCard>
 		</div>
+
+		<ServerEditDialog
+			:server="serverInEdit"
+			@close="closeEditDialog"
+		/>
 	</div>
 </template>
 

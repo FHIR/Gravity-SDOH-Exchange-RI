@@ -322,11 +322,13 @@ export const getTasks = async (): Promise<Task[]> => ([
 //todo: remove mock
 export const getServers = async (): Promise<Server[]> => ([
 	{
+		id: "1",
 		name: "My Primary Care",
 		url: "https://api.logicahealth.org/PrimaryCare/data",
 		authUrl: "https://api.logicahealth.org/PrimaryCare/authorize",
 		clientId: "7ae69b73-34ab-446f-b3dc-6dc958794576"
 	}, {
+		id: "2",
 		name: "Multi Speciality Practice",
 		url: "https://api.logicahealth.org/MultiSpecialtyPractice/data",
 		authUrl: "https://api.logicahealth.org/MultiSpecialtyPractice/authorize",

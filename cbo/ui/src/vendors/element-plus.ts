@@ -14,7 +14,8 @@ import {
 	ElInput,
 	ElAlert,
 	ElTable,
-	ElTableColumn
+	ElTableColumn,
+	ElDialog
 } from "element-plus";
 //todo: use unplugin-vue-components
 import "element-plus/es/components/container/style/css";
@@ -30,6 +31,7 @@ import "element-plus/es/components/input/style/css";
 import "element-plus/es/components/alert/style/css";
 import "element-plus/es/components/table/style/css";
 import "element-plus/es/components/table-column/style/css";
+import "element-plus/es/components/dialog/style/css";
 
 export default (app: App) => {
 	app.use(ElContainer);
@@ -45,4 +47,5 @@ export default (app: App) => {
 	app.use(ElAlert);
 	app.use(ElTable);
 	app.use(ElTableColumn);
+	app.use(ElDialog);
 };

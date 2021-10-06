@@ -74,6 +74,7 @@ export type Occurrence = {
 }
 
 export type Server = {
+	id: string,
 	name: string,
 	url: string,
 	authUrl: string,
