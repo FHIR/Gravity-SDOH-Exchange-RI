@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, PropType, computed } from "vue";
-import { Task, TaskStatus, TaskWithState } from "@/types";
+import { TaskWithState } from "@/types";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate } from "@/utils";
 import TableWrapper from "@/components/TableWrapper.vue";
@@ -186,7 +186,7 @@ export default defineComponent({
 				label="Synchronization Status"
 				class-name="sync-cell"
 			>
-				<template #default="{ row }">
+				<template #default>
 					<div class="sync-wrapper">
 						<div class="sync-icon"></div>
 						Synced <span class="sync-date"> Sep 12, 2021, 10:00 AM </span>

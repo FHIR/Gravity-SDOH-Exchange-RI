@@ -1,32 +1,11 @@
 <script lang="ts">
-import { defineComponent, ref, h } from "vue";
+import { defineComponent, ref } from "vue";
 import { Task, TaskWithState } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
 import Filters from "@/components/Filters.vue";
 import TableCard from "@/components/TableCard.vue";
 import TaskEditDialog from "@/components/TaskEditDialog.vue";
-
-const poll = <T>(
-	makeRequest: () => Promise<T>,
-	proceed: (t: T) => boolean,
-	ms: number
-) => {
-	const next = () => {
-		setTimeout(async () => {
-			try {
-				const resp = await makeRequest();
-				if (proceed(resp)) {
-					next();
-				}
-			} catch {
-				next();
-			}
-		}, ms);
-	};
-	next();
-};
-
 
 export default defineComponent({
 	components: {
@@ -62,6 +41,11 @@ export default defineComponent({
 			taskInEdit.value = taskToEdit.task;
 		};
 
+		const updateTaskFromDialog = (task: Task) => {
+			tasks.value = tasks.value.map(taskState => taskState.task.id === task.id ? { ...taskState, task } : taskState);
+			closeDialog();
+		};
+
 		const closeDialog = () => {
 			taskInEdit.value = null;
 		};
@@ -70,7 +54,8 @@ export default defineComponent({
 			tasks,
 			editTask,
 			closeDialog,
-			taskInEdit
+			taskInEdit,
+			updateTaskFromDialog
 		};
 	}
 });
@@ -80,29 +65,18 @@ export default defineComponent({
 	<div class="tasks">
 		<Filters />
 		<TableCard>
-		<TaskEditDialog
-			:task="taskInEdit"
-			@close="closeDialog"
-			@task-updated="updateTaskFromDialog"
-		/>
-		<div class="filters">
-			<label>Search:</label>
-			<el-input
-				placeholder="Search..."
-				size="mini"
+			<TaskEditDialog
+				:task="taskInEdit"
+				@close="closeDialog"
+				@task-updated="updateTaskFromDialog"
 			/>
 
-			<label>Filter by:</label>
-			<el-input
-				size="mini"
-			/>
-		</div>
-
-		<div class="table-card">
-			<TaskTable
-				:tasks="tasks"
-				@task-name-click="editTask"
-			/>
+			<div class="table-card">
+				<TaskTable
+					:tasks="tasks"
+					@task-name-click="editTask"
+				/>
+			</div>
 		</TableCard>
 	</div>
 </template>

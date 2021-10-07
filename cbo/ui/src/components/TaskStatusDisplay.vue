@@ -1,7 +1,5 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { TaskStatus } from "@/types";
-
 
 export default defineComponent({
 	props: {

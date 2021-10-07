@@ -1,10 +1,10 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed, watch, reactive, toRefs } from "vue";
-import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure } from "@/types";
+import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure, Comment } from "@/types";
 import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate, showDateTime } from "@/utils";
-
+import { getProceduresForCategory } from "@/api";
 
 type TaskStuff = {
 	id: string,
@@ -19,7 +19,7 @@ type TaskStuff = {
 	outcome: string,
 	statusReason: string,
 	previouslySetProcedures: string[],
-	syncStatus: string
+	previousComments: string[]
 }
 
 const initialTaskStuff: TaskStuff = {
@@ -35,12 +35,12 @@ const initialTaskStuff: TaskStuff = {
 	outcome: "",
 	statusReason: "",
 	previouslySetProcedures: [],
-	syncStatus: ""
+	previousComments: []
 };
 
 const Flow: { [status in TaskStatus]?: TaskStatus[] } = {
 	"Received":    ["Accepted", "Rejected"],
-	"Accepted":    ["In Progress", "On Hold", "Cancelled"],
+	"Accepted":    ["In Progress", "On Hold", "Completed", "Cancelled"],
 	"In Progress": ["On Hold", "Completed", "Cancelled"],
 	"On Hold":     ["In Progress", "Cancelled"]
 };
@@ -59,10 +59,9 @@ const prepareTaskStuff = (task: Task): TaskStuff => ({
 	statusDate: showDateTime(task.lastModified),
 	outcome: task.outcome || "",
 	statusReason: task.statusReason || "",
-	previouslySetProcedures: task.procedures.map(proc => proc.display),
-	syncStatus: task.syncStatus
+	previousComments: task.comments.map(({ text }) => text),
+	previouslySetProcedures: task.procedures.map(proc => proc.display)
 });
-
 
 export default defineComponent({
 	components: { TaskStatusSelect, TaskStatusDisplay },
@@ -94,9 +93,10 @@ export default defineComponent({
 
 		const isFinalized = computed(() => ["Rejected", "Cancelled", "Completed"].includes(taskFields.value.status));
 
-		const showOutcomeInput = computed(() => status.value === "Completed");
+		const visibleForCompletedStatus = computed(() => status.value === "Completed");
+		const visibleForCancelledStatus = computed(() => status.value === "Cancelled");
 		const showStatusReasonInput = computed(() => status.value === "Rejected" || status.value === "Cancelled");
-		const showProceduresSelect = computed(() => status.value === "Completed" || status.value === "Cancelled");
+		const hiddenForCompletedStatus = computed(() => status.value === "Completed" || status.value === "Cancelled");
 
 		const proceduresRequired = computed(() => status.value === "Completed");
 
@@ -105,14 +105,20 @@ export default defineComponent({
 		);
 
 		const isValid = computed(() =>
-			(!showOutcomeInput.value || outcome.value) &&
+			(!visibleForCompletedStatus.value || outcome.value) &&
 			(!showStatusReasonInput.value || statusReason.value) &&
 			(!proceduresRequired.value || procedures.value.length > 0)
 		);
 
 		const canSave = computed(() => statusChanged.value && isValid.value);
 
+		const availableProcedures = ref<Procedure[]>([]);
+		const loadProcedures = async (categoryCode: string) => {
+			availableProcedures.value = await getProceduresForCategory(categoryCode);
+		};
+
 		const init = (task: Task) => {
+			loadProcedures(task.serviceRequest.category.code);
 			const fields = prepareTaskStuff(task);
 			taskFields.value = fields;
 			status.value = fields.status;
@@ -128,13 +134,43 @@ export default defineComponent({
 			}
 		}, { immediate: true });
 
-		const availableProcedures = ref<Procedure[]>([]);
-
 		const beforeClose = () => {
 			ctx.emit("close");
 		};
 
 		const saveInProgress = ref(false);
+
+		const save = async () => {
+			const payload: UpdateTaskPayload = {
+				status: status.value as UpdatedStatus,
+				// comment: comment.value || undefined,
+				outcome: visibleForCompletedStatus.value ? outcome.value : undefined,
+				statusReason: showStatusReasonInput.value ? statusReason.value : undefined,
+				procedureCodes: procedures.value.length > 0 ? procedures.value : undefined
+			};
+			saveInProgress.value = true;
+			try {
+				// TODO: Rework when BE will be ready
+				// await updateTask(taskFields.value.id, payload);
+				// const updatedTask = await getTask(taskFields.value.id);
+				const taskToUpdate = props.task;
+				const commentToAdd: Comment = {
+					author: {
+						resourceType: "dahjkhdk",
+						id: "dasdasda",
+						display: "asdasda"
+					},
+					time: "2021-10-05T19:11:08",
+					text: comment.value
+				};
+
+				const updatedTask = { ...taskToUpdate, ...payload, requestType: "inactive", comments: [...taskToUpdate!.comments, commentToAdd] };
+				ctx.emit("task-updated", updatedTask);
+				// init(updatedTask);
+			} finally {
+				saveInProgress.value = false;
+			}
+		};
 
 		const formRef = ref<any>(null);
 		const formRules = computed(() => ({
@@ -166,14 +202,16 @@ export default defineComponent({
 			formStuff,
 			acceptedStatuses,
 			availableProcedures,
-			showOutcomeInput,
+			visibleForCompletedStatus,
+			visibleForCancelledStatus,
 			showStatusReasonInput,
-			showProceduresSelect,
+			hiddenForCompletedStatus,
 			statusChanged,
 			isFinalized,
 			canSave,
 			beforeClose,
-			saveInProgress
+			saveInProgress,
+			save
 		};
 	}
 });
@@ -208,7 +246,7 @@ export default defineComponent({
 								<div class="sync-icon"></div>
 								Synced
 								<span class="sync-date">
-									{{ taskFields.syncStatus }}
+									Sep 12, 2021, 10:00 AM
 								</span>
 							</div>
 						</el-form-item>
@@ -252,6 +290,18 @@ export default defineComponent({
 								{{ taskFields.occurrence }}
 							</span>
 						</el-form-item>
+						<el-form-item
+							v-if="taskFields.previousComments.length > 0"
+							label="Comment(s)"
+						>
+							<div
+								v-for="(comment, ix) in taskFields.previousComments"
+								:key="ix"
+								class="comment"
+							>
+								{{ comment }}
+							</div>
+						</el-form-item>
 					</el-form>
 				</div>
 
@@ -276,7 +326,7 @@ export default defineComponent({
 							</el-form-item>
 
 							<el-form-item
-								v-if="taskFields.statusReason"
+								v-if="taskFields.statusReason && !visibleForCompletedStatus"
 								label="Reason"
 							>
 								<span>
@@ -285,7 +335,7 @@ export default defineComponent({
 							</el-form-item>
 
 							<el-form-item
-								v-if="taskFields.outcome"
+								v-if="taskFields.outcome && !visibleForCancelledStatus"
 								label="Outcome"
 							>
 								<span>
@@ -294,7 +344,7 @@ export default defineComponent({
 							</el-form-item>
 
 							<el-form-item
-								v-if="taskFields.previouslySetProcedures.length > 0"
+								v-if="taskFields.previouslySetProcedures.length > 0 && !visibleForCancelledStatus"
 								label="Procedures"
 							>
 								<el-tag
@@ -326,7 +376,7 @@ export default defineComponent({
 							</el-form-item>
 
 							<el-form-item
-								v-if="showOutcomeInput"
+								v-if="visibleForCompletedStatus"
 								label="Outcome"
 								prop="outcome"
 							>
@@ -350,7 +400,7 @@ export default defineComponent({
 							</el-form-item>
 
 							<el-form-item
-								v-if="showProceduresSelect"
+								v-if="visibleForCompletedStatus"
 								label="Procedures"
 								prop="procedures"
 							>
@@ -372,6 +422,7 @@ export default defineComponent({
 							</el-form-item>
 
 							<el-form-item
+								v-if="!hiddenForCompletedStatus"
 								label="Comment"
 							>
 								<el-input
@@ -397,6 +448,7 @@ export default defineComponent({
 					round
 					:disabled="!canSave"
 					:loading="saveInProgress"
+					@click="save"
 				>
 					Save Changes
 				</el-button>
@@ -451,6 +503,62 @@ export default defineComponent({
 		}
 	}
 
+	::v-deep(.el-radio) {
+		.el-radio__label {
+			color: $global-text-color;
+			font-weight: 400;
+		}
+
+		&.is-checked .el-radio__inner {
+			background-color: $global-primary-color;
+			border-color: $global-primary-color;
+		}
+	}
+
+	::v-deep(.el-textarea),
+	::v-deep(.el-input) {
+		input,
+		textarea {
+			font-size: $global-font-size;
+			font-weight: 400;
+			color: $global-text-color;
+
+			&::placeholder {
+				font-size: $global-font-size;
+				font-weight: 400;
+				color: $grey;
+			}
+		}
+	}
+
+	::v-deep(.el-select) {
+		width: 100%;
+
+		.el-select-dropdown__item {
+			padding: 0 10px;
+			font-size: $global-small-font-size;
+			height: 25px;
+			line-height: 25px;
+		}
+
+		.el-tag {
+			background-color: $alice-blue;
+			color: $global-text-color;
+			font-size: $global-font-size;
+			font-weight: 400;
+
+			.el-tag__close {
+				background: none;
+				color: $global-text-color;
+				font-weight: 1000;
+			}
+
+			.el-tag__close:hover {
+				background: none;
+			}
+		}
+	}
+
 	.dialog-body {
 		border-top: $global-border;
 		border-bottom: $global-border;
@@ -494,10 +602,12 @@ export default defineComponent({
 				margin-left: 10px;
 			}
 
-			.procedures-select {
-				::v-deep(.el-select-dropdown) {
-					width: 485px;
-				}
+			.procedures-select ::v-deep(.el-select-dropdown) {
+				width: 485px;
+			}
+
+			.procedure-tag {
+				color: $night-rider;
 			}
 
 			.procedure-tag + .procedure-tag {
@@ -528,61 +638,6 @@ export default defineComponent({
 
 		.el-button + .el-button {
 			margin-left: 20px;
-		}
-	}
-
-	::v-deep(.el-radio) {
-		.el-radio__label {
-			color: $global-text-color;
-			font-weight: 400;
-		}
-
-		&.is-checked .el-radio__inner {
-			background-color: $global-primary-color;
-			border-color: $global-primary-color;
-		}
-	}
-
-	::v-deep(.el-textarea),
-	::v-deep(.el-input) {
-		input, textarea {
-			font-size: $global-font-size;
-			font-weight: 400;
-			color: $global-text-color;
-
-			&::placeholder {
-				font-size: $global-font-size;
-				font-weight: 400;
-				color: $grey;
-			}
-		}
-	}
-
-	::v-deep(.el-select) {
-		width: 100%;
-
-		.el-select-dropdown__item {
-			padding: 0 10px;
-			font-size: $global-small-font-size;
-			height: 25px;
-			line-height: 25px;
-		}
-
-		.el-tag {
-			background-color: $alice-blue;
-			color: $global-text-color;
-			font-size: $global-font-size;
-			font-weight: 400;
-
-			.el-tag__close {
-				background: none;
-				color: $global-text-color;
-				font-weight: 1000;
-
-				&:hover {
-					background: none;
-				}
-			}
 		}
 	}
 }
