@@ -1,0 +1,35 @@
+@import "~@/assets/scss/abstracts/variables";
+
+.el-input--mini {
+	line-height: 25px;
+
+	.el-input__inner {
+		height: 25px;
+	}
+
+	.el-textarea__inner,
+	.el-input__inner {
+		font-size: $global-font-size;
+		line-height: $global-font-size;
+		padding: 5px 10px;
+
+		&::placeholder {
+			color: $grey;
+			font-weight: $global-font-weight-normal;
+		}
+	}
+}
+
+.el-input--prefix {
+	.el-input__prefix {
+		left: 10px;
+	}
+
+	.el-input__inner {
+		padding-left: 30px;
+	}
+}
+
+.el-input--mini .el-input__icon {
+	line-height: 25px;
+}
