@@ -33,7 +33,7 @@ export default defineComponent({
 			authUrl: server.authUrl,
 			clientId: server.clientId,
 			lastSync: new Date().toISOString(),
-			accessUntil: new Date().toISOString()
+			accessUntil: server.accessUntil
 		})));
 
 		const handleNameClick = (id: string) => {
