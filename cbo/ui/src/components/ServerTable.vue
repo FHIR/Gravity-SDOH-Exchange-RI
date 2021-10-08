@@ -4,6 +4,7 @@ import { Server } from "@/types";
 import TableWrapper from "@/components/TableWrapper.vue";
 
 type DisplayFields = {
+	id: string,
 	name: string,
 	url: string,
 	authUrl: string,
@@ -13,7 +14,7 @@ type DisplayFields = {
 }
 
 export default defineComponent({
-	name: "ServeTable",
+	name: "ServerTable",
 	components: {
 		TableWrapper
 	},
@@ -23,18 +24,26 @@ export default defineComponent({
 			required: true
 		}
 	},
-	setup(props) {
+	emits: ["server-name-click"],
+	setup(props, ctx) {
 		const tableData = computed<DisplayFields[]>(() => props.data.map((server: Server) => ({
+			id: server.id,
 			name: server.name,
 			url: server.url,
 			authUrl: server.authUrl,
 			clientId: server.clientId,
 			lastSync: new Date().toISOString(),
-			accessUntil: new Date().toISOString()
+			accessUntil: server.accessUntil
 		})));
 
+		const handleNameClick = (id: string) => {
+			const server: Server = props.data.find(server => server.id === id)!;
+			ctx.emit("server-name-click", server);
+		};
+
 		return {
-			tableData
+			tableData,
+			handleNameClick
 		};
 	}
 });
@@ -43,10 +52,18 @@ export default defineComponent({
 <template>
 	<TableWrapper>
 		<el-table :data="tableData">
-			<el-table-column
-				prop="name"
-				label="Server Name"
-			/>
+			<el-table-column label="Server Name">
+				<template #default="{ row }">
+					<div
+						class="clickable-text"
+						@click="handleNameClick(row.id)"
+					>
+						<span class="name">
+							{{ row.name }}
+						</span>
+					</div>
+				</template>
+			</el-table-column>
 
 			<el-table-column
 				prop="url"

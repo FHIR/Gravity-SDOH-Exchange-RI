@@ -1,4 +1,4 @@
-import { Task, User, Server } from "@/types";
+import { Task, User, Server, NewServerPayload, UpdateServerPayload } from "@/types";
 
 export const getContext = async (): Promise<User> => ({ id: "vidsmok4uVBobra", name: "Colin Brooks", userType: "CEO" });
 const dataOnly = <T>({ data }: { data: T }): T => data;
@@ -322,14 +322,38 @@ export const getTasks = async (): Promise<Task[]> => ([
 //todo: remove mock
 export const getServers = async (): Promise<Server[]> => ([
 	{
+		id: "1",
 		name: "My Primary Care",
 		url: "https://api.logicahealth.org/PrimaryCare/data",
 		authUrl: "https://api.logicahealth.org/PrimaryCare/authorize",
-		clientId: "7ae69b73-34ab-446f-b3dc-6dc958794576"
+		clientId: "7ae69b73-34ab-446f-b3dc-6dc958794576",
+		accessUntil: new Date().toISOString()
 	}, {
+		id: "2",
 		name: "Multi Speciality Practice",
 		url: "https://api.logicahealth.org/MultiSpecialtyPractice/data",
 		authUrl: "https://api.logicahealth.org/MultiSpecialtyPractice/authorize",
-		clientId: "1ae44b16-72ab-236f-b1dc-6dc652095814"
+		clientId: "1ae44b16-72ab-236f-b1dc-6dc652095814",
+		accessUntil: new Date().toISOString()
 	}
 ]);
+
+//todo: remove mock
+export const createServer = async (payload: NewServerPayload): Promise<Server> => ({
+	id: "3",
+	name: payload.name,
+	url: payload.url,
+	authUrl: payload.authUrl,
+	clientId: payload.clientId,
+	accessUntil: new Date().toISOString()
+});
+
+//todo: remove mock
+export const updateServer = async (payload: UpdateServerPayload): Promise<Server> => ({
+	id: payload.id,
+	name: payload.name,
+	url: payload.url,
+	authUrl: payload.authUrl,
+	clientId: payload.clientId,
+	accessUntil: new Date().toISOString()
+});
