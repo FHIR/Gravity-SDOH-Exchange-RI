@@ -95,6 +95,23 @@ export type Procedure = {
 }
 
 export type Server = {
+	id: string,
+	name: string,
+	url: string,
+	authUrl: string,
+	clientId: string,
+	accessUntil: string
+}
+
+export type NewServerPayload = {
+	name: string,
+	url: string,
+	authUrl: string,
+	clientId: string
+}
+
+export type UpdateServerPayload = {
+	id: string,
 	name: string,
 	url: string,
 	authUrl: string,

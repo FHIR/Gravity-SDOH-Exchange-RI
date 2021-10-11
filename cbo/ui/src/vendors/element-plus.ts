@@ -1,5 +1,4 @@
 import { App } from "vue";
-import "@/assets/scss/element-plus/index.scss";
 
 import {
 	ElContainer,
@@ -18,7 +17,8 @@ import {
 	ElSelect,
 	ElOption,
 	ElTag,
-	ElDialog
+	ElDialog,
+	ElDivider
 } from "element-plus";
 //todo: use unplugin-vue-components
 import "element-plus/es/components/container/style/css";
@@ -34,10 +34,12 @@ import "element-plus/es/components/input/style/css";
 import "element-plus/es/components/alert/style/css";
 import "element-plus/es/components/table/style/css";
 import "element-plus/es/components/table-column/style/css";
+import "element-plus/es/components/dialog/style/css";
+import "element-plus/es/components/divider/style/css";
+import "@/assets/scss/element-plus/index.scss";
 import "element-plus/es/components/select/style/css";
 import "element-plus/es/components/option/style/css";
 import "element-plus/es/components/tag/style/css";
-import "element-plus/es/components/dialog/style/css";
 
 export default (app: App) => {
 	app.use(ElContainer);
@@ -53,8 +55,9 @@ export default (app: App) => {
 	app.use(ElAlert);
 	app.use(ElTable);
 	app.use(ElTableColumn);
+	app.use(ElDialog);
+	app.use(ElDivider);
 	app.use(ElSelect);
 	app.use(ElOption);
 	app.use(ElTag);
-	app.use(ElDialog);
 };

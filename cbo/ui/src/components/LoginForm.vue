@@ -43,7 +43,7 @@ export default defineComponent({
 	<div class="login-form">
 		<h3>Community-Based Organization App</h3>
 		<h4>Log into the CBO app</h4>
-		<el-form>
+		<el-form @keyup.enter="handleLogin">
 			<el-form-item>
 				<el-input
 					v-model="username"
