@@ -273,6 +273,10 @@ export default defineComponent({
 							<span>
 								{{ taskFields.forPatient }}
 							</span>
+							<span
+								class="icon-link"
+							>
+							</span>
 						</el-form-item>
 
 						<el-form-item
@@ -459,22 +463,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+@import "~@/assets/scss/abstracts/mixins";
 
 .dialog {
 	::v-deep(.el-dialog) {
 		.el-dialog__body {
 			padding: 0;
-		}
-
-		.el-dialog__title {
-			color: $global-text-color;
-			font-size: $global-large-font-size;
-			font-weight: 500;
-		}
-
-		.el-dialog__close {
-			font-weight: 1000;
-			color: $global-text-color;
 		}
 	}
 
@@ -493,7 +487,6 @@ export default defineComponent({
 			width: 165px;
 			padding-right: 10px;
 			line-height: 15px;
-			color: $grey;
 		}
 
 		.el-form-item__content {
@@ -512,22 +505,6 @@ export default defineComponent({
 		&.is-checked .el-radio__inner {
 			background-color: $global-primary-color;
 			border-color: $global-primary-color;
-		}
-	}
-
-	::v-deep(.el-textarea),
-	::v-deep(.el-input) {
-		input,
-		textarea {
-			font-size: $global-font-size;
-			font-weight: 400;
-			color: $global-text-color;
-
-			&::placeholder {
-				font-size: $global-font-size;
-				font-weight: 400;
-				color: $grey;
-			}
 		}
 	}
 
@@ -564,7 +541,6 @@ export default defineComponent({
 		border-bottom: $global-border;
 		padding: 25px;
 		max-height: 700px;
-		overflow-y: auto;
 
 		.readonly-part {
 			padding-bottom: 30px;
@@ -640,5 +616,14 @@ export default defineComponent({
 			margin-left: 20px;
 		}
 	}
+
+	.icon-link {
+		position: relative;
+		left: 7px;
+		cursor: pointer;
+
+		@include icon("~@/assets/images/link.svg", 14px, 14px);
+	}
+
 }
 </style>

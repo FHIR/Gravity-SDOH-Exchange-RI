@@ -31,3 +31,17 @@
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
+
+@mixin icon($src, $w, $h: $w) {
+	display: inline-block;
+	width: $w;
+	height: $h;
+
+	@if $src {
+		background-image: url($src);
+	}
+
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center;
+}
