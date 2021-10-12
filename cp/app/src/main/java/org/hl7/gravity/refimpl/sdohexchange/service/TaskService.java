@@ -1,62 +1,48 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.TaskStatus;
-import org.hl7.fhir.r4.model.codesystems.SearchModifierCode;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+/**
+ * A Service to work with CP Tasks (usually retrieved from the EHR). It skips any Tasks created by this CP for the
+ * different CBOs.
+ */
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TaskService {
 
-  private final IGenericClient cpClient;
+  private final TaskRepository taskRepository;
   private final SDOHMappings sdohMappings;
 
   public List<TaskDto> readAll() {
-    Bundle tasksBundle = cpClient.search()
-        .forResource(Task.class)
-        .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
-            .code(TaskStatus.REQUESTED.toCode()))
-        // include ServiceRequest
-        .include(Task.INCLUDE_FOCUS)
-        .sort()
-        .descending(Constants.PARAM_LASTUPDATED)
-        .returnBundle(Bundle.class)
-        .execute();
+    Bundle tasksBundle = taskRepository.findAllTasks();
     return new TaskBundleToDtoConverter().convert(tasksBundle);
   }
 
   public TaskDto read(String id) {
-    Bundle taskBundle = cpClient.search()
-        .forResource(Task.class)
-        .where(Task.RES_ID.exactly()
-            .code(id))
-        // include ServiceRequest
-        .include(Task.INCLUDE_FOCUS)
-        .returnBundle(Bundle.class)
-        .execute();
+    Bundle taskBundle = taskRepository.find(id, Lists.newArrayList(Task.INCLUDE_FOCUS));
     return new TaskBundleToDtoConverter().convert(taskBundle)
         .stream()
         .findFirst()
@@ -70,13 +56,7 @@ public class TaskService {
         .stream()
         .map(code -> sdohMappings.findResourceCoding(Procedure.class, code))
         .collect(Collectors.toList());
-    Bundle taskBundle = cpClient.search()
-        .forResource(Task.class)
-        .where(Task.RES_ID.exactly()
-            .code(id))
-        .include(Task.INCLUDE_FOCUS)
-        .returnBundle(Bundle.class)
-        .execute();
+    Bundle taskBundle = taskRepository.find(id, Lists.newArrayList(Task.INCLUDE_FOCUS));
     TaskInfoHolder taskInfo = new TaskInfoBundleExtractor().extract(taskBundle)
         .stream()
         .findFirst()
@@ -90,8 +70,6 @@ public class TaskService {
     bundleFactory.setOutcome(update.getOutcome());
     bundleFactory.setProcedureCodes(procedureCodes);
     bundleFactory.setUser(user);
-    cpClient.transaction()
-        .withBundle(bundleFactory.createUpdateBundle())
-        .execute();
+    taskRepository.transaction(bundleFactory.createUpdateBundle());
   }
 }
