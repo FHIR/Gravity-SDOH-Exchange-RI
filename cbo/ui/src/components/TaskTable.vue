@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, PropType, computed } from "vue";
-import { Task, TaskStatus, TaskWithState } from "@/types";
+import { TaskWithState } from "@/types";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate } from "@/utils";
 import TableWrapper from "@/components/TableWrapper.vue";
@@ -66,13 +66,19 @@ export default defineComponent({
 			required: true
 		}
 	},
-	emits: ["task-name-click", "view-resources"],
+	emits: ["task-name-click"],
 	setup(props, ctx) {
 		const tasksInOrder = computed(() => [...props.tasks].sort(orderOnTasks));
 		const tableData = computed(() => tasksInOrder.value.map(displayTask));
 
+		const taskNameClick = (taskId: string) => {
+			const task: TaskWithState = props.tasks.find(taskState => taskState.task.id === taskId)!;
+			ctx.emit("task-name-click", task);
+		};
+
 		return {
-			tableData
+			tableData,
+			taskNameClick
 		};
 	}
 });
@@ -180,7 +186,7 @@ export default defineComponent({
 				label="Synchronization Status"
 				class-name="sync-cell"
 			>
-				<template #default="{ row }">
+				<template #default>
 					<div class="sync-wrapper">
 						<div class="sync-icon"></div>
 						Synced <span class="sync-date"> Sep 12, 2021, 10:00 AM </span>

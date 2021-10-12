@@ -1,23 +1,23 @@
-import { Task, User, Server, NewServerPayload, UpdateServerPayload } from "@/types";
+import { Task, User, Server, NewServerPayload, UpdateServerPayload, Procedure } from "@/types";
 
 export const getContext = async (): Promise<User> => ({ id: "vidsmok4uVBobra", name: "Colin Brooks", userType: "CEO" });
-const dataOnly = <T>({ data }: { data: T }): T => data;
+// const dataOnly = <T>({ data }: { data: T }): T => data;
 // export const getTasks = () => axios.get<Task[]>("/task").then(dataOnly);
 // TODO: Mock data while we don't have BE
 export const getTasks = async (): Promise<Task[]> => ([
 	{
 		id: "1",
-		name: "first task",
-		createdAt: "29.01.1987",
-		lastModified: "12.12.1234",
+		name: "Task number 1",
+		createdAt: "2021-10-05T19:11:08",
+		lastModified: "2021-10-05T19:11:08",
 		priority: "high",
 		status: "Accepted",
 		requestType: "active",
 		serviceRequest: {
 			id: "12",
 			occurrence: {
-				end: "12313",
-				start: "123131"
+				end: "2021-10-05T19:11:08",
+				start: "2021-10-05T19:11:08"
 			},
 			category: {
 				code: "1231",
@@ -38,7 +38,7 @@ export const getTasks = async (): Promise<Task[]> => ([
 			id: "werwrw",
 			display: "Britney Spears"
 		},
-		consent: "consent",
+		consent: "yes",
 		comments: [
 			{
 				author: {
@@ -58,18 +58,18 @@ export const getTasks = async (): Promise<Task[]> => ([
 		}]
 	},
 	{
-		id: "1",
-		name: "first task",
-		createdAt: "29.01.1987",
-		lastModified: "12.12.1234",
+		id: "2",
+		name: "Task number 2",
+		createdAt: "2021-10-05T19:11:08",
+		lastModified: "2021-10-05T19:11:08",
 		priority: "high",
 		status: "Received",
 		requestType: "active",
 		serviceRequest: {
 			id: "12",
 			occurrence: {
-				end: "12313",
-				start: "123131"
+				end: "2021-10-05T19:11:08",
+				start: "2021-10-05T19:11:08"
 			},
 			category: {
 				code: "1231",
@@ -88,9 +88,9 @@ export const getTasks = async (): Promise<Task[]> => ([
 		patient: {
 			resourceType: "2we2f",
 			id: "werwrw",
-			display: "werwrwerw"
+			display: "Supers Racca"
 		},
-		consent: "consent",
+		consent: "yes",
 		comments: [
 			{
 				author: {
@@ -110,18 +110,18 @@ export const getTasks = async (): Promise<Task[]> => ([
 		}]
 	},
 	{
-		id: "1",
-		name: "first task",
-		createdAt: "29.01.1987",
-		lastModified: "12.12.1234",
+		id: "3",
+		name: "Task number 3",
+		createdAt: "2021-10-05T19:11:08",
+		lastModified: "2021-10-05T19:11:08",
 		priority: "high",
 		status: "Received",
 		requestType: "active",
 		serviceRequest: {
 			id: "12",
 			occurrence: {
-				end: "12313",
-				start: "123131"
+				end: "2021-10-05T19:11:08",
+				start: "2021-10-05T19:11:08"
 			},
 			category: {
 				code: "1231",
@@ -142,7 +142,7 @@ export const getTasks = async (): Promise<Task[]> => ([
 			id: "werwrw",
 			display: "werwrwerw"
 		},
-		consent: "consent",
+		consent: "no",
 		comments: [
 			{
 				author: {
@@ -150,7 +150,7 @@ export const getTasks = async (): Promise<Task[]> => ([
 					id: "dasdasda",
 					display: "asdasda"
 				},
-				time: "123131231",
+				time: "2021-10-05T19:11:08",
 				text: "31231313"
 			}
 		],
@@ -162,18 +162,18 @@ export const getTasks = async (): Promise<Task[]> => ([
 		}]
 	},
 	{
-		id: "1",
-		name: "first task",
-		createdAt: "29.01.1987",
-		lastModified: "12.12.1234",
+		id: "4",
+		name: "Task number 4",
+		createdAt: "2021-10-05T19:11:08",
+		lastModified: "2021-10-05T19:11:08",
 		priority: "high",
-		status: "Received",
+		status: "Completed",
 		requestType: "inactive",
 		serviceRequest: {
 			id: "12",
 			occurrence: {
-				end: "12313",
-				start: "123131"
+				end: "2021-10-05T19:11:08",
+				start: "2021-10-05T19:11:08"
 			},
 			category: {
 				code: "1231",
@@ -194,7 +194,7 @@ export const getTasks = async (): Promise<Task[]> => ([
 			id: "werwrw",
 			display: "werwrwerw"
 		},
-		consent: "consent",
+		consent: "no",
 		comments: [
 			{
 				author: {
@@ -202,7 +202,7 @@ export const getTasks = async (): Promise<Task[]> => ([
 					id: "dasdasda",
 					display: "asdasda"
 				},
-				time: "123131231",
+				time: "2021-10-05T19:11:08",
 				text: "31231313"
 			}
 		],
@@ -214,18 +214,18 @@ export const getTasks = async (): Promise<Task[]> => ([
 		}]
 	},
 	{
-		id: "1",
-		name: "first task",
-		createdAt: "29.01.1987",
-		lastModified: "12.12.1234",
+		id: "5",
+		name: "Task number 5",
+		createdAt: "2021-10-05T19:11:08",
+		lastModified: "2021-10-05T19:11:08",
 		priority: "high",
-		status: "Received",
+		status: "Completed",
 		requestType: "inactive",
 		serviceRequest: {
 			id: "12",
 			occurrence: {
-				end: "12313",
-				start: "123131"
+				end: "2021-10-05T19:11:08",
+				start: "2021-10-05T19:11:08"
 			},
 			category: {
 				code: "1231",
@@ -246,7 +246,7 @@ export const getTasks = async (): Promise<Task[]> => ([
 			id: "werwrw",
 			display: "werwrwerw"
 		},
-		consent: "consent",
+		consent: "yes",
 		comments: [
 			{
 				author: {
@@ -254,7 +254,7 @@ export const getTasks = async (): Promise<Task[]> => ([
 					id: "dasdasda",
 					display: "asdasda"
 				},
-				time: "123131231",
+				time: "2021-10-05T19:11:08",
 				text: "31231313"
 			}
 		],
@@ -266,18 +266,18 @@ export const getTasks = async (): Promise<Task[]> => ([
 		}]
 	},
 	{
-		id: "1",
-		name: "first task",
-		createdAt: "29.01.1987",
-		lastModified: "12.12.1234",
+		id: "6",
+		name: "Task number 6",
+		createdAt: "2021-10-05T19:11:08",
+		lastModified: "2021-10-05T19:11:08",
 		priority: "high",
-		status: "Received",
+		status: "Cancelled",
 		requestType: "inactive",
 		serviceRequest: {
 			id: "12",
 			occurrence: {
-				end: "12313",
-				start: "123131"
+				end: "2021-10-05T19:11:08",
+				start: "2021-10-05T19:11:08"
 			},
 			category: {
 				code: "1231",
@@ -298,7 +298,7 @@ export const getTasks = async (): Promise<Task[]> => ([
 			id: "werwrw",
 			display: "werwrwerw"
 		},
-		consent: "consent",
+		consent: "yes",
 		comments: [
 			{
 				author: {
@@ -307,7 +307,16 @@ export const getTasks = async (): Promise<Task[]> => ([
 					display: "asdasda"
 				},
 				time: "123131231",
-				text: "31231313"
+				text: "comment-1"
+			},
+			{
+				author: {
+					resourceType: "dahjkhdk",
+					id: "dasdasda",
+					display: "asdasda"
+				},
+				time: "123131231",
+				text: "comment-2"
 			}
 		],
 		outcome: "outcome text",
@@ -318,6 +327,8 @@ export const getTasks = async (): Promise<Task[]> => ([
 		}]
 	}
 ]);
+//TODO: commented while BE is not ready
+// export const updateTask = (taskId: string, data: UpdateTaskPayload) => axios.put<void>(`/task/${taskId}`, data).then(dataOnly);
 
 //todo: remove mock
 export const getServers = async (): Promise<Server[]> => ([
@@ -335,6 +346,17 @@ export const getServers = async (): Promise<Server[]> => ([
 		authUrl: "https://api.logicahealth.org/MultiSpecialtyPractice/authorize",
 		clientId: "1ae44b16-72ab-236f-b1dc-6dc652095814",
 		accessUntil: new Date().toISOString()
+	}
+]);
+
+export const getProceduresForCategory = async (categoryCode: string): Promise<Procedure[]> => ([
+	{
+		display: "Procedure: 1",
+		code: "123678"
+	},
+	{
+		display: "Procedure: 2",
+		code: "123224678"
 	}
 ]);
 
