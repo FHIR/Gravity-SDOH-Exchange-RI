@@ -117,3 +117,14 @@ export type UpdateServerPayload = {
 	authUrl: string,
 	clientId: string
 }
+
+export type Resources = {
+	task: string,
+	serviceRequest: string,
+	requester: string,
+	patient: string,
+	consent: string,
+	conditions: string[],
+	goals: string[],
+	procedures: string[]
+}

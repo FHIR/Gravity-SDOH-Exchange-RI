@@ -66,7 +66,7 @@ export default defineComponent({
 			required: true
 		}
 	},
-	emits: ["task-name-click"],
+	emits: ["task-name-click", "view-resources"],
 	setup(props, ctx) {
 		const tasksInOrder = computed(() => [...props.tasks].sort(orderOnTasks));
 		const tableData = computed(() => tasksInOrder.value.map(displayTask));
@@ -76,9 +76,14 @@ export default defineComponent({
 			ctx.emit("task-name-click", task);
 		};
 
+		const taskViewResourcesClick = (taskId: string) => {
+			ctx.emit("view-resources", taskId);
+		};
+
 		return {
 			tableData,
-			taskNameClick
+			taskNameClick,
+			taskViewResourcesClick
 		};
 	}
 });
@@ -179,7 +184,14 @@ export default defineComponent({
 				label="Resources"
 				width="120"
 			>
-				<span class="clickable-text">view</span>
+				<template #default="{ row }">
+					<el-button
+						type="text"
+						@click="taskViewResourcesClick(row.id)"
+					>
+						view
+					</el-button>
+				</template>
 			</el-table-column>
 
 			<el-table-column
