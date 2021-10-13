@@ -5,6 +5,7 @@ import Filters from "@/components/Filters.vue";
 import TableCard from "@/components/TableCard.vue";
 import ServerTable from "@/components/ServerTable.vue";
 import ServerEditDialog from "@/components/ServerEditDialog.vue";
+import ServerCreateDialog from "@/components/ServerCreateDialog.vue";
 import { Server } from "@/types";
 import { ServersModule } from "@/store/modules/servers";
 
@@ -15,11 +16,13 @@ export default defineComponent({
 		TableCard,
 		Filters,
 		MainHeader,
-		ServerEditDialog
+		ServerEditDialog,
+		ServerCreateDialog
 	},
 	setup() {
 		const data = computed<Server[]>(() => ServersModule.servers);
 		const serverInEdit = ref<Server | null>(null);
+		const serverCreateVisible = ref<boolean>(false);
 
 		onMounted(async () => {
 			await ServersModule.getServers();
@@ -31,12 +34,17 @@ export default defineComponent({
 		const closeEditDialog = () => {
 			serverInEdit.value = null;
 		};
+		const closeCreateDialog = () => {
+			serverCreateVisible.value = false;
+		};
 
 		return {
 			data,
 			serverInEdit,
 			editServer,
-			closeEditDialog
+			closeEditDialog,
+			serverCreateVisible,
+			closeCreateDialog
 		};
 	}
 });
@@ -46,7 +54,17 @@ export default defineComponent({
 	<div class="page-container">
 		<MainHeader />
 		<div class="page-body">
-			<Filters />
+			<Filters>
+				<el-button
+					type="primary"
+					round
+					plain
+					size="mini"
+					@click="serverCreateVisible = true"
+				>
+					Add New Server
+				</el-button>
+			</Filters>
 			<TableCard>
 				<ServerTable
 					:data="data"
@@ -58,6 +76,10 @@ export default defineComponent({
 		<ServerEditDialog
 			:server="serverInEdit"
 			@close="closeEditDialog"
+		/>
+		<ServerCreateDialog
+			:visible="serverCreateVisible"
+			@close="closeCreateDialog"
 		/>
 	</div>
 </template>
