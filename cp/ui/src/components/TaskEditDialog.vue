@@ -1,9 +1,9 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed, watch, reactive, toRefs } from "vue";
-import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure } from "@/types";
+import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure, Cbo } from "@/types";
 import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
-import { updateTask, getTask, getProceduresForCategory } from "@/api";
+import { updateTask, getTask, getProceduresForCategory, getCBOList } from "@/api";
 import { showDate, showDateTime } from "@/utils";
 
 
@@ -84,12 +84,14 @@ export default defineComponent({
 		const formStuff = reactive({
 			outcome: "",
 			statusReason: "",
-			procedures: [] as string[]
+			procedures: [] as string[],
+			cboPerformer: "",
+			priorityForCBO: ""
 		});
 		// const outcome = ref<string>("");
 		// const statusReason = ref<string>("");
 		// const procedures = ref<string[]>([]);
-		const { outcome, statusReason, procedures } = toRefs(formStuff);
+		const { outcome, statusReason, procedures, cboPerformer, priorityForCBO } = toRefs(formStuff);
 
 		const acceptedStatuses = computed(() => [taskFields.value.status].concat(Flow[taskFields.value.status] || []));
 
@@ -118,8 +120,14 @@ export default defineComponent({
 			availableProcedures.value = await getProceduresForCategory(categoryCode);
 		};
 
+		const availableCBOList = ref<any>([]);
+		const loadCBO = async () => {
+			availableCBOList.value = await getCBOList();
+		};
+
 		const init = (task: Task) => {
 			loadProcedures(task.serviceRequest.category.code);
+			loadCBO();
 			const fields = prepareTaskStuff(task);
 			taskFields.value = fields;
 			status.value = fields.status;
@@ -127,12 +135,19 @@ export default defineComponent({
 			outcome.value = "";
 			statusReason.value = "";
 			procedures.value = [];
+			cboPerformer.value = "";
+			priorityForCBO.value = "";
 		};
 
 		watch(() => props.task, (newTask, prevTask) => {
 			if (newTask && newTask.id !== prevTask?.id) {
 				init(newTask);
 			}
+		}, { immediate: true });
+
+		const showFieldsForAcceptedStatus = ref<boolean>(false);
+		watch(() => status.value, newStatus => {
+			showFieldsForAcceptedStatus.value = newStatus === "Accepted" && props.task?.status === "Received";
 		}, { immediate: true });
 
 		const beforeClose = () => {
@@ -147,7 +162,9 @@ export default defineComponent({
 				comment: comment.value || undefined,
 				outcome: showOutcomeInput.value ? outcome.value : undefined,
 				statusReason: showStatusReasonInput.value ? statusReason.value : undefined,
-				procedureCodes: procedures.value.length > 0 ? procedures.value : undefined
+				procedureCodes: procedures.value.length > 0 ? procedures.value : undefined,
+				cboPerformer: cboPerformer.value,
+				priorityForCBO: priorityForCBO.value || undefined
 			};
 			saveInProgress.value = true;
 			try {
@@ -157,6 +174,7 @@ export default defineComponent({
 				init(updatedTask);
 			} finally {
 				saveInProgress.value = false;
+				showFieldsForAcceptedStatus.value = false;
 			}
 		};
 
@@ -164,6 +182,7 @@ export default defineComponent({
 		const formRules = computed(() => ({
 			statusReason: [{ required: true, message: "This field is required" }],
 			outcome: [{ required: true, message: "This field is required" }],
+			cboPerformer: [{ required: true, message: "This field is required" }],
 			procedures: [
 				{
 					required: proceduresRequired.value,
@@ -187,9 +206,13 @@ export default defineComponent({
 			outcome,
 			statusReason,
 			procedures,
+			cboPerformer,
+			priorityForCBO,
+			showFieldsForAcceptedStatus,
 			formStuff,
 			acceptedStatuses,
 			availableProcedures,
+			availableCBOList,
 			showOutcomeInput,
 			showStatusReasonInput,
 			showProceduresSelect,
@@ -405,6 +428,33 @@ export default defineComponent({
 									placeholder="Enter your comment here"
 								/>
 							</el-form-item>
+							<el-form-item
+								v-if="showFieldsForAcceptedStatus"
+								label="Performing CBO"
+								prop="cboPerformer"
+							>
+								<el-select
+									v-model="formStuff.cboPerformer"
+									placeholder="Select CBO"
+								>
+									<el-option
+										v-for="item in availableCBOList"
+										:key="item.id"
+										:label="item.name"
+										:value="item.id"
+									/>
+								</el-select>
+							</el-form-item>
+							<el-form-item
+								v-if="showFieldsForAcceptedStatus"
+								label="Priority for CBO"
+							>
+								<el-radio-group v-model="formStuff.priorityForCBO">
+									<el-radio label="Routine" />
+									<el-radio label="Urgent" />
+									<el-radio label="ASAP" />
+								</el-radio-group>
+							</el-form-item>
 						</template>
 					</el-form>
 				</div>
@@ -474,6 +524,28 @@ export default defineComponent({
 			flex: 1;
 			line-height: 15px;
 			color: $global-text-color;
+		}
+	}
+
+	::v-deep(.el-select) {
+		line-height: 25px;
+
+		.el-input__inner {
+			font-size: $global-font-size;
+			font-weight: 400;
+			color: #333;
+			height: 25px;
+		}
+
+		.el-select-dropdown__item .selected {
+			padding: 0 10px;
+			font-size: $global-small-font-size;
+			font-weight: 400;
+			color: #333;
+		}
+
+		.el-input {
+			line-height: 25px;
 		}
 	}
 
