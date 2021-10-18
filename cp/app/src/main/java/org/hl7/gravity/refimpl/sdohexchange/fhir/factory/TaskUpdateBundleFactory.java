@@ -99,14 +99,6 @@ public class TaskUpdateBundleFactory {
         cboServiceRequest.setIntent(ServiceRequest.ServiceRequestIntent.FILLERORDER);
         cboServiceRequest.setAuthoredOnElement(DateTimeType.now());
         cboServiceRequest.setPriority(priorityForCBO.getServiceRequestPriority());
-        // TODO set occurrence from parent task
-
-        //        if (occurrenceForCBO.isPeriod()) {
-        //          cboServiceRequest.setOccurrence(new Period().setStartElement(occurrenceForCBO.getStart())
-        //              .setEndElement(occurrenceForCBO.getEnd()));
-        //        } else {
-        //          cboServiceRequest.setOccurrence(occurrenceForCBO.getEnd());
-        //        }
         updateBundle.addEntry(FhirUtil.createPostEntry(cboServiceRequest));
 
         Task cboTask = task.copy();
