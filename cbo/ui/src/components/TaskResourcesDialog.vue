@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, PropType, computed, ref, watch } from "vue";
 import { Resources } from "@/types";
-// import { getTaskResources } from "@/api";
+import { getTaskResources } from "@/api";
 import JsonViewer from "@/components/JsonViewer.vue";
 
 
@@ -35,7 +35,7 @@ export default defineComponent({
 		watch(() => props.taskId, async taskId => {
 			originalData.value = null;
 			if (taskId) {
-				// originalData.value = await getTaskResources(taskId);
+				originalData.value = await getTaskResources(taskId);
 			}
 		}, { immediate: true });
 
@@ -64,6 +64,7 @@ export default defineComponent({
 			:before-close="beforeClose"
 		>
 			<div
+				v-loading="!data"
 				class="dialog-body"
 			>
 				<div

@@ -54,7 +54,6 @@ export default defineComponent({
 
 		const taskIdToViewResources = ref<string | null>(null);
 		const viewTaskResources = (taskId: string) => {
-			console.log(taskId);
 			taskIdToViewResources.value = taskId;
 		};
 
