@@ -20,10 +20,9 @@ import java.util.List;
         requiredFields = {"outcome", "procedureCodes"},
         message = "Updating task status to 'Completed' requires 'outcome' and 'procedureCodes'."),
     @TaskStatusValueMatch(updateStatus = TaskStatus.ACCEPTED,
-        nullFields = {"procedureCodes", "statusReason", "outcome"},
-        requiredFields = {"priorityForCBO", "occurrenceForCBO"},
+        nullFields = {"procedureCodes", "statusReason", "outcome"}, requiredFields = {"priorityForCBO"},
         message = "Updating task status to 'Accepted' with 'statusReason', 'outcome' or 'procedureCodes' is not "
-            + "valid. Required fields are 'priorityForCBO' and 'occurrenceForCBO'."),
+            + "valid. Required fields is 'priorityForCBO'."),
     @TaskStatusValueMatch(updateStatus = TaskStatus.INPROGRESS,
         nullFields = {"procedureCodes", "statusReason", "outcome", "priorityForCBO", "occurrenceForCBO",
             "cboPerformer"},

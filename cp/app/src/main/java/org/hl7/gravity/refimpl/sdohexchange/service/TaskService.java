@@ -80,7 +80,6 @@ public class TaskService {
     bundleFactory.setProcedureCodes(procedureCodes);
     bundleFactory.setUser(user);
     bundleFactory.setPriorityForCBO(update.getPriorityForCBO());
-    bundleFactory.setOccurrenceForCBO(update.getOccurrenceForCBO());
 
     if (update.getStatus() == TaskStatus.ACCEPTED) {
       //TODO move role/org extraction to some Extractor class.

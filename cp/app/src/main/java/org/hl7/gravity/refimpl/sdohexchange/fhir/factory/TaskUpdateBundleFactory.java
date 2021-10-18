@@ -7,7 +7,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -15,7 +14,6 @@ import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestStatus;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.OccurrenceRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskUpdateException;
@@ -46,7 +44,6 @@ public class TaskUpdateBundleFactory {
   private List<Coding> procedureCodes;
   private UserDto user;
   private Priority priorityForCBO;
-  private OccurrenceRequestDto occurrenceForCBO;
   private Reference cboTaskRequester;
   private Reference cboTaskOwner;
 
@@ -91,7 +88,6 @@ public class TaskUpdateBundleFactory {
       Assert.notNull(serviceRequest, "ServiceRequest can't be null.");
       if (status == TaskStatus.ACCEPTED) {
         Assert.notNull(priorityForCBO, "Priority for CBO cannot be null.");
-        Assert.notNull(occurrenceForCBO, "Occurrence for CBO cannot be null.");
         Assert.notNull(cboTaskRequester, "CBO Task requester cannot be null.");
 
         //TODO move to OwnTaskBundleFactory
@@ -103,12 +99,14 @@ public class TaskUpdateBundleFactory {
         cboServiceRequest.setIntent(ServiceRequest.ServiceRequestIntent.FILLERORDER);
         cboServiceRequest.setAuthoredOnElement(DateTimeType.now());
         cboServiceRequest.setPriority(priorityForCBO.getServiceRequestPriority());
-        if (occurrenceForCBO.isPeriod()) {
-          cboServiceRequest.setOccurrence(new Period().setStartElement(occurrenceForCBO.getStart())
-              .setEndElement(occurrenceForCBO.getEnd()));
-        } else {
-          cboServiceRequest.setOccurrence(occurrenceForCBO.getEnd());
-        }
+        // TODO set occurrence from parent task
+
+        //        if (occurrenceForCBO.isPeriod()) {
+        //          cboServiceRequest.setOccurrence(new Period().setStartElement(occurrenceForCBO.getStart())
+        //              .setEndElement(occurrenceForCBO.getEnd()));
+        //        } else {
+        //          cboServiceRequest.setOccurrence(occurrenceForCBO.getEnd());
+        //        }
         updateBundle.addEntry(FhirUtil.createPostEntry(cboServiceRequest));
 
         Task cboTask = task.copy();
