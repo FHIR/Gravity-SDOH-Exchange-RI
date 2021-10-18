@@ -6,13 +6,15 @@ import { getTasks } from "@/api";
 import Filters from "@/components/Filters.vue";
 import TableCard from "@/components/TableCard.vue";
 import TaskEditDialog from "@/components/TaskEditDialog.vue";
+import TaskResourcesDialog from "@/components/TaskResourcesDialog.vue";
 
 export default defineComponent({
 	components: {
 		TableCard,
 		Filters,
 		TaskTable,
-		TaskEditDialog
+		TaskEditDialog,
+		TaskResourcesDialog
 	},
 	props: {
 		requestType: {
@@ -50,12 +52,19 @@ export default defineComponent({
 			taskInEdit.value = null;
 		};
 
+		const taskIdToViewResources = ref<string | null>(null);
+		const viewTaskResources = (taskId: string) => {
+			taskIdToViewResources.value = taskId;
+		};
+
 		return {
 			tasks,
 			editTask,
 			closeDialog,
 			taskInEdit,
-			updateTaskFromDialog
+			updateTaskFromDialog,
+			viewTaskResources,
+			taskIdToViewResources
 		};
 	}
 });
@@ -71,10 +80,16 @@ export default defineComponent({
 				@task-updated="updateTaskFromDialog"
 			/>
 
+			<TaskResourcesDialog
+				:task-id="taskIdToViewResources"
+				@close="taskIdToViewResources = null"
+			/>
+
 			<div class="table-card">
 				<TaskTable
 					:tasks="tasks"
 					@task-name-click="editTask"
+					@view-resources="viewTaskResources"
 				/>
 			</div>
 		</TableCard>
