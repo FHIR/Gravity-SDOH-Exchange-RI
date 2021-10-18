@@ -14,6 +14,9 @@ import {
 	ElAlert,
 	ElTable,
 	ElTableColumn,
+	ElSelect,
+	ElOption,
+	ElTag,
 	ElDialog,
 	ElDivider
 } from "element-plus";
@@ -33,8 +36,10 @@ import "element-plus/es/components/table/style/css";
 import "element-plus/es/components/table-column/style/css";
 import "element-plus/es/components/dialog/style/css";
 import "element-plus/es/components/divider/style/css";
-
 import "@/assets/scss/element-plus/index.scss";
+import "element-plus/es/components/select/style/css";
+import "element-plus/es/components/option/style/css";
+import "element-plus/es/components/tag/style/css";
 
 export default (app: App) => {
 	app.use(ElContainer);
@@ -52,4 +57,7 @@ export default (app: App) => {
 	app.use(ElTableColumn);
 	app.use(ElDialog);
 	app.use(ElDivider);
+	app.use(ElSelect);
+	app.use(ElOption);
+	app.use(ElTag);
 };

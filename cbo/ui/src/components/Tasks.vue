@@ -1,37 +1,18 @@
 <script lang="ts">
-import { defineComponent, ref, h } from "vue";
+import { defineComponent, ref } from "vue";
 import { Task, TaskWithState } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
 import { getTasks } from "@/api";
 import Filters from "@/components/Filters.vue";
 import TableCard from "@/components/TableCard.vue";
-
-const poll = <T>(
-	makeRequest: () => Promise<T>,
-	proceed: (t: T) => boolean,
-	ms: number
-) => {
-	const next = () => {
-		setTimeout(async () => {
-			try {
-				const resp = await makeRequest();
-				if (proceed(resp)) {
-					next();
-				}
-			} catch {
-				next();
-			}
-		}, ms);
-	};
-	next();
-};
-
+import TaskEditDialog from "@/components/TaskEditDialog.vue";
 
 export default defineComponent({
 	components: {
 		TableCard,
 		Filters,
-		TaskTable
+		TaskTable,
+		TaskEditDialog
 	},
 	props: {
 		requestType: {
@@ -53,8 +34,28 @@ export default defineComponent({
 				tasks.value = inactiveRequests.value.map((task: Task) => ({ task, isNew: false }));
 		});
 
+		const taskInEdit = ref<Task | null>(null);
+
+		const editTask = (taskToEdit: TaskWithState) => {
+			// markTaskAsNotNew(taskToEdit.task.id);
+			taskInEdit.value = taskToEdit.task;
+		};
+
+		const updateTaskFromDialog = (task: Task) => {
+			tasks.value = tasks.value.map(taskState => taskState.task.id === task.id ? { ...taskState, task } : taskState);
+			closeDialog();
+		};
+
+		const closeDialog = () => {
+			taskInEdit.value = null;
+		};
+
 		return {
-			tasks
+			tasks,
+			editTask,
+			closeDialog,
+			taskInEdit,
+			updateTaskFromDialog
 		};
 	}
 });
@@ -64,9 +65,18 @@ export default defineComponent({
 	<div class="tasks">
 		<Filters />
 		<TableCard>
-			<TaskTable
-				:tasks="tasks"
+			<TaskEditDialog
+				:task="taskInEdit"
+				@close="closeDialog"
+				@task-updated="updateTaskFromDialog"
 			/>
+
+			<div class="table-card">
+				<TaskTable
+					:tasks="tasks"
+					@task-name-click="editTask"
+				/>
+			</div>
 		</TableCard>
 	</div>
 </template>

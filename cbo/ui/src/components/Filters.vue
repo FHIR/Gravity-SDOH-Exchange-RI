@@ -34,7 +34,9 @@ export default defineComponent({
 				size="mini"
 			/>
 		</div>
-		<slot></slot>
+		<div class="actions">
+			<slot></slot>
+		</div>
 	</div>
 </template>
 
@@ -59,6 +61,10 @@ export default defineComponent({
 	::v-deep(.el-input) {
 		width: 350px;
 		margin-right: 50px;
+	}
+
+	.actions {
+		margin-left: auto;
 	}
 }
 </style>
