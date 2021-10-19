@@ -105,7 +105,8 @@ public class TaskUpdateBundleFactory {
         cboTask.setId((String) null);
         cboTask.getIdentifier()
             .clear();
-        cboTask.addBasedOn(new Reference(task));
+        cboTask.addBasedOn(new Reference(task.getIdElement()
+            .toUnqualifiedVersionless()));
         cboTask.setStatus(TaskStatus.RECEIVED);
         cboTask.setAuthoredOnElement(DateTimeType.now());
         cboTask.setLastModifiedElement(DateTimeType.now());
