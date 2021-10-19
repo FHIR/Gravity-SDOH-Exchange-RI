@@ -1,7 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.model;
 
 import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +14,6 @@ import java.time.OffsetDateTime;
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode
 public class Server {
 
   @Id

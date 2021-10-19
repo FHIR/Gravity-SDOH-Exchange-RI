@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.model;
+package org.hl7.gravity.refimpl.sdohexchange.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

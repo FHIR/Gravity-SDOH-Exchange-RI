@@ -1,6 +1,7 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import org.hl7.gravity.refimpl.sdohexchange.auth.AuthorizationClient;
+import org.hl7.gravity.refimpl.sdohexchange.auth.TokenResponse;
 import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewServerDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ServerDto;
@@ -8,7 +9,6 @@ import org.hl7.gravity.refimpl.sdohexchange.exception.AuthClientException;
 import org.hl7.gravity.refimpl.sdohexchange.exception.DuplicateServerNameNotAllowedException;
 import org.hl7.gravity.refimpl.sdohexchange.exception.ServerNotFoundException;
 import org.hl7.gravity.refimpl.sdohexchange.model.Server;
-import org.hl7.gravity.refimpl.sdohexchange.model.TokenResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,10 +50,10 @@ public class ServerService {
 
   @Transactional
   public ServerDto createServer(NewServerDto newServerDto) throws AuthClientException {
-    serverRepository.findByServerName(newServerDto.getServerName())
-        .ifPresent(obj -> {
-          throw new DuplicateServerNameNotAllowedException(obj.getServerName());
-        });
+    if (serverRepository.findByServerName(newServerDto.getServerName())
+        .isPresent()) {
+      throw new DuplicateServerNameNotAllowedException(newServerDto.getServerName());
+    }
     Server server = modelMapper.map(newServerDto, Server.class);
     TokenResponse tokenResponse = authorizationClient.getTokenResponse(URI.create(newServerDto.getAuthServerUrl()),
         newServerDto.getClientId(), newServerDto.getClientSecret(), SCOPE);
@@ -67,12 +67,11 @@ public class ServerService {
   public ServerDto updateServer(Integer id, NewServerDto newServerDto) throws AuthClientException {
     Server server = serverRepository.findById(id)
         .orElseThrow(() -> new ServerNotFoundException(String.format("No Server was found by id '%s'", id)));
-    serverRepository.findByServerName(newServerDto.getServerName())
-        .ifPresent(obj -> {
-          if (!obj.equals(server)) {
-            throw new DuplicateServerNameNotAllowedException(obj.getServerName());
-          }
-        });
+    if (serverRepository.findByServerName(newServerDto.getServerName())
+        .isPresent() && !server.getServerName()
+        .equals(newServerDto.getServerName())) {
+      throw new DuplicateServerNameNotAllowedException(newServerDto.getServerName());
+    }
     TokenResponse tokenResponse = authorizationClient.getTokenResponse(URI.create(newServerDto.getAuthServerUrl()),
         newServerDto.getClientId(), newServerDto.getClientSecret(), SCOPE);
     server.setLastSyncDate(OffsetDateTime.now());

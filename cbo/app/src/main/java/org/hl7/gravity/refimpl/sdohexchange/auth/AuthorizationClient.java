@@ -2,7 +2,6 @@ package org.hl7.gravity.refimpl.sdohexchange.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.hl7.gravity.refimpl.sdohexchange.exception.AuthClientException;
-import org.hl7.gravity.refimpl.sdohexchange.model.TokenResponse;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -53,7 +52,17 @@ public class AuthorizationClient {
     }
   }
 
-  private HttpEntity<MultiValueMap<String, String>> createRequestEntity(String clientId, String secret, String scope) {
+  /**
+   * This method create request with credentials in headers, but if you want to set credentials in body, you can
+   * override this method.
+   *
+   * @param clientId OAuth2 Client ID
+   * @param secret   OAuth2 Client Secret
+   * @param scope    OAuth2 Client Scope
+   * @return request entity
+   */
+  protected HttpEntity<MultiValueMap<String, String>> createRequestEntity(String clientId, String secret,
+      String scope) {
     HttpHeaders headers = new HttpHeaders();
     headers.setBasicAuth(clientId, secret);
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
