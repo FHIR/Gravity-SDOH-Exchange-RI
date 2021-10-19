@@ -18,7 +18,8 @@ import {
 	ElOption,
 	ElTag,
 	ElDialog,
-	ElDivider
+	ElDivider,
+	ElLoading
 } from "element-plus";
 //todo: use unplugin-vue-components
 import "element-plus/es/components/container/style/css";
@@ -40,6 +41,7 @@ import "@/assets/scss/element-plus/index.scss";
 import "element-plus/es/components/select/style/css";
 import "element-plus/es/components/option/style/css";
 import "element-plus/es/components/tag/style/css";
+import "element-plus/es/components/loading/style/css";
 
 export default (app: App) => {
 	app.use(ElContainer);
@@ -60,4 +62,5 @@ export default (app: App) => {
 	app.use(ElSelect);
 	app.use(ElOption);
 	app.use(ElTag);
+	app.use(ElLoading);
 };

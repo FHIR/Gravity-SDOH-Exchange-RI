@@ -1,4 +1,4 @@
-import { Task, User, Server, NewServerPayload, UpdateServerPayload, Procedure } from "@/types";
+import { Task, User, Server, NewServerPayload, UpdateServerPayload, Procedure, Resources } from "@/types";
 
 export const getContext = async (): Promise<User> => ({ id: "vidsmok4uVBobra", name: "Colin Brooks", userType: "CEO" });
 // const dataOnly = <T>({ data }: { data: T }): T => data;
@@ -378,4 +378,15 @@ export const updateServer = async (payload: UpdateServerPayload): Promise<Server
 	authUrl: payload.authUrl,
 	clientId: payload.clientId,
 	accessUntil: new Date().toISOString()
+});
+
+export const getTaskResources = async (taskId: string): Promise<Resources> => ({
+	task: "",
+	serviceRequest: "",
+	requester: "",
+	patient: "",
+	consent: "",
+	conditions: [],
+	goals: [],
+	procedures: []
 });
