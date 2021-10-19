@@ -110,6 +110,8 @@ export default defineComponent({
 		const isValid = computed(() =>
 			(!showOutcomeInput.value || outcome.value) &&
 			(!showStatusReasonInput.value || statusReason.value) &&
+			(!showFieldsForAcceptedStatus.value || priorityForCBO.value) &&
+			(!showFieldsForAcceptedStatus.value || cboPerformer.value) &&
 			(!proceduresRequired.value || procedures.value.length > 0)
 		);
 
@@ -183,6 +185,11 @@ export default defineComponent({
 			statusReason: [{ required: true, message: "This field is required" }],
 			outcome: [{ required: true, message: "This field is required" }],
 			cboPerformer: [{ required: true, message: "This field is required" }],
+			priority: {
+				required: true,
+				trigger: "change",
+				message: ""
+			},
 			procedures: [
 				{
 					required: proceduresRequired.value,
@@ -448,6 +455,7 @@ export default defineComponent({
 							<el-form-item
 								v-if="showFieldsForAcceptedStatus"
 								label="Priority for CBO"
+								prop="priority"
 							>
 								<el-radio-group v-model="formStuff.priorityForCBO">
 									<el-radio label="Routine" />
