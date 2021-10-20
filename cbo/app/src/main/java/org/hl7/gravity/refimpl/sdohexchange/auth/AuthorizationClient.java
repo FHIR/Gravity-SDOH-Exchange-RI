@@ -53,7 +53,7 @@ public class AuthorizationClient {
   }
 
   /**
-   * This method create request with credentials in headers, but if you want to set credentials in body, you can
+   * This method creates request with credentials in headers, but if you want to set credentials in body, you can
    * override this method.
    *
    * @param clientId OAuth2 Client ID
