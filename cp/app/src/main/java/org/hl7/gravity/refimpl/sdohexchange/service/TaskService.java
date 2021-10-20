@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
@@ -23,6 +24,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskFailBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,8 +92,16 @@ public class TaskService {
             .getIdPart(), cboPerformer.getName()));
       }
     }
-
     taskRepository.transaction(bundleFactory.createUpdateBundle());
+    // Usually these will be only the cancel statuses. If so - just cancel the subsequent (own) tasks.
+    if (update.getStatus() != TaskStatus.ACCEPTED) {
+      try {
+        sync(taskInfo.getTask(), taskInfo.getServiceRequest());
+      } catch (ResourceNotFoundException exc) {
+        taskRepository.transaction(new TaskFailBundleFactory(taskInfo.getTask(), taskInfo.getServiceRequest(),
+            exc.getMessage()).createFailBundle());
+      }
+    }
   }
 
   private Organization getCBOOrganization(String orgId) {
@@ -126,6 +136,33 @@ public class TaskService {
     return roles.stream()
         .findFirst()
         .get();
+  }
+
+  public void sync(Task task, final ServiceRequest serviceRequest) {
+    Bundle ownUpdateBundle = new Bundle();
+    ownUpdateBundle.setType(Bundle.BundleType.TRANSACTION);
+
+    Bundle ownTaskBundle = taskRepository.findOurTask(task);
+    TaskInfoHolder ownTaskInfo = new TaskInfoBundleExtractor().extract(ownTaskBundle)
+        .stream()
+        .findFirst()
+        .orElseThrow(() -> new ResourceNotFoundException("No own task is found for task " + task.getIdElement()
+            .getIdPart()));
+
+    Task ownTask = ownTaskInfo.getTask();
+    ownTask.setStatus(task.getStatus());
+    ownTask.setStatusReason(task.getStatusReason());
+    ownTask.setLastModifiedElement(task.getLastModifiedElement());
+    ownTask.setNote(task.getNote());
+    ownUpdateBundle.addEntry(FhirUtil.createPutEntry(ownTask));
+
+    ServiceRequest cpServiceRequest = ownTaskInfo.getServiceRequest();
+    if (!serviceRequest.getStatus()
+        .equals(cpServiceRequest.getStatus())) {
+      cpServiceRequest.setStatus(serviceRequest.getStatus());
+      ownUpdateBundle.addEntry(FhirUtil.createPutEntry(cpServiceRequest));
+    }
+    taskRepository.transaction(ownUpdateBundle);
   }
 
 }

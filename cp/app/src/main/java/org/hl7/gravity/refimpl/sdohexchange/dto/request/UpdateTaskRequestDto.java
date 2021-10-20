@@ -14,23 +14,21 @@ import java.util.List;
     message = "Updating task status to 'Rejected' requires 'reason'."),
     @TaskStatusValueMatch(updateStatus = TaskStatus.CANCELLED,
         nullFields = {"priorityForCBO", "occurrenceForCBO", "cboPerformer"}, requiredFields = {"statusReason"},
-        message = "Updating task status to 'Canceled' requires 'reason'."),
+        message = "Updating task status to 'Canceled' requires 'statusReason'. All CBO fields must be unset."),
     @TaskStatusValueMatch(updateStatus = TaskStatus.COMPLETED,
         nullFields = {"priorityForCBO", "occurrenceForCBO", "cboPerformer"},
         requiredFields = {"outcome", "procedureCodes"},
-        message = "Updating task status to 'Completed' requires 'outcome' and 'procedureCodes'."),
-    @TaskStatusValueMatch(updateStatus = TaskStatus.ACCEPTED,
-        nullFields = {"procedureCodes", "statusReason", "outcome"}, requiredFields = {"priorityForCBO"},
-        message = "Updating task status to 'Accepted' with 'statusReason', 'outcome' or 'procedureCodes' is not "
-            + "valid. Required fields is 'priorityForCBO'."),
-    @TaskStatusValueMatch(updateStatus = TaskStatus.INPROGRESS,
-        nullFields = {"procedureCodes", "statusReason", "outcome", "priorityForCBO", "occurrenceForCBO",
-            "cboPerformer"},
-        message = "Updating task status to 'In Progress' with 'statusReason', 'outcome' or 'procedureCodes' is not "
-            + "valid."), @TaskStatusValueMatch(updateStatus = TaskStatus.ONHOLD,
+        message = "Updating task status to 'Completed' requires 'outcome' and 'procedureCodes'. All CBO fields must "
+            + "be unset."), @TaskStatusValueMatch(updateStatus = TaskStatus.ACCEPTED,
+    nullFields = {"procedureCodes", "statusReason", "outcome"}, requiredFields = {"priorityForCBO"},
+    message = "Updating task status to 'Accepted' with 'statusReason', 'outcome' or 'procedureCodes' is not "
+        + "valid. Required fields is 'priorityForCBO'."), @TaskStatusValueMatch(updateStatus = TaskStatus.INPROGRESS,
     nullFields = {"procedureCodes", "statusReason", "outcome", "priorityForCBO", "occurrenceForCBO", "cboPerformer"},
-    message = "Updating task status to 'On Hold' with 'statusReason', 'outcome' or 'procedureCodes' is not valid"
-        + ".")})
+    message = "Updating task status to 'In Progress' with 'statusReason', 'outcome' or 'procedureCodes' is not "
+        + "valid."), @TaskStatusValueMatch(updateStatus = TaskStatus.ONHOLD,
+    nullFields = {"procedureCodes", "statusReason", "outcome", "priorityForCBO", "occurrenceForCBO", "cboPerformer"},
+    message = "Updating task status to 'On Hold' with 'statusReason', 'outcome' or 'procedureCodes' or any of the CBO "
+        + "fields is not valid.")})
 public class UpdateTaskRequestDto {
 
   private TaskStatus status;

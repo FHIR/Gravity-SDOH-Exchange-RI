@@ -53,6 +53,21 @@ public class TaskRepository extends FhirRepository<Task> {
         .execute();
   }
 
+  public Bundle findOurTask(Task task) {
+    return getClient().search()
+        .forResource(getResourceType())
+        .where(Task.BASED_ON.hasId(task.getIdElement()
+            .toUnqualifiedVersionless()))
+        //Filler order are CBO (Our) tasks. This will probably be changed in the future.
+        // For now this is a simple way to distinguish CP tasks from CBO tasks.
+        .and(Task.INTENT.exactly()
+            .code(Task.TaskIntent.FILLERORDER.toCode()))
+        // include ServiceRequest
+        .include(Task.INCLUDE_FOCUS)
+        .returnBundle(Bundle.class)
+        .execute();
+  }
+
   @Override
   public Class<Task> getResourceType() {
     return Task.class;
