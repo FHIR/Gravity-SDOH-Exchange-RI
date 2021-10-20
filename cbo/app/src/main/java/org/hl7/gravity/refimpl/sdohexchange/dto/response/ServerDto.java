@@ -15,5 +15,5 @@ public class ServerDto {
   private String authServerUrl;
   private String clientId;
   private String clientSecret;
-  private OffsetDateTime lastSyncDate;
+  private OffsetDateTime lastSyncDate = OffsetDateTime.now();
 }

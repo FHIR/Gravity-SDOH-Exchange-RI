@@ -1,7 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import org.hl7.gravity.refimpl.sdohexchange.auth.AuthorizationClient;
-import org.hl7.gravity.refimpl.sdohexchange.auth.TokenResponse;
 import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewServerDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ServerDto;
@@ -15,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,10 +53,9 @@ public class ServerService {
       throw new DuplicateServerNameNotAllowedException(newServerDto.getServerName());
     }
     Server server = modelMapper.map(newServerDto, Server.class);
-    TokenResponse tokenResponse = authorizationClient.getTokenResponse(URI.create(newServerDto.getAuthServerUrl()),
-        newServerDto.getClientId(), newServerDto.getClientSecret(), SCOPE);
-    server.setLastSyncDate(OffsetDateTime.now());
-    server.setAccessToken(tokenResponse.getAccessToken());
+    // Just a validation of credentials.
+    authorizationClient.getTokenResponse(URI.create(newServerDto.getAuthServerUrl()), newServerDto.getClientId(),
+        newServerDto.getClientSecret(), SCOPE);
     serverRepository.save(server);
     return modelMapper.map(server, ServerDto.class);
   }
@@ -72,10 +69,9 @@ public class ServerService {
         .equals(newServerDto.getServerName())) {
       throw new DuplicateServerNameNotAllowedException(newServerDto.getServerName());
     }
-    TokenResponse tokenResponse = authorizationClient.getTokenResponse(URI.create(newServerDto.getAuthServerUrl()),
-        newServerDto.getClientId(), newServerDto.getClientSecret(), SCOPE);
-    server.setLastSyncDate(OffsetDateTime.now());
-    server.setAccessToken(tokenResponse.getAccessToken());
+    // Just a validation of credentials.
+    authorizationClient.getTokenResponse(URI.create(newServerDto.getAuthServerUrl()), newServerDto.getClientId(),
+        newServerDto.getClientSecret(), SCOPE);
     modelMapper.map(newServerDto, server);
     return modelMapper.map(server, ServerDto.class);
   }

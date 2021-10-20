@@ -6,9 +6,9 @@ spring:
       settings:
         web-allow-others: false
   datasource:
-    url: jdbc:h2:mem:cbodb
+    #url: jdbc:h2:mem:cbodb
     #This will crete database files in the RI root /data folder
-    #url: jdbc:h2:file:./data/cbodb
+    url: jdbc:h2:file:./data/cbodb
     username: sa
     password:
     driverClassName: org.h2.Driver
