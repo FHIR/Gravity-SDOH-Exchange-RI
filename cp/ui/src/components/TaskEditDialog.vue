@@ -41,7 +41,7 @@ const initialTaskStuff: TaskStuff = {
 
 const Flow: { [status in TaskStatus]?: TaskStatus[] } = {
 	"Received":    ["Accepted", "Rejected"],
-	"Accepted":    ["In Progress", "On Hold", "Cancelled"],
+	"Accepted":    ["Cancelled"],
 	"In Progress": ["On Hold", "Completed", "Cancelled"],
 	"On Hold":     ["In Progress", "Cancelled"]
 };
