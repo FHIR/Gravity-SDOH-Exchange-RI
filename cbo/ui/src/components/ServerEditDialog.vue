@@ -2,6 +2,7 @@
 import { defineComponent, PropType, computed, reactive, ref } from "vue";
 import { Server, UpdateServerPayload } from "@/types";
 import { ServersModule } from "@/store/modules/servers";
+import { showDefaultNotification } from "@/utils/utils";
 
 export type FormModel = {
 	name: string,
@@ -70,6 +71,7 @@ export default defineComponent({
 			}
 			finally {
 				saveInProgress.value = false;
+				showDefaultNotification(`Server "${formModel.name}" has been successfully updated!`);
 			}
 		};
 
