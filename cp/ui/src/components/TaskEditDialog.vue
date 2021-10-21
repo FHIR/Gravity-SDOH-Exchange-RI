@@ -165,7 +165,7 @@ export default defineComponent({
 				outcome: showOutcomeInput.value ? outcome.value : undefined,
 				statusReason: showStatusReasonInput.value ? statusReason.value : undefined,
 				procedureCodes: procedures.value.length > 0 ? procedures.value : undefined,
-				cboPerformer: cboPerformer.value,
+				cboPerformer: cboPerformer.value || undefined,
 				priorityForCBO: priorityForCBO.value || undefined
 			};
 			saveInProgress.value = true;

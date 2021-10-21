@@ -90,7 +90,7 @@ export type UpdateTaskPayload = {
 	statusReason?: string,
 	procedureCodes?: string[],
 	status: UpdatedStatus,
-	cboPerformer: string,
+	cboPerformer?: string,
 	priorityForCBO?: string
 }
 
