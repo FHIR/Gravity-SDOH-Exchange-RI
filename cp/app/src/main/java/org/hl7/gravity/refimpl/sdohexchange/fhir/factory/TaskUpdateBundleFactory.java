@@ -1,10 +1,5 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.factory;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Bundle;
@@ -19,6 +14,7 @@ import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestStatus;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskUpdateException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
@@ -26,6 +22,12 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.reference.util.ServiceRequestRe
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -41,13 +43,16 @@ public class TaskUpdateBundleFactory {
   private String outcome;
   private List<Coding> procedureCodes;
   private UserDto user;
+  private Priority priorityForCBO;
+  private Reference cboTaskRequester;
+  private Reference cboTaskOwner;
 
   static {
     //TODO: Verify this state machine
     TASK_STATE_MACHINE.put(TaskStatus.RECEIVED, Arrays.asList(TaskStatus.REJECTED, TaskStatus.ACCEPTED));
     TASK_STATE_MACHINE.put(TaskStatus.ACCEPTED, Arrays.asList(TaskStatus.CANCELLED, TaskStatus.INPROGRESS));
-    TASK_STATE_MACHINE.put(TaskStatus.INPROGRESS, Arrays.asList(TaskStatus.ONHOLD, TaskStatus.COMPLETED,
-        TaskStatus.CANCELLED));
+    TASK_STATE_MACHINE.put(TaskStatus.INPROGRESS,
+        Arrays.asList(TaskStatus.ONHOLD, TaskStatus.COMPLETED, TaskStatus.CANCELLED));
     TASK_STATE_MACHINE.put(TaskStatus.ONHOLD, Arrays.asList(TaskStatus.INPROGRESS, TaskStatus.CANCELLED));
   }
 
@@ -69,9 +74,8 @@ public class TaskUpdateBundleFactory {
     }
     List<TaskStatus> possibleStatuses = TASK_STATE_MACHINE.get(task.getStatus());
     if (possibleStatuses == null || !possibleStatuses.contains(status)) {
-      throw new TaskUpdateException(String.format("Unable to update Task status from '%s' to '%s'.",
-          task.getStatus()
-              .getDisplay(), status.getDisplay()));
+      throw new TaskUpdateException(String.format("Unable to update Task status from '%s' to '%s'.", task.getStatus()
+          .getDisplay(), status.getDisplay()));
     }
   }
 
@@ -82,6 +86,39 @@ public class TaskUpdateBundleFactory {
       task.setLastModifiedElement(DateTimeType.now());
 
       Assert.notNull(serviceRequest, "ServiceRequest can't be null.");
+      if (status == TaskStatus.ACCEPTED) {
+        Assert.notNull(priorityForCBO, "Priority for CBO cannot be null.");
+        Assert.notNull(cboTaskRequester, "CBO Task requester cannot be null.");
+
+        //TODO move to OwnTaskBundleFactory
+        ServiceRequest cboServiceRequest = serviceRequest.copy();
+        cboServiceRequest.setId(IdType.newRandomUuid());
+        cboServiceRequest.getIdentifier()
+            .clear();
+        cboServiceRequest.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
+        cboServiceRequest.setIntent(ServiceRequest.ServiceRequestIntent.FILLERORDER);
+        cboServiceRequest.setAuthoredOnElement(DateTimeType.now());
+        cboServiceRequest.setPriority(priorityForCBO.getServiceRequestPriority());
+        updateBundle.addEntry(FhirUtil.createPostEntry(cboServiceRequest));
+
+        Task cboTask = task.copy();
+        cboTask.setId((String) null);
+        cboTask.getIdentifier()
+            .clear();
+        cboTask.addBasedOn(new Reference(task.getIdElement()
+            .toUnqualifiedVersionless()));
+        cboTask.setStatus(TaskStatus.RECEIVED);
+        cboTask.setAuthoredOnElement(DateTimeType.now());
+        cboTask.setLastModifiedElement(DateTimeType.now());
+        cboTask.setFocus(new Reference(cboServiceRequest));
+        cboTask.setIntent(Task.TaskIntent.FILLERORDER);
+        cboTask.setPriority(priorityForCBO.getTaskPriority());
+        cboTask.setRequester(cboTaskRequester);
+        if (cboTaskOwner != null) {
+          cboTask.setOwner(cboTaskOwner);
+        }
+        updateBundle.addEntry(FhirUtil.createPostEntry(cboTask));
+      }
       if (status == TaskStatus.REJECTED || status == TaskStatus.CANCELLED) {
         Assert.notNull(statusReason, "Status reason cannot be null.");
         task.setStatusReason(new CodeableConcept().setText(statusReason));
@@ -90,8 +127,7 @@ public class TaskUpdateBundleFactory {
         }
         serviceRequest.setStatus(ServiceRequestStatus.REVOKED);
         updateBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
-      }
-      if (status == Task.TaskStatus.COMPLETED) {
+      } else if (status == Task.TaskStatus.COMPLETED) {
         Assert.notNull(outcome, "Outcome cannot be null.");
         Assert.isTrue(procedureCodes.size() > 0, "Procedures can't be empty.");
         task.getOutput()
@@ -143,9 +179,9 @@ public class TaskUpdateBundleFactory {
 
   private static Task.TaskOutputComponent createTaskOutput(Type value) {
     Task.TaskOutputComponent taskOutput = new Task.TaskOutputComponent();
-    taskOutput.setType(new CodeableConcept().addCoding(new Coding(
-        "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes", "resulting-activity",
-        "Resulting Activity")));
+    taskOutput.setType(new CodeableConcept().addCoding(
+        new Coding("http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes", "resulting-activity",
+            "Resulting Activity")));
     taskOutput.setValue(value);
     return taskOutput;
   }

@@ -18,7 +18,9 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class SpringFoxConfig {
 
   public static final String TASK_API_TAG = "Task Controller";
+  public static final String OUR_TASK_API_TAG = "Our-Task Controller";
   public static final String USER_API_TAG = "User Controller";
+  public static final String SUPPORT_API_TAG = "Support Controller";
   public static final String MAPPINGS_API_TAG = "Mappings Controller";
   public static final String RESOURCES_API_TAG = "Resources Controller";
 
@@ -33,7 +35,10 @@ public class SpringFoxConfig {
         .tags(new Tag(TASK_API_TAG,
                 "Perform operations on Task resources. This includes retrieving of tasks, changing task status, and "
                     + "triggering an automatic polling mechanism for Task status synchronization."),
-            new Tag(USER_API_TAG, "Get details of a currently logged in user."),
+            new Tag(OUR_TASK_API_TAG, "Perform operations on Our Tasks. These are tasks created within this app."),
+            new Tag(USER_API_TAG, "Get details of a currently logged in user."), new Tag(SUPPORT_API_TAG,
+                "Fetch lists of available FHIR resources to reference from Task/ServiceRequest "
+                    + "instances being created."),
             new Tag(MAPPINGS_API_TAG, "Get details of SDOH categories and codes."),
             new Tag(RESOURCES_API_TAG, "Get resources as raw FHIR documents."))
         .apiInfo(apiInfo)

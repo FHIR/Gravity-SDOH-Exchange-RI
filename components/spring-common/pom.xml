@@ -10,45 +10,43 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>fhir-common</artifactId>
-  <name>FHIR Common</name>
+  <artifactId>spring-common</artifactId>
+  <name>Spring Common</name>
   <packaging>jar</packaging>
 
   <properties>
-    <spring_boot_version>2.2.6.RELEASE</spring_boot_version>
-    <hapi_version>5.2.0</hapi_version>
+    <spring_version>5.2.5.RELEASE</spring_version>
   </properties>
 
-  <!-- TODO remove Spring dependency -->
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>${spring_boot_version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
+    <!--    <dependency>-->
+    <!--      <groupId>org.springframework</groupId>-->
+    <!--      <artifactId>spring-core</artifactId>-->
+    <!--    </dependency>-->
+    <!--    <dependency>-->
+    <!--      <groupId>org.springframework</groupId>-->
+    <!--      <artifactId>spring-beans</artifactId>-->
+    <!--    </dependency>-->
     <dependency>
       <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>${spring_version}</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.10.3</version>
     </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
-      <artifactId>hapi-fhir-structures-r4</artifactId>
+      <artifactId>hapi-fhir-client</artifactId>
       <version>${hapi_version}</version>
     </dependency>
     <dependency>
