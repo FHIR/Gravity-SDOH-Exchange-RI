@@ -4,12 +4,13 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.SearchModifierCode;
 
 public class TaskRepository extends FhirRepository<Task> {
 
-  private static final String orgId = "Organization/15573";
+  private static final String orgName = "Social Alliance";
 
   public TaskRepository(IGenericClient client) {
     super(client);
@@ -18,11 +19,13 @@ public class TaskRepository extends FhirRepository<Task> {
   public Bundle findAllTasks() {
     return getClient().search()
         .forResource(getResourceType())
-        .where(new TokenClientParam(Task.SP_STATUS + ':' + SearchModifierCode.NOT.toCode()).exactly()
+        .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.REQUESTED.toCode()))
         .and(Task.INTENT.exactly()
             .code(Task.TaskIntent.FILLERORDER.toCode()))
-        .and(Task.OWNER.hasId(orgId))
+        .and(new TokenClientParam(Task.SP_OWNER + ":" + "Organization." + Organization.SP_NAME + ":"
+            + SearchModifierCode.EXACT.toCode()).exactly()
+            .code(orgName))
         .include(Task.INCLUDE_FOCUS)
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
