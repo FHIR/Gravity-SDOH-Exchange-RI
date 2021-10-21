@@ -18,7 +18,9 @@
 		"normalize.css": "8.0.1",
 		"vue": "3.2.19",
 		"vue-router": "4.0.11",
-		"vuex": "4.0.2"
+		"vuex": "4.0.2",
+		"codemirror": "5.61.0",
+		"@types/codemirror": "5.60.0"
 	},
 	"devDependencies": {
 		"@types/lodash": "4.14.168",

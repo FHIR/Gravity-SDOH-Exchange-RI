@@ -19,5 +19,9 @@ swagger:
     name: Gravity Project
     url: https://www.hl7.org/gravity/
 
+oauth:
+  grant-type: client_credentials
+  scope: address phone read profile openid email write
+
 server:
   port: 8084

@@ -624,6 +624,5 @@ export default defineComponent({
 
 		@include icon("~@/assets/images/link.svg", 14px, 14px);
 	}
-
 }
 </style>

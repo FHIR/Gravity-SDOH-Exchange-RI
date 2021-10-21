@@ -1,6 +1,6 @@
 <script lang="ts">
-import { defineComponent, PropType, computed, reactive, ref } from "vue";
-import { Server, UpdateServerPayload } from "@/types";
+import { defineComponent, computed, reactive, ref } from "vue";
+import { NewServerPayload } from "@/types";
 import { ServersModule } from "@/store/modules/servers";
 
 export type FormModel = {
@@ -11,16 +11,15 @@ export type FormModel = {
 }
 
 export default defineComponent({
-	name: "ServerEditDialog",
+	name: "ServerCreateDialog",
 	props: {
-		server: {
-			type: Object as PropType<Server | null>,
-			default: null
+		visible: {
+			type: Boolean,
+			default: false
 		}
 	},
 	emits: ["close"],
 	setup(props, ctx) {
-		const visible = computed<boolean>(() => props.server !== null);
 		const formEl = ref<any>(null);
 		const formModel = reactive<FormModel>({
 			name: "",
@@ -36,33 +35,24 @@ export default defineComponent({
 		});
 		const saveInProgress = ref<boolean>(false);
 		const hasChanges = computed<boolean>(() => (
-			formModel.name !== props.server?.name ||
-			formModel.url !== props.server?.url ||
-			formModel.authUrl !== props.server?.authUrl ||
-			formModel.clientId !== props.server?.clientId
+			formModel.name !== "" ||
+			formModel.url !== "" ||
+			formModel.authUrl !== "" ||
+			formModel.clientId !== ""
 		));
 
-		const onDialogOpen = () => {
-			Object.assign(formModel, {
-				name: props.server?.name,
-				url: props.server?.url,
-				authUrl: props.server?.authUrl,
-				clientId: props.server?.clientId
-			});
-		};
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
 			ctx.emit("close");
 		};
 		const onFormSave = async () => {
-			const payload: UpdateServerPayload = {
-				id: props.server?.id || "",
+			const payload: NewServerPayload = {
 				...formModel
 			};
 			saveInProgress.value = true;
 			try {
 				await formEl.value.validate();
-				await ServersModule.updateServer(payload);
+				await ServersModule.createServer(payload);
 				onDialogClose();
 			}
 			catch (err) {
@@ -74,9 +64,7 @@ export default defineComponent({
 		};
 
 		return {
-			visible,
 			formEl,
-			onDialogOpen,
 			onDialogClose,
 			formModel,
 			validationRules,
@@ -91,13 +79,12 @@ export default defineComponent({
 <template>
 	<el-dialog
 		:model-value="visible"
-		title="Server Data"
+		title="New Server"
 		:width="700"
 		append-to-body
 		destroy-on-close
-		custom-class="edit-server-dialog"
+		custom-class="create-server-dialog"
 		@close="onDialogClose"
-		@opened="onDialogOpen"
 	>
 		<el-form
 			ref="formEl"
@@ -106,7 +93,7 @@ export default defineComponent({
 			label-width="185px"
 			label-position="left"
 			size="mini"
-			class="edit-server-form"
+			class="create-server-form"
 		>
 			<el-form-item
 				prop="name"
@@ -135,16 +122,6 @@ export default defineComponent({
 			>
 				<el-input v-model="formModel.clientId" />
 			</el-form-item>
-
-			<el-form-item label="Last Synchronization">
-				{{ $filters.formatDateTime(new Date().toISOString()) }}
-			</el-form-item>
-
-			<el-divider />
-
-			<el-form-item label="Access to Server">
-				{{ $filters.formatDateTime(server?.accessUntil) }}
-			</el-form-item>
 		</el-form>
 		<template #footer>
 			<el-button
@@ -164,18 +141,8 @@ export default defineComponent({
 				:disabled="!hasChanges"
 				@click="onFormSave"
 			>
-				Save Changes
+				Add New Server
 			</el-button>
 		</template>
 	</el-dialog>
 </template>
-
-<style lang="scss" scoped>
-@import "~@/assets/scss/abstracts/variables";
-
-.edit-server-form {
-	.el-divider {
-		margin: 20px 0;
-	}
-}
-</style>
