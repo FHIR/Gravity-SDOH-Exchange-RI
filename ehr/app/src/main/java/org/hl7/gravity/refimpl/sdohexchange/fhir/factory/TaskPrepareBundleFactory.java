@@ -69,11 +69,11 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
    */
   protected BundleEntryComponent getPractitionerRoleEntry() {
     Assert.notNull(practitioner, "Practitioner can't be null.");
-    return FhirUtil.createGetEntry(addParams(PractitionerRole.class.getSimpleName(), combineParams(
-        eq(PractitionerRole.SP_PRACTITIONER, practitioner),
-        eq(Constants.PARAM_PROFILE, UsCoreProfiles.PRACTITIONER_ROLE),
-        eq(resourceField(PractitionerRole.SP_ORGANIZATION, Constants.PARAM_PROFILE), UsCoreProfiles.ORGANIZATION)
-    )));
+    return FhirUtil.createGetEntry(addParams(PractitionerRole.class.getSimpleName(),
+        combineParams(eq(PractitionerRole.SP_PRACTITIONER, practitioner),
+            eq(Constants.PARAM_PROFILE, UsCoreProfiles.PRACTITIONER_ROLE),
+            eq(resourceField(PractitionerRole.SP_ORGANIZATION, Constants.PARAM_PROFILE),
+                UsCoreProfiles.ORGANIZATION))));
   }
 
   /**
@@ -82,7 +82,7 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
    * @return consent entry
    */
   protected BundleEntryComponent getConsentEntry() {
-    Assert.notNull(performer, "Consent can't be null.");
+    Assert.notNull(consent, "Consent can't be null.");
     return FhirUtil.createGetEntry(
         addParams(Consent.class.getSimpleName(), combineParams(eq(Consent.SP_RES_ID, consent))));
   }
@@ -96,13 +96,12 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
   protected BundleEntryComponent getPerformerWithEndpointEntry() {
     Assert.notNull(performer, "Performer Organization can't be null.");
     EndpointConnectionType connectionType = EndpointConnectionType.HL7FHIRREST;
-    return FhirUtil.createGetEntry(addParams(Organization.class.getSimpleName(), combineParams(
-        eq(Organization.SP_RES_ID, performer),
-        eq(Organization.SP_TYPE, hasSystemWithAnyCode(OrganizationTypeCode.SYSTEM)),
-        eq(Constants.PARAM_INCLUDE, include(Organization.class.getSimpleName(), Organization.SP_ENDPOINT)),
-        eq(resourceField(Organization.SP_ENDPOINT, Endpoint.SP_CONNECTION_TYPE),
-            hasSystemAndCode(connectionType.getSystem(), connectionType.toCode()))
-    )));
+    return FhirUtil.createGetEntry(addParams(Organization.class.getSimpleName(),
+        combineParams(eq(Organization.SP_RES_ID, performer),
+            eq(Organization.SP_TYPE, hasSystemWithAnyCode(OrganizationTypeCode.SYSTEM)),
+            eq(Constants.PARAM_INCLUDE, include(Organization.class.getSimpleName(), Organization.SP_ENDPOINT)),
+            eq(resourceField(Organization.SP_ENDPOINT, Endpoint.SP_CONNECTION_TYPE),
+                hasSystemAndCode(connectionType.getSystem(), connectionType.toCode())))));
   }
 
   /**
@@ -114,10 +113,9 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
     if (conditions == null || conditions.isEmpty()) {
       return null;
     }
-    return FhirUtil.createGetEntry(addParams(Condition.class.getSimpleName(), combineParams(
-        eq(Condition.SP_RES_ID, String.join(",", conditions)),
-        eq(Constants.PARAM_PROFILE, SDOHProfiles.CONDITION)
-    )));
+    return FhirUtil.createGetEntry(addParams(Condition.class.getSimpleName(),
+        combineParams(eq(Condition.SP_RES_ID, String.join(",", conditions)),
+            eq(Constants.PARAM_PROFILE, SDOHProfiles.CONDITION))));
   }
 
   /**
@@ -129,9 +127,7 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
     if (goals == null || goals.isEmpty()) {
       return null;
     }
-    return FhirUtil.createGetEntry(addParams(Goal.class.getSimpleName(), combineParams(
-        eq(Goal.SP_RES_ID, String.join(",", goals)),
-        eq(Constants.PARAM_PROFILE, SDOHProfiles.GOAL)
-    )));
+    return FhirUtil.createGetEntry(addParams(Goal.class.getSimpleName(),
+        combineParams(eq(Goal.SP_RES_ID, String.join(",", goals)), eq(Constants.PARAM_PROFILE, SDOHProfiles.GOAL))));
   }
 }
