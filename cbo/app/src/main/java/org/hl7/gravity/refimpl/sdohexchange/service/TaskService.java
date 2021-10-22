@@ -2,8 +2,6 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.gravity.refimpl.sdohexchange.auth.AuthorizationClient;
 import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.TaskRepository;
@@ -11,11 +9,11 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConvert
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.AuthClientException;
 import org.hl7.gravity.refimpl.sdohexchange.model.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +22,9 @@ import java.util.List;
 public class TaskService {
 
   private static final String SCOPE = "address phone read profile openid email write";
+
+  @Value("${fhir.cbo-org-name}")
+  private String orgName;
 
   private final FhirContext fhirContext;
   private final ServerRepository serverRepository;
@@ -40,13 +41,13 @@ public class TaskService {
     List<TaskDto> taskDtoList = new ArrayList<>();
     for (Server server : serverList) {
       IGenericClient fhirClient = fhirContext.newRestfulGenericClient(server.getFhirServerUrl());
-//      fhirClient.registerInterceptor(new BearerTokenAuthInterceptor(
-//          authorizationClient.getTokenResponse(URI.create(server.getAuthServerUrl()), server.getClientId(),
-//                  server.getClientSecret(), SCOPE)
-//              .getAccessToken()));
-      TaskRepository taskRepository = new TaskRepository(fhirClient);
-      Bundle bundle = taskRepository.findAllTasks();
-      taskDtoList.addAll(new TaskBundleToDtoConverter().convert(bundle));
+      // Doesn't support now
+      //      fhirClient.registerInterceptor(new BearerTokenAuthInterceptor(
+      //          authorizationClient.getTokenResponse(URI.create(server.getAuthServerUrl()), server.getClientId(),
+      //                  server.getClientSecret(), SCOPE)
+      //              .getAccessToken()));
+      TaskRepository taskRepository = new TaskRepository(fhirClient, orgName);
+      taskDtoList.addAll(new TaskBundleToDtoConverter().convert(taskRepository.findAllTasks()));
     }
     return taskDtoList;
   }

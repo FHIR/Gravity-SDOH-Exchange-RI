@@ -10,10 +10,11 @@ import org.hl7.fhir.r4.model.codesystems.SearchModifierCode;
 
 public class TaskRepository extends FhirRepository<Task> {
 
-  private static final String orgName = "Social Alliance";
+  private final String orgName;
 
-  public TaskRepository(IGenericClient client) {
+  public TaskRepository(IGenericClient client, String orgName) {
     super(client);
+    this.orgName = orgName;
   }
 
   public Bundle findAllTasks() {
@@ -23,8 +24,9 @@ public class TaskRepository extends FhirRepository<Task> {
             .code(Task.TaskStatus.REQUESTED.toCode()))
         .and(Task.INTENT.exactly()
             .code(Task.TaskIntent.FILLERORDER.toCode()))
-        .and(new TokenClientParam(Task.SP_OWNER + ":" + "Organization." + Organization.SP_NAME + ":"
-            + SearchModifierCode.EXACT.toCode()).exactly()
+        .and(new TokenClientParam(
+            Task.SP_OWNER + ":" + Organization.class.getSimpleName() + "." + Organization.SP_NAME + ":"
+                + SearchModifierCode.EXACT.toCode()).exactly()
             .code(orgName))
         .include(Task.INCLUDE_FOCUS)
         .sort()
