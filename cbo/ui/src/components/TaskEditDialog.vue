@@ -5,6 +5,7 @@ import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate, showDateTime } from "@/utils";
 import { getProceduresForCategory } from "@/api";
+import { showDefaultNotification } from "@/utils/utils";
 
 type TaskStuff = {
 	id: string,
@@ -169,6 +170,8 @@ export default defineComponent({
 				// init(updatedTask);
 			} finally {
 				saveInProgress.value = false;
+				status.value === "Cancelled" ? showDefaultNotification(`Task "${props.task?.name}" has been cancelled!`) :
+					showDefaultNotification(`"${props.task?.name}" status "${status.value}" has been successfully synchronized!`);
 			}
 		};
 

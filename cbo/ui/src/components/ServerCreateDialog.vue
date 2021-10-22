@@ -2,6 +2,7 @@
 import { defineComponent, computed, reactive, ref } from "vue";
 import { NewServerPayload } from "@/types";
 import { ServersModule } from "@/store/modules/servers";
+import { showDefaultNotification } from "@/utils/utils";
 
 export type FormModel = {
 	serverName: string,
@@ -68,6 +69,7 @@ export default defineComponent({
 			}
 			finally {
 				saveInProgress.value = false;
+				showDefaultNotification(`Server "${formModel.name}" has been successfully created!`);
 			}
 		};
 

@@ -19,7 +19,8 @@ import {
 	ElTag,
 	ElDialog,
 	ElDivider,
-	ElLoading
+	ElLoading,
+	ElNotification
 } from "element-plus";
 //todo: use unplugin-vue-components
 import "element-plus/es/components/container/style/css";
@@ -41,6 +42,7 @@ import "element-plus/es/components/select/style/css";
 import "element-plus/es/components/option/style/css";
 import "element-plus/es/components/tag/style/css";
 import "element-plus/es/components/loading/style/css";
+import "element-plus/es/components/notification/style/css";
 
 import "@/assets/scss/element-plus/index.scss";
 
@@ -64,4 +66,5 @@ export default (app: App) => {
 	app.use(ElOption);
 	app.use(ElTag);
 	app.use(ElLoading);
+	app.use(ElNotification);
 };
