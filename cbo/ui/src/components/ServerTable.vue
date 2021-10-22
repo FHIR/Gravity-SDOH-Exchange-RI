@@ -4,13 +4,13 @@ import { Server } from "@/types";
 import TableWrapper from "@/components/TableWrapper.vue";
 
 type DisplayFields = {
-	id: string,
-	name: string,
-	url: string,
-	authUrl: string,
+	id: number,
+	serverName: string,
+	fhirServerUrl: string,
+	authServerUrl: string,
 	clientId: string,
-	lastSync: string,
-	accessUntil: string
+	clientSecret: string,
+	lastSyncDate: string
 }
 
 export default defineComponent({
@@ -28,15 +28,15 @@ export default defineComponent({
 	setup(props, ctx) {
 		const tableData = computed<DisplayFields[]>(() => props.data.map((server: Server) => ({
 			id: server.id,
-			name: server.name,
-			url: server.url,
-			authUrl: server.authUrl,
+			serverName: server.serverName,
+			fhirServerUrl: server.fhirServerUrl,
+			authServerUrl: server.authServerUrl,
 			clientId: server.clientId,
-			lastSync: new Date().toISOString(),
-			accessUntil: server.accessUntil
+			clientSecret: server.clientSecret,
+			lastSyncDate: server.lastSyncDate
 		})));
 
-		const handleNameClick = (id: string) => {
+		const handleNameClick = (id: number) => {
 			const server: Server = props.data.find(server => server.id === id)!;
 			ctx.emit("server-name-click", server);
 		};
@@ -59,19 +59,19 @@ export default defineComponent({
 						@click="handleNameClick(row.id)"
 					>
 						<span class="name">
-							{{ row.name }}
+							{{ row.serverName }}
 						</span>
 					</div>
 				</template>
 			</el-table-column>
 
 			<el-table-column
-				prop="url"
+				prop="fhirServerUrl"
 				label="FHIR Server URL"
 			/>
 
 			<el-table-column
-				prop="authUrl"
+				prop="authServerUrl"
 				label="Authorization Server URL"
 			/>
 
@@ -80,18 +80,14 @@ export default defineComponent({
 				label="Client ID"
 			/>
 
+			<el-table-column
+				prop="clientSecret"
+				label="Client Secret"
+			/>
+
 			<el-table-column label="Last Synchronization Date">
 				<template #default="scope">
-					{{ $filters.formatDateTime(scope.row.lastSync) }}
-				</template>
-			</el-table-column>
-
-			<el-table-column label="Access to Server">
-				<template #default="scope">
-					<div class="sync-wrapper">
-						<div class="sync-icon"></div>
-						Until {{ $filters.formatDateTime(scope.row.accessUntil) }}
-					</div>
+					{{ $filters.formatDateTime(scope.row.lastSyncDate) }}
 				</template>
 			</el-table-column>
 		</el-table>

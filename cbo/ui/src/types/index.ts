@@ -95,27 +95,30 @@ export type Procedure = {
 }
 
 export type Server = {
-	id: string,
-	name: string,
-	url: string,
-	authUrl: string,
+	id: number,
+	serverName: string,
+	fhirServerUrl: string,
+	authServerUrl: string,
 	clientId: string,
-	accessUntil: string
+	clientSecret: string,
+	lastSyncDate: string
 }
 
 export type NewServerPayload = {
-	name: string,
-	url: string,
-	authUrl: string,
-	clientId: string
+	serverName: string,
+	fhirServerUrl: string,
+	authServerUrl: string,
+	clientId: string,
+	clientSecret: string
 }
 
 export type UpdateServerPayload = {
-	id: string,
-	name: string,
-	url: string,
-	authUrl: string,
-	clientId: string
+	id: number,
+	serverName: string,
+	fhirServerUrl: string,
+	authServerUrl: string,
+	clientId: string,
+	clientSecret: string
 }
 
 export type Resources = {
