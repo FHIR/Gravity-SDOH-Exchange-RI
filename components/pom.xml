@@ -16,6 +16,6 @@
 
   <modules>
     <module>fhir-common</module>
-    <module>spring-boot-starter-exception-handler</module>
+    <module>spring-common</module>
   </modules>
 </project>

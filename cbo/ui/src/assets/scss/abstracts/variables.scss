@@ -1,0 +1,41 @@
+// Colors
+$night-rider: #333;
+$white: #fff;
+$whisper: #e7e7e7;
+$dodger-blue: #0069ff;
+$silver: #bdbdbd;
+$grey: #858585;
+$alice-blue: #ecf1f4;
+
+// Base Color
+$global-text-color: $night-rider;
+$global-muted-color: $silver;
+$global-background: $white;
+$global-background-gray: rgba(189, 189, 189, 0.15);
+$global-primary-color: $dodger-blue;
+$global-text-muted-color: $silver;
+$global-box-shadow: 0 2px 5px rgba(51, 51, 51, 0.25);
+
+// Font size
+$global-xxxlarge-font-size: 3rem; // 48px;
+$global-xxlarge-font-size: 1.5rem; // 24px
+$global-xlarge-font-size: 1.25rem; // 20px
+$global-large-font-size: 1.125rem; // 18px
+$global-medium-font-size: 1rem; // 16px
+$global-font-size: 0.875rem; // 14px
+$global-intermediate-font-size: 0.8125rem; // 13px
+$global-small-font-size: 0.75rem; // 12px
+$global-xsmall-font-size: 0.625rem; // 10px
+$global-xxsmall-font-size: 0.5rem; // 8px
+
+// Base Font for HTML
+$global-line-height: 1.4;
+$global-line-height-small: 1.172;
+$global-font-weight-light: 300;
+$global-font-weight-normal: 400;
+$global-font-weight-medium: 500;
+$global-font-weight-bold: 700;
+
+// Border
+$global-base-border-color: $whisper;
+$global-border: 1px solid $global-base-border-color;

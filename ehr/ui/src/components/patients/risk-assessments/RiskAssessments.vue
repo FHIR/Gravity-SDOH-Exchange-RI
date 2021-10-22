@@ -35,18 +35,19 @@ export default defineComponent({
 
 		const viewingAssessment = ref<Assessment | undefined>(undefined);
 
-		AssessmentsModule.loadPastAssessments();
-
 		const handleDialogClose = () => {
 			viewingAssessment.value = undefined;
 			emit("stop-open-assessment");
 		};
 
-		watch(() => props.isActive, () => {
-			if (props.isActive && props.openAssessmentPhase) {
+		watch(() => props.isActive, async active => {
+			if (active) {
+				await AssessmentsModule.loadPastAssessments();
+			}
+			if (active && props.openAssessmentPhase) {
 				viewingAssessment.value = findAssessmentById(props.assessmentToOpen, assessments.value);
 			}
-		});
+		}, { immediate: true });
 
 		const findAssessmentById = (id: string, assessments: Assessment[]) => {
 			let assessment: Assessment | undefined;

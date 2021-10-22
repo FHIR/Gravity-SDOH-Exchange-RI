@@ -89,7 +89,9 @@ export type UpdateTaskPayload = {
 	outcome?: string,
 	statusReason?: string,
 	procedureCodes?: string[],
-	status: UpdatedStatus
+	status: UpdatedStatus,
+	cboPerformer?: string,
+	priorityForCBO?: string
 }
 
 
@@ -108,4 +110,11 @@ export type Resources = {
 	conditions: string[],
 	goals: string[],
 	procedures: string[]
+}
+
+export type Cbo = {
+	id: string,
+	name: string,
+	type: string,
+	errors: string[]
 }

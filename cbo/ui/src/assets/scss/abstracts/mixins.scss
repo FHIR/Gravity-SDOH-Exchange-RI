@@ -1,0 +1,47 @@
+@mixin scrollbar($width, $thumb-color, $track-color: transparent) {
+	// mozilla specific styles
+	scrollbar-color: $thumb-color $track-color;
+	scrollbar-width: thin;
+
+	// webkit specific styles
+	::-webkit-scrollbar {
+		width: $width;
+		// for horizontal scrollbars
+		height: $width;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background-color: $thumb-color;
+	}
+
+	::-webkit-scrollbar-track {
+		background-color: $track-color;
+	}
+}
+
+@mixin dont-break-out() {
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+	word-break: break-word;
+	hyphens: auto;
+}
+
+@mixin text-ellipsis() {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+@mixin icon($src, $w, $h: $w) {
+	display: inline-block;
+	width: $w;
+	height: $h;
+
+	@if $src {
+		background-image: url($src);
+	}
+
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center;
+}

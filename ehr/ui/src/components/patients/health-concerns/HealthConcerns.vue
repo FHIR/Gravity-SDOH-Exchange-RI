@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent, watch, ref } from "vue";
 import { Coding, Concern } from "@/types";
 import { ConcernsModule } from "@/store/modules/concerns";
 import HealthConcernsTable, { ConcernAction } from "@/components/patients/health-concerns/HealthConcernsTable.vue";
@@ -24,7 +24,6 @@ export type TableData = {
 }
 
 export default defineComponent({
-	name: "HealthConcerns",
 	components: {
 		NoItems,
 		NoActiveItems,
@@ -32,8 +31,14 @@ export default defineComponent({
 		NewConcernDialog,
 		EditConcernDialog
 	},
+	props: {
+		isActive: {
+			type: Boolean,
+			required: true
+		}
+	},
 	emits: ["trigger-open-assessment"],
-	setup() {
+	setup(props) {
 		const isDataLoading = ref<boolean>(false);
 		const newConcernDialogVisible = ref<boolean>(false);
 		const activeConcerns = computed<Concern[]>(() => ConcernsModule.activeConcerns);
@@ -64,15 +69,17 @@ export default defineComponent({
 			}))
 		);
 
-		onMounted(async () => {
-			isDataLoading.value = true;
-			try {
-				await ConcernsModule.getActiveConcerns();
-				await ConcernsModule.getResolvedConcerns();
-			} finally {
-				isDataLoading.value = false;
+		watch(() => props.isActive, async active => {
+			if (active) {
+				isDataLoading.value = true;
+				try {
+					await ConcernsModule.getActiveConcerns();
+					await ConcernsModule.getResolvedConcerns();
+				} finally {
+					isDataLoading.value = false;
+				}
 			}
-		});
+		}, { immediate: true });
 
 		const onConcernAction = ({ id, action }: { id: string, action: ConcernAction }) => {
 			ConcernsModule.setEditingConcernId({ id, openAction: action });

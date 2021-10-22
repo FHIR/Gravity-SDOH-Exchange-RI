@@ -79,8 +79,18 @@
     </dependency>
     <dependency>
       <groupId>org.hl7.gravity.refimpl.sdohexchange.components</groupId>
-      <artifactId>spring-boot-starter-exception-handler</artifactId>
+      <artifactId>spring-common</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <!-- Explicitly specify UI dependency so that the build order is correct.
+         The UI project must be built first, and only after that - API.
+         In other case the static UI resources might not be ready yet. -->
+    <dependency>
+      <groupId>org.hl7.gravity.refimpl.sdohexchange.ehr</groupId>
+      <artifactId>ui</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
