@@ -4,10 +4,11 @@ import { NewServerPayload } from "@/types";
 import { ServersModule } from "@/store/modules/servers";
 
 export type FormModel = {
-	name: string,
-	url: string,
-	authUrl: string,
-	clientId: string
+	serverName: string,
+	fhirServerUrl: string,
+	authServerUrl: string,
+	clientId: string,
+	clientSecret: string
 }
 
 export default defineComponent({
@@ -22,23 +23,32 @@ export default defineComponent({
 	setup(props, ctx) {
 		const formEl = ref<any>(null);
 		const formModel = reactive<FormModel>({
-			name: "",
-			url: "",
-			authUrl: "",
-			clientId: ""
+			serverName: "",
+			fhirServerUrl: "",
+			authServerUrl: "",
+			clientId: "",
+			clientSecret: ""
 		});
 		const validationRules = ref({
-			name: [{ required: true, message: "This field is required" }],
-			url: [{ required: true, message: "This field is required" }],
-			authUrl: [{ required: true, message: "This field is required" }],
-			clientId: [{ required: true, message: "This field is required" }]
+			serverName: [{
+				required: true,
+				message: "This field is required"
+			}, {
+				max: 64,
+				message: "Length should be up to 64"
+			}],
+			fhirServerUrl: [{ required: true, message: "This field is required" }],
+			authServerUrl: [{ required: true, message: "This field is required" }],
+			clientId: [{ required: true, message: "This field is required" }],
+			clientSecret: [{ required: true, message: "This field is required" }]
 		});
 		const saveInProgress = ref<boolean>(false);
 		const hasChanges = computed<boolean>(() => (
-			formModel.name !== "" ||
-			formModel.url !== "" ||
-			formModel.authUrl !== "" ||
-			formModel.clientId !== ""
+			formModel.serverName !== "" ||
+			formModel.fhirServerUrl !== "" ||
+			formModel.authServerUrl !== "" ||
+			formModel.clientId !== "" ||
+			formModel.clientSecret !== ""
 		));
 
 		const onDialogClose = () => {
@@ -46,9 +56,7 @@ export default defineComponent({
 			ctx.emit("close");
 		};
 		const onFormSave = async () => {
-			const payload: NewServerPayload = {
-				...formModel
-			};
+			const payload: NewServerPayload = { ...formModel };
 			saveInProgress.value = true;
 			try {
 				await formEl.value.validate();
@@ -96,24 +104,24 @@ export default defineComponent({
 			class="create-server-form"
 		>
 			<el-form-item
-				prop="name"
+				prop="serverName"
 				label="Server Name"
 			>
-				<el-input v-model="formModel.name" />
+				<el-input v-model="formModel.serverName" />
 			</el-form-item>
 
 			<el-form-item
-				prop="url"
+				prop="fhirServerUrl"
 				label="FHIR Server URL"
 			>
-				<el-input v-model="formModel.url" />
+				<el-input v-model="formModel.fhirServerUrl" />
 			</el-form-item>
 
 			<el-form-item
-				prop="authUrl"
+				prop="authServerUrl"
 				label="Authorization Server URL"
 			>
-				<el-input v-model="formModel.authUrl" />
+				<el-input v-model="formModel.authServerUrl" />
 			</el-form-item>
 
 			<el-form-item
@@ -121,6 +129,13 @@ export default defineComponent({
 				label="Client ID"
 			>
 				<el-input v-model="formModel.clientId" />
+			</el-form-item>
+
+			<el-form-item
+				prop="clientSecret"
+				label="Client Secret"
+			>
+				<el-input v-model="formModel.clientSecret" />
 			</el-form-item>
 		</el-form>
 		<template #footer>
