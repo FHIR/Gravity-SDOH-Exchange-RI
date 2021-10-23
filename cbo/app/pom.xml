@@ -111,6 +111,11 @@
       <artifactId>modelmapper</artifactId>
       <version>2.4.4</version>
     </dependency>
+    <dependency>
+      <groupId>org.hl7.gravity.refimpl.sdohexchange.components</groupId>
+      <artifactId>fhir-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
