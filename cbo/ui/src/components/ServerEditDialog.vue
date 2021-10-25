@@ -82,7 +82,7 @@ export default defineComponent({
 			}
 			finally {
 				saveInProgress.value = false;
-				showDefaultNotification(`Server "${formModel.name}" has been successfully updated!`);
+				showDefaultNotification(`Server "${formModel.serverName}" has been successfully updated!`);
 			}
 		};
 
