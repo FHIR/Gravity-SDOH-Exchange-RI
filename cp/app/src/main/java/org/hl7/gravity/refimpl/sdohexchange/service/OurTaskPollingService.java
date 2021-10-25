@@ -44,7 +44,6 @@ public class OurTaskPollingService {
       TaskStatus.REJECTED, TaskStatus.COMPLETED, TaskStatus.CANCELLED);
 
   private final IGenericClient openCpClient;
-  private final IGenericClient cpClient;
 
   @Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
   public void updateTasks() {
@@ -55,10 +54,9 @@ public class OurTaskPollingService {
         .revInclude(Task.INCLUDE_BASED_ON)
         //Include ServiceRequest for all Tasks, even the included ones.
         .include(Task.INCLUDE_FOCUS.setRecurse(true))
-        //Filler order are CBO (Our) tasks, we should skip them here. This will probably be changed in the future.
-        // For now this is a simple way to distinguish CP tasks from CBO tasks.
-        .and(new TokenClientParam(Task.SP_INTENT + ":" + SearchModifierCode.NOT.toCode()).exactly()
-            .code(Task.TaskIntent.FILLERORDER.toCode()))
+        //Intent=order are CP tasks, Filler-order are CBO (Our) tasks.
+        .and(Task.INTENT.exactly()
+            .code(Task.TaskIntent.ORDER.toCode()))
         // Get only tasks in-progress
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(TaskStatus.FAILED.toCode()))
