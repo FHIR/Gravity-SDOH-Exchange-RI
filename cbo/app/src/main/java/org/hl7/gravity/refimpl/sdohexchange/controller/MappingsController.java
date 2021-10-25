@@ -17,6 +17,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/controller/
 @Validated
 @RestController
 @RequestMapping("mappings")
