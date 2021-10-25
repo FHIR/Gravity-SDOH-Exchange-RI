@@ -62,6 +62,7 @@ export default defineComponent({
 			try {
 				await formEl.value.validate();
 				await ServersModule.createServer(payload);
+				showDefaultNotification(`Server "${formModel.serverName}" has been successfully created!`);
 				onDialogClose();
 			}
 			catch (err) {
@@ -69,7 +70,6 @@ export default defineComponent({
 			}
 			finally {
 				saveInProgress.value = false;
-				showDefaultNotification(`Server "${formModel.serverName}" has been successfully created!`);
 			}
 		};
 

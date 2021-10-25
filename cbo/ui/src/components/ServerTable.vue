@@ -2,6 +2,7 @@
 import { defineComponent, PropType, computed } from "vue";
 import { Server } from "@/types";
 import TableWrapper from "@/components/TableWrapper.vue";
+import { ServersModule } from "@/store/modules/servers";
 
 type DisplayFields = {
 	id: number,
@@ -40,10 +41,14 @@ export default defineComponent({
 			const server: Server = props.data.find(server => server.id === id)!;
 			ctx.emit("server-name-click", server);
 		};
+		const handleRemoveClick = async (id: number) => {
+			await ServersModule.deleteServer(id);
+		};
 
 		return {
 			tableData,
-			handleNameClick
+			handleNameClick,
+			handleRemoveClick
 		};
 	}
 });
@@ -86,8 +91,23 @@ export default defineComponent({
 			/>
 
 			<el-table-column label="Last Synchronization Date">
-				<template #default="scope">
-					{{ $filters.formatDateTime(scope.row.lastSyncDate) }}
+				<template #default="{ row }">
+					{{ $filters.formatDateTime(row.lastSyncDate) }}
+				</template>
+			</el-table-column>
+
+			<el-table-column
+				label="Actions"
+				width="100px"
+			>
+				<template #default="{ row }">
+					<el-button
+						type="danger"
+						icon="el-icon-delete"
+						circle
+						size="mini"
+						@click="handleRemoveClick(row.id)"
+					/>
 				</template>
 			</el-table-column>
 		</el-table>

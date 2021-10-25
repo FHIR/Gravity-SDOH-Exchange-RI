@@ -75,6 +75,7 @@ export default defineComponent({
 			try {
 				await formEl.value.validate();
 				await ServersModule.updateServer(payload);
+				showDefaultNotification(`Server "${formModel.serverName}" has been successfully updated!`);
 				onDialogClose();
 			}
 			catch (err) {
@@ -82,7 +83,6 @@ export default defineComponent({
 			}
 			finally {
 				saveInProgress.value = false;
-				showDefaultNotification(`Server "${formModel.serverName}" has been successfully updated!`);
 			}
 		};
 
@@ -157,7 +157,7 @@ export default defineComponent({
 			</el-form-item>
 
 			<el-form-item label="Last Synchronization">
-				{{ $filters.formatDateTime(server.lastSyncDate) }}
+				{{ $filters.formatDateTime(server?.lastSyncDate) }}
 			</el-form-item>
 		</el-form>
 		<template #footer>
