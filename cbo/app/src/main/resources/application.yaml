@@ -23,8 +23,8 @@ oauth:
   grant-type: client_credentials
   scope: address phone read profile openid email write
 
-fhir:
-  cbo-org-name: Social Alliance
+app:
+  url: https://localhost:8080
 
 server:
   port: 8084

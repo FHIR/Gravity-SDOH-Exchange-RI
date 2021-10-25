@@ -23,8 +23,8 @@ public class TaskService {
 
   private static final String SCOPE = "address phone read profile openid email write";
 
-  @Value("${fhir.cbo-org-name}")
-  private String orgName;
+  @Value("${app.url}")
+  private String applicationUrl;
 
   private final FhirContext fhirContext;
   private final ServerRepository serverRepository;
@@ -46,7 +46,7 @@ public class TaskService {
       //          authorizationClient.getTokenResponse(URI.create(server.getAuthServerUrl()), server.getClientId(),
       //                  server.getClientSecret(), SCOPE)
       //              .getAccessToken()));
-      TaskRepository taskRepository = new TaskRepository(fhirClient, orgName);
+      TaskRepository taskRepository = new TaskRepository(fhirClient, applicationUrl);
       taskDtoList.addAll(new TaskBundleToDtoConverter().convert(taskRepository.findAllTasks()));
     }
     return taskDtoList;
