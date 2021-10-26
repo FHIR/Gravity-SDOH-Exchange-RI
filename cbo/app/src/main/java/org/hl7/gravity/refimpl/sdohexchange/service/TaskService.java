@@ -2,12 +2,24 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.collect.Lists;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.auth.AuthorizationClient;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.TaskStatus;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.AuthClientException;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.model.Server;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,7 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,11 +43,13 @@ public class TaskService {
 
   private final FhirContext fhirContext;
   private final ServerRepository serverRepository;
+  private final SDOHMappings sdohMappings;
   private final AuthorizationClient authorizationClient;
 
-  public TaskService(ServerRepository serverRepository, FhirContext fhirContext) {
+  public TaskService(ServerRepository serverRepository, FhirContext fhirContext, SDOHMappings sdohMappings) {
     this.fhirContext = fhirContext;
     this.serverRepository = serverRepository;
+    this.sdohMappings = sdohMappings;
     this.authorizationClient = new AuthorizationClient(new RestTemplate());
   }
 
@@ -50,5 +67,38 @@ public class TaskService {
       taskDtoList.addAll(new TaskBundleToDtoConverter().convert(taskRepository.findAllTasks()));
     }
     return taskDtoList;
+  }
+
+  public void update(String id, UpdateTaskRequestDto update) throws AuthClientException {
+    Server server = serverRepository.findById(update.getServerId())
+        .get();
+    IGenericClient fhirClient = fhirContext.newRestfulGenericClient(server.getFhirServerUrl());
+    // Doesn't support now
+    //      fhirClient.registerInterceptor(new BearerTokenAuthInterceptor(
+    //          authorizationClient.getTokenResponse(URI.create(server.getAuthServerUrl()), server.getClientId(),
+    //                  server.getClientSecret(), SCOPE)
+    //              .getAccessToken()));
+    TaskRepository taskRepository = new TaskRepository(fhirClient, applicationUrl);
+
+    // Validates and converts Procedure codes to Coding
+    List<Coding> procedureCodes = Optional.ofNullable(update.getProcedureCodes())
+        .orElse(Collections.emptyList())
+        .stream()
+        .map(code -> sdohMappings.findResourceCoding(Procedure.class, code))
+        .collect(Collectors.toList());
+    Bundle taskBundle = taskRepository.find(id, Lists.newArrayList(Task.INCLUDE_FOCUS));
+    TaskInfoBundleExtractor.TaskInfoHolder taskInfo = new TaskInfoBundleExtractor().extract(taskBundle)
+        .stream()
+        .findFirst()
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)));
+    TaskUpdateBundleFactory bundleFactory = new TaskUpdateBundleFactory();
+    bundleFactory.setTask(taskInfo.getTask());
+    bundleFactory.setStatus(update.getTaskStatus());
+    bundleFactory.setStatusReason(update.getStatusReason());
+    bundleFactory.setComment(update.getComment());
+    bundleFactory.setOutcome(update.getOutcome());
+    bundleFactory.setProcedureCodes(procedureCodes);
+
+    taskRepository.transaction(bundleFactory.createUpdateBundle());
   }
 }
