@@ -1,14 +1,15 @@
 package org.hl7.gravity.refimpl.sdohexchange.validation;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import org.hl7.gravity.refimpl.sdohexchange.annotation.TaskStatusValueMatch;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.TaskStatus;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.StringUtils;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TaskStatusValueMatchValidator implements ConstraintValidator<TaskStatusValueMatch, Object> {
 
