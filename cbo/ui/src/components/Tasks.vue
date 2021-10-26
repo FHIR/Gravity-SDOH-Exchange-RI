@@ -28,8 +28,8 @@ export default defineComponent({
 		const inactiveRequests = ref<Task[]>([]);
 
 		getTasks().then((resp: Task[]) => {
-			activeRequests.value = resp.filter((task: Task) => task.requestType === "active");
-			inactiveRequests.value = resp.filter((task: Task) => task.requestType === "inactive");
+			activeRequests.value = resp.filter((task: Task) => task.status !== "Completed");
+			inactiveRequests.value = resp.filter((task: Task) => task.status === "Completed");
 
 			props.requestType === "active" ?
 				tasks.value = activeRequests.value.map((task: Task) => ({ task, isNew: false })) :

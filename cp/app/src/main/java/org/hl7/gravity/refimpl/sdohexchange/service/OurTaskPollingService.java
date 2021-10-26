@@ -44,7 +44,6 @@ public class OurTaskPollingService {
       TaskStatus.REJECTED, TaskStatus.COMPLETED, TaskStatus.CANCELLED);
 
   private final IGenericClient openCpClient;
-  private final IGenericClient cpClient;
 
   @Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
   public void updateTasks() {
@@ -55,9 +54,9 @@ public class OurTaskPollingService {
         .revInclude(Task.INCLUDE_BASED_ON)
         //Include ServiceRequest for all Tasks, even the included ones.
         .include(Task.INCLUDE_FOCUS.setRecurse(true))
-        // Task, retrieved from the EHR, are the ones where basedOn is not set. In other case - these are tasks sent
-        // to CBO (own tasks).
-        .where(Task.BASED_ON.isMissing(true))
+        //Intent=order are CP tasks, Filler-order are CBO (Our) tasks.
+        .and(Task.INTENT.exactly()
+            .code(Task.TaskIntent.ORDER.toCode()))
         // Get only tasks in-progress
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(TaskStatus.FAILED.toCode()))
@@ -173,7 +172,7 @@ public class OurTaskPollingService {
           .collect(Collectors.toList());
       if (ownTaskOutputs.size() == 0) {
         log.warn(
-            "Not output of type 'http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes|resulting"
+            "No output of type 'http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes|resulting"
                 + "-activity' with a reference to a proper Procedure is present in task with id '{}'. "
                 + "Expecting a reference to a Procedure resource.", ownTask.getIdElement()
                 .getIdPart());
