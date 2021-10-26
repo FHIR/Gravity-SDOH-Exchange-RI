@@ -3,11 +3,13 @@ package org.hl7.gravity.refimpl.sdohexchange.dao;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.codesystems.SearchModifierCode;
 
+@Slf4j
 public class TaskRepository extends FhirRepository<Task> {
 
   private final String applicationUrl;
@@ -18,6 +20,7 @@ public class TaskRepository extends FhirRepository<Task> {
   }
 
   public Bundle findAllTasks() {
+    log.info("Return bundle without entry if there is no tasks or Organization.identifier is wrong.");
     return getClient().search()
         .forResource(getResourceType())
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
