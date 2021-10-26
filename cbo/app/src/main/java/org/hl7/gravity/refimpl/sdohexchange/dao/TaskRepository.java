@@ -20,8 +20,7 @@ public class TaskRepository extends FhirRepository<Task> {
   }
 
   public Bundle findAllTasks() {
-    log.info("Return bundle without entry if there is no tasks or Organization.identifier is wrong.");
-    return getClient().search()
+    Bundle bundle = getClient().search()
         .forResource(getResourceType())
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.REQUESTED.toCode()))
@@ -35,6 +34,10 @@ public class TaskRepository extends FhirRepository<Task> {
         .descending(Constants.PARAM_LASTUPDATED)
         .returnBundle(Bundle.class)
         .execute();
+    if (!bundle.hasEntry()) {
+      log.info("Bundle have no entries if there is no tasks or Organization.identifier is wrong.");
+    }
+    return bundle;
   }
 
   @Override
