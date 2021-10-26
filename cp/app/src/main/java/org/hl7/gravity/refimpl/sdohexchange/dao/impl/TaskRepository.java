@@ -24,10 +24,9 @@ public class TaskRepository extends FhirRepository<Task> {
         .forResource(getResourceType())
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.REQUESTED.toCode()))
-        //Filler order are CBO (Our) tasks, we should skip them here. This will probably be changed in the future.
-        // For now this is a simple way to distinguish CP tasks from CBO tasks.
-        .and(new TokenClientParam(Task.SP_INTENT + ":" + SearchModifierCode.NOT.toCode()).exactly()
-            .code(Task.TaskIntent.FILLERORDER.toCode()))
+        //Intent=order are CP tasks, Filler-order are CBO (Our) tasks.
+        .and(Task.INTENT.exactly()
+            .code(Task.TaskIntent.ORDER.toCode()))
         // include ServiceRequest
         .include(Task.INCLUDE_FOCUS)
         .sort()
@@ -41,8 +40,7 @@ public class TaskRepository extends FhirRepository<Task> {
         .forResource(getResourceType())
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.REQUESTED.toCode()))
-        //Filler order are CBO (Our) tasks. This will probably be changed in the future.
-        // For now this is a simple way to distinguish CP tasks from CBO tasks.
+        //Intent=order are CP tasks, Filler-order are CBO (Our) tasks.
         .and(Task.INTENT.exactly()
             .code(Task.TaskIntent.FILLERORDER.toCode()))
         // include ServiceRequest
@@ -53,13 +51,18 @@ public class TaskRepository extends FhirRepository<Task> {
         .execute();
   }
 
+  /**
+   * Find our task (intent=filler-order) for a corresponding CP task.
+   *
+   * @param task CP task (intent=order)
+   * @return a bundle with a filler-order Task and ServiceRequest
+   */
   public Bundle findOurTask(Task task) {
     return getClient().search()
         .forResource(getResourceType())
         .where(Task.BASED_ON.hasId(task.getIdElement()
             .toUnqualifiedVersionless()))
-        //Filler order are CBO (Our) tasks. This will probably be changed in the future.
-        // For now this is a simple way to distinguish CP tasks from CBO tasks.
+        //Intent=order are CP tasks, Filler-order are CBO (Our) tasks.
         .and(Task.INTENT.exactly()
             .code(Task.TaskIntent.FILLERORDER.toCode()))
         // include ServiceRequest

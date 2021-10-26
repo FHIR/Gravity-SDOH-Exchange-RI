@@ -32,7 +32,7 @@ export default defineComponent({
 				alt="logo"
 			>
 			<div class="title">
-				CBO A
+				CBO
 			</div>
 		</div>
 		<div

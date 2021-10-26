@@ -1,4 +1,4 @@
-import { getServers, createServer, updateServer } from "@/api";
+import { getServers, createServer, updateServer, deleteServer } from "@/api";
 import { VuexModule, Module, Action, Mutation, getModule } from "vuex-module-decorators";
 import store from "@/store";
 import { Server, NewServerPayload, UpdateServerPayload } from "@/types";
@@ -21,6 +21,11 @@ class Servers extends VuexModule implements IServers {
 		this.servers = this.servers.map(s => s.id === payload.id ? payload : s);
 	}
 
+	@Mutation
+	removeServer(payload: number) {
+		this.servers = this.servers.filter(s => s.id !== payload);
+	}
+
 	@Action
 	async getServers(): Promise<void> {
 		const data = await getServers();
@@ -31,13 +36,21 @@ class Servers extends VuexModule implements IServers {
 	@Action
 	async createServer(payload: NewServerPayload): Promise<void> {
 		const newServer = await createServer(payload);
+
 		this.setServers([...this.servers, newServer]);
 	}
 
 	@Action
 	async updateServer(payload: UpdateServerPayload): Promise<void> {
 		const updatedServer = await updateServer(payload);
+
 		this.changeServer(updatedServer);
+	}
+
+	@Action
+	async deleteServer(payload: number): Promise<void> {
+		await deleteServer(payload);
+		this.removeServer(payload);
 	}
 }
 
