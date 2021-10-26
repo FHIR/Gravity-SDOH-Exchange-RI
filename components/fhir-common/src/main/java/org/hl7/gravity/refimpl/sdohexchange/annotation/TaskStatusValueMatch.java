@@ -10,7 +10,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-// Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/annotation/
 @Constraint(validatedBy = TaskStatusValueMatchValidator.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
