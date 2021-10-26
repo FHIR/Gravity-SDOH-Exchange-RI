@@ -24,8 +24,8 @@ oauth:
   scope: address phone read profile openid email write
 
 app:
-  # This variable is needed to create a request in TaskRepository to find tasks by Organization.identifier
-  url: https://localhost:8080
+  # This variable is used to find the filler-order tasks at multiple CP organizations by Organization.identifier.
+  url: https://localhos:8080
 
 server:
   port: 8084
