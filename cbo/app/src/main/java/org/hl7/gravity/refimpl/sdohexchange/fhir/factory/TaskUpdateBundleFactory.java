@@ -9,10 +9,12 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskUpdateException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.reference.util.ServiceRequestReferenceCollector;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -31,6 +33,7 @@ public class TaskUpdateBundleFactory {
   private static final Map<Task.TaskStatus, List<Task.TaskStatus>> TASK_STATE_MACHINE = new HashMap<>();
 
   private Task task;
+  private ServiceRequest serviceRequest;
   private Task.TaskStatus status;
   private String statusReason;
   private String comment;
@@ -77,6 +80,7 @@ public class TaskUpdateBundleFactory {
       task.setStatus(status);
       task.setLastModifiedElement(DateTimeType.now());
 
+      Assert.notNull(serviceRequest, "ServiceRequest can't be null.");
       if (status == Task.TaskStatus.ACCEPTED) {
 
         Task cboTask = task.copy();
@@ -97,12 +101,17 @@ public class TaskUpdateBundleFactory {
         if (status == Task.TaskStatus.CANCELLED) {
           createProceduresOutput(updateBundle);
         }
+        serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.REVOKED);
+        updateBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
       } else if (status == Task.TaskStatus.COMPLETED) {
         Assert.notNull(outcome, "Outcome cannot be null.");
         Assert.isTrue(procedureCodes.size() > 0, "Procedures can't be empty.");
         task.getOutput()
             .add(createTaskOutput(new CodeableConcept().setText(outcome)));
         createProceduresOutput(updateBundle);
+
+        serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.COMPLETED);
+        updateBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
       }
     }
     if (StringUtils.hasText(comment)) {
@@ -131,12 +140,14 @@ public class TaskUpdateBundleFactory {
         .addProfile(SDOHProfiles.PROCEDURE);
     procedure.setId(IdType.newRandomUuid());
     procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
+    procedure.setCategory(serviceRequest.getCategoryFirstRep());
     procedure.getCode()
         .addCoding(coding);
     procedure.getBasedOn()
         .add(task.getFocus());
     procedure.setSubject(task.getFor());
     procedure.setPerformed(DateTimeType.now());
+    procedure.setReasonReference(ServiceRequestReferenceCollector.getConditions(serviceRequest));
     return procedure;
   }
 

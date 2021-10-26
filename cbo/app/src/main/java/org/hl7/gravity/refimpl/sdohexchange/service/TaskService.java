@@ -93,6 +93,7 @@ public class TaskService {
     TaskUpdateBundleFactory bundleFactory = new TaskUpdateBundleFactory();
     bundleFactory.setTask(taskInfo.getTask());
     bundleFactory.setStatus(update.getTaskStatus());
+    bundleFactory.setServiceRequest(taskInfo.getServiceRequest());
     bundleFactory.setStatusReason(update.getStatusReason());
     bundleFactory.setComment(update.getComment());
     bundleFactory.setOutcome(update.getOutcome());
