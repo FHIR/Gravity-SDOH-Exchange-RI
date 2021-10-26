@@ -37,7 +37,7 @@ public class TaskRepository extends FhirRepository<Task> {
     if (!bundle.hasEntry()) {
       log.info(String.format(
           "No filler-order tasks were found at server '%s'. Either there are no tasks, or Organization"
-              + ".identifier does not match '$app.url'.", getClient().getServerBase()));
+              + ".identifier does not match '%s'.", getClient().getServerBase(), applicationUrl));
     }
     return bundle;
   }

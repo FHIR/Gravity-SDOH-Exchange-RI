@@ -25,7 +25,7 @@ oauth:
 
 app:
   # This variable is used to find the filler-order tasks at multiple CP organizations by Organization.identifier.
-  url: https://localhos:8080
+  url: https://localhost:8080
 
 server:
   port: 8084
