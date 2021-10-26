@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.util;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.reference.util;
 
 import lombok.experimental.UtilityClass;
 import org.hl7.fhir.r4.model.Condition;
