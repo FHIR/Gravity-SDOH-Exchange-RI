@@ -62,10 +62,11 @@ export default defineComponent({
 			try {
 				await formEl.value.validate();
 				await ServersModule.createServer(payload);
-				showDefaultNotification(`Server "${formModel.serverName}" has been successfully created!`);
+				showDefaultNotification(`Server"${formModel.serverName}" has been successfully created!`);
 				onDialogClose();
 			}
 			catch (err) {
+				showDefaultNotification("Server not found. Check your network connection or your credentials!");
 				console.log(err);
 			}
 			finally {

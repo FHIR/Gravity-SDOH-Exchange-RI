@@ -11,13 +11,17 @@ export default defineComponent({
 	setup() {
 		const route = useRoute();
 		const handleTabClick = (tab: any) => ActiveTabModule.setActiveTab(tab.paneName);
+		const activeTaskLength = computed<number>(() => ActiveTabModule.activeTaskLength);
+		const inactiveTaskLength = computed<number>(() => ActiveTabModule.inactiveTaskLength);
 		const currentRoute = computed<string>(() => route.path);
 
 		return {
 			activeTabName : ActiveTabModule.activeTab,
 			handleTabClick,
 			router,
-			currentRoute
+			currentRoute,
+			activeTaskLength,
+			inactiveTaskLength
 		};
 	}
 });
@@ -48,7 +52,7 @@ export default defineComponent({
 				>
 					<template #label>
 						<div class="label-wrap">
-							Active Requests
+							{{ `Active Requests (${activeTaskLength})` }}
 						</div>
 					</template>
 				</el-tab-pane>
@@ -57,7 +61,7 @@ export default defineComponent({
 				>
 					<template #label>
 						<div class="label-wrap">
-							Inactive Requests
+							{{ `Inactive Requests (${inactiveTaskLength})` }}
 						</div>
 					</template>
 				</el-tab-pane>

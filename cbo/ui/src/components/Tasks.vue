@@ -7,6 +7,7 @@ import Filters from "@/components/Filters.vue";
 import TableCard from "@/components/TableCard.vue";
 import TaskEditDialog from "@/components/TaskEditDialog.vue";
 import TaskResourcesDialog from "@/components/TaskResourcesDialog.vue";
+import { ActiveTabModule } from "@/store/activeTab";
 
 export default defineComponent({
 	components: {
@@ -26,15 +27,20 @@ export default defineComponent({
 		const tasks = ref<TaskWithState[]>([]);
 		const activeRequests = ref<Task[]>([]);
 		const inactiveRequests = ref<Task[]>([]);
+		const showLoader = ref<Boolean>(false);
 
+		showLoader.value = true;
 		getTasks().then((resp: Task[]) => {
-			activeRequests.value = resp.filter((task: Task) => task.status !== "Completed");
-			inactiveRequests.value = resp.filter((task: Task) => task.status === "Completed");
+			activeRequests.value = resp.filter((task: Task) => task.status !== "Completed" && task.status !== "Cancelled");
+			inactiveRequests.value = resp.filter((task: Task) => task.status === "Completed" || task.status === "Cancelled");
+
+			ActiveTabModule.setActiveTasksLength(activeRequests.value.length);
+			ActiveTabModule.setInactiveTasksLength(inactiveRequests.value.length);
 
 			props.requestType === "active" ?
 				tasks.value = activeRequests.value.map((task: Task) => ({ task, isNew: false })) :
 				tasks.value = inactiveRequests.value.map((task: Task) => ({ task, isNew: false }));
-		});
+		}).finally(() => showLoader.value = false);
 
 		const taskInEdit = ref<Task | null>(null);
 
@@ -64,7 +70,8 @@ export default defineComponent({
 			taskInEdit,
 			updateTaskFromDialog,
 			viewTaskResources,
-			taskIdToViewResources
+			taskIdToViewResources,
+			showLoader
 		};
 	}
 });
@@ -85,13 +92,12 @@ export default defineComponent({
 				@close="taskIdToViewResources = null"
 			/>
 
-			<div class="table-card">
-				<TaskTable
-					:tasks="tasks"
-					@task-name-click="editTask"
-					@view-resources="viewTaskResources"
-				/>
-			</div>
+			<TaskTable
+				:tasks="tasks"
+				:loading="showLoader"
+				@task-name-click="editTask"
+				@view-resources="viewTaskResources"
+			/>
 		</TableCard>
 	</div>
 </template>
