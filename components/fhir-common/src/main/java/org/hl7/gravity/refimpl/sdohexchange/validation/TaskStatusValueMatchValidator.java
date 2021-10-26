@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/validation
 public class TaskStatusValueMatchValidator implements ConstraintValidator<TaskStatusValueMatch, Object> {
 
   private TaskStatus updateStatus;
