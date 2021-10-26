@@ -14,7 +14,6 @@ import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.TaskStatus;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.AuthClientException;
