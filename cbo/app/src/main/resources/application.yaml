@@ -23,8 +23,8 @@ oauth:
   grant-type: client_credentials
   scope: address phone read profile openid email write
 
-# This variable is needed to create a request to find tasks by Organization.identifier
 app:
+  # This variable is needed to create a request in TaskRepository to find tasks by Organization.identifier
   url: https://localhost:8080
 
 server:
