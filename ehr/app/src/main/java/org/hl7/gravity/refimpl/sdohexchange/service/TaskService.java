@@ -127,7 +127,7 @@ public class TaskService {
     TaskUpdateBundleFactory updateBundleFactory = new TaskUpdateBundleFactory();
     updateBundleFactory.setTask(task);
     updateBundleFactory.setServiceRequest(serviceRequest);
-    updateBundleFactory.setStatus(update.getStatus());
+    updateBundleFactory.setStatus(update.getFhirStatus());
     updateBundleFactory.setStatusReason(update.getStatusReason());
     updateBundleFactory.setComment(update.getComment());
     updateBundleFactory.setUser(user);
