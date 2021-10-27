@@ -64,6 +64,7 @@ public class TaskService {
       //              .getAccessToken()));
       TaskRepository taskRepository = new TaskRepository(fhirClient, applicationUrl);
       taskDtoList.addAll(new TaskBundleToDtoConverter().convert(taskRepository.findAllTasks()));
+      taskDtoList.forEach(task -> task.setServerId(server.getId()));
     }
     return taskDtoList;
   }
