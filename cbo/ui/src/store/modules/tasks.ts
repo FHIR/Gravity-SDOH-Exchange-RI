@@ -3,6 +3,9 @@ import { VuexModule, Module, Action, Mutation, getModule } from "vuex-module-dec
 import store from "@/store";
 import { Task } from "@/types";
 
+const ACTIVE_STATUSES = ["In Progress", "Received", "On Hold", "Accepted"];
+const INACTIVE_STATUSES = ["Completed", "Cancelled", "Rejected", "Failed"];
+
 export interface ITasks {
 	tasks: Task[]
 }
@@ -12,11 +15,11 @@ class Tasks extends VuexModule implements ITasks {
 	tasks: Task[] = [];
 
 	get activeRequests() {
-		return this.tasks.filter((task: Task) => task.status !== "Completed" && task.status !== "Cancelled" && task.status !== "Failed" && task.status !== "Rejected");
+		return this.tasks.filter((task: Task) => ACTIVE_STATUSES.includes(task.status));
 	}
 
 	get inactiveRequests() {
-		return this.tasks.filter((task: Task) => task.status === "Completed" || task.status === "Cancelled" || task.status === "Rejected" || task.status === "Failed");
+		return this.tasks.filter((task: Task) => INACTIVE_STATUSES.includes(task.status));
 	}
 
 	@Mutation
