@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, PropType, ref, reactive, computed } from "vue";
+import { defineComponent, PropType, ref, reactive, computed, watch } from "vue";
 import { TableData } from "@/components/patients/action-steps/ActionSteps.vue";
 import { Occurrence, TaskStatus, updateTaskPayload } from "@/types";
 import moment from "moment";
@@ -8,7 +8,8 @@ import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
 
 export type FormModel = {
 	status: string,
-	comment: string
+	comment: string,
+	statusReason: string
 };
 
 
@@ -32,7 +33,8 @@ export default defineComponent({
 		const saveInProgress = ref<boolean>(false);
 		const formModel = reactive<FormModel>({
 			status: "",
-			comment: ""
+			comment: "",
+			statusReason: ""
 		});
 		//todo: use element-ui form type
 		const formEl = ref<HTMLFormElement>();
@@ -63,11 +65,26 @@ export default defineComponent({
 			}];
 		};
 
+		const showStatusReasonInput = computed(() => formModel.status === "Cancelled" && props.task?.status !== "Cancelled");
+
+		const init = (task: TableData) => {
+			formModel.status = "";
+			formModel.comment = "";
+			formModel.statusReason= "";
+		};
+
+		watch(() => props.task, (newTask, prevTask) => {
+			if (newTask && newTask.id !== prevTask?.id) {
+				init(newTask);
+			}
+		}, { immediate: true });
+
 		const onFormSave = async () => {
 			const payload: updateTaskPayload = {
 				id: props.task.id,
 				comment: formModel.comment,
-				status: formModel.status === props.task.status ? null : formModel.status as TaskStatus
+				status: formModel.status === props.task.status ? null : formModel.status as TaskStatus,
+				statusReason: showStatusReasonInput.value ? formModel.statusReason : undefined
 			};
 			saveInProgress.value = true;
 			try {
@@ -78,7 +95,19 @@ export default defineComponent({
 			}
 		};
 
-		const hasChanges = computed<boolean>(() => (formModel.comment !== "" || formModel.status !== props.task?.status));
+		const statusChanged = computed<boolean>(() =>
+			formModel.status !== props.task?.status
+		);
+
+		const isValid = computed(() =>
+			(!showStatusReasonInput.value || formModel.statusReason)
+		);
+
+		const hasChanges = computed(() => (statusChanged.value || formModel.comment !== "") && isValid.value);
+
+		const formRules = computed(() => ({
+			statusReason: [{ required: true, message: "This field is required" }]
+		}));
 
 		return {
 			saveInProgress,
@@ -89,7 +118,9 @@ export default defineComponent({
 			getStatusOptions,
 			onFormSave,
 			hasChanges,
-			formEl
+			formEl,
+			showStatusReasonInput,
+			formRules
 		};
 	}
 });
@@ -109,6 +140,7 @@ export default defineComponent({
 		<el-form
 			ref="formEl"
 			:model="formModel"
+			:rules="formRules"
 			label-width="155px"
 			label-position="left"
 			size="mini"
@@ -152,6 +184,17 @@ export default defineComponent({
 					</el-option>
 				</el-select>
 				<span class="date">{{ $filters.formatDateTime(task.lastModified) }}</span>
+			</el-form-item>
+			<el-form-item
+				v-if="showStatusReasonInput"
+				label="Reason"
+				prop="statusReason"
+			>
+				<el-input
+					v-model="formModel.statusReason"
+					type="textarea"
+					placeholder="Enter reason here"
+				/>
 			</el-form-item>
 			<el-form-item
 				label="Comment"

@@ -58,6 +58,7 @@ export default defineComponent({
 	<div class="dialog">
 		<el-dialog
 			title="Task Resources"
+			custom-class="task-resource-dialog"
 			:model-value="opened"
 			:width="900"
 			:show-close="true"

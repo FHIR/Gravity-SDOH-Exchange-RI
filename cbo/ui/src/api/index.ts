@@ -8,16 +8,7 @@ export const getTasks = () => axios.get<Task[]>("/tasks").then(dataOnly);
 //TODO: commented while BE is not ready
 // export const updateTask = (taskId: string, data: UpdateTaskPayload) => axios.put<void>(`/task/${taskId}`, data).then(dataOnly);
 
-export const getProceduresForCategory = async (categoryCode: string): Promise<Procedure[]> => ([
-	{
-		display: "Procedure: 1",
-		code: "123678"
-	},
-	{
-		display: "Procedure: 2",
-		code: "123224678"
-	}
-]);
+export const getProceduresForCategory = (categoryCode: string) => axios.get<Procedure[]>(`/mappings/categories/${categoryCode}/procedure/codings`).then(dataOnly);
 
 export const getServers = async (): Promise<Server[]> => {
 	const res = await axios.get("/servers");
