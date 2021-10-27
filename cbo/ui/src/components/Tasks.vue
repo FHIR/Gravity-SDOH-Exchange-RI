@@ -1,13 +1,12 @@
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { computed, defineComponent, onMounted, ref } from "vue";
 import { Task, TaskWithState } from "@/types";
 import TaskTable from "@/components/TaskTable.vue";
-import { getTasks } from "@/api";
 import Filters from "@/components/Filters.vue";
 import TableCard from "@/components/TableCard.vue";
 import TaskEditDialog from "@/components/TaskEditDialog.vue";
 import TaskResourcesDialog from "@/components/TaskResourcesDialog.vue";
-import { ActiveTabModule } from "@/store/activeTab";
+import { TasksModule } from "@/store/modules/tasks";
 
 export default defineComponent({
 	components: {
@@ -25,22 +24,21 @@ export default defineComponent({
 	},
 	setup(props) {
 		const tasks = ref<TaskWithState[]>([]);
-		const activeRequests = ref<Task[]>([]);
-		const inactiveRequests = ref<Task[]>([]);
+		const activeRequests = computed<Task[]>(() => TasksModule.activeRequests);
+		const inactiveRequests = computed<Task[]>(() => TasksModule.inactiveRequests);
 		const showLoader = ref<Boolean>(false);
 
-		showLoader.value = true;
-		getTasks().then((resp: Task[]) => {
-			activeRequests.value = resp.filter((task: Task) => task.status !== "Completed" && task.status !== "Cancelled");
-			inactiveRequests.value = resp.filter((task: Task) => task.status === "Completed" || task.status === "Cancelled");
-
-			ActiveTabModule.setActiveTasksLength(activeRequests.value.length);
-			ActiveTabModule.setInactiveTasksLength(inactiveRequests.value.length);
-
-			props.requestType === "active" ?
-				tasks.value = activeRequests.value.map((task: Task) => ({ task, isNew: false })) :
-				tasks.value = inactiveRequests.value.map((task: Task) => ({ task, isNew: false }));
-		}).finally(() => showLoader.value = false);
+		onMounted( async () => {
+			try {
+				showLoader.value = true;
+				await TasksModule.getTasks();
+			} finally {
+				props.requestType === "active" ?
+					tasks.value = activeRequests.value.map((task: Task) => ({ task, isNew: false })) :
+					tasks.value = inactiveRequests.value.map((task: Task) => ({ task, isNew: false }));
+				showLoader.value = false;
+			}
+		});
 
 		const taskInEdit = ref<Task | null>(null);
 
