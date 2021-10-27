@@ -17,6 +17,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConvert
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.AuthClientException;
+import org.hl7.gravity.refimpl.sdohexchange.exception.ServerNotFoundException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.model.Server;
@@ -68,9 +69,27 @@ public class TaskService {
     return taskDtoList;
   }
 
+  public TaskDto getTask(Integer serverId, String taskId) {
+    Server server = serverRepository.findById(serverId)
+        .orElseThrow(() -> new ServerNotFoundException(String.format("No server was found by id '%s'", serverId)));
+    IGenericClient fhirClient = fhirContext.newRestfulGenericClient(server.getFhirServerUrl());
+    // Doesn't support now
+    //      fhirClient.registerInterceptor(new BearerTokenAuthInterceptor(
+    //          authorizationClient.getTokenResponse(URI.create(server.getAuthServerUrl()), server.getClientId(),
+    //                  server.getClientSecret(), SCOPE)
+    //              .getAccessToken()));
+    TaskRepository taskRepository = new TaskRepository(fhirClient, applicationUrl);
+    Bundle taskBundle = taskRepository.find(taskId, Lists.newArrayList(Task.INCLUDE_FOCUS));
+    return new TaskBundleToDtoConverter().convert(taskBundle)
+        .stream()
+        .findFirst()
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), taskId)));
+  }
+
   public void update(String id, UpdateTaskRequestDto update) throws AuthClientException {
     Server server = serverRepository.findById(update.getServerId())
-        .get();
+        .orElseThrow(
+            () -> new ServerNotFoundException(String.format("No server was found by id '%s'", update.getServerId())));
     IGenericClient fhirClient = fhirContext.newRestfulGenericClient(server.getFhirServerUrl());
     // Doesn't support now
     //      fhirClient.registerInterceptor(new BearerTokenAuthInterceptor(
