@@ -4,6 +4,7 @@ import { ActiveTabModule } from "@/store/activeTab";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import UserInfo from "@/components/UserInfo.vue";
+import { TasksModule } from "@/store/modules/tasks";
 
 export default defineComponent({
 	name: "MainHeader",
@@ -11,13 +12,17 @@ export default defineComponent({
 	setup() {
 		const route = useRoute();
 		const handleTabClick = (tab: any) => ActiveTabModule.setActiveTab(tab.paneName);
+		const activeTaskLength = computed<number>(() => TasksModule.activeRequests.length);
+		const inactiveTaskLength = computed<number>(() => TasksModule.inactiveRequests.length);
 		const currentRoute = computed<string>(() => route.path);
 
 		return {
 			activeTabName : ActiveTabModule.activeTab,
 			handleTabClick,
 			router,
-			currentRoute
+			currentRoute,
+			activeTaskLength,
+			inactiveTaskLength
 		};
 	}
 });
@@ -48,7 +53,7 @@ export default defineComponent({
 				>
 					<template #label>
 						<div class="label-wrap">
-							Active Requests
+							{{ `Active Requests (${activeTaskLength})` }}
 						</div>
 					</template>
 				</el-tab-pane>
@@ -57,7 +62,7 @@ export default defineComponent({
 				>
 					<template #label>
 						<div class="label-wrap">
-							Inactive Requests
+							{{ `Inactive Requests (${inactiveTaskLength})` }}
 						</div>
 					</template>
 				</el-tab-pane>

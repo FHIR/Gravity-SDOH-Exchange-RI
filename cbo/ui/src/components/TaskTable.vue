@@ -64,6 +64,10 @@ export default defineComponent({
 		tasks: {
 			type: Array as PropType<TaskWithState[]>,
 			required: true
+		},
+		loading: {
+			type: Boolean,
+			default: false
 		}
 	},
 	emits: ["task-name-click", "view-resources"],
@@ -93,6 +97,7 @@ export default defineComponent({
 	<TableWrapper>
 		<el-table
 			:data="tableData"
+			v-loading="loading"
 			:row-class-name="({ row }) => row.isNew ? 'new-task' : ''"
 		>
 			<el-table-column
@@ -211,6 +216,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+
+::v-deep(.el-button--text) {
+	font-weight: $global-font-weight-normal;
+	text-decoration: underline;
+	font-size: $global-medium-font-size;
+	color: $global-primary-color;
+}
 
 .new-task {
 	font-weight: $global-font-weight-medium;

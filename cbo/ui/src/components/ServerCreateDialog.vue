@@ -80,6 +80,7 @@ export default defineComponent({
 				onDialogClose();
 			}
 			catch (err) {
+				showDefaultNotification("Server not found. Check your network connection or your credentials!");
 				console.log(err);
 			}
 			finally {
