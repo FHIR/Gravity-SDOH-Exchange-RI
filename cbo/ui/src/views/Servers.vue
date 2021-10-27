@@ -1,5 +1,6 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import MainHeader from "@/components/MainHeader.vue";
 import Filters from "@/components/Filters.vue";
 import TableCard from "@/components/TableCard.vue";
@@ -23,10 +24,30 @@ export default defineComponent({
 		const data = computed<Server[]>(() => ServersModule.servers);
 		const serverInEdit = ref<Server | null>(null);
 		const serverCreateVisible = ref<boolean>(false);
+		const serverFromOutside = ref<{
+			serverName: string,
+			fhirServerUrl: string,
+			authServerUrl: string,
+			clientId: string
+		} | {}>({});
+		const route = useRoute();
+		const router = useRouter();
 
 		onMounted(async () => {
+			handleParamsFromOutside();
 			await ServersModule.getServers();
 		});
+		const handleParamsFromOutside = () => {
+			const { query } = route;
+
+			if (query.serverName && query.fhirServerUrl && query.authServerUrl && query.clientId) {
+				serverFromOutside.value = { ...query };
+				serverCreateVisible.value = true;
+				router.replace({
+					query: undefined
+				});
+			}
+		};
 
 		const editServer = (server: Server) => {
 			serverInEdit.value = server;
@@ -36,6 +57,7 @@ export default defineComponent({
 		};
 		const closeCreateDialog = () => {
 			serverCreateVisible.value = false;
+			serverFromOutside.value = {};
 		};
 
 		return {
@@ -44,7 +66,8 @@ export default defineComponent({
 			editServer,
 			closeEditDialog,
 			serverCreateVisible,
-			closeCreateDialog
+			closeCreateDialog,
+			serverFromOutside
 		};
 	}
 });
@@ -78,6 +101,7 @@ export default defineComponent({
 			@close="closeEditDialog"
 		/>
 		<ServerCreateDialog
+			:server="serverFromOutside"
 			:visible="serverCreateVisible"
 			@close="closeCreateDialog"
 		/>

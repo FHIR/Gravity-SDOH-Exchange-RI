@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, computed, reactive, ref } from "vue";
+import { defineComponent, computed, reactive, ref, PropType } from "vue";
 import { NewServerPayload } from "@/types";
 import { ServersModule } from "@/store/modules/servers";
 import { showDefaultNotification } from "@/utils/utils";
@@ -15,6 +15,15 @@ export type FormModel = {
 export default defineComponent({
 	name: "ServerCreateDialog",
 	props: {
+		server: {
+			type: Object as PropType<{
+				serverName: string,
+				fhirServerUrl: string,
+				authServerUrl: string,
+				clientId: string
+			} | {}>,
+			default: {}
+		},
 		visible: {
 			type: Boolean,
 			default: false
@@ -56,6 +65,11 @@ export default defineComponent({
 			formEl.value?.resetFields();
 			ctx.emit("close");
 		};
+		const onDialogOpened = () => {
+			if (props.server) {
+				Object.assign(formModel, props.server);
+			}
+		};
 		const onFormSave = async () => {
 			const payload: NewServerPayload = { ...formModel };
 			saveInProgress.value = true;
@@ -80,7 +94,8 @@ export default defineComponent({
 			validationRules,
 			onFormSave,
 			saveInProgress,
-			hasChanges
+			hasChanges,
+			onDialogOpened
 		};
 	}
 });
@@ -94,6 +109,7 @@ export default defineComponent({
 		append-to-body
 		destroy-on-close
 		custom-class="create-server-dialog"
+		@opened="onDialogOpened"
 		@close="onDialogClose"
 	>
 		<el-form
