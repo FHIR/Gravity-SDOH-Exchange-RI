@@ -32,7 +32,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
 public class TaskService {
 
   private static final String SCOPE = "address phone read profile openid email write";
