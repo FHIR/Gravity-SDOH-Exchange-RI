@@ -14,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskDto {
 
+  private Integer serverId;
   private String id;
   private String name;
   private LocalDateTime createdAt;
