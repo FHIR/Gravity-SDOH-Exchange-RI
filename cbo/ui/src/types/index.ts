@@ -21,6 +21,7 @@ export type Task = {
 	priority: string,
 	status: any,
 	requestType: string,
+	serverId: number,
 	serviceRequest: {
 		id: string,
 		occurrence: Occurrence,
@@ -86,6 +87,7 @@ export type UpdateTaskPayload = {
 	outcome?: string,
 	statusReason?: string,
 	procedureCodes?: string[],
+	serverId: number,
 	status: UpdatedStatus
 }
 

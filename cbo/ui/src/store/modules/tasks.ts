@@ -27,11 +27,21 @@ class Tasks extends VuexModule implements ITasks {
 		this.tasks = payload;
 	}
 
+	@Mutation
+	changeTask(payload: Task) {
+		this.tasks = this.tasks.map(task => task.id === payload.id ? payload : task);
+	}
+
 	@Action
 	async getTasks(): Promise<void> {
 		const data = await getTasks();
 
 		this.setTasks(data);
+	}
+
+	@Action
+	async updateTask(updatedTask: Task): Promise<void> {
+		this.changeTask(updatedTask);
 	}
 }
 
