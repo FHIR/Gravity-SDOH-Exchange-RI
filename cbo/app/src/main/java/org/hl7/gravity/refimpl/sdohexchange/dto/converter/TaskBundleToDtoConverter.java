@@ -15,7 +15,11 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
   private final TaskInfoBundleExtractor taskInfoBundleParser = new TaskInfoBundleExtractor();
   private final TaskToDtoConverter taskToDtoConverter = new TaskToDtoConverter();
   private final ServiceRequestToDtoConverter serviceRequestToDtoConverter = new ServiceRequestToDtoConverter();
+  private final Integer serverId;
 
+  public TaskBundleToDtoConverter(Integer serverId) {
+    this.serverId = serverId;
+  }
   @Override
   public List<TaskDto> convert(Bundle bundle) {
     return taskInfoBundleParser.extract(bundle)
@@ -23,6 +27,7 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
         .map(taskInfoHolder -> {
           TaskDto taskDto = taskToDtoConverter.convert(taskInfoHolder.getTask());
           Assert.notNull(taskDto, "Task DTO cant be null.");
+          taskDto.setServerId(serverId);
           taskDto.setServiceRequest(serviceRequestToDtoConverter.convert(taskInfoHolder.getServiceRequest()));
           return taskDto;
         })
