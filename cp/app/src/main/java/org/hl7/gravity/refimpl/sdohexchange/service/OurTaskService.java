@@ -10,7 +10,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
-import org.hl7.gravity.refimpl.sdohexchange.exception.TaskIntentException;
+import org.hl7.gravity.refimpl.sdohexchange.exception.TaskReadException;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class OurTaskService {
     }
     if (!ourTask.getIntent()
         .equals(Task.TaskIntent.FILLERORDER)) {
-      throw new TaskIntentException("Task/" + id + " is not filler-order.");
+      throw new TaskReadException("Task/" + id + " is not filler-order.");
     }
     return new TaskToDtoConverter().convert(ourTask);
   }
