@@ -64,9 +64,7 @@ public class TaskService {
       //                  server.getClientSecret(), SCOPE)
       //              .getAccessToken()));
       TaskRepository taskRepository = new TaskRepository(fhirClient, applicationUrl);
-      List<TaskDto> tempList = new TaskBundleToDtoConverter().convert(taskRepository.findAllTasks());
-      tempList.forEach(task -> task.setServerId(server.getId()));
-      taskDtoList.addAll(tempList);
+      taskDtoList.addAll(new TaskBundleToDtoConverter(server.getId()).convert(taskRepository.findAllTasks()));
     }
     return taskDtoList;
   }
@@ -82,12 +80,10 @@ public class TaskService {
     //              .getAccessToken()));
     TaskRepository taskRepository = new TaskRepository(fhirClient, applicationUrl);
     Bundle taskBundle = taskRepository.find(taskId, Lists.newArrayList(Task.INCLUDE_FOCUS));
-    TaskDto task = new TaskBundleToDtoConverter().convert(taskBundle)
+    return new TaskBundleToDtoConverter(serverId).convert(taskBundle)
         .stream()
         .findFirst()
         .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), taskId)));
-    task.setServerId(server.getId());
-    return task;
   }
 
   public void update(String id, UpdateTaskRequestDto update) throws AuthClientException {
