@@ -1,13 +1,14 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.Assert;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>> {
@@ -23,6 +24,14 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
         .map(taskInfoHolder -> {
           TaskDto taskDto = taskToDtoConverter.convert(taskInfoHolder.getTask());
           Assert.notNull(taskDto, "Task DTO cant be null.");
+          taskInfoHolder.getTask()
+              .getBasedOn()
+              .stream()
+              .findFirst()
+              .ifPresent(reference -> {
+                taskDto.setBaseTaskId(reference.getReference());
+                taskDto.setBaseTaskName(reference.getDisplay());
+              });
           taskDto.setServiceRequest(serviceRequestToDtoConverter.convert(taskInfoHolder.getServiceRequest()));
           return taskDto;
         })

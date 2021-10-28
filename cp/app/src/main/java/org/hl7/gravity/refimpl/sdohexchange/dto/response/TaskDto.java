@@ -16,6 +16,8 @@ public class TaskDto {
 
   private String id;
   private String name;
+  private String baseTaskId;
+  private String baseTaskName;
   private LocalDateTime createdAt;
   private LocalDateTime lastModified;
   private String priority;
