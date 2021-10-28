@@ -81,20 +81,6 @@ public class TaskUpdateBundleFactory {
       task.setLastModifiedElement(DateTimeType.now());
 
       Assert.notNull(serviceRequest, "ServiceRequest can't be null.");
-      if (status == Task.TaskStatus.ACCEPTED) {
-
-        Task cboTask = task.copy();
-        cboTask.setId((String) null);
-        cboTask.getIdentifier()
-            .clear();
-        cboTask.addBasedOn(new Reference(task.getIdElement()
-            .toUnqualifiedVersionless()));
-        cboTask.setStatus(Task.TaskStatus.RECEIVED);
-        cboTask.setAuthoredOnElement(DateTimeType.now());
-        cboTask.setLastModifiedElement(DateTimeType.now());
-        cboTask.setIntent(Task.TaskIntent.FILLERORDER);
-        updateBundle.addEntry(FhirUtil.createPostEntry(cboTask));
-      }
       if (status == Task.TaskStatus.REJECTED || status == Task.TaskStatus.CANCELLED) {
         Assert.notNull(statusReason, "Status reason cannot be null.");
         task.setStatusReason(new CodeableConcept().setText(statusReason));
