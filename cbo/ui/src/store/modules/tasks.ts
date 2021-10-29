@@ -1,7 +1,7 @@
-import { getTasks } from "@/api";
+import { getTasks, updateTask, getTask } from "@/api";
 import { VuexModule, Module, Action, Mutation, getModule } from "vuex-module-decorators";
 import store from "@/store";
-import { Task } from "@/types";
+import { Task, UpdateTaskPayload } from "@/types";
 
 const ACTIVE_STATUSES = ["In Progress", "Received", "On Hold", "Accepted"];
 const INACTIVE_STATUSES = ["Completed", "Cancelled", "Rejected", "Failed"];
@@ -15,11 +15,15 @@ class Tasks extends VuexModule implements ITasks {
 	tasks: Task[] = [];
 
 	get activeRequests() {
-		return this.tasks.filter((task: Task) => ACTIVE_STATUSES.includes(task.status));
+		const activeTasks = this.tasks.filter((task: Task) => ACTIVE_STATUSES.includes(task.status));
+
+		return activeTasks.map((task: Task) => ({ task, isNew: false }));
 	}
 
 	get inactiveRequests() {
-		return this.tasks.filter((task: Task) => INACTIVE_STATUSES.includes(task.status));
+		const inactiveTask = this.tasks.filter((task: Task) => INACTIVE_STATUSES.includes(task.status));
+
+		return inactiveTask.map((task: Task) => ({ task, isNew: false }));
 	}
 
 	@Mutation
@@ -40,8 +44,12 @@ class Tasks extends VuexModule implements ITasks {
 	}
 
 	@Action
-	async updateTask(updatedTask: Task): Promise<void> {
+	async updateTask(payload :UpdateTaskPayload): Promise<Task> {
+		await updateTask(payload);
+		const updatedTask = await getTask(payload.id, payload.serverId);
 		this.changeTask(updatedTask);
+
+		return updatedTask;
 	}
 }
 

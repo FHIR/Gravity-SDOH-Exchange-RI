@@ -23,9 +23,9 @@ export default defineComponent({
 		}
 	},
 	setup(props) {
-		const tasks = ref<TaskWithState[]>([]);
-		const activeRequests = computed<Task[]>(() => TasksModule.activeRequests);
-		const inactiveRequests = computed<Task[]>(() => TasksModule.inactiveRequests);
+		const tasks = computed<TaskWithState[]>(() => props.requestType === "active" ? activeRequests.value: inactiveRequests.value);
+		const activeRequests = computed<TaskWithState[]>(() => TasksModule.activeRequests);
+		const inactiveRequests = computed<TaskWithState[]>(() => TasksModule.inactiveRequests);
 		const showLoader = ref<Boolean>(false);
 
 		onMounted( async () => {
@@ -33,9 +33,6 @@ export default defineComponent({
 				showLoader.value = true;
 				await TasksModule.getTasks();
 			} finally {
-				props.requestType === "active" ?
-					tasks.value = activeRequests.value.map((task: Task) => ({ task, isNew: false })) :
-					tasks.value = inactiveRequests.value.map((task: Task) => ({ task, isNew: false }));
 				showLoader.value = false;
 			}
 		});
@@ -45,11 +42,6 @@ export default defineComponent({
 		const editTask = (taskToEdit: TaskWithState) => {
 			// markTaskAsNotNew(taskToEdit.task.id);
 			taskInEdit.value = taskToEdit.task;
-		};
-
-		const updateTaskFromDialog = (task: Task) => {
-			tasks.value = tasks.value.map(taskState => taskState.task.id === task.id ? { ...taskState, task } : taskState);
-			closeDialog();
 		};
 
 		const closeDialog = () => {
@@ -66,7 +58,6 @@ export default defineComponent({
 			editTask,
 			closeDialog,
 			taskInEdit,
-			updateTaskFromDialog,
 			viewTaskResources,
 			taskIdToViewResources,
 			showLoader
@@ -82,7 +73,7 @@ export default defineComponent({
 			<TaskEditDialog
 				:task="taskInEdit"
 				@close="closeDialog"
-				@task-updated="updateTaskFromDialog"
+				@close-dialog="closeDialog"
 			/>
 
 			<TaskResourcesDialog

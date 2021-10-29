@@ -4,7 +4,7 @@ import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedu
 import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate, showDateTime } from "@/utils";
-import { getProceduresForCategory, updateTask, getTask } from "@/api";
+import { getProceduresForCategory } from "@/api";
 import { showDefaultNotification } from "@/utils/utils";
 import { TasksModule } from "@/store/modules/tasks";
 
@@ -73,7 +73,7 @@ export default defineComponent({
 			default: null
 		}
 	},
-	emits: ["close", "task-updated"],
+	emits: ["close"],
 	setup(props, ctx) {
 		const opened = computed(() => props.task !== null);
 
@@ -144,6 +144,7 @@ export default defineComponent({
 
 		const save = async () => {
 			const payload: UpdateTaskPayload = {
+				id: props.task!.id,
 				status: status.value as UpdatedStatus,
 				comment: comment.value || undefined,
 				serverId: props.task!.serverId,
@@ -153,10 +154,8 @@ export default defineComponent({
 			};
 			saveInProgress.value = true;
 			try {
-				await updateTask(taskFields.value.id, payload);
-				const updatedTask = await getTask(taskFields.value.id, props.task!.serverId);
-				await TasksModule.updateTask(updatedTask);
-				ctx.emit("task-updated", updatedTask);
+				const updatedTask = await TasksModule.updateTask(payload);
+				ctx.emit("close");
 				init(updatedTask);
 			} finally {
 				saveInProgress.value = false;

@@ -22,6 +22,7 @@ export type Task = {
 	status: any,
 	requestType: string,
 	serverId: number,
+	isNew?: boolean,
 	serviceRequest: {
 		id: string,
 		occurrence: Occurrence,
@@ -83,6 +84,7 @@ export type UpdatedStatus =
 	| "Completed"
 
 export type UpdateTaskPayload = {
+	id: string,
 	comment?: string,
 	outcome?: string,
 	statusReason?: string,
