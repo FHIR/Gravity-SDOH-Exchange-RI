@@ -37,7 +37,7 @@ public class OurTaskService {
     }
     if (!ourTask.getIntent()
         .equals(Task.TaskIntent.FILLERORDER)) {
-      throw new TaskReadException("Task/" + id + " is not filler-order.");
+      throw new TaskReadException("The intent of Task/" + id + " is not filler-order.");
     }
     return new TaskToDtoConverter().convert(ourTask);
   }
