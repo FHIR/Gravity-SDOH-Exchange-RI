@@ -6,6 +6,7 @@ import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate, showDateTime } from "@/utils";
 import { getProceduresForCategory } from "@/api";
 import { showDefaultNotification } from "@/utils/utils";
+import { TasksModule } from "@/store/modules/tasks";
 
 type TaskStuff = {
 	id: string,
@@ -98,6 +99,8 @@ export default defineComponent({
 		const visibleForCancelledStatus = computed(() => status.value === "Cancelled");
 		const showStatusReasonInput = computed(() => status.value === "Rejected" || status.value === "Cancelled");
 		const hiddenForCompletedStatus = computed(() => status.value === "Completed" || status.value === "Cancelled");
+		//todo: we don't have task specific sync date, so use global
+		const lastSyncDate = computed<string>(() => TasksModule.lastSyncDate);
 
 		const proceduresRequired = computed(() => status.value === "Completed");
 
@@ -214,7 +217,8 @@ export default defineComponent({
 			canSave,
 			beforeClose,
 			saveInProgress,
-			save
+			save,
+			lastSyncDate
 		};
 	}
 });
@@ -243,13 +247,13 @@ export default defineComponent({
 						</el-form-item>
 
 						<el-form-item
-							label="Synchronized Status"
+							label="Synchronization Status"
 						>
 							<div class="sync-wrapper">
 								<div class="sync-icon"></div>
 								Synced
 								<span class="sync-date">
-									Sep 12, 2021, 10:00 AM
+									{{ $filters.formatDateTime(lastSyncDate) }}
 								</span>
 							</div>
 						</el-form-item>

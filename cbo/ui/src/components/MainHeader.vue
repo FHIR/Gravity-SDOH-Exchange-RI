@@ -11,10 +11,13 @@ export default defineComponent({
 	components: { UserInfo },
 	setup() {
 		const route = useRoute();
-		const handleTabClick = (tab: any) => ActiveTabModule.setActiveTab(tab.paneName);
 		const activeTaskLength = computed<number>(() => TasksModule.activeRequests.length);
 		const inactiveTaskLength = computed<number>(() => TasksModule.inactiveRequests.length);
 		const currentRoute = computed<string>(() => route.path);
+		const lastSyncDate = computed<string>(() => TasksModule.lastSyncDate);
+
+		const handleTabClick = (tab: any) => ActiveTabModule.setActiveTab(tab.paneName);
+		const handleSyncClick = () => TasksModule.getTasks();
 
 		return {
 			activeTabName : ActiveTabModule.activeTab,
@@ -22,7 +25,9 @@ export default defineComponent({
 			router,
 			currentRoute,
 			activeTaskLength,
-			inactiveTaskLength
+			inactiveTaskLength,
+			lastSyncDate,
+			handleSyncClick
 		};
 	}
 });
@@ -78,12 +83,13 @@ export default defineComponent({
 			class="sync"
 			:class="{ 'sync-margin' : currentRoute === '/servers' }"
 		>
-			Synchronization:
+			Last Synchronization: {{ lastSyncDate ? $filters.formatDateTime(lastSyncDate) : "" }}
 		</div>
 		<div class="right-container">
 			<el-button
 				plain
 				round
+				@click="handleSyncClick"
 			>
 				Synchronize
 			</el-button>
