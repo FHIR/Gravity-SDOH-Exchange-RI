@@ -26,17 +26,15 @@ export default defineComponent({
 		const tasks = ref<TaskWithState[]>([]);
 		const activeRequests = computed<Task[]>(() => TasksModule.activeRequests);
 		const inactiveRequests = computed<Task[]>(() => TasksModule.inactiveRequests);
-		const showLoader = ref<Boolean>(false);
+		const showLoader = computed<boolean>(() => TasksModule.isLoading);
 
 		onMounted( async () => {
 			try {
-				showLoader.value = true;
 				await TasksModule.getTasks();
 			} finally {
 				props.requestType === "active" ?
 					tasks.value = activeRequests.value.map((task: Task) => ({ task, isNew: false })) :
 					tasks.value = inactiveRequests.value.map((task: Task) => ({ task, isNew: false }));
-				showLoader.value = false;
 			}
 		});
 
