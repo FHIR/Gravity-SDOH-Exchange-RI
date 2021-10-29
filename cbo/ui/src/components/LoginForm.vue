@@ -56,6 +56,7 @@ export default defineComponent({
 				<el-input
 					v-model="password"
 					placeholder="Password"
+					:show-password="true"
 					@input="hideValidation"
 				/>
 			</el-form-item>

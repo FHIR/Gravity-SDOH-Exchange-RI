@@ -7,12 +7,16 @@ const ACTIVE_STATUSES = ["In Progress", "Received", "On Hold", "Accepted"];
 const INACTIVE_STATUSES = ["Completed", "Cancelled", "Rejected", "Failed"];
 
 export interface ITasks {
-	tasks: Task[]
+	tasks: Task[],
+	lastSyncDate: string,
+	isLoading: boolean
 }
 
 @Module({ dynamic: true, store, name: "tasks" })
 class Tasks extends VuexModule implements ITasks {
 	tasks: Task[] = [];
+	lastSyncDate: string = "";
+	isLoading: boolean = false;
 
 	get activeRequests() {
 		const activeTasks = this.tasks.filter((task: Task) => ACTIVE_STATUSES.includes(task.status));
@@ -36,11 +40,27 @@ class Tasks extends VuexModule implements ITasks {
 		this.tasks = this.tasks.map(task => task.id === payload.id ? payload : task);
 	}
 
+	@Mutation
+	setLastSyncDate(payload: string) {
+		this.lastSyncDate = payload;
+	}
+
+	@Mutation
+	setIsLoading(payload: boolean) {
+		this.isLoading = payload;
+	}
+
 	@Action
 	async getTasks(): Promise<void> {
-		const data = await getTasks();
+		this.setIsLoading(true);
+		try {
+			const data = await getTasks();
 
-		this.setTasks(data);
+			this.setTasks(data);
+			this.setLastSyncDate(new Date().toISOString());
+		} finally {
+			this.setIsLoading(false);
+		}
 	}
 
 	@Action

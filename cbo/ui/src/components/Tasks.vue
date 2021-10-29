@@ -26,15 +26,12 @@ export default defineComponent({
 		const tasks = computed<TaskWithState[]>(() => props.requestType === "active" ? activeRequests.value: inactiveRequests.value);
 		const activeRequests = computed<TaskWithState[]>(() => TasksModule.activeRequests);
 		const inactiveRequests = computed<TaskWithState[]>(() => TasksModule.inactiveRequests);
-		const showLoader = ref<Boolean>(false);
+		const showLoader = computed<boolean>(() => TasksModule.isLoading);
 
 		onMounted( async () => {
 			try {
-				showLoader.value = true;
 				await TasksModule.getTasks();
-			} finally {
-				showLoader.value = false;
-			}
+			} catch {}
 		});
 
 		const taskInEdit = ref<Task | null>(null);
@@ -73,7 +70,6 @@ export default defineComponent({
 			<TaskEditDialog
 				:task="taskInEdit"
 				@close="closeDialog"
-				@close-dialog="closeDialog"
 			/>
 
 			<TaskResourcesDialog
