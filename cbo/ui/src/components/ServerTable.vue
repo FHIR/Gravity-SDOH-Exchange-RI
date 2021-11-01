@@ -23,6 +23,10 @@ export default defineComponent({
 		data: {
 			type: Array as PropType<Server[]>,
 			required: true
+		},
+		loading: {
+			type: Boolean,
+			default: false
 		}
 	},
 	emits: ["server-name-click"],
@@ -56,7 +60,10 @@ export default defineComponent({
 
 <template>
 	<TableWrapper>
-		<el-table :data="tableData">
+		<el-table
+			v-loading="loading"
+			:data="tableData"
+		>
 			<el-table-column label="Server Name">
 				<template #default="{ row }">
 					<div

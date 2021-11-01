@@ -10,12 +10,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
-import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestStatus;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
-import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskUpdateException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.reference.util.ServiceRequestReferenceCollector;
@@ -29,11 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+// Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/fhir/factory
 @Getter
 @Setter
 public class TaskUpdateBundleFactory {
 
-  private static final Map<TaskStatus, List<TaskStatus>> TASK_STATE_MACHINE = new HashMap<>();
+  private static final Map<Task.TaskStatus, List<Task.TaskStatus>> TASK_STATE_MACHINE = new HashMap<>();
 
   private Task task;
   private ServiceRequest serviceRequest;
@@ -42,18 +39,16 @@ public class TaskUpdateBundleFactory {
   private String comment;
   private String outcome;
   private List<Coding> procedureCodes;
-  private UserDto user;
-  private Priority priorityForCBO;
-  private Reference cboTaskRequester;
-  private Reference cboTaskOwner;
 
   static {
     //TODO: Verify this state machine
-    TASK_STATE_MACHINE.put(TaskStatus.RECEIVED, Arrays.asList(TaskStatus.REJECTED, TaskStatus.ACCEPTED));
-    TASK_STATE_MACHINE.put(TaskStatus.ACCEPTED, Arrays.asList(TaskStatus.CANCELLED, TaskStatus.INPROGRESS));
-    TASK_STATE_MACHINE.put(TaskStatus.INPROGRESS,
-        Arrays.asList(TaskStatus.ONHOLD, TaskStatus.COMPLETED, TaskStatus.CANCELLED));
-    TASK_STATE_MACHINE.put(TaskStatus.ONHOLD, Arrays.asList(TaskStatus.INPROGRESS, TaskStatus.CANCELLED));
+    TASK_STATE_MACHINE.put(Task.TaskStatus.RECEIVED, Arrays.asList(Task.TaskStatus.REJECTED, Task.TaskStatus.ACCEPTED));
+    TASK_STATE_MACHINE.put(Task.TaskStatus.ACCEPTED,
+        Arrays.asList(Task.TaskStatus.CANCELLED, Task.TaskStatus.INPROGRESS));
+    TASK_STATE_MACHINE.put(Task.TaskStatus.INPROGRESS,
+        Arrays.asList(Task.TaskStatus.ONHOLD, Task.TaskStatus.COMPLETED, Task.TaskStatus.CANCELLED));
+    TASK_STATE_MACHINE.put(Task.TaskStatus.ONHOLD,
+        Arrays.asList(Task.TaskStatus.INPROGRESS, Task.TaskStatus.CANCELLED));
   }
 
   public Bundle createUpdateBundle() {
@@ -72,7 +67,7 @@ public class TaskUpdateBundleFactory {
     if (Objects.equals(task.getStatus(), status)) {
       throw new TaskUpdateException("Task status must not be the same.");
     }
-    List<TaskStatus> possibleStatuses = TASK_STATE_MACHINE.get(task.getStatus());
+    List<Task.TaskStatus> possibleStatuses = TASK_STATE_MACHINE.get(task.getStatus());
     if (possibleStatuses == null || !possibleStatuses.contains(status)) {
       throw new TaskUpdateException(String.format("Unable to update Task status from '%s' to '%s'.", task.getStatus()
           .getDisplay(), status.getDisplay()));
@@ -86,56 +81,29 @@ public class TaskUpdateBundleFactory {
       task.setLastModifiedElement(DateTimeType.now());
 
       Assert.notNull(serviceRequest, "ServiceRequest can't be null.");
-      if (status == TaskStatus.ACCEPTED) {
-        Assert.notNull(priorityForCBO, "Priority for CBO cannot be null.");
-        Assert.notNull(cboTaskRequester, "CBO Task requester cannot be null.");
-
-        //TODO move to OwnTaskBundleFactory
-        ServiceRequest cboServiceRequest = serviceRequest.copy();
-        cboServiceRequest.setId(IdType.newRandomUuid());
-        cboServiceRequest.getIdentifier()
-            .clear();
-        cboServiceRequest.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-        cboServiceRequest.setIntent(ServiceRequest.ServiceRequestIntent.FILLERORDER);
-        cboServiceRequest.setAuthoredOnElement(DateTimeType.now());
-        cboServiceRequest.setPriority(priorityForCBO.getServiceRequestPriority());
-        updateBundle.addEntry(FhirUtil.createPostEntry(cboServiceRequest));
-
-        Task cboTask = task.copy();
-        cboTask.setId((String) null);
-        cboTask.getIdentifier()
-            .clear();
-        cboTask.addBasedOn(new Reference(task.getIdElement()
-            .toUnqualifiedVersionless()));
-        cboTask.setStatus(TaskStatus.RECEIVED);
-        cboTask.setAuthoredOnElement(DateTimeType.now());
-        cboTask.setLastModifiedElement(DateTimeType.now());
-        cboTask.setFocus(new Reference(cboServiceRequest));
-        cboTask.setIntent(Task.TaskIntent.FILLERORDER);
-        cboTask.setPriority(priorityForCBO.getTaskPriority());
-        cboTask.setRequester(cboTaskRequester);
-        if (cboTaskOwner != null) {
-          cboTask.setOwner(cboTaskOwner);
-        }
-        updateBundle.addEntry(FhirUtil.createPostEntry(cboTask));
-      } else if (status == TaskStatus.REJECTED || status == TaskStatus.CANCELLED) {
+      if (status == Task.TaskStatus.REJECTED || status == Task.TaskStatus.CANCELLED) {
         Assert.notNull(statusReason, "Status reason cannot be null.");
         task.setStatusReason(new CodeableConcept().setText(statusReason));
-        if (status == TaskStatus.CANCELLED) {
+        if (status == Task.TaskStatus.CANCELLED) {
           createProceduresOutput(updateBundle);
         }
-        serviceRequest.setStatus(ServiceRequestStatus.REVOKED);
+        serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.REVOKED);
         updateBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
-      } else {
-        throw new TaskUpdateException("Status " + status.getDisplay() + " cannot be set explicitly.");
+      } else if (status == Task.TaskStatus.COMPLETED) {
+        Assert.notNull(outcome, "Outcome cannot be null.");
+        Assert.isTrue(procedureCodes.size() > 0, "Procedures can't be empty.");
+        task.getOutput()
+            .add(createTaskOutput(new CodeableConcept().setText(outcome)));
+        createProceduresOutput(updateBundle);
+
+        serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.COMPLETED);
+        updateBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
       }
     }
     if (StringUtils.hasText(comment)) {
-      Assert.notNull(user, "User cannot be null.");
       task.addNote()
           .setText(comment)
-          .setTimeElement(DateTimeType.now())
-          .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
+          .setTimeElement(DateTimeType.now());
     }
   }
 

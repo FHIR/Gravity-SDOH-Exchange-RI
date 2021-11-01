@@ -160,7 +160,8 @@ export type Concern = {
 export type updateTaskPayload = {
 	comment?: string,
 	status: TaskStatus | null,
-	id: string
+	id: string,
+	statusReason?: string
 }
 
 export type GoalAsCompletedPayload = {

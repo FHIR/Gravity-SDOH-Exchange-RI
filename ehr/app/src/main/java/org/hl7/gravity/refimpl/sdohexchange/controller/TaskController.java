@@ -2,9 +2,6 @@ package org.hl7.gravity.refimpl.sdohexchange.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.UserInfoToDtoConverter;
@@ -26,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @RestController
 @RequestMapping("task")
@@ -66,7 +67,7 @@ public class TaskController {
   @PutMapping("{id}")
   @ApiOperation(value = "Update Task resource.")
   public ResponseEntity<Void> update(@PathVariable @NotBlank(message = "Task id can't be empty.") String id,
-      @RequestBody UpdateTaskRequestDto update, @ApiIgnore @AuthenticationPrincipal OidcUser user) {
+      @Valid @RequestBody UpdateTaskRequestDto update, @ApiIgnore @AuthenticationPrincipal OidcUser user) {
     UserDto userDto = new UserInfoToDtoConverter().convert(user.getClaims());
     taskService.update(id, update, userDto);
     return ResponseEntity.noContent()
