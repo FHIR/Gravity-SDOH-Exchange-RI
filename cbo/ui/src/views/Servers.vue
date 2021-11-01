@@ -22,6 +22,7 @@ export default defineComponent({
 	},
 	setup() {
 		const data = computed<Server[]>(() => ServersModule.servers);
+		const showLoader = computed<boolean>(() => ServersModule.isLoading);
 		const serverInEdit = ref<Server | null>(null);
 		const serverCreateVisible = ref<boolean>(false);
 		const serverFromOutside = ref<{
@@ -67,7 +68,8 @@ export default defineComponent({
 			closeEditDialog,
 			serverCreateVisible,
 			closeCreateDialog,
-			serverFromOutside
+			serverFromOutside,
+			showLoader
 		};
 	}
 });
@@ -91,6 +93,7 @@ export default defineComponent({
 			<TableCard>
 				<ServerTable
 					:data="data"
+					:loading="showLoader"
 					@server-name-click="editServer"
 				/>
 			</TableCard>
