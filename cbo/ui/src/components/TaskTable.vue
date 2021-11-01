@@ -4,6 +4,7 @@ import { TaskWithState } from "@/types";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate } from "@/utils";
 import TableWrapper from "@/components/TableWrapper.vue";
+import { TasksModule } from "@/store/modules/tasks";
 
 
 type TaskDisplayFields = {
@@ -21,7 +22,8 @@ type TaskDisplayFields = {
 	payer: string,
 	comment: string,
 	outcome: string,
-	requestType: string
+	requestType: string,
+	lastSyncDate: string
 }
 
 
@@ -40,7 +42,8 @@ const displayTask = ({ task, isNew }: TaskWithState): TaskDisplayFields => ({
 	performingCBO: "",
 	payer: "",
 	comment: task.comments[0]?.text || "",
-	outcome: task.outcome || ""
+	outcome: task.outcome || "",
+	lastSyncDate: TasksModule.lastSyncDate
 });
 
 
@@ -96,8 +99,8 @@ export default defineComponent({
 <template>
 	<TableWrapper>
 		<el-table
-			:data="tableData"
 			v-loading="loading"
+			:data="tableData"
 			:row-class-name="({ row }) => row.isNew ? 'new-task' : ''"
 		>
 			<el-table-column
@@ -203,10 +206,10 @@ export default defineComponent({
 				label="Synchronization Status"
 				class-name="sync-cell"
 			>
-				<template #default>
+				<template #default="{ row }">
 					<div class="sync-wrapper">
 						<div class="sync-icon"></div>
-						Synced <span class="sync-date"> Sep 12, 2021, 10:00 AM </span>
+						Synced <span class="sync-date">{{ $filters.formatDateTime(row.lastSyncDate) }}</span>
 					</div>
 				</template>
 			</el-table-column>
