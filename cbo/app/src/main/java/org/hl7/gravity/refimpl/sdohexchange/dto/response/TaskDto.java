@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/dto/response/
-// Added id and serverId fields
+// Added serverId field
 @Getter
 @Setter
 @RequiredArgsConstructor
