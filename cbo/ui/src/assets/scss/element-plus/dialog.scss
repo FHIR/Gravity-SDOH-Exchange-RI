@@ -19,10 +19,13 @@
 	}
 }
 
-.el-dialog__body {
-	padding: 25px 25px 10px;
+.el-dialog__body :not(.task-resource-dialog) {
 	max-height: 60vh;
+}
+
+.el-dialog__body {
 	overflow: auto;
+	padding: 25px 25px 10px;
 }
 
 .el-dialog__footer {

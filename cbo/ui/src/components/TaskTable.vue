@@ -4,6 +4,7 @@ import { TaskWithState } from "@/types";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate } from "@/utils";
 import TableWrapper from "@/components/TableWrapper.vue";
+import { TasksModule } from "@/store/modules/tasks";
 
 
 type TaskDisplayFields = {
@@ -21,7 +22,8 @@ type TaskDisplayFields = {
 	payer: string,
 	comment: string,
 	outcome: string,
-	requestType: string
+	requestType: string,
+	lastSyncDate: string
 }
 
 
@@ -40,7 +42,8 @@ const displayTask = ({ task, isNew }: TaskWithState): TaskDisplayFields => ({
 	performingCBO: "",
 	payer: "",
 	comment: task.comments[0]?.text || "",
-	outcome: task.outcome || ""
+	outcome: task.outcome || "",
+	lastSyncDate: TasksModule.lastSyncDate
 });
 
 
@@ -64,6 +67,10 @@ export default defineComponent({
 		tasks: {
 			type: Array as PropType<TaskWithState[]>,
 			required: true
+		},
+		loading: {
+			type: Boolean,
+			default: false
 		}
 	},
 	emits: ["task-name-click", "view-resources"],
@@ -92,6 +99,7 @@ export default defineComponent({
 <template>
 	<TableWrapper>
 		<el-table
+			v-loading="loading"
 			:data="tableData"
 			:row-class-name="({ row }) => row.isNew ? 'new-task' : ''"
 		>
@@ -198,10 +206,10 @@ export default defineComponent({
 				label="Synchronization Status"
 				class-name="sync-cell"
 			>
-				<template #default>
+				<template #default="{ row }">
 					<div class="sync-wrapper">
 						<div class="sync-icon"></div>
-						Synced <span class="sync-date"> Sep 12, 2021, 10:00 AM </span>
+						Synced <span class="sync-date">{{ $filters.formatDateTime(row.lastSyncDate) }}</span>
 					</div>
 				</template>
 			</el-table-column>
@@ -211,6 +219,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+
+::v-deep(.el-button--text) {
+	font-weight: $global-font-weight-normal;
+	text-decoration: underline;
+	font-size: $global-medium-font-size;
+	color: $global-primary-color;
+}
 
 .new-task {
 	font-weight: $global-font-weight-medium;

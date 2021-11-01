@@ -32,6 +32,12 @@ public class TaskController {
     return taskService.getTasks();
   }
 
+  @GetMapping("/{serverId}/{taskId}")
+  @ApiOperation(value = "Retrieve Task resource by id from specific server.")
+  public TaskDto read(@PathVariable Integer serverId, @PathVariable String taskId) {
+    return taskService.getTask(serverId, taskId);
+  }
+
   @PutMapping("/{id}")
   @ApiOperation(value = "Update Task resource.")
   public ResponseEntity<Void> update(@PathVariable("id") String id,

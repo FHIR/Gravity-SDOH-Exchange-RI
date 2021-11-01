@@ -4,12 +4,14 @@ import store from "@/store";
 import { Server, NewServerPayload, UpdateServerPayload } from "@/types";
 
 export interface IServers {
-	servers: Server[]
+	servers: Server[],
+	isLoading: boolean
 }
 
 @Module({ dynamic: true, store, name: "servers" })
 class Servers extends VuexModule implements IServers {
 	servers: Server[] = [];
+	isLoading: boolean = false;
 
 	@Mutation
 	setServers(payload: Server[]) {
@@ -26,11 +28,21 @@ class Servers extends VuexModule implements IServers {
 		this.servers = this.servers.filter(s => s.id !== payload);
 	}
 
+	@Mutation
+	setIsLoading(payload: boolean) {
+		this.isLoading = payload;
+	}
+
 	@Action
 	async getServers(): Promise<void> {
-		const data = await getServers();
+		this.setIsLoading(true);
+		try {
+			const data = await getServers();
 
-		this.setServers(data);
+			this.setServers(data);
+		} finally {
+			this.setIsLoading(false);
+		}
 	}
 
 	@Action

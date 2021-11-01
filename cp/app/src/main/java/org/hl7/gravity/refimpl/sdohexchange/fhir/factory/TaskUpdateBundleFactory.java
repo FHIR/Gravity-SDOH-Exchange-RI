@@ -118,8 +118,7 @@ public class TaskUpdateBundleFactory {
           cboTask.setOwner(cboTaskOwner);
         }
         updateBundle.addEntry(FhirUtil.createPostEntry(cboTask));
-      }
-      if (status == TaskStatus.REJECTED || status == TaskStatus.CANCELLED) {
+      } else if (status == TaskStatus.REJECTED || status == TaskStatus.CANCELLED) {
         Assert.notNull(statusReason, "Status reason cannot be null.");
         task.setStatusReason(new CodeableConcept().setText(statusReason));
         if (status == TaskStatus.CANCELLED) {
@@ -127,15 +126,8 @@ public class TaskUpdateBundleFactory {
         }
         serviceRequest.setStatus(ServiceRequestStatus.REVOKED);
         updateBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
-      } else if (status == Task.TaskStatus.COMPLETED) {
-        Assert.notNull(outcome, "Outcome cannot be null.");
-        Assert.isTrue(procedureCodes.size() > 0, "Procedures can't be empty.");
-        task.getOutput()
-            .add(createTaskOutput(new CodeableConcept().setText(outcome)));
-        createProceduresOutput(updateBundle);
-
-        serviceRequest.setStatus(ServiceRequestStatus.COMPLETED);
-        updateBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
+      } else {
+        throw new TaskUpdateException("Status " + status.getDisplay() + " cannot be set explicitly.");
       }
     }
     if (StringUtils.hasText(comment)) {

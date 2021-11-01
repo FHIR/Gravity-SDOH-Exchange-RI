@@ -6,7 +6,6 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.annotation.TaskStatusValueMatch;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -28,13 +27,13 @@ import java.util.List;
             + ".")})
 public class UpdateTaskRequestDto {
 
+  @NotNull
+  private Integer serverId;
   private TaskStatus status;
   private String comment;
   private String statusReason;
   private String outcome;
   private List<String> procedureCodes;
-  @NotNull
-  private Integer serverId;
 
   public Task.TaskStatus getTaskStatus() {
     return status == null ? null : status.getTaskStatus();

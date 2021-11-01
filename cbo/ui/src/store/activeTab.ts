@@ -8,7 +8,7 @@ export interface ITab {
 
 @Module({ dynamic: true, store, name: "activeTab" })
 class ActiveTab extends VuexModule implements ITab {
-	activeTab: string = ACTIVE_REQUESTS_TAB
+	activeTab: string = ACTIVE_REQUESTS_TAB;
 
 	@Mutation
 	setActiveTab(tabName: string) {
