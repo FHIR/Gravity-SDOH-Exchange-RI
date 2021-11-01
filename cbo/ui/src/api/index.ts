@@ -9,11 +9,7 @@ export const getTasks = () => axios.get<Task[]>("/tasks").then(dataOnly);
 
 export const getTask = (taskId: string, serverId: number) => axios.get<Task>(`/tasks/${serverId}/${taskId}`).then(dataOnly);
 
-export const updateTask = async ({ id, ...data }: UpdateTaskPayload): Promise<Task> => {
-	const res = await axios.put(`/tasks/${id}`, data);
-
-	return res.data;
-};
+export const updateTask = async ({ id, ...rest }: UpdateTaskPayload) => axios.put<void>(`/tasks/${id}`, rest);
 
 export const getProceduresForCategory = (categoryCode: string) => axios.get<Procedure[]>(`/mappings/categories/${categoryCode}/procedure/codings`).then(dataOnly);
 
