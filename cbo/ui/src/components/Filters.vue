@@ -3,13 +3,23 @@ import { defineComponent, ref } from "vue";
 
 export default defineComponent({
 	name: "Filters",
-	setup() {
+	emits: ["search", "filter"],
+	setup(_, { emit }) {
 		const search = ref<string>("");
 		const filter = ref<string>("");
 
+		const handleSearch = () => {
+			emit("search", search.value);
+		};
+		const handleFilter = () => {
+			emit("filter", filter.value);
+		};
+
 		return {
 			search,
-			filter
+			filter,
+			handleSearch,
+			handleFilter
 		};
 	}
 });
@@ -23,6 +33,7 @@ export default defineComponent({
 				v-model="search"
 				placeholder="Search..."
 				size="mini"
+				@input="handleSearch"
 			/>
 		</div>
 
@@ -32,6 +43,7 @@ export default defineComponent({
 				v-model="filter"
 				placeholder="Filter..."
 				size="mini"
+				@input="handleFilter"
 			/>
 		</div>
 		<div class="actions">
