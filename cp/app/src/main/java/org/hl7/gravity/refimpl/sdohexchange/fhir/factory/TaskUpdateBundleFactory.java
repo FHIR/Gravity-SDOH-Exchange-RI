@@ -116,7 +116,6 @@ public class TaskUpdateBundleFactory {
         cboTask.setRequester(cboTaskRequester);
         if (cboTaskOwner != null) {
           cboTask.setOwner(cboTaskOwner);
-          task.setOwner(cboTaskOwner);
         }
         updateBundle.addEntry(FhirUtil.createPostEntry(cboTask));
       } else if (status == TaskStatus.REJECTED || status == TaskStatus.CANCELLED) {
