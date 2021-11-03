@@ -24,14 +24,6 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
         .map(taskInfoHolder -> {
           TaskDto taskDto = taskToDtoConverter.convert(taskInfoHolder.getTask());
           Assert.notNull(taskDto, "Task DTO cant be null.");
-          taskInfoHolder.getTask()
-              .getBasedOn()
-              .stream()
-              .findFirst()
-              .ifPresent(reference -> {
-                taskDto.setBaseTaskId(reference.getReference());
-                taskDto.setBaseTaskName(reference.getDisplay());
-              });
           taskDto.setServiceRequest(serviceRequestToDtoConverter.convert(taskInfoHolder.getServiceRequest()));
           return taskDto;
         })
