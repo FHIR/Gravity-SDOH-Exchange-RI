@@ -1,8 +1,5 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
-import static org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil.toLocalDateTime;
-
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
@@ -11,6 +8,11 @@ import org.hl7.fhir.r4.model.Type;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProcedureDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.springframework.core.convert.converter.Converter;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil.toLocalDateTime;
 
 public class TaskToDtoConverter implements Converter<Task, TaskDto> {
 
@@ -31,6 +33,10 @@ public class TaskToDtoConverter implements Converter<Task, TaskDto> {
         .getDisplay());
     taskDto.setRequester(typeToDtoConverter.convert(task.getRequester()));
     taskDto.setPatient(typeToDtoConverter.convert(task.getFor()));
+    if (!task.getBasedOn().isEmpty()) {
+      taskDto.setBaseTask(typeToDtoConverter.convert(task.getBasedOn()
+          .get(0)));
+    }
     //TODO: Change to consent id in future
     taskDto.setConsent("yes");
     taskDto.setComments(task.getNote()

@@ -45,7 +45,6 @@ public class TaskRepository extends FhirRepository<Task> {
             .code(Task.TaskIntent.FILLERORDER.toCode()))
         // include ServiceRequest
         .include(Task.INCLUDE_FOCUS)
-        .include(Task.INCLUDE_BASED_ON)
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
         .returnBundle(Bundle.class)

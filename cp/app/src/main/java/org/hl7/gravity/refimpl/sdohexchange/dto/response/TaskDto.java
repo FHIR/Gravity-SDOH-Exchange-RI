@@ -23,7 +23,7 @@ public class TaskDto {
   private ServiceRequestDto serviceRequest;
   private TypeDto requester;
   private TypeDto patient;
-  private TypeDto baseTaskInfo;
+  private TypeDto baseTask;
   private String consent;
   private String outcome;
   private List<CommentDto> comments = new ArrayList<>();

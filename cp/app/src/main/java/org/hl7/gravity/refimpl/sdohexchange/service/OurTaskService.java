@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,17 @@ public class OurTaskService {
 
   public List<TaskDto> readAll() {
     Bundle tasksBundle = taskRepository.findAllOurTasks();
+    FhirUtil.getFromBundle(tasksBundle, Task.class)
+        .forEach(task -> {
+          Task baseTask = taskRepository.find(task.getBasedOn()
+                  .get(0)
+                  .getReferenceElement()
+                  .getIdPart())
+              .get();
+          task.getBasedOn()
+              .get(0)
+              .setDisplay(baseTask.getDescription());
+        });
     return new TaskBundleToDtoConverter().convert(tasksBundle);
   }
 
