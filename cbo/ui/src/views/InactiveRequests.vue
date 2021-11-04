@@ -17,6 +17,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .inactive-requests {
 	height: 100%;
+	max-height: calc(100% - 110px);
 	padding: 0 45px 45px 45px;
 }
 </style>

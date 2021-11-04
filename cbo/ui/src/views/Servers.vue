@@ -124,6 +124,7 @@ export default defineComponent({
 		flex-direction: column;
 		flex-grow: 1;
 		padding: 0 45px 45px;
+		max-height: calc(100% - 110px);
 	}
 
 	.filters {
