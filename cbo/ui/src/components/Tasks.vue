@@ -136,14 +136,29 @@ export default defineComponent({
 			taskIdToViewResources.value = taskId;
 		};
 
+		const search = ref<string>("");
+		const handleSearch = (payload: string) => {
+			search.value = payload;
+		};
+		const searchedTasks = computed<TaskWithState[]>(() => {
+			const normalizedSearch = search.value.toLowerCase();
+
+			return normalizedSearch ? tasks.value.filter(({ task }) =>
+				task.name.toLowerCase().includes(normalizedSearch) ||
+				task.requester.display.toLowerCase().includes(normalizedSearch) ||
+				task.patient.display.toLowerCase().includes(normalizedSearch)
+			) : tasks.value;
+		});
+
 		return {
-			tasks,
+			searchedTasks,
 			editTask,
 			closeDialog,
 			taskInEdit,
 			viewTaskResources,
 			taskIdToViewResources,
-			showLoader
+			showLoader,
+			handleSearch
 		};
 	}
 });
@@ -151,7 +166,7 @@ export default defineComponent({
 
 <template>
 	<div class="tasks">
-		<Filters />
+		<Filters @search="handleSearch" />
 		<TableCard>
 			<TaskEditDialog
 				:task="taskInEdit"
@@ -164,7 +179,7 @@ export default defineComponent({
 			/>
 
 			<TaskTable
-				:tasks="tasks"
+				:tasks="searchedTasks"
 				:loading="showLoader"
 				@task-name-click="editTask"
 				@view-resources="viewTaskResources"
