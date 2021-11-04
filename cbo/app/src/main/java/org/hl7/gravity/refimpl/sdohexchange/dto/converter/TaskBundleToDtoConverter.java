@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 // Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/dto/converter/
+// Added serverId field, constructor for it and setting this field to TaskDto
 public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>> {
 
   private final TaskInfoBundleExtractor taskInfoBundleParser = new TaskInfoBundleExtractor();

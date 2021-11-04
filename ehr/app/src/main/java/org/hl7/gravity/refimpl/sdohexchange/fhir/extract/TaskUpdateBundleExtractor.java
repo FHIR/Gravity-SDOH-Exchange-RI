@@ -1,10 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -18,6 +14,11 @@ import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskUpdateException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskUpdateBundleExtractor.TaskUpdateInfoHolder;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Transaction bundle parser of resources required for Task update.
@@ -55,13 +56,11 @@ public class TaskUpdateBundleExtractor extends BundleExtractor<TaskUpdateInfoHol
       this.serviceRequest = resourceList(resources, ServiceRequest.class).stream()
           .findFirst()
           .orElseThrow(() -> new TaskUpdateException("ServiceRequest not found"));
-      this.ownerOrganization = resourceList(resources, Organization.class)
-          .stream()
+      this.ownerOrganization = resourceList(resources, Organization.class).stream()
           .findFirst()
           .orElseThrow(() -> new TaskUpdateException("Owner Organization not found."));
       EndpointConnectionType connectionType = EndpointConnectionType.HL7FHIRREST;
-      this.endpoint = resourceList(resources, Endpoint.class)
-          .stream()
+      this.endpoint = resourceList(resources, Endpoint.class).stream()
           .findFirst()
           .filter(endpoint -> endpoint.getConnectionType()
               .getSystem()

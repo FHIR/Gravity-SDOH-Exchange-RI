@@ -14,13 +14,16 @@ import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.AuthClientException;
 import org.hl7.gravity.refimpl.sdohexchange.exception.ServerNotFoundException;
+import org.hl7.gravity.refimpl.sdohexchange.exception.TaskReadException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.model.Server;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -53,7 +57,7 @@ public class TaskService {
     this.authorizationClient = new AuthorizationClient(new RestTemplate());
   }
 
-  public List<TaskDto> getTasks() throws AuthClientException {
+  public List<TaskDto> readAll() throws AuthClientException {
     List<Server> serverList = serverRepository.findAll();
     List<TaskDto> taskDtoList = new ArrayList<>();
     for (Server server : serverList) {
@@ -69,7 +73,7 @@ public class TaskService {
     return taskDtoList;
   }
 
-  public TaskDto getTask(Integer serverId, String taskId) {
+  public TaskDto read(Integer serverId, String taskId) {
     Server server = serverRepository.findById(serverId)
         .orElseThrow(() -> new ServerNotFoundException(String.format("No server was found by id '%s'", serverId)));
     IGenericClient fhirClient = fhirContext.newRestfulGenericClient(server.getFhirServerUrl());
@@ -80,10 +84,15 @@ public class TaskService {
     //              .getAccessToken()));
     TaskRepository taskRepository = new TaskRepository(fhirClient, applicationUrl);
     Bundle taskBundle = taskRepository.find(taskId, Lists.newArrayList(Task.INCLUDE_FOCUS));
-    return new TaskBundleToDtoConverter(serverId).convert(taskBundle)
-        .stream()
-        .findFirst()
-        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), taskId)));
+    Task task = FhirUtil.getFirstFromBundle(taskBundle, Task.class);
+    if (Objects.isNull(task)) {
+      throw new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), taskId));
+    }
+    if (!task.getIntent()
+        .equals(Task.TaskIntent.FILLERORDER)) {
+      throw new TaskReadException("The intent of Task/" + taskId + " is not filler-order.");
+    }
+    return new TaskToDtoConverter().convert(task);
   }
 
   public void update(String id, UpdateTaskRequestDto update) throws AuthClientException {
