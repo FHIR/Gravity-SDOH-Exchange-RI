@@ -32,7 +32,6 @@ public class TaskToDtoConverter implements Converter<Task, TaskDto> {
         .getDisplay());
     taskDto.setRequester(typeToDtoConverter.convert(task.getRequester()));
     taskDto.setPatient(typeToDtoConverter.convert(task.getFor()));
-    taskDto.setPerformer(typeToDtoConverter.convert(task.getOwner()));
     //TODO: Change to consent id in future
     taskDto.setConsent("yes");
     taskDto.setComments(task.getNote()
