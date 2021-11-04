@@ -50,10 +50,8 @@ public class TaskService {
   public List<TaskDto> readAll() {
     Bundle tasksBundle = taskRepository.findAllTasks();
     FhirUtil.getFromBundle(tasksBundle, Task.class)
-        .forEach(task -> FhirUtil.getFromBundle(taskRepository.findOurTask(task), Task.class)
-            .stream()
-            .findFirst()
-            .ifPresent(task::setOwnerTarget));
+        .forEach(
+            task -> task.setOwnerTarget(FhirUtil.getFirstFromBundle(taskRepository.findOurTask(task), Task.class)));
     return new TaskBundleToDtoConverter().convert(tasksBundle);
   }
 
