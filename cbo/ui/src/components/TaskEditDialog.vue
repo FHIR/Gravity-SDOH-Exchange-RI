@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed, watch, reactive, toRefs } from "vue";
-import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure, Comment } from "@/types";
+import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure } from "@/types";
 import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate, showDateTime } from "@/utils";
@@ -42,7 +42,7 @@ const initialTaskStuff: TaskStuff = {
 
 const Flow: { [status in TaskStatus]?: TaskStatus[] } = {
 	"Received":    ["Accepted", "Rejected"],
-	"Accepted":    ["In Progress", "On Hold", "Completed", "Cancelled"],
+	"Accepted":    ["In Progress", "Cancelled"],
 	"In Progress": ["On Hold", "Completed", "Cancelled"],
 	"On Hold":     ["In Progress", "Cancelled"]
 };
@@ -73,7 +73,7 @@ export default defineComponent({
 			default: null
 		}
 	},
-	emits: ["close", "task-updated"],
+	emits: ["close"],
 	setup(props, ctx) {
 		const opened = computed(() => props.task !== null);
 
@@ -146,31 +146,19 @@ export default defineComponent({
 
 		const save = async () => {
 			const payload: UpdateTaskPayload = {
+				id: props.task!.id,
 				status: status.value as UpdatedStatus,
-				// comment: comment.value || undefined,
+				comment: comment.value || undefined,
+				serverId: props.task!.serverId,
 				outcome: visibleForCompletedStatus.value ? outcome.value : undefined,
 				statusReason: showStatusReasonInput.value ? statusReason.value : undefined,
 				procedureCodes: procedures.value.length > 0 ? procedures.value : undefined
 			};
 			saveInProgress.value = true;
 			try {
-				// TODO: Rework when BE will be ready
-				// await updateTask(taskFields.value.id, payload);
-				// const updatedTask = await getTask(taskFields.value.id);
-				const taskToUpdate = props.task;
-				const commentToAdd: Comment = {
-					author: {
-						resourceType: "dahjkhdk",
-						id: "dasdasda",
-						display: "asdasda"
-					},
-					time: "2021-10-05T19:11:08",
-					text: comment.value
-				};
-
-				const updatedTask = { ...taskToUpdate, ...payload, requestType: "inactive", comments: [...taskToUpdate!.comments, commentToAdd] };
-				ctx.emit("task-updated", updatedTask);
-				// init(updatedTask);
+				const updatedTask = await TasksModule.updateTask(payload);
+				ctx.emit("close");
+				init(updatedTask);
 			} finally {
 				saveInProgress.value = false;
 				status.value === "Cancelled" ? showDefaultNotification(`Task "${props.task?.name}" has been cancelled!`) :

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed, watch, reactive, toRefs } from "vue";
-import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure, Cbo } from "@/types";
+import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure } from "@/types";
 import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { updateTask, getTask, getProceduresForCategory, getCBOList } from "@/api";
