@@ -52,14 +52,14 @@ class Tasks extends VuexModule implements ITasks {
 
 	@Action
 	async getTasks(): Promise<void> {
-		this.setIsLoading(true);
+		// this.setIsLoading(true);
 		try {
 			const data = await getTasks();
 
 			this.setTasks(data);
 			this.setLastSyncDate(new Date().toISOString());
 		} finally {
-			this.setIsLoading(false);
+			// this.setIsLoading(false);
 		}
 	}
 
