@@ -1,15 +1,16 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class TaskInfoBundleExtractor extends BundleExtractor<List<TaskInfoHolder>> {
 
@@ -23,12 +24,11 @@ public class TaskInfoBundleExtractor extends BundleExtractor<List<TaskInfoHolder
     return FhirUtil.getFromBundle(bundle, Task.class)
         .stream()
         .map(task -> {
-              ServiceRequest serviceRequest = serviceRequestMap.get(task.getFocus()
-                  .getReferenceElement()
-                  .getIdPart());
-              return new TaskInfoHolder(task, serviceRequest);
-            }
-        )
+          ServiceRequest serviceRequest = serviceRequestMap.get(task.getFocus()
+              .getReferenceElement()
+              .getIdPart());
+          return new TaskInfoHolder(task, serviceRequest);
+        })
         .collect(Collectors.toList());
   }
 
