@@ -71,23 +71,6 @@ public class TaskRepository extends FhirRepository<Task> {
         .execute();
   }
 
-  /**
-   * Find our task (intent=filler-order) for a corresponding CP task.
-   *
-   * @param taskId id of CP task (intent=order)
-   * @return a bundle with a filler-order Task
-   */
-  public Bundle findOurTaskById(String taskId) {
-    return getClient().search()
-        .forResource(getResourceType())
-        .where(Task.BASED_ON.hasId(taskId))
-        //Intent=order are CP tasks, Filler-order are CBO (Our) tasks.
-        .and(Task.INTENT.exactly()
-            .code(Task.TaskIntent.FILLERORDER.toCode()))
-        .returnBundle(Bundle.class)
-        .execute();
-  }
-
   @Override
   public Class<Task> getResourceType() {
     return Task.class;

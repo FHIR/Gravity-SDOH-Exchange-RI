@@ -9,6 +9,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProcedureDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.springframework.core.convert.converter.Converter;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil.toLocalDateTime;
@@ -32,6 +33,10 @@ public class TaskToDtoConverter implements Converter<Task, TaskDto> {
         .getDisplay());
     taskDto.setRequester(typeToDtoConverter.convert(task.getRequester()));
     taskDto.setPatient(typeToDtoConverter.convert(task.getFor()));
+    if (!Objects.isNull(task.getOwnerTarget())) {
+      Task ourTask = (Task) task.getOwnerTarget();
+      taskDto.setPerformer(typeToDtoConverter.convert(ourTask.getOwner()));
+    }
     //TODO: Change to consent id in future
     taskDto.setConsent("yes");
     taskDto.setComments(task.getNote()

@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TypeToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.TaskStatus;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
@@ -33,7 +32,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -51,16 +49,12 @@ public class TaskService {
 
   public List<TaskDto> readAll() {
     Bundle tasksBundle = taskRepository.findAllTasks();
-    TypeToDtoConverter typeToDtoConverter = new TypeToDtoConverter();
-    List<TaskDto> taskDtoList = new TaskBundleToDtoConverter().convert(tasksBundle);
-    Objects.requireNonNull(taskDtoList)
-        .forEach(task -> {
-          FhirUtil.getFromBundle(taskRepository.findOurTaskById(task.getId()), Task.class)
-              .stream()
-              .findFirst()
-              .ifPresent(ourTask -> task.setPerformer(typeToDtoConverter.convert(ourTask.getOwner())));
-        });
-    return taskDtoList;
+    FhirUtil.getFromBundle(tasksBundle, Task.class)
+        .forEach(task -> FhirUtil.getFromBundle(taskRepository.findOurTask(task), Task.class)
+            .stream()
+            .findFirst()
+            .ifPresent(task::setOwnerTarget));
+    return new TaskBundleToDtoConverter().convert(tasksBundle);
   }
 
   public TaskDto read(String id) {
