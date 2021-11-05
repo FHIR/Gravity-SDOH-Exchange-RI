@@ -204,7 +204,7 @@ export default defineComponent({
 	}
 
 	.sync {
-		margin-left: 130px;
+		margin-left: 90px;
 	}
 
 	.sync-margin {

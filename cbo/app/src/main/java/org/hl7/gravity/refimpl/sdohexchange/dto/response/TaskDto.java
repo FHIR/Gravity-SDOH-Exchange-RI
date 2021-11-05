@@ -9,13 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/dto/response/
+// Added serverId field
 @Getter
 @Setter
 @RequiredArgsConstructor
 public class TaskDto {
 
-  private Integer serverId;
   private String id;
+  private Integer serverId;
   private String name;
   private LocalDateTime createdAt;
   private LocalDateTime lastModified;
