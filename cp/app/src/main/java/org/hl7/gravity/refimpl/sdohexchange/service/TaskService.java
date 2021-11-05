@@ -12,7 +12,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
@@ -53,23 +52,6 @@ public class TaskService {
 
   public List<TaskDto> readAll() {
     Bundle tasksBundle = taskRepository.findAllTasks();
-    FhirUtil.getFromBundle(tasksBundle, Task.class)
-        .stream()
-        .filter(Task::hasBasedOn)
-        .forEach(task -> ((Task) task.getBasedOn()
-            .get(0)
-            .getResource()).setOwnerTarget(task));
-    // Return Tasks where search.mode != include and all ServiceRequests
-    tasksBundle.setEntry(tasksBundle.getEntry()
-        .stream()
-        .filter(entry -> entry.getResource()
-            .getResourceType()
-            .equals(ResourceType.ServiceRequest) || (entry.getResource()
-            .getResourceType()
-            .equals(ResourceType.Task) && !entry.getSearch()
-            .getMode()
-            .equals(Bundle.SearchEntryMode.INCLUDE)))
-        .collect(Collectors.toList()));
     return new TaskBundleToDtoConverter().convert(tasksBundle);
   }
 

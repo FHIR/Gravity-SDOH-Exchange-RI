@@ -2,8 +2,11 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.Assert;
 
@@ -19,6 +22,23 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
 
   @Override
   public List<TaskDto> convert(Bundle bundle) {
+    FhirUtil.getFromBundle(bundle, Task.class)
+        .stream()
+        .filter(Task::hasBasedOn)
+        .forEach(task -> ((Task) task.getBasedOn()
+            .get(0)
+            .getResource()).setOwnerTarget(task));
+    // Return Tasks where search.mode != include and all ServiceRequests
+    bundle.setEntry(bundle.getEntry()
+        .stream()
+        .filter(entry -> entry.getResource()
+            .getResourceType()
+            .equals(ResourceType.ServiceRequest) || (entry.getResource()
+            .getResourceType()
+            .equals(ResourceType.Task) && !entry.getSearch()
+            .getMode()
+            .equals(Bundle.SearchEntryMode.INCLUDE)))
+        .collect(Collectors.toList()));
     return taskInfoBundleParser.extract(bundle)
         .stream()
         .map(taskInfoHolder -> {
