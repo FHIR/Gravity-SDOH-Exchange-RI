@@ -19,15 +19,11 @@ class Tasks extends VuexModule implements ITasks {
 	isLoading: boolean = false;
 
 	get activeRequests() {
-		const activeTasks = this.tasks.filter((task: Task) => ACTIVE_STATUSES.includes(task.status));
-
-		return activeTasks.map((task: Task) => ({ task, isNew: false }));
+		return this.tasks.filter((task: Task) => ACTIVE_STATUSES.includes(task.status));
 	}
 
 	get inactiveRequests() {
-		const inactiveTask = this.tasks.filter((task: Task) => INACTIVE_STATUSES.includes(task.status));
-
-		return inactiveTask.map((task: Task) => ({ task, isNew: false }));
+		return this.tasks.filter((task: Task) => INACTIVE_STATUSES.includes(task.status));
 	}
 
 	@Mutation
@@ -51,15 +47,18 @@ class Tasks extends VuexModule implements ITasks {
 	}
 
 	@Action
-	async getTasks(): Promise<void> {
-		// this.setIsLoading(true);
+	async getTasks(showLoader: boolean = false): Promise<void> {
+		if (showLoader) {
+			this.setIsLoading(true);
+		}
+
 		try {
 			const data = await getTasks();
 
 			this.setTasks(data);
 			this.setLastSyncDate(new Date().toISOString());
 		} finally {
-			// this.setIsLoading(false);
+			this.setIsLoading(false);
 		}
 	}
 

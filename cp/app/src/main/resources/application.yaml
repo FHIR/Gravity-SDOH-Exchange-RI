@@ -1,6 +1,6 @@
 cp:
-  fhir-server-uri: https://api.logicahealth.org/GravitySDOHCBRO/data
-  open-fhir-server-uri: https://api.logicahealth.org/GravitySDOHCBRO/open
+  fhir-server-uri:
+  open-fhir-server-uri:
 
 spring:
   security:
@@ -8,8 +8,8 @@ spring:
       client:
         registration:
           cp-client:
-            client-id: ebfacee0-8e06-4fd9-b8d3-7e0c81eb1ef4
-            client-secret: ANOh5rd7b4VUL3qJb7GN-dlNITx9BauQ9m4HnA93Gu22FMoByoXvBpQSb2gk9Yw-Nq66b6on-9JiQHsoW178HK8
+            client-id:
+            client-secret:
             client-name: Gravity-SDOH-CP-App
             provider: cp-provider
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
