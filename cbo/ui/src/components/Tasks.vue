@@ -59,7 +59,7 @@ export default defineComponent({
 				addStateToTasks();
 
 				watch(() => TasksModule.tasks, (newTasks, prevTasks) => {
-					if (newTasks && prevTasks) {
+					if (newTasks.length && prevTasks?.length) {
 						showUpdates(newTasks, prevTasks);
 						updateTasks(newTasks);
 					}
