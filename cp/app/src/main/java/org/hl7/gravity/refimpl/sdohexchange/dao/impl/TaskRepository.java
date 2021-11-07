@@ -30,6 +30,7 @@ public class TaskRepository extends FhirRepository<Task> {
         // include ServiceRequest
         .include(Task.INCLUDE_FOCUS)
         .revInclude(Task.INCLUDE_BASED_ON)
+        .include(Task.INCLUDE_OWNER)
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
         .returnBundle(Bundle.class)
