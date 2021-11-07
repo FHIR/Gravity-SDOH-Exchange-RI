@@ -2,6 +2,7 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
@@ -24,10 +25,12 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
   public List<TaskDto> convert(Bundle bundle) {
     FhirUtil.getFromBundle(bundle, Task.class)
         .stream()
+        // Get filler-order tasks
         .filter(Task::hasBasedOn)
         .forEach(task -> ((Task) task.getBasedOn()
             .get(0)
-            .getResource()).setOwnerTarget(task));
+            .getResource()).setOwnerTarget((Resource) task.getOwner()
+            .getResource()));
     // Return Tasks where search.mode != include and all ServiceRequests
     bundle.setEntry(bundle.getEntry()
         .stream()
