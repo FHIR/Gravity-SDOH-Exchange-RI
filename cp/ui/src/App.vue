@@ -4,11 +4,16 @@ import { defineComponent, ref, computed } from "vue";
 import { User } from "@/types";
 import { getUserInfo } from "@/api";
 import AppHeader from "@/components/AppHeader.vue";
-import Tasks from "@/components/Tasks.vue";
+import ServiceRequests from "@/components/ServiceRequests/index.vue";
+import OurTasks from "@/components/OurTasks/index.vue";
+import useServiceRequests from "./state/useServiceRequests";
+import useOurTasks from "./state/useOurTasks";
 
+
+export type TabName = "requests" | "our-tasks";
 
 export default defineComponent({
-	components: { AppHeader, Tasks },
+	components: { AppHeader, ServiceRequests, OurTasks },
 	setup() {
 		const user = ref<User | undefined>(undefined);
 		const userName = computed<string | undefined>(() => user.value?.name || undefined);
@@ -17,8 +22,14 @@ export default defineComponent({
 			user.value = resp;
 		});
 
+		const activeTab = ref<TabName>("requests");
+
+		useServiceRequests().startPolling();
+		useOurTasks().startPolling();
+
 		return {
-			userName
+			userName,
+			activeTab
 		};
 	}
 });
@@ -28,11 +39,14 @@ export default defineComponent({
 	<div class="app-container">
 		<AppHeader
 			:user-name="userName"
+			:active-tab="activeTab"
+			@update:active-tab="activeTab = $event"
 		/>
 
 		<div class="body">
 			<div class="main">
-				<Tasks />
+				<ServiceRequests v-if="activeTab === 'requests'" />
+				<OurTasks v-if="activeTab === 'our-tasks'" />
 			</div>
 		</div>
 	</div>
