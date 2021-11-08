@@ -1,12 +1,38 @@
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { TabName } from "@/App.vue";
+import useOurTasks from "@/state/useOurTasks";
+import useServiceRequests from "@/state/useServiceRequests";
+import { computed, defineComponent, PropType } from "vue";
 
 export default defineComponent({
 	props: {
 		userName: {
 			type: String as PropType<string | undefined>,
 			default: undefined
+		},
+		activeTab: {
+			type: String as PropType<TabName>,
+			required: true
 		}
+	},
+	emits: ["update:active-tab"],
+	setup(props, { emit }) {
+		const updateName = (tabName: TabName) => {
+			if (props.activeTab !== tabName) {
+				emit("update:active-tab", tabName);
+			}
+		};
+		const { serviceRequests } = useServiceRequests();
+		const { ourTasks } = useOurTasks();
+
+		const anyNewServiceRequests = computed(() => serviceRequests.value.some(({ isNew }) => isNew));
+		const anyNewOurTasks = computed(() => ourTasks.value.some(({ isNew }) => isNew));
+
+		return {
+			updateName,
+			anyNewServiceRequests,
+			anyNewOurTasks
+		};
 	}
 });
 </script>
@@ -26,19 +52,31 @@ export default defineComponent({
 
 		<div class="nav-tabs">
 			<el-tabs
-				active-name="sr"
+				:model-value="activeTab"
+				@update:model-value="updateName"
 			>
 				<el-tab-pane
-					name="sr"
+					name="requests"
 				>
 					<template #label>
 						<div class="label-wrap">
 							Service Requests
+							<div v-if="anyNewServiceRequests" class="marker"></div>
 						</div>
 					</template>
 				</el-tab-pane>
 				<el-tab-pane
-					name="ro"
+					name="our-tasks"
+				>
+					<template #label>
+						<div class="label-wrap">
+							Our Tasks
+							<div v-if="anyNewOurTasks" class="marker"></div>
+						</div>
+					</template>
+				</el-tab-pane>
+				<el-tab-pane
+					name="requesting-organizations"
 					:disabled="true"
 				>
 					<template #label>
@@ -48,7 +86,7 @@ export default defineComponent({
 					</template>
 				</el-tab-pane>
 				<el-tab-pane
-					name="cbo"
+					name="cbos"
 					:disabled="true"
 				>
 					<template #label>
@@ -111,11 +149,13 @@ export default defineComponent({
 	align-items: center;
 	background-color: $global-background;
 	padding-right: 45px;
+	overflow-x: auto;
 
 	.cp {
 		border-right: $global-border;
 		padding: 10px 15px 0 45px;
 		height: 100%;
+		flex-shrink: 0;
 
 		.gravity-logo {
 			width: 56px;
@@ -182,6 +222,17 @@ export default defineComponent({
 					font-size: $global-font-size;
 					font-weight: 400;
 					color: $global-text-color;
+					position: relative;
+
+					.marker {
+						width: 10px;
+						height: 10px;
+						background-color: $red;
+						border-radius: 50%;
+						position: absolute;
+						top: 5px;
+						right: 35px;
+					}
 				}
 
 				&.is-active .label-wrap {
@@ -208,6 +259,7 @@ export default defineComponent({
 		background-position: center;
 		position: relative;
 		cursor: pointer;
+		flex-shrink: 0;
 
 		.mark {
 			width: 13px;
@@ -231,6 +283,7 @@ export default defineComponent({
 		margin-left: 55px;
 		display: flex;
 		align-items: center;
+		flex-shrink: 0;
 
 		.pic {
 			width: 30px;
