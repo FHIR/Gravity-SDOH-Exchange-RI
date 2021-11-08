@@ -5,7 +5,11 @@ export const getContext = async (): Promise<User> => ({ id: "vidsmok4uVBobra", n
 
 const dataOnly = <T>({ data }: { data: T }): T => data;
 
-export const getTasks = () => axios.get<Task[]>("/tasks").then(dataOnly);
+export const getTasks = async (): Promise<Task[]> => {
+	const res = await axios.get<Task[]>("/tasks");
+
+	return res.data;
+};
 
 export const getTask = (taskId: string, serverId: number) => axios.get<Task>(`/tasks/${serverId}/${taskId}`).then(dataOnly);
 
