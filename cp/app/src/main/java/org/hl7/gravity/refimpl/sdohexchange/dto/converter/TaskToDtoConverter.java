@@ -1,17 +1,14 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProcedureDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
-import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil.toLocalDateTime;
@@ -35,11 +32,6 @@ public class TaskToDtoConverter implements Converter<Task, TaskDto> {
         .getDisplay());
     taskDto.setRequester(typeToDtoConverter.convert(task.getRequester()));
     taskDto.setPatient(typeToDtoConverter.convert(task.getFor()));
-    if (!Objects.isNull(task.getOwnerTarget())) {
-      Organization org = (Organization) task.getOwnerTarget();
-      taskDto.setPerformer(typeToDtoConverter.convert(FhirUtil.toReference(Organization.class, org.getIdElement()
-          .getIdPart(), org.getName())));
-    }
     //TODO: Change to consent id in future
     taskDto.setConsent("yes");
     taskDto.setComments(task.getNote()
