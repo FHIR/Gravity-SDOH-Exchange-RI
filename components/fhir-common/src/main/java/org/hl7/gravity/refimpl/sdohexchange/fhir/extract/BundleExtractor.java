@@ -15,6 +15,10 @@ public abstract class BundleExtractor<T> {
 
   public abstract T extract(Bundle bundle);
 
+  /**
+   * Get resources from the map by class name and cast to target resource class
+   * Usually use it with {@link #extractToMap(Bundle)} method
+   */
   protected <R extends Resource> List<R> resourceList(
       Map<? extends Class<? extends Resource>, List<Resource>> resources,
       Class<R> resourceClass) {
@@ -25,6 +29,10 @@ public abstract class BundleExtractor<T> {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Get map resources from the bundle
+   * Usually use it with {@link #resourceList(Map, Class)} method
+   */
   protected Map<? extends Class<? extends Resource>, List<Resource>> extractToMap(Bundle bundle) {
     return bundle.getEntry()
         .stream()
