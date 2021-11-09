@@ -16,7 +16,7 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.CpTaskBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.TaskStatus;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
@@ -52,7 +52,7 @@ public class TaskService {
 
   public List<TaskDto> readAll() {
     Bundle tasksBundle = taskRepository.findAllTasks();
-    return new TaskBundleToDtoConverter().convert(tasksBundle);
+    return new CpTaskBundleToDtoConverter().convert(tasksBundle);
   }
 
   public TaskDto read(String id) {

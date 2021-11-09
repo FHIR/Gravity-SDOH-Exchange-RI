@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OurTaskBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskReadException;
@@ -26,7 +26,7 @@ public class OurTaskService {
 
   public List<TaskDto> readAll() {
     Bundle tasksBundle = taskRepository.findAllOurTasks();
-    return new TaskBundleToDtoConverter().convert(tasksBundle);
+    return new OurTaskBundleToDtoConverter().convert(tasksBundle);
   }
 
   public TaskDto read(String id) {
