@@ -24,11 +24,22 @@ public class CpTaskInfoBundleExtractor extends BundleExtractor<List<CpTaskInfoHo
     Map<String, Task> ourTaskMap = FhirUtil.getFromBundle(bundle, Task.class)
         .stream()
         .filter(t -> t.getIntent() == Task.TaskIntent.FILLERORDER)
-        .collect(Collectors.toMap(task -> task.getBasedOn()
-            .get(0)
-            .getResource()
-            .getIdElement()
-            .getIdPart(), Function.identity()));
+        .collect(Collectors.toMap(ourTask -> {
+          if (ourTask.getBasedOn()
+              .isEmpty() || !(ourTask.getBasedOn()
+              .get(0)
+              .getResource() instanceof Task)) {
+            String reason = String.format("Our task resource with id '%s' does not contain basedOn.",
+                ourTask.getIdElement()
+                    .getIdPart());
+            throw new CpTaskInfoBundleExtractorException(reason);
+          }
+          return ourTask.getBasedOn()
+              .get(0)
+              .getResource()
+              .getIdElement()
+              .getIdPart();
+        }, Function.identity()));
 
     return taskInfoHolders.stream()
         .filter(t -> t.getTask()
@@ -38,13 +49,15 @@ public class CpTaskInfoBundleExtractor extends BundleExtractor<List<CpTaskInfoHo
               .getIdElement()
               .getIdPart());
           Organization performer = null;
-          if (!Objects.isNull(ourTaskMap.get(taskInfoHolder.getTask()
-              .getIdElement()
-              .getIdPart()))) {
-            performer = (Organization) ourTaskMap.get(taskInfoHolder.getTask()
-                    .getIdElement()
-                    .getIdPart())
-                .getOwner()
+          if (!Objects.isNull(ourTask)) {
+            if (!(ourTask.getOwner()
+                .getResource() instanceof Organization)) {
+              String reason = String.format("Our task resource with id '%s' does not contain owner.",
+                  ourTask.getIdElement()
+                      .getIdPart());
+              throw new CpTaskInfoBundleExtractorException(reason);
+            }
+            performer = (Organization) ourTask.getOwner()
                 .getResource();
           }
           return new CpTaskInfoHolder(taskInfoHolder, ourTask, performer);
@@ -62,6 +75,13 @@ public class CpTaskInfoBundleExtractor extends BundleExtractor<List<CpTaskInfoHo
       super(taskInfoHolder.getTask(), taskInfoHolder.getServiceRequest());
       this.ourTask = ourTask;
       this.performer = performer;
+    }
+  }
+
+  public static class CpTaskInfoBundleExtractorException extends RuntimeException {
+
+    public CpTaskInfoBundleExtractorException(String message) {
+      super(message);
     }
   }
 }
