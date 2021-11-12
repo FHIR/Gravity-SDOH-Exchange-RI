@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+// Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/fhir/reference/util
 @UtilityClass
 public class TaskReferenceCollector {
 
