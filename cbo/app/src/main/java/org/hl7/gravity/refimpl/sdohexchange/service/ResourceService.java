@@ -3,7 +3,6 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
@@ -41,16 +40,14 @@ public class ResourceService {
   @Value("${app.url}")
   private String applicationUrl;
 
-  private final IGenericClient cpClient;
   private final ResourceLoader resourceLoader;
   private final ResourceParser resourceParser;
   private final ServerRepository serverRepository;
   private final FhirContext fhirContext;
   private final AuthorizationClient authorizationClient;
 
-  public ResourceService(IGenericClient cpClient, ResourceLoader resourceLoader, ResourceParser resourceParser,
+  public ResourceService(ResourceLoader resourceLoader, ResourceParser resourceParser,
       ServerRepository serverRepository, FhirContext fhirContext) {
-    this.cpClient = cpClient;
     this.resourceLoader = resourceLoader;
     this.resourceParser = resourceParser;
     this.serverRepository = serverRepository;
@@ -70,7 +67,7 @@ public class ResourceService {
     TaskRepository taskRepository = new TaskRepository(fhirClient, applicationUrl);
 
     // Getting task by id with Patient, requester Organization and ServiceRequest
-    Bundle taskBundle = cpClient.search()
+    Bundle taskBundle = fhirClient.search()
         .forResource(Task.class)
         .where(Task.RES_ID.exactly()
             .code(taskId))
@@ -90,7 +87,7 @@ public class ResourceService {
     Organization requester = FhirUtil.getFirstFromBundle(taskBundle, Organization.class);
 
     // Load all Task Procedures and ServiceRequest required resources as one transaction
-    Map<Class<? extends Resource>, List<Resource>> loadedResources = resourceLoader.getResources(cpClient,
+    Map<Class<? extends Resource>, List<Resource>> loadedResources = resourceLoader.getResources(fhirClient,
         collectAllReferences(task, serviceRequest));
 
     TaskJsonResourcesDto resourcesDto = new TaskJsonResourcesDto();

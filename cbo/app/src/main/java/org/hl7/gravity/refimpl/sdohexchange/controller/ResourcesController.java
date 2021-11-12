@@ -16,14 +16,14 @@ import javax.validation.constraints.NotBlank;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/resources")
+@RequestMapping("resources")
 @Api(tags = "Resources API")
 public class ResourcesController {
 
   private final ResourceService resourceService;
 
   @ApiOperation(value = "Get all Task resources as JSON.")
-  @GetMapping("/{serverId}/task/{id}")
+  @GetMapping("/{serverId}/task/{taskId}")
   public TaskJsonResourcesDto getTaskResources(@PathVariable Integer serverId,
       @PathVariable @NotBlank(message = "Task id can't be empty.") String taskId) {
     return resourceService.getTaskResources(serverId, taskId);

@@ -2,7 +2,6 @@ package org.hl7.gravity.refimpl.sdohexchange.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import javax.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskJsonResourcesDto;
@@ -13,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.constraints.NotBlank;
 
 @Api(tags = {SpringFoxConfig.RESOURCES_API_TAG})
 @Validated

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+// Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/dto/response
 @Data
 @NoArgsConstructor
 public class TaskJsonResourcesDto {
