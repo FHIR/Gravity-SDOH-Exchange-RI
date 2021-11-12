@@ -4,7 +4,8 @@ import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedu
 import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { updateTask, getTask, getProceduresForCategory, getCBOList } from "@/api";
-import { showDate, showDateTime } from "@/utils";
+import { showDateTime, showOccurrence } from "@/utils";
+import useServiceRequests from "@/state/useServiceRequests";
 
 
 type TaskStuff = {
@@ -42,11 +43,9 @@ const initialTaskStuff: TaskStuff = {
 const Flow: { [status in TaskStatus]?: TaskStatus[] } = {
 	"Received":    ["Accepted", "Rejected"],
 	"Accepted":    ["Cancelled"],
-	"In Progress": ["On Hold", "Completed", "Cancelled"],
-	"On Hold":     ["In Progress", "Cancelled"]
+	"In Progress": ["Cancelled"],
+	"On Hold":     ["Cancelled"]
 };
-
-const showOccurrence = (ocr: Occurrence) => ocr.start ? `From ${showDate(ocr.start)} to ${showDate(ocr.end)}` : `Until ${showDate(ocr.end)}`;
 
 const prepareTaskStuff = (task: Task): TaskStuff => ({
 	id: task.id,
@@ -68,14 +67,17 @@ const prepareTaskStuff = (task: Task): TaskStuff => ({
 export default defineComponent({
 	components: { TaskStatusSelect, TaskStatusDisplay },
 	props: {
-		task: {
-			type: Object as PropType<Task | null>,
+		taskId: {
+			type: String as PropType<string | null>,
 			default: null
 		}
 	},
-	emits: ["close", "task-updated"],
+	emits: ["close"],
 	setup(props, ctx) {
-		const opened = computed(() => props.task !== null);
+		const { find, update } = useServiceRequests();
+		const task = computed(() => props.taskId ? find(props.taskId).value : null);
+
+		const opened = computed(() => task.value !== null);
 
 		const taskFields = ref<TaskStuff>(initialTaskStuff);
 
@@ -88,9 +90,6 @@ export default defineComponent({
 			cboPerformer: "",
 			priorityForCBO: ""
 		});
-		// const outcome = ref<string>("");
-		// const statusReason = ref<string>("");
-		// const procedures = ref<string[]>([]);
 		const { outcome, statusReason, procedures, cboPerformer, priorityForCBO } = toRefs(formStuff);
 
 		const acceptedStatuses = computed(() => [taskFields.value.status].concat(Flow[taskFields.value.status] || []));
@@ -122,7 +121,7 @@ export default defineComponent({
 			availableProcedures.value = await getProceduresForCategory(categoryCode);
 		};
 
-		const availableCBOList = ref<any>([]);
+		const availableCBOList = ref<Cbo[]>([]);
 		const loadCBO = async () => {
 			availableCBOList.value = await getCBOList();
 		};
@@ -141,7 +140,7 @@ export default defineComponent({
 			priorityForCBO.value = "";
 		};
 
-		watch(() => props.task, (newTask, prevTask) => {
+		watch(task, (newTask, prevTask) => {
 			if (newTask && newTask.id !== prevTask?.id) {
 				init(newTask);
 			}
@@ -149,7 +148,7 @@ export default defineComponent({
 
 		const showFieldsForAcceptedStatus = ref<boolean>(false);
 		watch(() => status.value, newStatus => {
-			showFieldsForAcceptedStatus.value = newStatus === "Accepted" && props.task?.status === "Received";
+			showFieldsForAcceptedStatus.value = newStatus === "Accepted" && task.value?.status === "Received";
 		}, { immediate: true });
 
 		const beforeClose = () => {
@@ -170,10 +169,8 @@ export default defineComponent({
 			};
 			saveInProgress.value = true;
 			try {
-				await updateTask(taskFields.value.id, payload);
-				const updatedTask = await getTask(taskFields.value.id);
-				ctx.emit("task-updated", updatedTask);
-				init(updatedTask);
+				await update(taskFields.value.id, payload);
+				ctx.emit("close");
 			} finally {
 				saveInProgress.value = false;
 				showFieldsForAcceptedStatus.value = false;
@@ -237,7 +234,7 @@ export default defineComponent({
 <template>
 	<div class="dialog">
 		<el-dialog
-			title="Task"
+			title="Service Request"
 			:model-value="opened"
 			:width="700"
 			:show-close="true"

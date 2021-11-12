@@ -1,12 +1,19 @@
-import { Task, User, Server, NewServerPayload, UpdateServerPayload, Procedure, Resources } from "@/types";
+import { Task, User, Server, NewServerPayload, UpdateServerPayload, Procedure, Resources, UpdateTaskPayload } from "@/types";
 import axios from "axios";
 
 export const getContext = async (): Promise<User> => ({ id: "vidsmok4uVBobra", name: "Colin Brooks", userType: "CEO" });
-const dataOnly = <T>({ data }: { data: T }): T => data;
-export const getTasks = () => axios.get<Task[]>("/tasks").then(dataOnly);
 
-//TODO: commented while BE is not ready
-// export const updateTask = (taskId: string, data: UpdateTaskPayload) => axios.put<void>(`/task/${taskId}`, data).then(dataOnly);
+const dataOnly = <T>({ data }: { data: T }): T => data;
+
+export const getTasks = async (): Promise<Task[]> => {
+	const res = await axios.get<Task[]>("/tasks");
+
+	return res.data;
+};
+
+export const getTask = (taskId: string, serverId: number) => axios.get<Task>(`/tasks/${serverId}/${taskId}`).then(dataOnly);
+
+export const updateTask = async ({ id, ...rest }: UpdateTaskPayload) => axios.put<void>(`/tasks/${id}`, rest);
 
 export const getProceduresForCategory = (categoryCode: string) => axios.get<Procedure[]>(`/mappings/categories/${categoryCode}/procedure/codings`).then(dataOnly);
 

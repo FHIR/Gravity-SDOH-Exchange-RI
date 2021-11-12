@@ -17,7 +17,7 @@ export default defineComponent({
 		const lastSyncDate = computed<string>(() => TasksModule.lastSyncDate);
 
 		const handleTabClick = (tab: any) => ActiveTabModule.setActiveTab(tab.paneName);
-		const handleSyncClick = () => TasksModule.getTasks();
+		const handleSyncClick = () => TasksModule.getTasks(true);
 
 		return {
 			activeTabName : ActiveTabModule.activeTab,
@@ -204,7 +204,7 @@ export default defineComponent({
 	}
 
 	.sync {
-		margin-left: 130px;
+		margin-left: 90px;
 	}
 
 	.sync-margin {

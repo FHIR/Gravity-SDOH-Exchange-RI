@@ -1,7 +1,7 @@
-import { getTasks } from "@/api";
+import { getTasks, updateTask, getTask } from "@/api";
 import { VuexModule, Module, Action, Mutation, getModule } from "vuex-module-decorators";
 import store from "@/store";
-import { Task } from "@/types";
+import { Task, UpdateTaskPayload } from "@/types";
 
 const ACTIVE_STATUSES = ["In Progress", "Received", "On Hold", "Accepted"];
 const INACTIVE_STATUSES = ["Completed", "Cancelled", "Rejected", "Failed"];
@@ -32,6 +32,11 @@ class Tasks extends VuexModule implements ITasks {
 	}
 
 	@Mutation
+	changeTask(payload: Task) {
+		this.tasks = this.tasks.map(task => task.id === payload.id ? payload : task);
+	}
+
+	@Mutation
 	setLastSyncDate(payload: string) {
 		this.lastSyncDate = payload;
 	}
@@ -42,8 +47,11 @@ class Tasks extends VuexModule implements ITasks {
 	}
 
 	@Action
-	async getTasks(): Promise<void> {
-		this.setIsLoading(true);
+	async getTasks(showLoader: boolean = false): Promise<void> {
+		if (showLoader) {
+			this.setIsLoading(true);
+		}
+
 		try {
 			const data = await getTasks();
 
@@ -52,6 +60,15 @@ class Tasks extends VuexModule implements ITasks {
 		} finally {
 			this.setIsLoading(false);
 		}
+	}
+
+	@Action
+	async updateTask(payload :UpdateTaskPayload): Promise<Task> {
+		await updateTask(payload);
+		const updatedTask = await getTask(payload.id, payload.serverId);
+		this.changeTask(updatedTask);
+
+		return updatedTask;
 	}
 }
 
