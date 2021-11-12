@@ -15,17 +15,25 @@ public class OurTaskInfoBundleExtractor extends BundleExtractor<List<OurTaskInfo
 
   @Override
   public List<OurTaskInfoHolder> extract(Bundle bundle) {
-    List<TaskInfoBundleExtractor.TaskInfoHolder> taskInfoHolders = taskInfoBundleExtractor.extract(bundle);
+    List<TaskInfoHolder> taskInfoHolders = taskInfoBundleExtractor.extract(bundle);
 
     return taskInfoHolders.stream()
         .filter(t -> t.getTask()
             .getIntent() == Task.TaskIntent.FILLERORDER)
         .map(taskInfoHolder -> {
-          Task baseTask = (Task) taskInfoHolder.getTask()
-              .getBasedOn()
+          Task ourTask = taskInfoHolder.getTask();
+          if (ourTask.getBasedOn()
+              .isEmpty() || !(ourTask.getBasedOn()
+              .get(0)
+              .getResource() instanceof Task)) {
+            String reason = String.format("Our task resource with id '%s' does not contain basedOn.",
+                ourTask.getIdElement()
+                    .getIdPart());
+            throw new OurTaskInfoBundleExtractorException(reason);
+          }
+          Task baseTask = (Task) ourTask.getBasedOn()
               .get(0)
               .getResource();
-
           return new OurTaskInfoHolder(taskInfoHolder, baseTask);
         })
         .collect(Collectors.toList());
@@ -39,6 +47,13 @@ public class OurTaskInfoBundleExtractor extends BundleExtractor<List<OurTaskInfo
     public OurTaskInfoHolder(TaskInfoHolder taskInfoHolder, Task baseTask) {
       super(taskInfoHolder.getTask(), taskInfoHolder.getServiceRequest());
       this.baseTask = baseTask;
+    }
+  }
+
+  public static class OurTaskInfoBundleExtractorException extends RuntimeException {
+
+    public OurTaskInfoBundleExtractorException(String message) {
+      super(message);
     }
   }
 }
