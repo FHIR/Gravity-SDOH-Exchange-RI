@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class OurTaskInfoBundleExtractor extends BundleExtractor<List<OurTaskInfoHolder>> {
 
-  private TaskInfoBundleExtractor taskInfoBundleExtractor = new TaskInfoBundleExtractor();
+  private final TaskInfoBundleExtractor taskInfoBundleExtractor = new TaskInfoBundleExtractor();
 
   @Override
   public List<OurTaskInfoHolder> extract(Bundle bundle) {
