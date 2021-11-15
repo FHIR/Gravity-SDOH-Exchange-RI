@@ -29,13 +29,13 @@ public class TaskController {
   @GetMapping
   @ApiOperation(value = "List of all tasks from all servers")
   public List<TaskDto> list() throws AuthClientException {
-    return taskService.getTasks();
+    return taskService.readAll();
   }
 
   @GetMapping("/{serverId}/{taskId}")
   @ApiOperation(value = "Retrieve Task resource by id from specific server.")
   public TaskDto read(@PathVariable Integer serverId, @PathVariable String taskId) {
-    return taskService.getTask(serverId, taskId);
+    return taskService.read(serverId, taskId);
   }
 
   @PutMapping("/{id}")

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, PropType, computed } from "vue";
-import { Task, TaskStatus, TaskWithState } from "@/types";
+import { TaskStatus, TaskWithState } from "@/types";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
 import { showDate } from "@/utils";
 
@@ -58,6 +58,10 @@ export default defineComponent({
 		tasks: {
 			type: Array as PropType<TaskWithState[]>,
 			required: true
+		},
+		variant: {
+			type: String as PropType<"service-requests" | "our-tasks">,
+			default: "service-requests"
 		}
 	},
 	emits: ["task-name-click", "view-resources"],
@@ -66,8 +70,7 @@ export default defineComponent({
 		const tableData = computed(() => tasksInOrder.value.map(displayTask));
 
 		const taskNameClick = (taskId: string) => {
-			const task: TaskWithState = props.tasks.find(taskState => taskState.task.id === taskId)!;
-			ctx.emit("task-name-click", task);
+			ctx.emit("task-name-click", taskId);
 		};
 
 		const taskViewResourcesClick = (taskId: string) => {
@@ -89,33 +92,64 @@ export default defineComponent({
 			:data="tableData"
 			:row-class-name="({ row }) => row.isNew ? 'new-task' : ''"
 		>
-			<el-table-column
-				label="Task Name"
-				width="290"
-			>
-				<template #default="{ row }">
-					<div
-						class="task-name-cell"
-						@click="taskNameClick(row.id)"
-					>
-						<span class="name">
-							{{ row.taskName }}
-						</span>
-						<span
-							v-if="row.isNew"
-							class="new-mark"
+			<template v-if="variant == 'service-requests'">
+				<el-table-column
+					label="Service Request Name"
+					width="290"
+				>
+					<template #default="{ row }">
+						<div
+							class="task-name-cell"
+							@click="taskNameClick(row.id)"
 						>
-							new
-						</span>
-					</div>
-				</template>
-			</el-table-column>
+							<span class="name">
+								{{ row.taskName }}
+							</span>
+							<span
+								v-if="row.isNew"
+								class="new-mark"
+							>
+								new
+							</span>
+						</div>
+					</template>
+				</el-table-column>
 
-			<el-table-column
-				prop="requestDate"
-				label="Request Date"
-				:width="120"
-			/>
+				<el-table-column
+					prop="requestDate"
+					label="Request Date"
+					:width="120"
+				/>
+			</template>
+			<template v-else>
+				<el-table-column
+					label="Task Name"
+					width="290"
+				>
+					<template #default="{ row }">
+						<div
+							class="task-name-cell"
+							@click="taskNameClick(row.id)"
+						>
+							<span class="name">
+								{{ row.taskName }}
+							</span>
+							<span
+								v-if="row.isNew"
+								class="new-mark"
+							>
+								new
+							</span>
+						</div>
+					</template>
+				</el-table-column>
+
+				<el-table-column
+					prop="taskName"
+					label="Service Request Name"
+					:width="290"
+				/>
+			</template>
 
 			<el-table-column
 				prop="priority"
@@ -161,7 +195,7 @@ export default defineComponent({
 
 			<el-table-column
 				prop="performingCBO"
-				label="Performing CBO"
+				label="Performer"
 				class-name="column-interactive"
 			/>
 
@@ -300,7 +334,7 @@ export default defineComponent({
 				line-height: 11px;
 				display: inline-block;
 				padding: 4px;
-				background-color: #e04558;
+				background-color: $red;
 				font-size: $global-font-size;
 				font-weight: 400;
 				color: $white;

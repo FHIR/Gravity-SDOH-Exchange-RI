@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Objects;
 
 // Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/fhir/factory
+// Deleted user, priorityForCBO, cboTaskRequester and cboTaskOwner fields
+// Block with condition to check ACCEPTED status was deleted
 @Getter
 @Setter
 public class TaskUpdateBundleFactory {
