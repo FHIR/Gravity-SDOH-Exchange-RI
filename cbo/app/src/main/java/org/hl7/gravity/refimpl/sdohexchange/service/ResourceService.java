@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.auth.AuthorizationClient;
 import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
-import org.hl7.gravity.refimpl.sdohexchange.dao.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskJsonResourcesDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.ServerNotFoundException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ResourceLoader;
@@ -64,7 +63,6 @@ public class ResourceService {
     //          authorizationClient.getTokenResponse(URI.create(server.getAuthServerUrl()), server.getClientId(),
     //                  server.getClientSecret(), SCOPE)
     //              .getAccessToken()));
-    TaskRepository taskRepository = new TaskRepository(fhirClient, applicationUrl);
 
     // Getting task by id with Patient, requester Organization and ServiceRequest
     Bundle taskBundle = fhirClient.search()
