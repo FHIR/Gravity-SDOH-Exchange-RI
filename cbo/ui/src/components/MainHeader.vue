@@ -17,7 +17,7 @@ export default defineComponent({
 		const lastSyncDate = computed<string>(() => TasksModule.lastSyncDate);
 
 		const handleTabClick = (tab: any) => ActiveTabModule.setActiveTab(tab.paneName);
-		const handleSyncClick = () => TasksModule.getTasks(true);
+		const handleSyncClick = () => TasksModule.getTasks();
 
 		return {
 			activeTabName : ActiveTabModule.activeTab,
