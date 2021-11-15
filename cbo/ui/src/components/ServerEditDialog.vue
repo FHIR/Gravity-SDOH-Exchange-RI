@@ -2,7 +2,7 @@
 import { defineComponent, PropType, computed, reactive, ref } from "vue";
 import { Server, UpdateServerPayload } from "@/types";
 import { ServersModule } from "@/store/modules/servers";
-import { showDefaultNotification } from "@/utils/utils";
+import { showDefaultNotification } from "@/utils";
 
 export type FormModel = {
 	serverName: string,
