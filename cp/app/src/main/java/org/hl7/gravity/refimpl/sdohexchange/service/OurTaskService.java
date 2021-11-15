@@ -8,7 +8,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OurTaskBundleToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskReadException;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
@@ -30,7 +29,7 @@ public class OurTaskService {
   }
 
   public TaskDto read(String id) {
-    Bundle taskBundle = taskRepository.find(id, Lists.newArrayList(Task.INCLUDE_FOCUS));
+    Bundle taskBundle = taskRepository.find(id, Lists.newArrayList(Task.INCLUDE_FOCUS, Task.INCLUDE_BASED_ON));
     Task ourTask = FhirUtil.getFirstFromBundle(taskBundle, Task.class);
     if (Objects.isNull(ourTask)) {
       throw new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id));
@@ -39,6 +38,9 @@ public class OurTaskService {
         .equals(Task.TaskIntent.FILLERORDER)) {
       throw new TaskReadException("The intent of Task/" + id + " is not filler-order.");
     }
-    return new TaskToDtoConverter().convert(ourTask);
+    return new OurTaskBundleToDtoConverter().convert(taskBundle)
+        .stream()
+        .findFirst()
+        .get();
   }
 }
