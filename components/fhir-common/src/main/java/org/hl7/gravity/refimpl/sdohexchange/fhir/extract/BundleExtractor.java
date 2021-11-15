@@ -30,7 +30,7 @@ public abstract class BundleExtractor<T> {
   }
 
   /**
-   * Get map resources from the bundle
+   * Get map of resources from the bundle
    * Usually use it with {@link #resourceList(Map, Class)} method
    */
   protected Map<? extends Class<? extends Resource>, List<Resource>> extractToMap(Bundle bundle) {
