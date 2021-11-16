@@ -24,22 +24,11 @@ public class CpTaskInfoBundleExtractor extends BundleExtractor<List<CpTaskInfoHo
     Map<String, Task> ourTaskMap = FhirUtil.getFromBundle(bundle, Task.class)
         .stream()
         .filter(t -> t.getIntent() == Task.TaskIntent.FILLERORDER)
-        .collect(Collectors.toMap(ourTask -> {
-          if (ourTask.getBasedOn()
-              .isEmpty() || !(ourTask.getBasedOn()
-              .get(0)
-              .getResource() instanceof Task)) {
-            String reason = String.format("Our task resource with id '%s' does not contain basedOn.",
-                ourTask.getIdElement()
-                    .getIdPart());
-            throw new CpTaskInfoBundleExtractorException(reason);
-          }
-          return ourTask.getBasedOn()
-              .get(0)
-              .getResource()
-              .getIdElement()
-              .getIdPart();
-        }, Function.identity()));
+        .collect(Collectors.toMap(ourTask -> ourTask.getBasedOn()
+            .get(0)
+            .getResource()
+            .getIdElement()
+            .getIdPart(), Function.identity()));
 
     return taskInfoHolders.stream()
         .filter(t -> t.getTask()
