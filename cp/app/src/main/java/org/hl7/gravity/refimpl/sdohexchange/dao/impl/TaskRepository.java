@@ -30,7 +30,7 @@ public class TaskRepository extends FhirRepository<Task> {
         // include ServiceRequest
         .include(Task.INCLUDE_FOCUS)
         .revInclude(Task.INCLUDE_BASED_ON)
-        .include(Task.INCLUDE_OWNER.asNonRecursive())
+        .include(Task.INCLUDE_OWNER.asRecursive())
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
         .returnBundle(Bundle.class)
@@ -48,7 +48,7 @@ public class TaskRepository extends FhirRepository<Task> {
         // include ServiceRequest
         .include(Task.INCLUDE_FOCUS)
         .include(Task.INCLUDE_BASED_ON)
-        .include(Task.INCLUDE_OWNER.asNonRecursive())
+        .include(Task.INCLUDE_OWNER.asRecursive())
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
         .returnBundle(Bundle.class)
