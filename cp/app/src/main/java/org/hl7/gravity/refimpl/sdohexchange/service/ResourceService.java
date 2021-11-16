@@ -2,9 +2,6 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
@@ -26,6 +23,10 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.reference.util.TaskReferenceCol
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -57,8 +58,8 @@ public class ResourceService {
     Organization requester = FhirUtil.getFirstFromBundle(taskBundle, Organization.class);
 
     // Load all Task Procedures and ServiceRequest required resources as one transaction
-    Map<Class<? extends Resource>, List<Resource>> loadedResources =
-        resourceLoader.getResources(cpClient, collectAllReferences(task, serviceRequest));
+    Map<Class<? extends Resource>, List<Resource>> loadedResources = resourceLoader.getResources(cpClient,
+        collectAllReferences(task, serviceRequest));
 
     TaskJsonResourcesDto resourcesDto = new TaskJsonResourcesDto();
     resourcesDto.setTask(resourceParser.parse(task));

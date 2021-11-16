@@ -4,6 +4,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BaseReference;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
@@ -15,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-// Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/fhir
 @Component
 public class ResourceLoader {
 
@@ -25,7 +26,7 @@ public class ResourceLoader {
       return Collections.emptyMap();
     }
     Bundle loadResourcesBundle = new Bundle();
-    loadResourcesBundle.setType(Bundle.BundleType.TRANSACTION);
+    loadResourcesBundle.setType(BundleType.TRANSACTION);
 
     references.stream()
         .map(BaseReference::getReferenceElement)
@@ -38,7 +39,7 @@ public class ResourceLoader {
         .execute()
         .getEntry()
         .stream()
-        .map(Bundle.BundleEntryComponent::getResource)
+        .map(BundleEntryComponent::getResource)
         .filter(Objects::nonNull)
         .collect(Collectors.groupingBy(Resource::getClass));
   }
@@ -49,7 +50,7 @@ public class ResourceLoader {
       return Collections.emptyMap();
     }
     Bundle loadResourcesBundle = new Bundle();
-    loadResourcesBundle.setType(Bundle.BundleType.TRANSACTION);
+    loadResourcesBundle.setType(BundleType.TRANSACTION);
 
     references.stream()
         .map(BaseReference::getReferenceElement)
@@ -74,12 +75,12 @@ public class ResourceLoader {
         .execute()
         .getEntry()
         .stream()
-        .map(Bundle.BundleEntryComponent::getResource)
+        .map(BundleEntryComponent::getResource)
         .filter(Bundle.class::isInstance)
         .map(Bundle.class::cast)
         .map(Bundle::getEntry)
         .flatMap(List::stream)
-        .map(Bundle.BundleEntryComponent::getResource)
+        .map(BundleEntryComponent::getResource)
         .collect(Collectors.groupingBy(Resource::getClass));
   }
 }
