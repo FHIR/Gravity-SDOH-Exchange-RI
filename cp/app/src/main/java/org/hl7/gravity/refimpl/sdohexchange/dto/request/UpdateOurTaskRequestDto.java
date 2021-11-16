@@ -15,8 +15,8 @@ import org.springframework.util.StringUtils;
 public class UpdateOurTaskRequestDto {
 
   private TaskStatus status;
-  private String comment;
   private String statusReason;
+  private String comment;
 
   public Task.TaskStatus getTaskStatus() {
     return status == null ? null : status.getTaskStatus();
