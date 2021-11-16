@@ -21,7 +21,7 @@ public class CpTaskInfoBundleExtractor extends BundleExtractor<List<CpTaskInfoHo
   @Override
   public List<CpTaskInfoHolder> extract(Bundle bundle) {
     List<TaskInfoHolder> taskInfoHolders = taskInfoBundleExtractor.extract(bundle);
-    Map<String, Task> ourTaskMap = FhirUtil.getFromBundle(bundle, Task.class)
+    Map<String, Task> taskIdToOurTaskMap = FhirUtil.getFromBundle(bundle, Task.class)
         .stream()
         .filter(t -> t.getIntent() == Task.TaskIntent.FILLERORDER)
         .collect(Collectors.toMap(ourTask -> ourTask.getBasedOn()
@@ -34,15 +34,15 @@ public class CpTaskInfoBundleExtractor extends BundleExtractor<List<CpTaskInfoHo
         .filter(t -> t.getTask()
             .getIntent() == Task.TaskIntent.ORDER)
         .map(taskInfoHolder -> {
-          Task ourTask = ourTaskMap.get(taskInfoHolder.getTask()
+          Task ourTask = taskIdToOurTaskMap.get(taskInfoHolder.getTask()
               .getIdElement()
               .getIdPart());
           Organization performer = null;
           if (!Objects.isNull(ourTask)) {
             if (!(ourTask.getOwner()
                 .getResource() instanceof Organization)) {
-              String reason = String.format("Our task resource with id '%s' does not contain owner.",
-                  ourTask.getIdElement()
+              String reason = String.format(
+                  "Our task resource with id '%s' does not contain owner of type Organization.", ourTask.getIdElement()
                       .getIdPart());
               throw new CpTaskInfoBundleExtractorException(reason);
             }

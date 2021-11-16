@@ -16,7 +16,7 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.CpTaskBundleToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.TaskStatus;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
@@ -51,11 +51,12 @@ public class TaskService {
 
   public List<TaskDto> readAll() {
     Bundle tasksBundle = taskRepository.findAllTasks();
-    return new CpTaskBundleToDtoConverter().convert(tasksBundle);
+    return new TaskBundleToDtoConverter().convert(tasksBundle);
   }
 
   public TaskDto read(String id) {
-    Bundle taskBundle = taskRepository.find(id, Lists.newArrayList(Task.INCLUDE_FOCUS, Task.INCLUDE_OWNER),
+    Bundle taskBundle = taskRepository.find(id,
+        Lists.newArrayList(Task.INCLUDE_FOCUS, Task.INCLUDE_OWNER.asNonRecursive()),
         Lists.newArrayList(Task.INCLUDE_BASED_ON));
     Task task = FhirUtil.getFirstFromBundle(taskBundle, Task.class);
     if (Objects.isNull(task)) {
@@ -65,7 +66,7 @@ public class TaskService {
         .equals(Task.TaskIntent.ORDER)) {
       throw new TaskReadException("The intent of Task/" + id + " is not order.");
     }
-    return new CpTaskBundleToDtoConverter().convert(taskBundle)
+    return new TaskBundleToDtoConverter().convert(taskBundle)
         .stream()
         .findFirst()
         .get();

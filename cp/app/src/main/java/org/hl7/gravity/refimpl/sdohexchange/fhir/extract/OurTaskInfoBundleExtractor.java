@@ -26,7 +26,7 @@ public class OurTaskInfoBundleExtractor extends BundleExtractor<List<OurTaskInfo
               .isEmpty() || !(ourTask.getBasedOn()
               .get(0)
               .getResource() instanceof Task)) {
-            String reason = String.format("Our task resource with id '%s' does not contain basedOn.",
+            String reason = String.format("Our task resource with id '%s' does not contain basedOn of type Task.",
                 ourTask.getIdElement()
                     .getIdPart());
             throw new OurTaskInfoBundleExtractorException(reason);

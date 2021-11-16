@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class CpTaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>> {
+public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>> {
 
   private final CpTaskInfoBundleExtractor cpTaskInfoBundleExtractor = new CpTaskInfoBundleExtractor();
   private final TaskToDtoConverter taskToDtoConverter = new TaskToDtoConverter();
