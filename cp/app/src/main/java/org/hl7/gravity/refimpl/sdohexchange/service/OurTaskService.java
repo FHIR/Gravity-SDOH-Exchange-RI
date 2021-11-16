@@ -29,7 +29,8 @@ public class OurTaskService {
   }
 
   public TaskDto read(String id) {
-    Bundle taskBundle = taskRepository.find(id, Lists.newArrayList(Task.INCLUDE_FOCUS, Task.INCLUDE_BASED_ON));
+    Bundle taskBundle = taskRepository.find(id,
+        Lists.newArrayList(Task.INCLUDE_FOCUS, Task.INCLUDE_BASED_ON, Task.INCLUDE_OWNER.asNonRecursive()));
     Task ourTask = FhirUtil.getFirstFromBundle(taskBundle, Task.class);
     if (Objects.isNull(ourTask)) {
       throw new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id));

@@ -1,6 +1,7 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.OurTaskInfoBundleExtractor;
@@ -31,6 +32,10 @@ public class OurTaskBundleToDtoConverter implements Converter<Bundle, List<TaskD
                   .getIdElement()
                   .getIdPart(), ourTaskInfoHolder.getBaseTask()
                   .getDescription())));
+          taskDto.setPerformer(typeToDtoConverter.convert(FhirUtil.toReference(Organization.class,
+              ourTaskInfoHolder.getPerformer()
+                  .getId(), ourTaskInfoHolder.getPerformer()
+                  .getName())));
           return taskDto;
         })
         .collect(Collectors.toList());

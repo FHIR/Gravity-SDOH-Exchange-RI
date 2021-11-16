@@ -2,6 +2,7 @@ package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.OurTaskInfoBundleExtractor.OurTaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
@@ -31,10 +32,19 @@ public class OurTaskInfoBundleExtractor extends BundleExtractor<List<OurTaskInfo
                     .getIdPart());
             throw new OurTaskInfoBundleExtractorException(reason);
           }
+          if (!(ourTask.getOwner()
+              .getResource() instanceof Organization)) {
+            String reason = String.format("Our task resource with id '%s' does not contain owner of type Organization.",
+                ourTask.getIdElement()
+                    .getIdPart());
+            throw new CpTaskInfoBundleExtractor.CpTaskInfoBundleExtractorException(reason);
+          }
           Task baseTask = (Task) ourTask.getBasedOn()
               .get(0)
               .getResource();
-          return new OurTaskInfoHolder(taskInfoHolder, baseTask);
+          Organization performer = (Organization) ourTask.getOwner()
+              .getResource();
+          return new OurTaskInfoHolder(taskInfoHolder, baseTask, performer);
         })
         .collect(Collectors.toList());
   }
@@ -43,10 +53,12 @@ public class OurTaskInfoBundleExtractor extends BundleExtractor<List<OurTaskInfo
   public static class OurTaskInfoHolder extends TaskInfoHolder {
 
     private final Task baseTask;
+    private final Organization performer;
 
-    public OurTaskInfoHolder(TaskInfoHolder taskInfoHolder, Task baseTask) {
+    public OurTaskInfoHolder(TaskInfoHolder taskInfoHolder, Task baseTask, Organization performer) {
       super(taskInfoHolder.getTask(), taskInfoHolder.getServiceRequest());
       this.baseTask = baseTask;
+      this.performer = performer;
     }
   }
 
