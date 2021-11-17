@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,12 +46,20 @@ public abstract class FhirRepository<T extends IBaseResource> implements Generic
 
   @Override
   public Bundle find(String id, Collection<Include> includes) {
+    return find(id, includes, Collections.emptyList());
+  }
+
+  @Override
+  public Bundle find(String id, Collection<Include> includes, Collection<Include> revIncludes) {
     IQuery<IBaseBundle> bundle = client.search()
         .forResource(getResourceType())
         .where(BaseResource.RES_ID.exactly()
             .codes(id));
     for (Include include : includes) {
       bundle = bundle.include(include);
+    }
+    for (Include revInclude : revIncludes) {
+      bundle = bundle.revInclude(revInclude);
     }
     return bundle.returnBundle(Bundle.class)
         .execute();

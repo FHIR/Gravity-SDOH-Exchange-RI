@@ -3,7 +3,6 @@ package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
@@ -17,8 +16,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Transaction bundle parser of resources required for Task update.
@@ -33,12 +30,7 @@ public class TaskUpdateBundleExtractor extends BundleExtractor<TaskUpdateInfoHol
 
   @Override
   public TaskUpdateInfoHolder extract(Bundle bundle) {
-    Map<? extends Class<? extends Resource>, List<Resource>> taskResources = bundle.getEntry()
-        .stream()
-        .map(BundleEntryComponent::getResource)
-        .filter(Objects::nonNull)
-        .collect(Collectors.groupingBy(Resource::getClass));
-    return new TaskUpdateInfoHolder(taskResources);
+    return new TaskUpdateInfoHolder(extractToMap(bundle));
   }
 
   @Getter

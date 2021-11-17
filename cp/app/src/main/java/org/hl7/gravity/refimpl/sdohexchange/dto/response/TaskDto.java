@@ -23,6 +23,7 @@ public class TaskDto {
   private ServiceRequestDto serviceRequest;
   private TypeDto requester;
   private TypeDto patient;
+  private TypeDto performer;
   private TypeDto baseTask;
   private String consent;
   private String outcome;

@@ -14,7 +14,6 @@ import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.AuthClientException;
@@ -92,7 +91,10 @@ public class TaskService {
         .equals(Task.TaskIntent.FILLERORDER)) {
       throw new TaskReadException("The intent of Task/" + taskId + " is not filler-order.");
     }
-    return new TaskToDtoConverter().convert(task);
+    return new TaskBundleToDtoConverter(serverId).convert(taskBundle)
+        .stream()
+        .findFirst()
+        .get();
   }
 
   public void update(String id, UpdateTaskRequestDto update) throws AuthClientException {
