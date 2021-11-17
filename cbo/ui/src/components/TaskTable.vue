@@ -84,7 +84,9 @@ export default defineComponent({
 		};
 
 		const taskViewResourcesClick = (taskId: string) => {
-			ctx.emit("view-resources", taskId);
+			const task: TaskWithState = props.tasks.find(taskState => taskState.task.id === taskId)!;
+
+			ctx.emit("view-resources", task);
 		};
 
 		return {
