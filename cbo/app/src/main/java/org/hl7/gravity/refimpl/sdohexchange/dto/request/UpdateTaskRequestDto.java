@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 // Copied from cp/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/dto/request
+// Deleted a few @TaskStatusValueMatch and fields
 @Getter
 @Setter
 @TaskStatusValueMatch.List({@TaskStatusValueMatch(updateStatus = TaskStatus.REJECTED, requiredFields = {"statusReason"},
