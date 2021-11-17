@@ -1,5 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
@@ -9,8 +10,6 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProcedureDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
-
-import java.util.stream.Collectors;
 
 public class TaskToDtoConverter implements Converter<Task, TaskDto> {
 
