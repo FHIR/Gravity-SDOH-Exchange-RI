@@ -9,7 +9,6 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
-import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Component
 public class ResourceLoader {
 
   public Map<Class<? extends Resource>, List<Resource>> getResources(IGenericClient client,
