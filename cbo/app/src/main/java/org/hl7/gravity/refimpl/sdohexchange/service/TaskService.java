@@ -25,7 +25,6 @@ import org.hl7.gravity.refimpl.sdohexchange.model.Server;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
 public class TaskService {
 
   private static final String SCOPE = "address phone read profile openid email write";

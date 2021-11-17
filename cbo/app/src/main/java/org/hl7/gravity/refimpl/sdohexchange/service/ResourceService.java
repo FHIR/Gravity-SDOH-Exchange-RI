@@ -1,8 +1,8 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
@@ -15,33 +15,60 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.gravity.refimpl.sdohexchange.auth.AuthorizationClient;
+import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskJsonResourcesDto;
+import org.hl7.gravity.refimpl.sdohexchange.exception.ServerNotFoundException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ResourceLoader;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ResourceParser;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.reference.util.ServiceRequestReferenceCollector;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.reference.util.TaskReferenceCollector;
+import org.hl7.gravity.refimpl.sdohexchange.model.Server;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ResourceService {
 
-  private final IGenericClient cpClient;
+  @Value("${app.url}")
+  private String applicationUrl;
+
   private final ResourceLoader resourceLoader;
   private final ResourceParser resourceParser;
+  private final ServerRepository serverRepository;
+  private final FhirContext fhirContext;
+  private final AuthorizationClient authorizationClient;
 
-  public TaskJsonResourcesDto getTaskResources(String id) {
+  public ResourceService(ResourceLoader resourceLoader, ResourceParser resourceParser,
+      ServerRepository serverRepository, FhirContext fhirContext) {
+    this.resourceLoader = resourceLoader;
+    this.resourceParser = resourceParser;
+    this.serverRepository = serverRepository;
+    this.fhirContext = fhirContext;
+    this.authorizationClient = new AuthorizationClient(new RestTemplate());
+  }
+
+  public TaskJsonResourcesDto getTaskResources(Integer serverId, String taskId) {
+    Server server = serverRepository.findById(serverId)
+        .orElseThrow(() -> new ServerNotFoundException(String.format("No server was found by id '%s'", serverId)));
+    IGenericClient fhirClient = fhirContext.newRestfulGenericClient(server.getFhirServerUrl());
+    // Doesn't support now
+    //      fhirClient.registerInterceptor(new BearerTokenAuthInterceptor(
+    //          authorizationClient.getTokenResponse(URI.create(server.getAuthServerUrl()), server.getClientId(),
+    //                  server.getClientSecret(), SCOPE)
+    //              .getAccessToken()));
+
     // Getting task by id with Patient, requester Organization and ServiceRequest
-    Bundle taskBundle = cpClient.search()
+    Bundle taskBundle = fhirClient.search()
         .forResource(Task.class)
         .where(Task.RES_ID.exactly()
-            .code(id))
+            .code(taskId))
         .include(Task.INCLUDE_FOCUS)
         .include(Task.INCLUDE_PATIENT)
         .include(Task.INCLUDE_REQUESTER)
@@ -51,14 +78,14 @@ public class ResourceService {
     Task task = FhirUtil.getFromBundle(taskBundle, Task.class)
         .stream()
         .findFirst()
-        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)));
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), taskId)));
     // We expect that task was validated and contains all resources
     ServiceRequest serviceRequest = FhirUtil.getFirstFromBundle(taskBundle, ServiceRequest.class);
     Patient patient = FhirUtil.getFirstFromBundle(taskBundle, Patient.class);
     Organization requester = FhirUtil.getFirstFromBundle(taskBundle, Organization.class);
 
     // Load all Task Procedures and ServiceRequest required resources as one transaction
-    Map<Class<? extends Resource>, List<Resource>> loadedResources = resourceLoader.getResources(cpClient,
+    Map<Class<? extends Resource>, List<Resource>> loadedResources = resourceLoader.getResources(fhirClient,
         collectAllReferences(task, serviceRequest));
 
     TaskJsonResourcesDto resourcesDto = new TaskJsonResourcesDto();
