@@ -17,6 +17,8 @@ public interface GenericRepository<T extends IBaseResource> {
 
   Bundle find(String id, Collection<Include> includes);
 
+  Bundle find(String id, Collection<Include> includes, Collection<Include> revIncludes);
+
   Bundle find(List<String> ids);
 
   Bundle transaction(Bundle transaction);
