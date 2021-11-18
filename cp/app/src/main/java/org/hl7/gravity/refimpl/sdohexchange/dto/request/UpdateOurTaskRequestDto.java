@@ -7,6 +7,7 @@ import org.hl7.gravity.refimpl.sdohexchange.annotation.TaskStatusValueMatch;
 import org.springframework.util.StringUtils;
 
 // Copied from ehr/app/src/main/java/org/hl7/gravity/refimpl/sdohexchange/dto/request/UpdateTaskRequestDto.java
+// Deleted a few @TaskStatusValueMatch annotations and fields
 @Getter
 @Setter
 @TaskStatusValueMatch.List(
