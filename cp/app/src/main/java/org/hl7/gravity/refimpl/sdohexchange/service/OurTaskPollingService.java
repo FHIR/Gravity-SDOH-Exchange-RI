@@ -47,10 +47,10 @@ public class OurTaskPollingService {
 
   @Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
   public void updateTasks() {
-    log.info("Updating tasks from own tasks...");
+    log.info("Updating tasks from our tasks...");
     Bundle tasksBundle = openCpClient.search()
         .forResource(Task.class)
-        //Include corresponding Own Tasks
+        //Include corresponding Our Tasks
         .revInclude(Task.INCLUDE_BASED_ON)
         //Include ServiceRequest for all Tasks, even the included ones.
         .include(Task.INCLUDE_FOCUS.setRecurse(true))
@@ -81,7 +81,7 @@ public class OurTaskPollingService {
     updateBundle.setType(Bundle.BundleType.TRANSACTION);
 
     for (Task task : tasksPollingInfo.getTasks()) {
-      //Skip for now. We create own tasks automatically when we set a status to Accepted.
+      //Skip for now. We create our tasks automatically when we set a status to Accepted.
       if (task.getStatus()
           .equals(TaskStatus.REQUESTED) || task.getStatus()
           .equals(TaskStatus.RECEIVED)) {
@@ -89,8 +89,8 @@ public class OurTaskPollingService {
       }
       ServiceRequest serviceRequest = getServiceRequest(task);
       try {
-        Task ownTask = tasksPollingInfo.getOurTask(task);
-        combineResult(updateBundle, getUpdateBundle(task, serviceRequest, ownTask));
+        Task ourTask = tasksPollingInfo.getOurTask(task);
+        combineResult(updateBundle, getUpdateBundle(task, serviceRequest, ourTask));
       } catch (OurTaskPollingUpdateException exc) {
         combineResult(updateBundle, failTask(task, serviceRequest, exc.getMessage()));
       }
@@ -106,7 +106,7 @@ public class OurTaskPollingService {
     log.info("Task update process finished.");
   }
 
-  protected Bundle getUpdateBundle(Task task, ServiceRequest serviceRequest, Task ownTask) {
+  protected Bundle getUpdateBundle(Task task, ServiceRequest serviceRequest, Task ourTask) {
     Bundle resultBundle = new Bundle();
     resultBundle.setType(Bundle.BundleType.TRANSACTION);
     // Do a copy not to modify an input Task. Possibly this method will fail during execution, and we don't want to
@@ -114,55 +114,57 @@ public class OurTaskPollingService {
     Task resultTask = task.copy();
 
     // If status is the same and comments size are the same  OR CP task in REQUESTED state - do nothing.
-    if ((ownTask.getStatus()
-        .equals(task.getStatus()) && ownTask.getNote()
+    if ((ourTask.getStatus()
+        .equals(task.getStatus()) && ourTask.getNote()
         .size() == task.getNote()
-        .size()) || TaskStatus.REQUESTED.equals(ownTask.getStatus()) || TaskStatus.RECEIVED.equals(
-        ownTask.getStatus())) {
+        .size()) || TaskStatus.REQUESTED.equals(ourTask.getStatus()) || TaskStatus.RECEIVED.equals(
+        ourTask.getStatus())) {
       return resultBundle;
     }
     log.info("Task status/field change detected for id '{}'. '{}' -> '{}'. Updating...", task.getIdElement()
-        .getIdPart(), task.getStatus(), ownTask.getStatus());
+        .getIdPart(), task.getStatus(), ourTask.getStatus());
     // Copy required Task fields
-    copyTaskFields(resultTask, ownTask);
+    copyTaskFields(resultTask, ourTask);
     resultBundle.addEntry(FhirUtil.createPutEntry(resultTask));
-    if (FINISHED_TASK_STATUSES.contains(ownTask.getStatus())) {
+    if (FINISHED_TASK_STATUSES.contains(ourTask.getStatus())) {
       // It is critical to pass a resultTask, not a task, since it will be modified inside.
-      handleFinishedTask(resultBundle, resultTask, serviceRequest, ownTask);
+      handleFinishedTask(resultBundle, resultTask, serviceRequest, ourTask);
     }
     return resultBundle;
   }
 
-  protected void copyTaskFields(Task task, Task ownTask) {
-    task.setStatus(ownTask.getStatus());
-    task.setStatusReason(ownTask.getStatusReason());
-    task.setLastModified(ownTask.getLastModified());
+  protected void copyTaskFields(Task task, Task ourTask) {
+    task.setStatus(ourTask.getStatus());
+    task.setStatusReason(ourTask.getStatusReason());
+    task.setLastModified(ourTask.getLastModified());
     int notesSize = task.getNote()
         .size();
-    int ownNotesSize = ownTask.getNote()
+    int ourNotesSize = ourTask.getNote()
         .size();
-    if (notesSize < ownNotesSize) {
-      ownTask.getNote()
-          .subList(notesSize, ownNotesSize)
+    if (notesSize < ourNotesSize) {
+      ourTask.getNote()
+          .subList(notesSize, ourNotesSize)
           .stream()
-          .filter(ownComment -> ownComment.getAuthor() instanceof Reference)
-          .forEach(ownComment -> {
-            task.addNote(ownComment);
-          });
+          .filter(ourComment -> ourComment.getAuthor() instanceof Reference)
+          .forEach(task::addNote);
     }
   }
 
-  protected void handleFinishedTask(Bundle resultBundle, Task task, ServiceRequest serviceRequest, Task ownTask) {
-    if (TaskStatus.COMPLETED.equals(ownTask.getStatus())) {
+  protected void handleFinishedTask(Bundle resultBundle, Task task, ServiceRequest serviceRequest, Task ourTask) {
+    if (TaskStatus.COMPLETED.equals(ourTask.getStatus())) {
       serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.COMPLETED);
+      resultBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
+    }
+    if (TaskStatus.CANCELLED.equals(ourTask.getStatus())) {
+      serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.REVOKED);
       resultBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
     }
     // Procedure should be present if task status is COMPLETED or CANCELLED. Copy it. Also take care of a Task.output
     // property.
-    if (TaskStatus.COMPLETED.equals(ownTask.getStatus()) || TaskStatus.CANCELLED.equals(ownTask.getStatus())) {
+    if (TaskStatus.COMPLETED.equals(ourTask.getStatus()) || TaskStatus.CANCELLED.equals(ourTask.getStatus())) {
       // Modify Task.output. If task output is of type resulting-activity and contains a Reference to a proper
       // Procedure - copy output changing a Procedure reference to a local one.
-      List<TaskOutputComponent> ownTaskOutputs = ownTask.getOutput()
+      List<TaskOutputComponent> ourTaskOutputs = ourTask.getOutput()
           .stream()
           //We only copy outputs which reference a Code and a Reference
           .filter(t -> t.getValue() instanceof CodeableConcept || (t.getValue() instanceof Reference
@@ -170,35 +172,35 @@ public class OurTaskPollingService {
               .getResourceType()
               .equals(Procedure.class.getSimpleName())))
           .collect(Collectors.toList());
-      if (ownTaskOutputs.size() == 0) {
+      if (ourTaskOutputs.size() == 0) {
         log.warn(
             "No output of type 'http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes|resulting"
                 + "-activity' with a reference to a proper Procedure is present in task with id '{}'. "
-                + "Expecting a reference to a Procedure resource.", ownTask.getIdElement()
+                + "Expecting a reference to a Procedure resource.", ourTask.getIdElement()
                 .getIdPart());
       }
-      Map<String, Procedure> ownProcedureMap = getOwnTaskProcedures(ownTaskOutputs);
-      for (TaskOutputComponent ownTaskOutput : ownTaskOutputs) {
-        TaskOutputComponent taskOutput = ownTaskOutput.copy();
-        if (ownTaskOutput.getValue() instanceof Reference) {
-          Reference ownProcedureReference = (Reference) ownTaskOutput.getValue();
-          String ownProcedureId = ownProcedureReference.getReferenceElement()
+      Map<String, Procedure> ourProcedureMap = getOurTaskProcedures(ourTaskOutputs);
+      for (TaskOutputComponent ourTaskOutput : ourTaskOutputs) {
+        TaskOutputComponent taskOutput = ourTaskOutput.copy();
+        if (ourTaskOutput.getValue() instanceof Reference) {
+          Reference ourProcedureReference = (Reference) ourTaskOutput.getValue();
+          String ourProcedureId = ourProcedureReference.getReferenceElement()
               .getIdPart();
-          Procedure ownProcedure = ownProcedureMap.get(ownProcedureId);
+          Procedure ourProcedure = ourProcedureMap.get(ourProcedureId);
           // All Procedures have the same reason reference as ServiceRequest
-          Procedure resultProcedure = copyProcedure(ownProcedure, task.getFor(), task.getFocus(),
+          Procedure resultProcedure = copyProcedure(ourProcedure, task.getFor(), task.getFocus(),
               serviceRequest.getReasonReference());
           resultProcedure.setId(IdType.newRandomUuid());
           //TODO add identifier
 
           //          resultProcedure.addIdentifier()
           //              .setSystem(SERVER_BASE)
-          //              .setValue(ownProcedureId);
+          //              .setValue(ourProcedureId);
           // Add Procedure to result bundle
           resultBundle.addEntry(FhirUtil.createPostEntry(resultProcedure));
 
           taskOutput.setValue(FhirUtil.toReference(Procedure.class, resultProcedure.getIdElement()
-              .getIdPart(), ownProcedureReference.getDisplay()));
+              .getIdPart(), ourProcedureReference.getDisplay()));
         }
         task.addOutput(taskOutput);
       }
@@ -215,7 +217,7 @@ public class OurTaskPollingService {
         .getResource();
   }
 
-  protected Map<String, Procedure> getOwnTaskProcedures(List<TaskOutputComponent> taskOutputs) {
+  protected Map<String, Procedure> getOurTaskProcedures(List<TaskOutputComponent> taskOutputs) {
     List<String> procedureIds = taskOutputs.stream()
         .map(TaskOutputComponent::getValue)
         .filter(Reference.class::isInstance)

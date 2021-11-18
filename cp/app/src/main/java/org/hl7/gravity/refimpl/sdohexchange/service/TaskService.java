@@ -105,7 +105,7 @@ public class TaskService {
       }
     }
     taskRepository.transaction(bundleFactory.createUpdateBundle());
-    // Usually these will be only the cancel statuses. If so - just cancel the subsequent (own) tasks.
+    // Usually these will be only the cancel statuses. If so - just cancel the subsequent (our) tasks.
     if (update.getStatus() != TaskStatus.ACCEPTED) {
       try {
         sync(taskInfo.getTask(), taskInfo.getServiceRequest());
@@ -117,12 +117,10 @@ public class TaskService {
   }
 
   private Organization getCBOOrganization(String orgId) {
-    Organization cboPerformer = cpClient.read()
+    return cpClient.read()
         .resource(Organization.class)
         .withId(orgId)
         .execute();
-    //TODO check org is CBO
-    return cboPerformer;
   }
 
   private PractitionerRole getRole(UserDto user) {
@@ -151,30 +149,30 @@ public class TaskService {
   }
 
   public void sync(Task task, final ServiceRequest serviceRequest) {
-    Bundle ownUpdateBundle = new Bundle();
-    ownUpdateBundle.setType(Bundle.BundleType.TRANSACTION);
+    Bundle ourUpdateBundle = new Bundle();
+    ourUpdateBundle.setType(Bundle.BundleType.TRANSACTION);
 
-    Bundle ownTaskBundle = taskRepository.findOurTask(task);
-    TaskInfoHolder ownTaskInfo = new TaskInfoBundleExtractor().extract(ownTaskBundle)
+    Bundle ourTaskBundle = taskRepository.findOurTask(task);
+    TaskInfoHolder ourTaskInfo = new TaskInfoBundleExtractor().extract(ourTaskBundle)
         .stream()
         .findFirst()
-        .orElseThrow(() -> new ResourceNotFoundException("No own task is found for task " + task.getIdElement()
+        .orElseThrow(() -> new ResourceNotFoundException("No our task is found for task " + task.getIdElement()
             .getIdPart()));
 
-    Task ownTask = ownTaskInfo.getTask();
-    ownTask.setStatus(task.getStatus());
-    ownTask.setStatusReason(task.getStatusReason());
-    ownTask.setLastModifiedElement(task.getLastModifiedElement());
-    ownTask.setNote(task.getNote());
-    ownUpdateBundle.addEntry(FhirUtil.createPutEntry(ownTask));
+    Task ourTask = ourTaskInfo.getTask();
+    ourTask.setStatus(task.getStatus());
+    ourTask.setStatusReason(task.getStatusReason());
+    ourTask.setLastModifiedElement(task.getLastModifiedElement());
+    ourTask.setNote(task.getNote());
+    ourUpdateBundle.addEntry(FhirUtil.createPutEntry(ourTask));
 
-    ServiceRequest cpServiceRequest = ownTaskInfo.getServiceRequest();
+    ServiceRequest ourServiceRequest = ourTaskInfo.getServiceRequest();
     if (!serviceRequest.getStatus()
-        .equals(cpServiceRequest.getStatus())) {
-      cpServiceRequest.setStatus(serviceRequest.getStatus());
-      ownUpdateBundle.addEntry(FhirUtil.createPutEntry(cpServiceRequest));
+        .equals(ourServiceRequest.getStatus())) {
+      ourServiceRequest.setStatus(serviceRequest.getStatus());
+      ourUpdateBundle.addEntry(FhirUtil.createPutEntry(ourServiceRequest));
     }
-    taskRepository.transaction(ownUpdateBundle);
+    taskRepository.transaction(ourUpdateBundle);
   }
 
 }

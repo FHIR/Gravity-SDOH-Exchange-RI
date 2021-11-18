@@ -26,7 +26,7 @@ import java.util.Objects;
 @Setter
 public class OurTaskUpdateBundleFactory {
 
-  private static final Map<TaskStatus, List<TaskStatus>> TASK_STATE_MACHINE  = new HashMap<>();
+  private static final Map<TaskStatus, List<TaskStatus>> TASK_STATE_MACHINE = new HashMap<>();
 
   private Task task;
   private ServiceRequest serviceRequest;
@@ -37,6 +37,7 @@ public class OurTaskUpdateBundleFactory {
   private UserDto user;
 
   static {
+    TASK_STATE_MACHINE.put(TaskStatus.RECEIVED, Collections.singletonList(TaskStatus.CANCELLED));
     TASK_STATE_MACHINE.put(TaskStatus.ACCEPTED, Collections.singletonList(TaskStatus.CANCELLED));
     TASK_STATE_MACHINE.put(TaskStatus.INPROGRESS, Collections.singletonList(TaskStatus.CANCELLED));
     TASK_STATE_MACHINE.put(TaskStatus.ONHOLD, Collections.singletonList(TaskStatus.CANCELLED));
