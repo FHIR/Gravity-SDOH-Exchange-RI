@@ -155,9 +155,8 @@ export default defineComponent({
 			};
 			saveInProgress.value = true;
 			try {
-				const updatedTask = await TasksModule.updateTask(payload);
+				await TasksModule.updateTask(payload);
 				ctx.emit("close");
-				init(updatedTask);
 			} finally {
 				saveInProgress.value = false;
 				status.value === "Cancelled" ? showDefaultNotification(`Task "${props.task?.name}" has been cancelled!`) :

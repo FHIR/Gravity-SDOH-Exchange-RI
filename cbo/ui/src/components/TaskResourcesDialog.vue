@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, PropType, computed, ref, watch } from "vue";
-import { Resources } from "@/types";
+import { Resources, Task, TaskWithState } from "@/types";
 import { getTaskResources } from "@/api";
 import JsonViewer from "@/components/JsonViewer.vue";
 
@@ -21,21 +21,24 @@ const prepareData = (data: Resources) => [
 export default defineComponent({
 	components: { JsonViewer },
 	props: {
-		taskId: {
-			type: String as PropType<string | null>,
+		task: {
+			type: Object as PropType<TaskWithState | null>,
 			default: null
 		}
 	},
 	emits: ["close"],
 	setup(props, ctx) {
-		const opened = computed(() => props.taskId !== null);
+		const opened = computed(() =>  props.task !== null);
 
 		const originalData = ref<Resources | null>(null);
 
-		watch(() => props.taskId, async taskId => {
+		watch(() => props.task, async task => {
 			originalData.value = null;
-			if (taskId) {
-				originalData.value = await getTaskResources(taskId);
+			if (task) {
+				originalData.value = await getTaskResources({
+					serverId: task.task.serverId,
+					taskId: task.task.id
+				});
 			}
 		}, { immediate: true });
 

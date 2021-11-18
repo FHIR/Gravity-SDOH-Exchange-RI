@@ -39,13 +39,4 @@ export const deleteServer = async (id: number): Promise<void> => {
 	await axios.delete(`/servers/${id}`);
 };
 
-export const getTaskResources = async (taskId: string): Promise<Resources> => ({
-	task: "",
-	serviceRequest: "",
-	requester: "",
-	patient: "",
-	consent: "",
-	conditions: [],
-	goals: [],
-	procedures: []
-});
+export const getTaskResources = ({ serverId, taskId }: {serverId: number, taskId: string}) => axios.get<Resources>(`resources/${serverId}/task/${taskId}`).then(dataOnly);

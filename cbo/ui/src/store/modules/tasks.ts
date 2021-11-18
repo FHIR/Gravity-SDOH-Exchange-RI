@@ -87,13 +87,6 @@ class Tasks extends VuexModule implements ITasks {
 	}
 
 	@Action
-	async refreshTasksNow(onUpdates: (updates: { name: string, oldStatus: string, newStatus: string }[]) => void) {
-		const newList = await getTasks();
-		onUpdates(findUpdates(newList, this.tasks));
-		this.updateTasks(newList);
-	}
-
-	@Action
 	async getTasks(): Promise<void> {
 		this.setIsLoading(true);
 
@@ -108,11 +101,11 @@ class Tasks extends VuexModule implements ITasks {
 	}
 
 	@Action
-	startPolling(onUpdates: (updates: { name: string, oldStatus: string, newStatus: string }[]) => void) {
+	async startPolling(onUpdates: (updates: { name: string, oldStatus: string, newStatus: string }[]) => void) {
 
-		this.getTasks();
+		await this.getTasks();
 
-		poll(() => getTasks(), newList => {
+		await poll(() => getTasks(), newList => {
 			onUpdates(findUpdates(newList, this.tasks));
 			this.updateTasks(newList);
 
@@ -121,12 +114,10 @@ class Tasks extends VuexModule implements ITasks {
 	}
 
 	@Action
-	async updateTask(payload :UpdateTaskPayload): Promise<Task> {
+	async updateTask(payload :UpdateTaskPayload): Promise<void> {
 		await updateTask(payload);
 		const updatedTask = await getTask(payload.id, payload.serverId);
 		this.changeTask(updatedTask);
-
-		return updatedTask;
 	}
 }
 
