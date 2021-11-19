@@ -117,10 +117,18 @@ public class TaskService {
   }
 
   private Organization getCBOOrganization(String orgId) {
-    return cpClient.read()
+    Organization cboPerformer = cpClient.read()
         .resource(Organization.class)
         .withId(orgId)
         .execute();
+    if (!Objects.isNull(cboPerformer) && !Objects.equals("cbo", cboPerformer.getTypeFirstRep()
+        .getCodingFirstRep()
+        .getCode())) {
+      String reason = String.format("Organization resource with '%s' id is not CBO.", cboPerformer.getIdElement()
+          .getIdPart());
+      throw new OrganizationTypeException(reason);
+    }
+    return cboPerformer;
   }
 
   private PractitionerRole getRole(UserDto user) {
@@ -175,4 +183,10 @@ public class TaskService {
     taskRepository.transaction(ourUpdateBundle);
   }
 
+  public static class OrganizationTypeException extends RuntimeException {
+
+    public OrganizationTypeException(String message) {
+      super(message);
+    }
+  }
 }

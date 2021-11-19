@@ -151,17 +151,20 @@ public class OurTaskPollingService {
   }
 
   protected void handleFinishedTask(Bundle resultBundle, Task task, ServiceRequest serviceRequest, Task ourTask) {
+    boolean isFinished = false;
     if (TaskStatus.COMPLETED.equals(ourTask.getStatus())) {
       serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.COMPLETED);
       resultBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
-    }
-    if (TaskStatus.CANCELLED.equals(ourTask.getStatus())) {
+      isFinished = true;
+    } else if (TaskStatus.CANCELLED.equals(ourTask.getStatus()) || TaskStatus.REJECTED.equals(ourTask.getStatus())
+        || TaskStatus.FAILED.equals(ourTask.getStatus())) {
       serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.REVOKED);
       resultBundle.addEntry(FhirUtil.createPutEntry(serviceRequest));
+      isFinished = true;
     }
     // Procedure should be present if task status is COMPLETED or CANCELLED. Copy it. Also take care of a Task.output
     // property.
-    if (TaskStatus.COMPLETED.equals(ourTask.getStatus()) || TaskStatus.CANCELLED.equals(ourTask.getStatus())) {
+    if (isFinished) {
       // Modify Task.output. If task output is of type resulting-activity and contains a Reference to a proper
       // Procedure - copy output changing a Procedure reference to a local one.
       List<TaskOutputComponent> ourTaskOutputs = ourTask.getOutput()
