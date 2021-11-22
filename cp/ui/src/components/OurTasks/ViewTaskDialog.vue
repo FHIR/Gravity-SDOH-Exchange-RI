@@ -19,7 +19,8 @@ type TaskStuff = {
 	statusDate: string,
 	outcome: string,
 	statusReason: string,
-	previouslySetProcedures: string[]
+	previouslySetProcedures: string[],
+	performer: string
 }
 
 const prepareTaskStuff = (task: Task): TaskStuff => ({
@@ -35,7 +36,8 @@ const prepareTaskStuff = (task: Task): TaskStuff => ({
 	statusDate: showDateTime(task.lastModified),
 	outcome: task.outcome || "",
 	statusReason: task.statusReason || "",
-	previouslySetProcedures: task.procedures.map(proc => proc.display)
+	previouslySetProcedures: task.procedures.map(proc => proc.display),
+	performer: task.performer?.display || "",
 });
 
 
@@ -195,6 +197,15 @@ export default defineComponent({
 							>
 								{{ proc }}
 							</el-tag>
+						</el-form-item>
+
+						<el-form-item
+							v-if="taskFields.performer"
+							label="Performing CBO"
+						>
+							<span>
+								{{ taskFields.performer }}
+							</span>
 						</el-form-item>
 					</el-form>
 				</div>

@@ -8,6 +8,7 @@ import { showDate } from "@/utils";
 type TaskDisplayFields = {
 	id: string,
 	taskName: string,
+	baseTaskName: string,
 	isNew: boolean,
 	requestDate: string,
 	priority: string,
@@ -26,6 +27,7 @@ type TaskDisplayFields = {
 const displayTask = ({ task, isNew }: TaskWithState): TaskDisplayFields => ({
 	id: task.id,
 	taskName: task.name,
+	baseTaskName: task.baseTask?.display || "",
 	isNew,
 	requestDate: showDate(task.createdAt),
 	priority: task.priority,
@@ -34,7 +36,7 @@ const displayTask = ({ task, isNew }: TaskWithState): TaskDisplayFields => ({
 	requestor: task.requester.display,
 	patient: task.patient.display,
 	consent: task.consent,
-	performingCBO: "",
+	performingCBO: task.performer?.display || "",
 	payer: "",
 	comment: task.comments[0]?.text || "",
 	outcome: task.outcome || ""
@@ -145,7 +147,7 @@ export default defineComponent({
 				</el-table-column>
 
 				<el-table-column
-					prop="taskName"
+					prop="baseTaskName"
 					label="Service Request Name"
 					:width="290"
 				/>
