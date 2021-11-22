@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
@@ -21,6 +22,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.TaskStatus;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
+import org.hl7.gravity.refimpl.sdohexchange.exception.InvalidOrganizationTypeException;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskReadException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
@@ -105,7 +107,7 @@ public class TaskService {
       }
     }
     taskRepository.transaction(bundleFactory.createUpdateBundle());
-    // Usually these will be only the cancel statuses. If so - just cancel the subsequent (own) tasks.
+    // Usually these will be only the cancel statuses. If so - just cancel the subsequent (our) tasks.
     if (update.getStatus() != TaskStatus.ACCEPTED) {
       try {
         sync(taskInfo.getTask(), taskInfo.getServiceRequest());
@@ -121,8 +123,19 @@ public class TaskService {
         .resource(Organization.class)
         .withId(orgId)
         .execute();
-    //TODO check org is CBO
+    if (cboPerformer != null) {
+      OrganizationTypeCode type = Optional.ofNullable(
+              FhirUtil.findCoding(cboPerformer.getType(), OrganizationTypeCode.SYSTEM))
+          .map(o -> OrganizationTypeCode.fromCode(o.getCode()))
+          .orElse(null);
+      if (type != OrganizationTypeCode.CBO) {
+        String reason = String.format("Organization resource with '%s' id is not CBO.", cboPerformer.getIdElement()
+            .getIdPart());
+        throw new InvalidOrganizationTypeException(reason);
+      }
+    }
     return cboPerformer;
+
   }
 
   private PractitionerRole getRole(UserDto user) {
@@ -151,30 +164,29 @@ public class TaskService {
   }
 
   public void sync(Task task, final ServiceRequest serviceRequest) {
-    Bundle ownUpdateBundle = new Bundle();
-    ownUpdateBundle.setType(Bundle.BundleType.TRANSACTION);
+    Bundle ourUpdateBundle = new Bundle();
+    ourUpdateBundle.setType(Bundle.BundleType.TRANSACTION);
 
-    Bundle ownTaskBundle = taskRepository.findOurTask(task);
-    TaskInfoHolder ownTaskInfo = new TaskInfoBundleExtractor().extract(ownTaskBundle)
+    Bundle ourTaskBundle = taskRepository.findOurTask(task);
+    TaskInfoHolder ourTaskInfo = new TaskInfoBundleExtractor().extract(ourTaskBundle)
         .stream()
         .findFirst()
-        .orElseThrow(() -> new ResourceNotFoundException("No own task is found for task " + task.getIdElement()
+        .orElseThrow(() -> new ResourceNotFoundException("No our task is found for task " + task.getIdElement()
             .getIdPart()));
 
-    Task ownTask = ownTaskInfo.getTask();
-    ownTask.setStatus(task.getStatus());
-    ownTask.setStatusReason(task.getStatusReason());
-    ownTask.setLastModifiedElement(task.getLastModifiedElement());
-    ownTask.setNote(task.getNote());
-    ownUpdateBundle.addEntry(FhirUtil.createPutEntry(ownTask));
+    Task ourTask = ourTaskInfo.getTask();
+    ourTask.setStatus(task.getStatus());
+    ourTask.setStatusReason(task.getStatusReason());
+    ourTask.setLastModifiedElement(task.getLastModifiedElement());
+    ourTask.setNote(task.getNote());
+    ourUpdateBundle.addEntry(FhirUtil.createPutEntry(ourTask));
 
-    ServiceRequest cpServiceRequest = ownTaskInfo.getServiceRequest();
+    ServiceRequest ourServiceRequest = ourTaskInfo.getServiceRequest();
     if (!serviceRequest.getStatus()
-        .equals(cpServiceRequest.getStatus())) {
-      cpServiceRequest.setStatus(serviceRequest.getStatus());
-      ownUpdateBundle.addEntry(FhirUtil.createPutEntry(cpServiceRequest));
+        .equals(ourServiceRequest.getStatus())) {
+      ourServiceRequest.setStatus(serviceRequest.getStatus());
+      ourUpdateBundle.addEntry(FhirUtil.createPutEntry(ourServiceRequest));
     }
-    taskRepository.transaction(ownUpdateBundle);
+    taskRepository.transaction(ourUpdateBundle);
   }
-
 }
