@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
@@ -21,6 +22,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.TaskStatus;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
+import org.hl7.gravity.refimpl.sdohexchange.exception.InvalidOrganizationTypeException;
 import org.hl7.gravity.refimpl.sdohexchange.exception.TaskReadException;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor;
@@ -121,14 +123,19 @@ public class TaskService {
         .resource(Organization.class)
         .withId(orgId)
         .execute();
-    if (!Objects.isNull(cboPerformer) && !Objects.equals("cbo", cboPerformer.getTypeFirstRep()
-        .getCodingFirstRep()
-        .getCode())) {
-      String reason = String.format("Organization resource with '%s' id is not CBO.", cboPerformer.getIdElement()
-          .getIdPart());
-      throw new OrganizationTypeException(reason);
+    if (cboPerformer != null) {
+      OrganizationTypeCode type = Optional.ofNullable(
+              FhirUtil.findCoding(cboPerformer.getType(), OrganizationTypeCode.SYSTEM))
+          .map(o -> OrganizationTypeCode.fromCode(o.getCode()))
+          .orElse(null);
+      if (type != OrganizationTypeCode.CBO) {
+        String reason = String.format("Organization resource with '%s' id is not CBO.", cboPerformer.getIdElement()
+            .getIdPart());
+        throw new InvalidOrganizationTypeException(reason);
+      }
     }
     return cboPerformer;
+
   }
 
   private PractitionerRole getRole(UserDto user) {
@@ -181,12 +188,5 @@ public class TaskService {
       ourUpdateBundle.addEntry(FhirUtil.createPutEntry(ourServiceRequest));
     }
     taskRepository.transaction(ourUpdateBundle);
-  }
-
-  public static class OrganizationTypeException extends RuntimeException {
-
-    public OrganizationTypeException(String message) {
-      super(message);
-    }
   }
 }
