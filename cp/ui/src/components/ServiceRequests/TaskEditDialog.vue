@@ -1,9 +1,9 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed, watch, reactive, toRefs } from "vue";
-import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure, Cbo } from "@/types";
+import { Task, TaskStatus, UpdatedStatus, UpdateTaskPayload, Procedure, Cbo } from "@/types";
 import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
-import { updateTask, getTask, getProceduresForCategory, getCBOList } from "@/api";
+import { getProceduresForCategory, getCBOList } from "@/api";
 import { showDateTime, showOccurrence } from "@/utils";
 import useServiceRequests from "@/state/useServiceRequests";
 
@@ -21,7 +21,8 @@ type TaskStuff = {
 	statusDate: string,
 	outcome: string,
 	statusReason: string,
-	previouslySetProcedures: string[]
+	previouslySetProcedures: string[],
+	performingCBO: string
 }
 
 const initialTaskStuff: TaskStuff = {
@@ -37,7 +38,8 @@ const initialTaskStuff: TaskStuff = {
 	statusDate: "",
 	outcome: "",
 	statusReason: "",
-	previouslySetProcedures: []
+	previouslySetProcedures: [],
+	performingCBO: ""
 };
 
 const Flow: { [status in TaskStatus]?: TaskStatus[] } = {
@@ -60,7 +62,8 @@ const prepareTaskStuff = (task: Task): TaskStuff => ({
 	statusDate: showDateTime(task.lastModified),
 	outcome: task.outcome || "",
 	statusReason: task.statusReason || "",
-	previouslySetProcedures: task.procedures.map(proc => proc.display)
+	previouslySetProcedures: task.procedures.map(proc => proc.display),
+	performingCBO: task.performer?.display || ""
 });
 
 
@@ -303,6 +306,15 @@ export default defineComponent({
 							>
 								{{ comment }}
 							</div>
+						</el-form-item>
+
+						<el-form-item
+							v-if="taskFields.performingCBO"
+							label="Perorming CBO"
+						>
+							<span>
+								{{ taskFields.performingCBO }}
+							</span>
 						</el-form-item>
 					</el-form>
 				</div>
