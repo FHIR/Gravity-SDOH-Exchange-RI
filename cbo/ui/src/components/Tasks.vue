@@ -28,7 +28,7 @@ export default defineComponent({
 		const showLoader = computed<boolean>(() => TasksModule.isLoading);
 
 		onMounted( () => {
-			TasksModule.refreshTasksNow(showUpdates);
+			TasksModule.getTasks();
 		});
 
 		const taskInEdit = ref<Task | null>(null);
@@ -42,10 +42,8 @@ export default defineComponent({
 			taskInEdit.value = null;
 		};
 
-		const taskIdToViewResources = ref<string | null>(null);
-		const viewTaskResources = (taskId: string) => {
-			taskIdToViewResources.value = taskId;
-		};
+		const taskToViewResources = ref<TaskWithState | null>(null);
+		const viewTaskResources = (task: TaskWithState) => taskToViewResources.value = task;
 
 		const search = ref<string>("");
 		const handleSearch = (payload: string) => {
@@ -67,7 +65,7 @@ export default defineComponent({
 			closeDialog,
 			taskInEdit,
 			viewTaskResources,
-			taskIdToViewResources,
+			taskToViewResources,
 			showLoader,
 			handleSearch
 		};
@@ -85,8 +83,8 @@ export default defineComponent({
 			/>
 
 			<TaskResourcesDialog
-				:task-id="taskIdToViewResources"
-				@close="taskIdToViewResources = null"
+				:task="taskToViewResources"
+				@close="taskToViewResources = null"
 			/>
 
 			<TaskTable
