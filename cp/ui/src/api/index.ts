@@ -1,5 +1,5 @@
 import axios from "axios";
-import { User, Task, UpdateTaskPayload, Procedure, Resources, Cbo } from "@/types";
+import { User, Task, UpdateTaskPayload, Procedure, Resources, Cbo, UpdateOurTaskPayload } from "@/types";
 
 
 const dataOnly = <T>({ data }: { data: T }): T => data;
@@ -13,7 +13,11 @@ export const getOurTasks = () => axios.get<Task[]>("/our-task").then(dataOnly);
 
 export const getTask = (taskId: string) => axios.get<Task>(`/task/${taskId}`).then(dataOnly);
 
+export const getOurTask = (taskId: string) => axios.get<Task>(`/our-task/${taskId}`).then(dataOnly);
+
 export const updateTask = (taskId: string, data: UpdateTaskPayload) => axios.put<void>(`/task/${taskId}`, data).then(dataOnly);
+
+export const updateOurTask = (taskId: string, data: UpdateOurTaskPayload) => axios.put<void>(`/our-task/${taskId}`, data).then(dataOnly);
 
 export const getProceduresForCategory = (categoryCode: string) => axios.get<Procedure[]>(`/mappings/categories/${categoryCode}/procedure/codings`).then(dataOnly);
 

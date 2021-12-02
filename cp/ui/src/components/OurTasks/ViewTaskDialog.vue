@@ -1,7 +1,8 @@
 <script lang="ts">
-import { defineComponent, PropType, computed } from "vue";
+import { defineComponent, PropType, computed, ref, watch } from "vue";
 import { Task, TaskStatus } from "@/types";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
+import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import { showDateTime, showOccurrence } from "@/utils";
 import useOurTasks from "@/state/useOurTasks";
 
@@ -40,9 +41,10 @@ const prepareTaskStuff = (task: Task): TaskStuff => ({
 	performer: task.performer?.display || "",
 });
 
+const CancellableStatuses: Set<TaskStatus> = new Set(["Received", "Accepted", "In Progress", "On Hold"]);
 
 export default defineComponent({
-	components: { TaskStatusDisplay },
+	components: { TaskStatusDisplay, TaskStatusSelect },
 	props: {
 		taskId: {
 			type: String as PropType<string | null>,
@@ -51,21 +53,60 @@ export default defineComponent({
 	},
 	emits: ["close"],
 	setup(props, ctx) {
-		const { find } = useOurTasks();
+		const { find, cancelTask } = useOurTasks();
 		const task = computed(() => props.taskId ? find(props.taskId).value : null);
 
 		const opened = computed(() => task.value !== null);
 
 		const taskFields = computed<TaskStuff | null>(() => task.value ? prepareTaskStuff(task.value) : null);
 
+		const canCancel = computed(() => taskFields.value && CancellableStatuses.has(taskFields.value.status));
+
+		const statusModel = ref<TaskStatus>(taskFields.value?.status || "Received");
+		watch(opened, () => {
+			statusModel.value = taskFields.value?.status || "Received";
+			formModel.value.statusReason = "";
+		});
+
+		const statusChanged = computed(() => statusModel.value !== taskFields.value?.status);
+
+		const formModel = ref({
+			statusReason: ""
+		});
+
+		const canSave = computed(() => statusChanged.value && formModel.value.statusReason);
+
+		const saveInProgress = ref(false);
+
+		const save = async () => {
+			try {
+				saveInProgress.value = true;
+				await cancelTask(props.taskId!, formModel.value.statusReason);
+			} finally {
+				saveInProgress.value = false;
+			}
+		};
+
 		const beforeClose = () => {
 			ctx.emit("close");
+		};
+
+		const formRules = {
+			statusReason: [{ required: true, message: "This field is required" }]
 		};
 
 		return {
 			opened,
 			taskFields,
 			beforeClose,
+			canCancel,
+			statusModel,
+			statusChanged,
+			canSave,
+			saveInProgress,
+			formModel,
+			formRules,
+			save
 		};
 	}
 });
@@ -152,10 +193,27 @@ export default defineComponent({
 
 				<div class="editable-part">
 					<el-form
-						ref="formRef"
 						label-position="left"
+						:model="formModel"
+						:rules="formRules"
 					>
 						<el-form-item
+							v-if="canCancel"
+							label="Status"
+						>
+							<TaskStatusSelect
+								v-model="statusModel"
+								:options="[taskFields.status, 'Cancelled']"
+							/>
+							<span
+								v-if="!statusChanged"
+								class="status-date"
+							>
+								{{ taskFields.statusDate }}
+							</span>
+						</el-form-item>
+						<el-form-item
+							v-else
 							label="Status"
 						>
 							<TaskStatusDisplay
@@ -165,6 +223,18 @@ export default defineComponent({
 							<span class="status-date">
 								{{ taskFields.statusDate }}
 							</span>
+						</el-form-item>
+
+						<el-form-item
+							v-if="statusChanged"
+							label="Reason"
+							prop="statusReason"
+						>
+							<el-input
+								v-model="formModel.statusReason"
+								type="textarea"
+								placeholder="Enter reason here"
+							/>
 						</el-form-item>
 
 						<el-form-item
@@ -217,6 +287,15 @@ export default defineComponent({
 					@click="beforeClose"
 				>
 					Close
+				</el-button>
+
+				<el-button
+					:disabled="!canSave"
+					round
+					:loading="saveInProgress"
+					@click="save"
+				>
+					Save
 				</el-button>
 			</div>
 		</el-dialog>

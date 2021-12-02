@@ -102,6 +102,11 @@ export type UpdateTaskPayload = {
 	priorityForCBO?: string
 }
 
+export type UpdateOurTaskPayload = {
+	status: "Cancelled",
+	statusReason: string
+}
+
 
 export type Procedure = {
 	code: string,
