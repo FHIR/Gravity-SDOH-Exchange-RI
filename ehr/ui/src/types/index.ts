@@ -292,3 +292,41 @@ export type ActiveResources = {
 	activeInterventionsCount: number,
 	activeProblemsCount: number
 }
+
+// todo: change after BE sync
+export type PatientTask = {
+	comments: Comment[],
+	createdAt: string,
+	errors: string[],
+	id: string,
+	lastModified: string | null,
+	name: string,
+	organization: TaskOrganization | null,
+	outcome: string | null,
+	priority: "ASAP" | "Routine" | "Urgent" | null,
+	procedures: Procedure[]
+	serviceRequest: ServiceRequest,
+	status: TaskStatus,
+	statusReason: string | null
+};
+
+// todo: change after BE sync
+export type NewPatientTaskPayload = {
+	category: string,
+	conditionIds: string[],
+	consent: string,
+	comment: string,
+	goalIds: string[],
+	performerId: string,
+	code: string,
+	name: string,
+	occurrence: Occurrence | string
+};
+
+// todo: change after BE sync
+export type UpdatePatientTaskPayload = {
+	comment?: string,
+	status: TaskStatus | null,
+	id: string,
+	statusReason?: string
+}

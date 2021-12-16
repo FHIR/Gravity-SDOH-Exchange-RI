@@ -19,7 +19,10 @@ import {
 	NewGoalPayload,
 	GoalCoding,
 	GoalAsCompletedPayload,
-	ActiveResources
+	ActiveResources,
+	PatientTask,
+	NewPatientTaskPayload,
+	UpdatePatientTaskPayload
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -32,6 +35,13 @@ export const getTasks = async (): Promise<Task[]> => {
 	const res = await axios.get("/task");
 
 	return res.data;
+};
+
+// todo: change after BE sync
+export const getPatientTasks = async (): Promise<PatientTask[]> => {
+	const res = await axios.get("/patient-task");
+
+	return res.data
 };
 
 export const getActiveConcerns = async (): Promise<Concern[]> => {
@@ -72,8 +82,22 @@ export const createTask = async (payload: newTaskPayload): Promise<{ taskId: str
 	return res.data;
 };
 
+// todo: change after BE sync
+export const createPatientTask = async (payload: NewPatientTaskPayload): Promise<{ taskId: string }> => {
+	const res = await axios.post("/patient-task", payload);
+
+	return res.data;
+};
+
 export const updateTask = async ({ id, ...data }: updateTaskPayload): Promise<Task> => {
 	const res = await axios.put(`/task/${id}`, data);
+
+	return res.data;
+};
+
+// todo: change after BE sync
+export const updatePatientTask = async ({ id, ...data }: UpdatePatientTaskPayload): Promise<PatientTask> => {
+	const res = await axios.put(`/patient-task/${id}`, data);
 
 	return res.data;
 };
