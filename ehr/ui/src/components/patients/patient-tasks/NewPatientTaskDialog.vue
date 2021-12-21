@@ -1,19 +1,41 @@
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref, computed, watch } from "vue";
 import { RuleItem } from "async-validator";
 
 type FormModel = {
 	name: string,
-	type: string,
+	type: TaskType | "",
 	code: string,
 	status: string,
 	priority: string,
-	comment: string
+	occurrence: string,
+	comment: string,
+	// additional type related fields
+	questionnaireType: string,
+	questionnaireFormat: string,
+	questionnaire: string
 };
 
 const DEFAULT_REQUIRED_RULE = {
 	required: true,
 	message: "This field is required"
+};
+
+type TaskType = "MAKE_CONTACT" | "COMPLETE_QUESTIONNAIRE" | "PROVIDE_FEEDBACK";
+
+const TYPE_CODE_MAP: Record<TaskType, { code: string, display: string }> = {
+	MAKE_CONTACT: {
+		code: "make-contact",
+		display: "Make Contact"
+	},
+	COMPLETE_QUESTIONNAIRE: {
+		code: "complete-questionnaire",
+		display: "Complete Questionnaire"
+	},
+	PROVIDE_FEEDBACK: {
+		code: "adhoc",
+		display: "Adhoc"
+	}
 };
 
 export default defineComponent({
@@ -26,17 +48,21 @@ export default defineComponent({
 	emits: ["close"],
 	setup(_, { emit }) {
 		const saveInProgress = ref<boolean>(false);
-		const typeOptions = ref<{ label: string, value: string }[]>([{
+		const typeOptions = ref<{ label: string, value: TaskType }[]>([{
 			label: "Complete questionnaire regarding social risks",
-			value: "assessment"
+			value: "COMPLETE_QUESTIONNAIRE"
 		}, {
 			label: "Provide feedback on service delivered",
-			value: "referral"
+			value: "PROVIDE_FEEDBACK"
 		}]);
-		const codeOptions = ref<[]>([]);
 		const statusOptions = ref<{ label: string, value: string }[]>([{
 			label: "Ready",
 			value: "ready"
+		}]);
+		// todo: probably will be BE call for list of questionnaires
+		const questionnaireOptions = ref<{ label: string, value: string }[]>([{
+			label: "Hunger Vital Signs",
+			value: "hvs"
 		}]);
 		const formModel = ref<FormModel>({
 			name: "",
@@ -44,14 +70,20 @@ export default defineComponent({
 			code: "",
 			status: "Ready",
 			priority: "Routine",
-			comment: ""
+			occurrence: "",
+			comment: "",
+			questionnaireType: "",
+			questionnaireFormat: "FHIR",
+			questionnaire: ""
 		});
 		const formEl = ref<HTMLFormElement>();
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
 			name: DEFAULT_REQUIRED_RULE,
 			type: DEFAULT_REQUIRED_RULE,
-			code: DEFAULT_REQUIRED_RULE,
-			priority: DEFAULT_REQUIRED_RULE
+			priority: DEFAULT_REQUIRED_RULE,
+			occurrence: DEFAULT_REQUIRED_RULE,
+			questionnaireFormat: DEFAULT_REQUIRED_RULE,
+			questionnaire: DEFAULT_REQUIRED_RULE
 		};
 		const formHasChanges = computed<boolean>(() =>
 			(
@@ -60,9 +92,20 @@ export default defineComponent({
 				formModel.value.code !== "" ||
 				formModel.value.status !== "Ready" ||
 				formModel.value.priority !== "Routine" ||
+				formModel.value.occurrence !== "Routine" ||
 				formModel.value.comment !== ""
 			)
 		);
+
+		watch(() => formModel.value.type, val => {
+			if (val === "COMPLETE_QUESTIONNAIRE") {
+				formModel.value.code = TYPE_CODE_MAP[val].code;
+			}
+		});
+		watch(() => formModel.value.questionnaire, () => {
+			// todo: based on chosen questionnaire set correct type
+			formModel.value.questionnaireType = "risk-questionnaire";
+		});
 
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
@@ -87,7 +130,8 @@ export default defineComponent({
 			formRules,
 			typeOptions,
 			statusOptions,
-			formHasChanges
+			formHasChanges,
+			questionnaireOptions
 		};
 	}
 });
@@ -107,7 +151,7 @@ export default defineComponent({
 			ref="formEl"
 			:model="formModel"
 			:rules="formRules"
-			label-width="155px"
+			label-width="160px"
 			label-position="left"
 			size="mini"
 			class="new-patient-task-form"
@@ -141,12 +185,48 @@ export default defineComponent({
 				label="Code"
 				prop="code"
 			>
-				<el-select
+				<el-input
 					v-model="formModel.code"
 					placeholder="Select code"
 					:disabled="true"
 				/>
 			</el-form-item>
+
+			<template v-if="formModel.type === 'COMPLETE_QUESTIONNAIRE'">
+				<el-form-item
+					label="Questionnaire Type"
+					prop="questionnaireType"
+				>
+					<el-input
+						v-model="formModel.questionnaireType"
+						:disabled="true"
+					/>
+				</el-form-item>
+				<el-form-item
+					label="Questionnaire Format"
+					prop="questionnaireFormat"
+				>
+					<el-radio-group v-model="formModel.questionnaireFormat">
+						<el-radio label="FHIR" />
+					</el-radio-group>
+				</el-form-item>
+				<el-form-item
+					label="FHIR Questionnaire"
+					prop="questionnaire"
+				>
+					<el-select
+						v-model="formModel.questionnaire"
+						placeholder="Select questionnaire"
+					>
+						<el-option
+							v-for="item in questionnaireOptions"
+							:key="item.value"
+							:label="item.label"
+							:value="item.value"
+						/>
+					</el-select>
+				</el-form-item>
+			</template>
 
 			<el-divider />
 
@@ -158,6 +238,7 @@ export default defineComponent({
 					v-model="formModel.status"
 					placeholder="Select status"
 					class="half"
+					:disabled="true"
 				>
 					<el-option
 						v-for="item in statusOptions"
@@ -174,7 +255,20 @@ export default defineComponent({
 				<el-radio-group v-model="formModel.priority">
 					<el-radio label="Routine" />
 					<el-radio label="Urgent" />
+					<el-radio label="ASAP" />
 				</el-radio-group>
+			</el-form-item>
+			<el-form-item
+				label="Occurrence"
+				prop="occurrence"
+			>
+				<el-date-picker
+					v-model="formModel.occurrence"
+					type="daterange"
+					range-separator="To"
+					start-placeholder="Select date"
+					end-placeholder="Select date"
+				/>
 			</el-form-item>
 			<el-form-item
 				label="Comment"
