@@ -1,9 +1,10 @@
-package org.hl7.gravity.refimpl.sdohexchange.codesystems;
+package org.hl7.gravity.refimpl.sdohexchange.sdohmappings;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.System;
 
 @Data
 @NoArgsConstructor

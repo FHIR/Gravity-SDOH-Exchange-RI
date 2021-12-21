@@ -49,9 +49,9 @@ public class TaskController {
   }
 
   @GetMapping
-  @ApiOperation(value = "List all Task resources.",
-      notes = "This will include ALL available Task resources, even the ones created outside of a "
-          + "SDOH use case. Task/ServiceRequest instances can be created manually as well (not through a 'create' "
+  @ApiOperation(value = "List all Task resources.", notes =
+      "This will return all referral Task resources. Task/ServiceRequest instances can be created manually as well "
+          + "(not through a 'create' "
           + "endpoint) - in this case an additional 'errors' field will point out existing issues and help to fix "
           + "them for proper processing.")
   public List<TaskDto> list() {

@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.codes;
+package org.hl7.gravity.refimpl.sdohexchange.codes;
 
 import lombok.Getter;
 

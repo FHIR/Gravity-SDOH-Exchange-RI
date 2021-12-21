@@ -3,6 +3,7 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.codes.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
@@ -32,6 +33,7 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskFailBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.TaskUpdateBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.query.TaskQueryFactory;
+import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.service.CpService.CpClientException;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +114,8 @@ public class TaskService {
 
     Bundle tasksBundle = new TaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .include(Task.INCLUDE_FOCUS)
+        //Get only referral tasks
+        .where(new TokenClientParam("owner:Organization.type").hasSystemWithAnyCode(OrganizationTypeCode.SYSTEM))
         .returnBundle(Bundle.class)
         .execute();
     return new TaskBundleToDtoConverter().convert(tasksBundle);

@@ -3,9 +3,9 @@ package org.hl7.gravity.refimpl.sdohexchange.dao.impl;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.gravity.refimpl.sdohexchange.codes.LoincCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.SDOHTemporaryCode;
 import org.hl7.gravity.refimpl.sdohexchange.dao.FhirRepository;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codes.LoincCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.codes.SDOHTemporaryCode;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,7 +18,7 @@ public class ObservationRepository extends FhirRepository<Observation> {
     super(ehrClient);
   }
 
-  public Bundle findPatientEmploymentStatus(String patientId){
+  public Bundle findPatientEmploymentStatus(String patientId) {
     return getClient().search()
         .forResource(getResourceType())
         .where(Observation.PATIENT.hasId(patientId))
@@ -29,11 +29,12 @@ public class ObservationRepository extends FhirRepository<Observation> {
         .execute();
   }
 
-  public Bundle findPatientEducationLevel(String patientId){
+  public Bundle findPatientEducationLevel(String patientId) {
     return getClient().search()
         .forResource(getResourceType())
         .where(Observation.PATIENT.hasId(patientId))
-        .where(Observation.CODE.exactly().code(LoincCode.HIGHEST_EDUCATION_LEVEL.getCode()))
+        .where(Observation.CODE.exactly()
+            .code(LoincCode.HIGHEST_EDUCATION_LEVEL.getCode()))
         .and(Observation.CODE.hasSystemWithAnyCode(LoincCode.SYSTEM))
         .returnBundle(Bundle.class)
         .execute();

@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.codesystems;
+package org.hl7.gravity.refimpl.sdohexchange.sdohmappings;
 
 import java.util.List;
 import lombok.Data;
