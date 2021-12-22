@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum SDOHTemporaryCode {
   EMPLOYMENT_STATUS("employment-status", "Employment Status"),
-  CONTACT_CODE("contact-entity", "Contact Entity");
+  CONTACT_CODE("contact-entity", "Contact Entity"),
+  QUESTIONNAIRE_CATEGORY("questionnaire-category", "Questionnaire Category"),
+  RISK_QUESTIONNAIRE("risk-questionnaire", "Risk Questionnaire");
 
   private final String code;
   private final String display;

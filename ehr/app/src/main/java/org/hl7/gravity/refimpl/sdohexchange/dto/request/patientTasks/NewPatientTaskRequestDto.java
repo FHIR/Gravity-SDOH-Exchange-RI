@@ -13,7 +13,8 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true)
-@JsonSubTypes({@JsonSubTypes.Type(value = NewMakeContactRequestDto.class, name = "MAKE_CONTACT")})
+@JsonSubTypes({@JsonSubTypes.Type(value = NewMakeContactTaskRequestDto.class, name = "MAKE_CONTACT"),
+    @JsonSubTypes.Type(value = NewSocialRiskTaskRequestDto.class, name = "COMPLETE_SR_QUESTIONNAIRE")})
 public class NewPatientTaskRequestDto {
 
   @NotEmpty(message = "Task name can't be empty.")

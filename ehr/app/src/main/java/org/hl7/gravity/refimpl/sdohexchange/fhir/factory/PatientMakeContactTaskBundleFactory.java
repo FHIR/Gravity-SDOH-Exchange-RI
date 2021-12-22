@@ -1,23 +1,14 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.factory;
 
-import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.HealthcareService;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codes.PatientTaskCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SDOHTemporaryCode;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.OccurrenceRequestDto;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
-import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
-import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 
 /**
@@ -26,51 +17,22 @@ import org.springframework.util.Assert;
  */
 @Getter
 @Setter
-public class PatientMakeContactTaskBundleFactory {
+public class PatientMakeContactTaskBundleFactory extends PatientTaskBundleFactory {
 
-  private String name;
-  private Patient patient;
-  private Priority priority;
-  private OccurrenceRequestDto occurrence;
-  private Reference requester;
   private HealthcareService contactInfo;
   private Task referralTask;
-  private String comment;
-  private UserDto user;
 
   public Bundle createBundle() {
-    Assert.notNull(name, "Name cannot be null.");
-    Assert.notNull(patient, "Patient cannot be null.");
-    Assert.notNull(priority, "Priority cannot be null.");
-    Assert.notNull(occurrence, "Occurrence cannot be null.");
-    Assert.notNull(requester, "Requester (Organization) cannot be null.");
     Assert.notNull(contactInfo, "Contact Info (HealthcareService) cannot be null.");
     Assert.notNull(referralTask, "Referral Task (Task) cannot be null.");
 
-    Bundle bundle = new Bundle();
-    bundle.setType(Bundle.BundleType.TRANSACTION);
-
-    Task task = createTask();
-    bundle.addEntry(FhirUtil.createPostEntry(task));
-
-    return bundle;
+    return super.createBundle();
   }
 
   protected Task createTask() {
-    Task task = new Task();
-    task.getMeta()
-        .addProfile(SDOHProfiles.PATIENT_TASK);
-    task.setStatus(Task.TaskStatus.READY);
-    task.setIntent(Task.TaskIntent.ORDER);
-    task.setPriority(priority.getTaskPriority());
-    task.setAuthoredOnElement(DateTimeType.now());
-    task.setLastModifiedElement(DateTimeType.now());
+    Task task = super.createTask();
     task.getCode()
         .addCoding(PatientTaskCode.MAKE_CONTACT.toCoding());
-    task.setDescription(name);
-    task.setFor(getPatientReference());
-    task.setOwner(getPatientReference());
-    task.setRequester(requester);
     task.addPartOf(new Reference(referralTask.getIdElement()
         .toUnqualifiedVersionless()));
     Task.ParameterComponent input = task.addInput();
@@ -79,19 +41,6 @@ public class PatientMakeContactTaskBundleFactory {
             SDOHTemporaryCode.CONTACT_CODE.getDisplay()));
     input.setValue(new Reference(contactInfo.getIdElement()
         .toUnqualifiedVersionless()));
-
-    if (!Strings.isNullOrEmpty(comment)) {
-      task.addNote()
-          .setText(comment)
-          .setTimeElement(DateTimeType.now())
-          .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
-    }
     return task;
-  }
-
-  private Reference getPatientReference() {
-    return FhirUtil.toReference(Patient.class, patient.getIdElement()
-        .getIdPart(), patient.getNameFirstRep()
-        .getNameAsSingleString());
   }
 }

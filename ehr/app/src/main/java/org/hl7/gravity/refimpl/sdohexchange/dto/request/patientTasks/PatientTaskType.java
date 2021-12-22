@@ -10,8 +10,8 @@ import java.util.List;
 
 @AllArgsConstructor
 public enum PatientTaskType {
-  MAKE_CONTACT(Lists.newArrayList(PatientTaskCode.MAKE_CONTACT.toCoding()));
-
+  MAKE_CONTACT(Lists.newArrayList(PatientTaskCode.MAKE_CONTACT.toCoding())),
+  COMPLETE_SR_QUESTIONNAIRE(Lists.newArrayList(PatientTaskCode.COMPLETE_QUESTIONNAIRE.toCoding()));
   @Getter
   private List<Coding> codes;
 }

@@ -7,7 +7,7 @@ import javax.validation.constraints.NotEmpty;
 
 @Getter
 @Setter
-public class NewMakeContactRequestDto extends NewPatientTaskRequestDto {
+public class NewMakeContactTaskRequestDto extends NewPatientTaskRequestDto {
 
   @NotEmpty(message = "Referral Task id (referralTaskId) can't be empty.")
   private String referralTaskId;

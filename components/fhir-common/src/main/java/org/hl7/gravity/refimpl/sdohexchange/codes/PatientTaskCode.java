@@ -10,8 +10,6 @@ public enum PatientTaskCode {
   ADHOC,
   COMPLETE_QUESTIONNAIRE;
 
-  public static final String SDC_TEMP_CODE_SYSTEM = "http://hl7.org/fhir/uv/sdc/CodeSystem/temp";
-
   public static PatientTaskCode fromCode(String codeString) throws FHIRException {
     if (Strings.isNullOrEmpty(codeString)) {
       return null;
@@ -40,7 +38,7 @@ public enum PatientTaskCode {
       case ADHOC:
         return new Coding(SDOHTemporaryCode.SYSTEM, "adhoc", "Adhoc");
       case COMPLETE_QUESTIONNAIRE:
-        return new Coding(SDC_TEMP_CODE_SYSTEM, "complete-questionnaire", "Complete Questionnaire");
+        return new Coding(SDCTemporaryCode.SYSTEM, "complete-questionnaire", "Complete Questionnaire");
       default:
         return null;
     }

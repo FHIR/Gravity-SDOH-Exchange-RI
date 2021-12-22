@@ -6,12 +6,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.patientTasks.NewMakeContactRequestDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.patientTasks.NewMakeContactTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patientTasks.NewPatientTaskRequestDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.patientTasks.NewSocialRiskTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.PatientMakeContactTaskPrepareBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.PatientSocialRiskTaskPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientMakeContactTaskBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientMakeContactTaskPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientSocialRiskTaskBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientSocialRiskTaskPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientTaskBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,8 +33,26 @@ public class PatientTaskService {
   public String newTask(NewPatientTaskRequestDto taskRequest, UserDto user) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
-    //TODO add support for more types
-    NewMakeContactRequestDto makeContactTaskRequest = (NewMakeContactRequestDto) taskRequest;
+    PatientTaskBundleFactory taskBundleFactory;
+    if (taskRequest instanceof NewMakeContactTaskRequestDto) {
+      taskBundleFactory = createMakeContactTaskBundleFactory(user, (NewMakeContactTaskRequestDto) taskRequest);
+    } else if (taskRequest instanceof NewSocialRiskTaskRequestDto) {
+      taskBundleFactory = createSocialRiskTaskBundleFactory(user, (NewSocialRiskTaskRequestDto) taskRequest);
+    } else {
+      throw new IllegalArgumentException(taskRequest.getClass()
+          .getSimpleName() + " instances not supported yet.");
+    }
+
+    Bundle taskCreateBundle = ehrClient.transaction()
+        .withBundle(taskBundleFactory.createBundle())
+        .execute();
+
+    return FhirUtil.getFromResponseBundle(taskCreateBundle, Task.class)
+        .getIdPart();
+  }
+
+  private PatientMakeContactTaskBundleFactory createMakeContactTaskBundleFactory(UserDto user,
+      NewMakeContactTaskRequestDto makeContactTaskRequest) {
     PatientMakeContactTaskPrepareBundleFactory taskPrepareBundleFactory =
         new PatientMakeContactTaskPrepareBundleFactory(smartOnFhirContext.getPatient(), user.getId(),
             makeContactTaskRequest.getHealthcareServiceId(), makeContactTaskRequest.getReferralTaskId());
@@ -40,22 +63,38 @@ public class PatientTaskService {
         new PatientMakeContactTaskPrepareBundleExtractor().extract(taskRelatedResources);
 
     PatientMakeContactTaskBundleFactory taskBundleFactory = new PatientMakeContactTaskBundleFactory();
-    taskBundleFactory.setName(taskRequest.getName());
+    taskBundleFactory.setName(makeContactTaskRequest.getName());
     taskBundleFactory.setPatient(taskPrepareInfoHolder.getPatient());
-    taskBundleFactory.setPriority(taskRequest.getPriority());
-    taskBundleFactory.setOccurrence(taskRequest.getOccurrence());
+    taskBundleFactory.setPriority(makeContactTaskRequest.getPriority());
+    taskBundleFactory.setOccurrence(makeContactTaskRequest.getOccurrence());
     taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
     taskBundleFactory.setReferralTask(taskPrepareInfoHolder.getReferralTask());
-    taskBundleFactory.setComment(taskRequest.getComment());
+    taskBundleFactory.setComment(makeContactTaskRequest.getComment());
     taskBundleFactory.setUser(user);
     //TODO verify whether the passed HealthcareService instance is related to the task
     taskBundleFactory.setContactInfo(taskPrepareInfoHolder.getHealthcareService());
+    return taskBundleFactory;
+  }
 
-    Bundle taskCreateBundle = ehrClient.transaction()
-        .withBundle(taskBundleFactory.createBundle())
+  private PatientSocialRiskTaskBundleFactory createSocialRiskTaskBundleFactory(UserDto user,
+      NewSocialRiskTaskRequestDto socialRiskTaskRequest) {
+    PatientSocialRiskTaskPrepareBundleFactory taskPrepareBundleFactory = new PatientSocialRiskTaskPrepareBundleFactory(
+        smartOnFhirContext.getPatient(), user.getId(), socialRiskTaskRequest.getQuestionnaireId());
+    Bundle taskRelatedResources = ehrClient.transaction()
+        .withBundle(taskPrepareBundleFactory.createPrepareBundle())
         .execute();
+    PatientSocialRiskTaskPrepareBundleExtractor.PatientSocialRiskTaskPrepareInfoHolder taskPrepareInfoHolder =
+        new PatientSocialRiskTaskPrepareBundleExtractor().extract(taskRelatedResources);
 
-    return FhirUtil.getFromResponseBundle(taskCreateBundle, Task.class)
-        .getIdPart();
+    PatientSocialRiskTaskBundleFactory taskBundleFactory = new PatientSocialRiskTaskBundleFactory();
+    taskBundleFactory.setName(socialRiskTaskRequest.getName());
+    taskBundleFactory.setPatient(taskPrepareInfoHolder.getPatient());
+    taskBundleFactory.setPriority(socialRiskTaskRequest.getPriority());
+    taskBundleFactory.setOccurrence(socialRiskTaskRequest.getOccurrence());
+    taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
+    taskBundleFactory.setComment(socialRiskTaskRequest.getComment());
+    taskBundleFactory.setUser(user);
+    taskBundleFactory.setQuestionniare(taskPrepareInfoHolder.getQuestionnaire());
+    return taskBundleFactory;
   }
 }
