@@ -6,17 +6,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.patientTasks.NewMakeContactTaskRequestDto;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.patientTasks.NewPatientTaskRequestDto;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.patientTasks.NewSocialRiskTaskRequestDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewFeedbackTaskRequestDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewMakeContactTaskRequestDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewPatientTaskRequestDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewSocialRiskTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.PatientMakeContactTaskPrepareBundleExtractor;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.PatientSocialRiskTaskPrepareBundleExtractor;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientMakeContactTaskBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientMakeContactTaskPrepareBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientSocialRiskTaskBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientSocialRiskTaskPrepareBundleFactory;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientTaskBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientFeedbackTaskPrepareBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientMakeContactTaskPrepareBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientSocialRiskTaskPrepareBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientFeedbackTaskBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientFeedbackTaskPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientMakeContactTaskBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientMakeContactTaskPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientSocialRiskTaskBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientSocialRiskTaskPrepareBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientTaskBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +42,8 @@ public class PatientTaskService {
       taskBundleFactory = createMakeContactTaskBundleFactory(user, (NewMakeContactTaskRequestDto) taskRequest);
     } else if (taskRequest instanceof NewSocialRiskTaskRequestDto) {
       taskBundleFactory = createSocialRiskTaskBundleFactory(user, (NewSocialRiskTaskRequestDto) taskRequest);
+    } else if (taskRequest instanceof NewFeedbackTaskRequestDto) {
+      taskBundleFactory = createFeedbackTaskBundleFactory(user, (NewFeedbackTaskRequestDto) taskRequest);
     } else {
       throw new IllegalArgumentException(taskRequest.getClass()
           .getSimpleName() + " instances not supported yet.");
@@ -68,6 +74,7 @@ public class PatientTaskService {
     taskBundleFactory.setPriority(makeContactTaskRequest.getPriority());
     taskBundleFactory.setOccurrence(makeContactTaskRequest.getOccurrence());
     taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
+    //TODO verify whether the passed Task instance is related to the Patient
     taskBundleFactory.setReferralTask(taskPrepareInfoHolder.getReferralTask());
     taskBundleFactory.setComment(makeContactTaskRequest.getComment());
     taskBundleFactory.setUser(user);
@@ -95,6 +102,29 @@ public class PatientTaskService {
     taskBundleFactory.setComment(socialRiskTaskRequest.getComment());
     taskBundleFactory.setUser(user);
     taskBundleFactory.setQuestionniare(taskPrepareInfoHolder.getQuestionnaire());
+    return taskBundleFactory;
+  }
+
+  private PatientTaskBundleFactory createFeedbackTaskBundleFactory(UserDto user,
+      NewFeedbackTaskRequestDto feedbackTaskRequest) {
+    PatientFeedbackTaskPrepareBundleFactory taskPrepareBundleFactory = new PatientFeedbackTaskPrepareBundleFactory(
+        smartOnFhirContext.getPatient(), user.getId(), feedbackTaskRequest.getReferralTaskId());
+    Bundle taskRelatedResources = ehrClient.transaction()
+        .withBundle(taskPrepareBundleFactory.createPrepareBundle())
+        .execute();
+    PatientFeedbackTaskPrepareBundleExtractor.PatientFeedbackTaskPrepareInfoHolder taskPrepareInfoHolder =
+        new PatientFeedbackTaskPrepareBundleExtractor().extract(taskRelatedResources);
+
+    PatientFeedbackTaskBundleFactory taskBundleFactory = new PatientFeedbackTaskBundleFactory();
+    taskBundleFactory.setName(feedbackTaskRequest.getName());
+    taskBundleFactory.setPatient(taskPrepareInfoHolder.getPatient());
+    taskBundleFactory.setPriority(feedbackTaskRequest.getPriority());
+    taskBundleFactory.setOccurrence(feedbackTaskRequest.getOccurrence());
+    taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
+    //TODO verify whether the passed Task instance is related to the Patient
+    taskBundleFactory.setReferralTask(taskPrepareInfoHolder.getReferralTask());
+    taskBundleFactory.setComment(feedbackTaskRequest.getComment());
+    taskBundleFactory.setUser(user);
     return taskBundleFactory;
   }
 }

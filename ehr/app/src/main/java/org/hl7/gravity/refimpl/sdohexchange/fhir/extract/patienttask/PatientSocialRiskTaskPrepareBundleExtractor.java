@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask;
 
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;

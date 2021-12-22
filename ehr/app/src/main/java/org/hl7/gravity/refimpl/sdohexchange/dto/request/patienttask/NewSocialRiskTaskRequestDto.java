@@ -1,8 +1,7 @@
-package org.hl7.gravity.refimpl.sdohexchange.dto.request.patientTasks;
+package org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;

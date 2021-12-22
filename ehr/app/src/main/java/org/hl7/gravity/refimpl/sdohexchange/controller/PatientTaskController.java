@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.UserInfoToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.patientTasks.NewPatientTaskRequestDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewPatientTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.NewTaskResponseDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.PatientTaskService;

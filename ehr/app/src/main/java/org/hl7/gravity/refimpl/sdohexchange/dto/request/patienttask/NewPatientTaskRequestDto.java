@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.dto.request.patientTasks;
+package org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -14,7 +14,8 @@ import javax.validation.constraints.NotNull;
 @Setter
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true)
 @JsonSubTypes({@JsonSubTypes.Type(value = NewMakeContactTaskRequestDto.class, name = "MAKE_CONTACT"),
-    @JsonSubTypes.Type(value = NewSocialRiskTaskRequestDto.class, name = "COMPLETE_SR_QUESTIONNAIRE")})
+    @JsonSubTypes.Type(value = NewSocialRiskTaskRequestDto.class, name = "COMPLETE_SR_QUESTIONNAIRE"),
+    @JsonSubTypes.Type(value = NewFeedbackTaskRequestDto.class, name = "SERVICE_FEEDBACK")})
 public class NewPatientTaskRequestDto {
 
   @NotEmpty(message = "Task name can't be empty.")

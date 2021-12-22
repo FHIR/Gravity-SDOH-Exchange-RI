@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.factory;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask;
 
 import com.google.common.base.Strings;
 import lombok.Getter;
@@ -9,7 +9,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.codes.PatientTaskCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.OccurrenceRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.Priority;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;

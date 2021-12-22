@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.extract;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask;
 
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Patient;
@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.gravity.refimpl.sdohexchange.exception.PrepareBundleException;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.BundleExtractor;
 
 import java.util.List;
 import java.util.Map;

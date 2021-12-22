@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.factory;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask;
 
 import lombok.Getter;
 import lombok.Setter;

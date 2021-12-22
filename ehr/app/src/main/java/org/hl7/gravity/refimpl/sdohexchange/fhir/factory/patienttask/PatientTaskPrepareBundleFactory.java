@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.fhir.factory;
+package org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask;
 
 import ca.uhn.fhir.rest.api.Constants;
 import lombok.AllArgsConstructor;
@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreProfiles;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.util.Assert;
 
