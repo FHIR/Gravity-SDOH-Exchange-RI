@@ -13,7 +13,7 @@ type FormModel = {
 	// additional type related fields
 	questionnaireType: string,
 	questionnaireFormat: string,
-	questionnaire: string
+	questionnaireId: string
 };
 
 const DEFAULT_REQUIRED_RULE = {
@@ -21,14 +21,14 @@ const DEFAULT_REQUIRED_RULE = {
 	message: "This field is required"
 };
 
-type TaskType = "MAKE_CONTACT" | "COMPLETE_QUESTIONNAIRE" | "PROVIDE_FEEDBACK";
+type TaskType = "MAKE_CONTACT" | "COMPLETE_SR_QUESTIONNAIRE" | "PROVIDE_FEEDBACK";
 
 const TYPE_CODE_MAP: Record<TaskType, { code: string, display: string }> = {
 	MAKE_CONTACT: {
 		code: "make-contact",
 		display: "Make Contact"
 	},
-	COMPLETE_QUESTIONNAIRE: {
+	COMPLETE_SR_QUESTIONNAIRE: {
 		code: "complete-questionnaire",
 		display: "Complete Questionnaire"
 	},
@@ -50,7 +50,7 @@ export default defineComponent({
 		const saveInProgress = ref<boolean>(false);
 		const typeOptions = ref<{ label: string, value: TaskType }[]>([{
 			label: "Complete questionnaire regarding social risks",
-			value: "COMPLETE_QUESTIONNAIRE"
+			value: "COMPLETE_SR_QUESTIONNAIRE"
 		}, {
 			label: "Provide feedback on service delivered",
 			value: "PROVIDE_FEEDBACK"
@@ -62,7 +62,7 @@ export default defineComponent({
 		// todo: probably will be BE call for list of questionnaires
 		const questionnaireOptions = ref<{ label: string, value: string }[]>([{
 			label: "Hunger Vital Signs",
-			value: "hvs"
+			value: "27867"
 		}]);
 		const formModel = ref<FormModel>({
 			name: "",
@@ -73,8 +73,8 @@ export default defineComponent({
 			occurrence: "",
 			comment: "",
 			questionnaireType: "",
-			questionnaireFormat: "FHIR",
-			questionnaire: ""
+			questionnaireFormat: "FHIR_QUESTIONNAIRE",
+			questionnaireId: ""
 		});
 		const formEl = ref<HTMLFormElement>();
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
@@ -83,7 +83,7 @@ export default defineComponent({
 			priority: DEFAULT_REQUIRED_RULE,
 			occurrence: DEFAULT_REQUIRED_RULE,
 			questionnaireFormat: DEFAULT_REQUIRED_RULE,
-			questionnaire: DEFAULT_REQUIRED_RULE
+			questionnaireId: DEFAULT_REQUIRED_RULE
 		};
 		const formHasChanges = computed<boolean>(() =>
 			(
@@ -98,13 +98,13 @@ export default defineComponent({
 		);
 
 		watch(() => formModel.value.type, val => {
-			if (val === "COMPLETE_QUESTIONNAIRE") {
+			if (val === "COMPLETE_SR_QUESTIONNAIRE") {
 				formModel.value.code = TYPE_CODE_MAP[val].code;
 			}
 		});
-		watch(() => formModel.value.questionnaire, () => {
+		watch(() => formModel.value.questionnaireId, () => {
 			// todo: based on chosen questionnaire set correct type
-			formModel.value.questionnaireType = "risk-questionnaire";
+			formModel.value.questionnaireType = "RISK_QUESTIONNAIRE";
 		});
 
 		const onDialogClose = () => {
@@ -192,7 +192,7 @@ export default defineComponent({
 				/>
 			</el-form-item>
 
-			<template v-if="formModel.type === 'COMPLETE_QUESTIONNAIRE'">
+			<template v-if="formModel.type === 'COMPLETE_SR_QUESTIONNAIRE'">
 				<el-form-item
 					label="Questionnaire Type"
 					prop="questionnaireType"
@@ -207,15 +207,17 @@ export default defineComponent({
 					prop="questionnaireFormat"
 				>
 					<el-radio-group v-model="formModel.questionnaireFormat">
-						<el-radio label="FHIR" />
+						<el-radio label="FHIR_QUESTIONNAIRE">
+							FHIR Questionnaire
+						</el-radio>
 					</el-radio-group>
 				</el-form-item>
 				<el-form-item
 					label="FHIR Questionnaire"
-					prop="questionnaire"
+					prop="questionnaireId"
 				>
 					<el-select
-						v-model="formModel.questionnaire"
+						v-model="formModel.questionnaireId"
 						placeholder="Select questionnaire"
 					>
 						<el-option
