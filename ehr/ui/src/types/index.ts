@@ -310,17 +310,18 @@ export type PatientTask = {
 	statusReason: string | null
 };
 
-// todo: change after BE sync
 export type NewPatientTaskPayload = {
-	category: string,
-	conditionIds: string[],
-	consent: string,
-	comment: string,
-	goalIds: string[],
-	performerId: string,
 	code: string,
+	comment: string,
 	name: string,
-	occurrence: Occurrence | string
+	occurrence: Occurrence | string,
+	priority: string,
+	type: string,
+	questionnaireType?: string,
+	questionnaireFormat?: string,
+	questionnaireId?: string,
+	referralTaskId?: string,
+	healthcareServiceId?: string
 };
 
 // todo: change after BE sync

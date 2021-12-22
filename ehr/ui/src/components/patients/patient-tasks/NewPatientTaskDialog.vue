@@ -1,6 +1,10 @@
 <script lang="ts">
 import { defineComponent, ref, computed, watch } from "vue";
 import { RuleItem } from "async-validator";
+import { TasksModule } from "@/store/modules/tasks";
+import { PatientTasksModule } from "@/store/modules/patientTasks";
+import { Task, NewPatientTaskPayload } from "@/types";
+import { prepareOccurrence } from "@/utils/utils";
 
 type FormModel = {
 	name: string,
@@ -8,12 +12,13 @@ type FormModel = {
 	code: string,
 	status: string,
 	priority: string,
-	occurrence: string,
+	occurrence: string[],
 	comment: string,
 	// additional type related fields
 	questionnaireType: string,
 	questionnaireFormat: string,
-	questionnaireId: string
+	questionnaireId: string,
+	referralTaskId: string
 };
 
 const DEFAULT_REQUIRED_RULE = {
@@ -21,7 +26,7 @@ const DEFAULT_REQUIRED_RULE = {
 	message: "This field is required"
 };
 
-type TaskType = "MAKE_CONTACT" | "COMPLETE_SR_QUESTIONNAIRE" | "PROVIDE_FEEDBACK";
+type TaskType = "MAKE_CONTACT" | "COMPLETE_SR_QUESTIONNAIRE" | "SERVICE_FEEDBACK";
 
 const TYPE_CODE_MAP: Record<TaskType, { code: string, display: string }> = {
 	MAKE_CONTACT: {
@@ -32,9 +37,9 @@ const TYPE_CODE_MAP: Record<TaskType, { code: string, display: string }> = {
 		code: "complete-questionnaire",
 		display: "Complete Questionnaire"
 	},
-	PROVIDE_FEEDBACK: {
-		code: "adhoc",
-		display: "Adhoc"
+	SERVICE_FEEDBACK: {
+		code: "complete-questionnaire",
+		display: "Complete Questionnaire"
 	}
 };
 
@@ -53,7 +58,7 @@ export default defineComponent({
 			value: "COMPLETE_SR_QUESTIONNAIRE"
 		}, {
 			label: "Provide feedback on service delivered",
-			value: "PROVIDE_FEEDBACK"
+			value: "SERVICE_FEEDBACK"
 		}]);
 		const statusOptions = ref<{ label: string, value: string }[]>([{
 			label: "Ready",
@@ -70,11 +75,12 @@ export default defineComponent({
 			code: "",
 			status: "Ready",
 			priority: "Routine",
-			occurrence: "",
+			occurrence: [],
 			comment: "",
 			questionnaireType: "",
 			questionnaireFormat: "FHIR_QUESTIONNAIRE",
-			questionnaireId: ""
+			questionnaireId: "",
+			referralTaskId: ""
 		});
 		const formEl = ref<HTMLFormElement>();
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
@@ -83,7 +89,8 @@ export default defineComponent({
 			priority: DEFAULT_REQUIRED_RULE,
 			occurrence: DEFAULT_REQUIRED_RULE,
 			questionnaireFormat: DEFAULT_REQUIRED_RULE,
-			questionnaireId: DEFAULT_REQUIRED_RULE
+			questionnaireId: DEFAULT_REQUIRED_RULE,
+			referralTaskId: DEFAULT_REQUIRED_RULE
 		};
 		const formHasChanges = computed<boolean>(() =>
 			(
@@ -92,13 +99,18 @@ export default defineComponent({
 				formModel.value.code !== "" ||
 				formModel.value.status !== "Ready" ||
 				formModel.value.priority !== "Routine" ||
-				formModel.value.occurrence !== "Routine" ||
+				formModel.value.occurrence !== [""] ||
 				formModel.value.comment !== ""
 			)
 		);
+		const referralTasks = computed<Task[]>(() => TasksModule.tasks);
+		const referralTaskOptions = computed<{ label: string, value: string }[]>(() => referralTasks.value.map(t => ({
+			label: t.name,
+			value: t.id
+		})));
 
 		watch(() => formModel.value.type, val => {
-			if (val === "COMPLETE_SR_QUESTIONNAIRE") {
+			if (val === "COMPLETE_SR_QUESTIONNAIRE" || val === "SERVICE_FEEDBACK") {
 				formModel.value.code = TYPE_CODE_MAP[val].code;
 			}
 		});
@@ -111,13 +123,36 @@ export default defineComponent({
 			formEl.value?.resetFields();
 			emit("close");
 		};
-		const onDialogOpen = () => {
-			// todo: fetch needed info here
+		const onDialogOpen = async () => {
+			await TasksModule.getTasks();
 		};
 		const onFormSave = async () => {
 			await formEl.value?.validate();
-			// todo: create new patient task
-			emit("close");
+			saveInProgress.value = true;
+			try {
+				const payload: NewPatientTaskPayload = {
+					code: formModel.value.code,
+					comment: formModel.value.comment,
+					name: formModel.value.name,
+					occurrence: prepareOccurrence(formModel.value.occurrence),
+					priority: formModel.value.priority,
+					type: formModel.value.type
+				};
+
+				if (formModel.value.type === "COMPLETE_SR_QUESTIONNAIRE") {
+					payload.questionnaireType = formModel.value.questionnaireType;
+					payload.questionnaireFormat = formModel.value.questionnaireFormat;
+					payload.questionnaireId = formModel.value.questionnaireId;
+				}
+				if (formModel.value.type === "SERVICE_FEEDBACK") {
+					payload.referralTaskId = formModel.value.referralTaskId;
+				}
+
+				await PatientTasksModule.createTask(payload);
+				emit("close");
+			} finally {
+				saveInProgress.value = false;
+			}
 		};
 
 		return {
@@ -131,7 +166,8 @@ export default defineComponent({
 			typeOptions,
 			statusOptions,
 			formHasChanges,
-			questionnaireOptions
+			questionnaireOptions,
+			referralTaskOptions
 		};
 	}
 });
@@ -181,6 +217,26 @@ export default defineComponent({
 					/>
 				</el-select>
 			</el-form-item>
+
+			<template v-if="formModel.type === 'SERVICE_FEEDBACK'">
+				<el-form-item
+					label="Referral Task"
+					prop="referralTaskId"
+				>
+					<el-select
+						v-model="formModel.referralTaskId"
+						placeholder="Select referral task"
+					>
+						<el-option
+							v-for="item in referralTaskOptions"
+							:key="item.value"
+							:label="item.label"
+							:value="item.value"
+						/>
+					</el-select>
+				</el-form-item>
+			</template>
+
 			<el-form-item
 				label="Code"
 				prop="code"
