@@ -3,9 +3,8 @@ import { defineComponent, PropType, ref, computed, watch, reactive, toRefs } fro
 import { Task, TaskStatus, Occurrence, UpdatedStatus, UpdateTaskPayload, Procedure } from "@/types";
 import TaskStatusSelect from "@/components/TaskStatusSelect.vue";
 import TaskStatusDisplay from "@/components/TaskStatusDisplay.vue";
-import { showDate, showDateTime } from "@/utils";
+import { showDate, showDateTime, showDefaultNotification } from "@/utils";
 import { getProceduresForCategory } from "@/api";
-import { showDefaultNotification } from "@/utils/utils";
 import { TasksModule } from "@/store/modules/tasks";
 
 type TaskStuff = {
@@ -156,9 +155,8 @@ export default defineComponent({
 			};
 			saveInProgress.value = true;
 			try {
-				const updatedTask = await TasksModule.updateTask(payload);
+				await TasksModule.updateTask(payload);
 				ctx.emit("close");
-				init(updatedTask);
 			} finally {
 				saveInProgress.value = false;
 				status.value === "Cancelled" ? showDefaultNotification(`Task "${props.task?.name}" has been cancelled!`) :

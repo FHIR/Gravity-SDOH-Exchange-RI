@@ -14,7 +14,6 @@ import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;
-import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.AuthClientException;
@@ -26,7 +25,6 @@ import org.hl7.gravity.refimpl.sdohexchange.model.Server;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -37,7 +35,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
 public class TaskService {
 
   private static final String SCOPE = "address phone read profile openid email write";
@@ -92,7 +89,10 @@ public class TaskService {
         .equals(Task.TaskIntent.FILLERORDER)) {
       throw new TaskReadException("The intent of Task/" + taskId + " is not filler-order.");
     }
-    return new TaskToDtoConverter().convert(task);
+    return new TaskBundleToDtoConverter(serverId).convert(taskBundle)
+        .stream()
+        .findFirst()
+        .get();
   }
 
   public void update(String id, UpdateTaskRequestDto update) throws AuthClientException {

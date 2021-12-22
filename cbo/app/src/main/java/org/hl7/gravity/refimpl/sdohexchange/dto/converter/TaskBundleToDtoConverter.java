@@ -21,6 +21,7 @@ public class TaskBundleToDtoConverter implements Converter<Bundle, List<TaskDto>
   public TaskBundleToDtoConverter(Integer serverId) {
     this.serverId = serverId;
   }
+
   @Override
   public List<TaskDto> convert(Bundle bundle) {
     return taskInfoBundleParser.extract(bundle)

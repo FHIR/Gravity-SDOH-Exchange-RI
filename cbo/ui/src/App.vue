@@ -1,12 +1,15 @@
 <script lang="ts">
 import "@/assets/scss/styles.scss";
-import { defineComponent, onMounted } from "vue";
+import { defineComponent,  onMounted } from "vue";
 import { ContextModule } from "@/store/context";
+import { TasksModule } from "@/store/modules/tasks";
+import { showUpdates } from "@/utils";
 
 export default defineComponent({
 	name: "App",
 	setup() {
 		onMounted(() => ContextModule.getContext());
+		TasksModule.startPolling(showUpdates);
 	}
 });
 </script>

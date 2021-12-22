@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class TaskUpdateBundleFactory {
 
   private Task task;
   private ServiceRequest serviceRequest;
-  private Task.TaskStatus status;
+  private TaskStatus status;
   private String statusReason;
   private String comment;
   private String outcome;
@@ -48,12 +49,10 @@ public class TaskUpdateBundleFactory {
   private Reference cboTaskOwner;
 
   static {
-    //TODO: Verify this state machine
     TASK_STATE_MACHINE.put(TaskStatus.RECEIVED, Arrays.asList(TaskStatus.REJECTED, TaskStatus.ACCEPTED));
-    TASK_STATE_MACHINE.put(TaskStatus.ACCEPTED, Arrays.asList(TaskStatus.CANCELLED, TaskStatus.INPROGRESS));
-    TASK_STATE_MACHINE.put(TaskStatus.INPROGRESS,
-        Arrays.asList(TaskStatus.ONHOLD, TaskStatus.COMPLETED, TaskStatus.CANCELLED));
-    TASK_STATE_MACHINE.put(TaskStatus.ONHOLD, Arrays.asList(TaskStatus.INPROGRESS, TaskStatus.CANCELLED));
+    TASK_STATE_MACHINE.put(TaskStatus.ACCEPTED, Collections.singletonList(TaskStatus.CANCELLED));
+    TASK_STATE_MACHINE.put(TaskStatus.INPROGRESS, Collections.singletonList(TaskStatus.CANCELLED));
+    TASK_STATE_MACHINE.put(TaskStatus.ONHOLD, Collections.singletonList(TaskStatus.CANCELLED));
   }
 
   public Bundle createUpdateBundle() {
@@ -90,7 +89,7 @@ public class TaskUpdateBundleFactory {
         Assert.notNull(priorityForCBO, "Priority for CBO cannot be null.");
         Assert.notNull(cboTaskRequester, "CBO Task requester cannot be null.");
 
-        //TODO move to OwnTaskBundleFactory
+        //TODO move to OurTaskBundleFactory
         ServiceRequest cboServiceRequest = serviceRequest.copy();
         cboServiceRequest.setId(IdType.newRandomUuid());
         cboServiceRequest.getIdentifier()
