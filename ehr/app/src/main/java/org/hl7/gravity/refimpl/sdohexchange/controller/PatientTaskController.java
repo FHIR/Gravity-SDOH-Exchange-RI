@@ -8,10 +8,12 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.converter.UserInfoToDtoConverter
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewPatientTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.NewTaskResponseDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskItemDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.PatientTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("patient-task")
@@ -27,6 +30,15 @@ import javax.validation.Valid;
 public class PatientTaskController {
 
   private final PatientTaskService patientTaskService;
+
+  @GetMapping
+  @ApiOperation(value = "List all Patient Task resources.",
+      notes = "This will return all patient Task resources. Task instances can be created manually as well "
+          + "(not through a 'create' endpoint) - in this case an additional 'errors' field will point out existing "
+          + "issues and help to fix them for proper processing.")
+  public List<PatientTaskItemDto> list() {
+    return patientTaskService.listTasks();
+  }
 
   @PostMapping
   @ApiOperation(value = "Create a new Patient task.",

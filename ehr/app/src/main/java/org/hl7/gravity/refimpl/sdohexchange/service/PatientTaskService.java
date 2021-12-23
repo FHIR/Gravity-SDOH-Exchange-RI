@@ -1,16 +1,22 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.gravity.refimpl.sdohexchange.codes.SDCTemporaryCode;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PatientTaskBundleToItemDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewFeedbackTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewMakeContactTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewPatientTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewSocialRiskTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskItemDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientFeedbackTaskPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientMakeContactTaskPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientSocialRiskTaskPrepareBundleExtractor;
@@ -21,10 +27,15 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientMake
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientSocialRiskTaskBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientSocialRiskTaskPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientTaskBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.query.PatientTaskQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -33,6 +44,48 @@ public class PatientTaskService {
 
   private final SmartOnFhirContext smartOnFhirContext;
   private final IGenericClient ehrClient;
+
+  public List<PatientTaskItemDto> listTasks() {
+    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+
+    Bundle tasksBundle = new PatientTaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+        .include(Task.INCLUDE_PART_OF)
+        //Get only patient tasks
+        .where(new TokenClientParam("owner:Patient").exactly()
+            .code(smartOnFhirContext.getPatient()))
+        .returnBundle(Bundle.class)
+        .execute();
+    tasksBundle = addQuestionnairesToTaskBundle(tasksBundle);
+    return new PatientTaskBundleToItemDtoConverter().convert(tasksBundle);
+  }
+
+  private Bundle addQuestionnairesToTaskBundle(Bundle responseBundle) {
+    // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
+    List<String> urls = FhirUtil.getFromBundle(responseBundle, Task.class)
+        .stream()
+        .map(t -> t.getInput()
+            .stream()
+            .filter(i -> SDCTemporaryCode.QUESTIONNAIRE.getCode()
+                .equals(i.getType()
+                    .getCodingFirstRep()
+                    .getCode()))
+            .findAny()
+            .orElse(null))
+        .filter(Objects::nonNull)
+        .filter(i -> i.getValue() instanceof CanonicalType)
+        .map(i -> ((CanonicalType) i.getValue()).getValue())
+        .collect(Collectors.toList());
+
+    Bundle questionnaires = ehrClient.search()
+        .forResource(Questionnaire.class)
+        .where(Questionnaire.URL.matches()
+            .values(urls))
+        .returnBundle(Bundle.class)
+        .execute();
+
+    Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+    return merged;
+  }
 
   public String newTask(NewPatientTaskRequestDto taskRequest, UserDto user) {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
