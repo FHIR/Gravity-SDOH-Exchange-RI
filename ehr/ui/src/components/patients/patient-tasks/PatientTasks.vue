@@ -7,30 +7,26 @@ import NewPatientTaskDialog from "@/components/patients/patient-tasks/NewPatient
 import { PatientTasksModule } from "@/store/modules/patientTasks";
 import {
 	Coding,
-	Comment,
-	Occurrence,
-	PatientTask, Procedure,
-	ServiceRequestCondition,
-	ServiceRequestGoal,
+	PatientTask,
 	TaskStatus
 } from "@/types";
 
 export type TableData = {
-	name: string,
-	status: TaskStatus,
-	category: Coding,
-	problems: ServiceRequestCondition[],
-	goals: ServiceRequestGoal[],
-	performer: string | null | undefined,
-	consent: string
-	outcomes: string | null,
-	comments: Comment[],
-	lastModified: string | null,
-	request: Coding,
-	priority: string | null,
-	occurrence: Occurrence,
-	procedures: Procedure[],
 	id: string,
+	name: string,
+	type: string | null,
+	status: TaskStatus,
+	lastModified: string | null,
+	code: Coding | null,
+	referral: {
+		id: string,
+		display: string
+	} | null,
+	assessment: {
+		id: string,
+		display: string
+	} | null,
+	outcomes: string | null,
 	statusReason: string | null
 };
 
@@ -48,21 +44,15 @@ export default defineComponent({
 		const tasks = computed<PatientTask[]>(() => PatientTasksModule.tasks);
 		const tableData = computed<TableData[]>(() =>
 			tasks.value.map((task: PatientTask) => ({
-				name: task.name,
-				status: task.status,
-				category: task.serviceRequest.category,
-				problems: task.serviceRequest.conditions,
-				goals: task.serviceRequest.goals,
-				performer: task.organization?.display,
-				consent: task.serviceRequest.consent.display,
-				outcomes: task.outcome,
-				comments: task.comments,
-				lastModified: task.lastModified,
-				request: task.serviceRequest.code,
-				priority: task.priority,
-				occurrence: task.serviceRequest.occurrence,
-				procedures: task.procedures,
 				id: task.id,
+				name: task.name,
+				type: task.type,
+				status: task.status,
+				lastModified: task.lastModified,
+				code: task.code,
+				referral: task.referralTask,
+				assessment: task.assessment,
+				outcomes: task.outcome,
 				statusReason: task.statusReason
 			}))
 		);

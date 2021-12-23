@@ -63,29 +63,39 @@ export default defineComponent({
 				label="Type"
 			/>
 
-			<el-table-column
-				prop="code"
-				label="Code"
-			/>
-
-			<el-table-column
-				prop="status"
-				label="Status"
-			/>
-
-			<el-table-column
-				prop="Date"
-				label="Date"
-			/>
-
-			<el-table-column
-				prop="basedOn"
-				label="Based On"
-			/>
-
-			<el-table-column label="Outcomes">
+			<el-table-column label="Status">
 				<template #default="scope">
-					{{ scope.row.statusReason ? scope.row.statusReason : scope.row.outcomes }}
+					<div class="status-cell">
+						<TaskStatusIcon :status="scope.row.status" />
+						<div class="info">
+							<span class="status">{{ scope.row.status }}</span>
+							<span class="date">{{ $filters.formatDateTime(scope.row.lastModified) }}</span>
+						</div>
+					</div>
+				</template>
+			</el-table-column>
+
+			<el-table-column label="Code">
+				<template #default="scope">
+					{{ scope.row.code?.display || "N/A" }}
+				</template>
+			</el-table-column>
+
+			<el-table-column label="Referral">
+				<template #default="scope">
+					{{ scope.row.referral?.display || "N/A" }}
+				</template>
+			</el-table-column>
+
+			<el-table-column label="Assessment">
+				<template #default="scope">
+					{{ scope.row.assessment?.display || "N/A" }}
+				</template>
+			</el-table-column>
+
+			<el-table-column label="Outcomes/Reason">
+				<template #default="scope">
+					{{ scope.row.statusReason || scope.row.outcomes || "N/A" }}
 				</template>
 			</el-table-column>
 		</el-table>
