@@ -41,7 +41,7 @@ export const getTasks = async (): Promise<Task[]> => {
 export const getPatientTasks = async (): Promise<PatientTask[]> => {
 	const res = await axios.get("/patient-task");
 
-	return res.data
+	return res.data;
 };
 
 export const getActiveConcerns = async (): Promise<Concern[]> => {
