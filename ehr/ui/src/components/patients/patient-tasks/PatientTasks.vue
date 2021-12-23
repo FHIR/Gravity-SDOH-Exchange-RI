@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted, onUnmounted } from "vue";
+import { defineComponent, ref, computed, onMounted, onUnmounted, watch, h } from "vue";
 import NoItems from "@/components/patients/NoItems.vue";
 import NoActiveItems from "@/components/patients/NoActiveItems.vue";
 import PatientTasksTable from "@/components/patients/patient-tasks/PatientTasksTable.vue";
@@ -10,6 +10,9 @@ import {
 	PatientTask,
 	TaskStatus
 } from "@/types";
+import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
+import { ElNotification } from "element-plus";
+import { taskStatusDiff } from "@/components/patients/action-steps/ActionSteps.vue";
 
 export type TableData = {
 	id: string,
@@ -75,6 +78,55 @@ export default defineComponent({
 		};
 		onUnmounted(() => {
 			clearTimeout(pollId.value);
+		});
+
+		// todo: check what are the rules for notifications show
+		const findDiff = (val: PatientTask[], oldVal: PatientTask[]): taskStatusDiff[] =>
+			val.flatMap((task: PatientTask) => {
+				const existingTask = oldVal.find(t => t.id === task.id);
+				if (!existingTask) {
+					return [];
+				}
+
+				const oldStatus = existingTask.status;
+				const newStatus = task.status;
+				if (oldStatus === newStatus) {
+					return [];
+				}
+
+				return [{
+					name: task.name,
+					oldStatus,
+					newStatus
+				}];
+			});
+
+		watch(() => tasks.value, (val, oldVal) => {
+			const diff = findDiff(val, oldVal);
+
+			diff.forEach(update => {
+				const message = h("p", [
+					`Patient changed status of task "${update.name}" from `,
+					h(TaskStatusIcon, {
+						status: update.oldStatus,
+						small: true,
+						showLabel: true
+					}),
+					" to ",
+					h(TaskStatusIcon,{
+						status: update.newStatus,
+						small: true,
+						showLabel: true
+					})
+				]);
+
+				ElNotification({
+					title: "Notification",
+					iconClass: "notification-bell",
+					duration: 10000,
+					message
+				});
+			});
 		});
 
 		const handleDialogClose = () => {
