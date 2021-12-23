@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.codesystems;
+package org.hl7.gravity.refimpl.sdohexchange.sdohmappings;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +40,7 @@ public class SDOHMappings implements InitializingBean {
         .orElse(Collections.emptyList());
   }
 
-  public List<org.hl7.gravity.refimpl.sdohexchange.codesystems.Coding> findAllResourceCodings(String categoryCode,
+  public List<org.hl7.gravity.refimpl.sdohexchange.sdohmappings.Coding> findAllResourceCodings(String categoryCode,
       Class<? extends org.hl7.fhir.r4.model.Resource> resourceClass) {
     return Optional.ofNullable(findCategory(categoryCode).findResource(resourceClass))
         .map(Resource::getSystems)

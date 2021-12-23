@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.hl7.fhir.r4.model.codesystems.SearchModifierCode;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TaskInfoBundleExtractor.TaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.TasksPollingBundleExtractor;

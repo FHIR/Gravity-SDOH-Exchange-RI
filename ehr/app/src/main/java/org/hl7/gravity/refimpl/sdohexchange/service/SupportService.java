@@ -10,15 +10,18 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Goal;
+import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r5.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ConditionToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.GoalToInfoDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.HealthcareServiceBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.OrganizationToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ActiveResourcesDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalInfoDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.HealthcareServiceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OrganizationDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
@@ -95,6 +98,18 @@ public class SupportService {
         .stream()
         .map(org -> new OrganizationToDtoConverter().convert(org))
         .collect(Collectors.toList());
+  }
+
+  public List<HealthcareServiceDto> listHealthcareServices(String organizationId) {
+    Bundle servicesBundle = ehrClient.search()
+        .forResource(HealthcareService.class)
+        .sort()
+        .descending(Constants.PARAM_LASTUPDATED)
+        .where(HealthcareService.ORGANIZATION.hasId(organizationId))
+        .include(HealthcareService.INCLUDE_LOCATION)
+        .returnBundle(Bundle.class)
+        .execute();
+    return new HealthcareServiceBundleToDtoConverter().convert(servicesBundle);
   }
 
   //TODO do this in parallel.

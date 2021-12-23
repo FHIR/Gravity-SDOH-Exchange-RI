@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.auth.AuthorizationClient;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dao.ServerRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dao.TaskRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.TaskBundleToDtoConverter;

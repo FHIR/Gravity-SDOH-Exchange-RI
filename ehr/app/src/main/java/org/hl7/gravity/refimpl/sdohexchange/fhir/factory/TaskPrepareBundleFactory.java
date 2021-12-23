@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.codesystems.EndpointConnectionType;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.OrganizationTypeCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;

@@ -4,7 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.gravity.refimpl.sdohexchange.codesystems.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.SDOHMappings;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;

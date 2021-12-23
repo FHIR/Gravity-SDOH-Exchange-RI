@@ -1,5 +1,5 @@
 sdoh-mappings:
-  system: "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes"
+  system: "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/SDOHCC-CodeSystemTemporaryCodes"
   categories:
     - code: "food-insecurity"
       display: "Food Insecurity"
