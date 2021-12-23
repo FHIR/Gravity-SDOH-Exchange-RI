@@ -2,15 +2,18 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SDCTemporaryCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PatientTaskBundleToItemDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewFeedbackTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewMakeContactTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewPatientTaskRequestDto;
@@ -20,6 +23,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTask
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientFeedbackTaskPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientMakeContactTaskPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientSocialRiskTaskPrepareBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.PatientTaskUpdateBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientFeedbackTaskBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientFeedbackTaskPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.patienttask.PatientMakeContactTaskBundleFactory;
@@ -85,6 +89,26 @@ public class PatientTaskService {
 
     Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
     return merged;
+  }
+
+  public void update(String id, UpdateTaskRequestDto update, UserDto user) {
+    Task task = ehrClient.read()
+        .resource(Task.class)
+        .withId(id)
+        .execute();
+    if (task == null) {
+      throw new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id));
+    }
+    PatientTaskUpdateBundleFactory updateBundleFactory = new PatientTaskUpdateBundleFactory();
+    updateBundleFactory.setTask(task);
+    updateBundleFactory.setStatus(update.getFhirStatus());
+    updateBundleFactory.setStatusReason(update.getStatusReason());
+    updateBundleFactory.setComment(update.getComment());
+    updateBundleFactory.setUser(user);
+
+    ehrClient.transaction()
+        .withBundle(updateBundleFactory.createUpdateBundle())
+        .execute();
   }
 
   public String newTask(NewPatientTaskRequestDto taskRequest, UserDto user) {
