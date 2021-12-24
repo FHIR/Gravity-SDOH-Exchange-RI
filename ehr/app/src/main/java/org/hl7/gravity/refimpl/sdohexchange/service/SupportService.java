@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
+import com.google.common.base.Strings;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -12,6 +13,7 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r5.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codes.OrganizationTypeCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ConditionToDtoConverter;
@@ -23,6 +25,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConditionDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.GoalInfoDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.HealthcareServiceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.OrganizationDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.ConditionClinicalStatusCodes;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCoreConditionCategory;
@@ -110,6 +113,20 @@ public class SupportService {
         .returnBundle(Bundle.class)
         .execute();
     return new HealthcareServiceBundleToDtoConverter().convert(servicesBundle);
+  }
+
+  public List<ReferenceDto> listAssessments() {
+    Bundle bundle = ehrClient.search()
+        .forResource(Questionnaire.class)
+        .sort()
+        .descending(Constants.PARAM_LASTUPDATED)
+        .returnBundle(Bundle.class)
+        .execute();
+    return FhirUtil.getFromBundle(bundle, Questionnaire.class)
+        .stream()
+        .map(q -> new ReferenceDto(q.getIdElement()
+            .getIdPart(), Strings.isNullOrEmpty(q.getTitle()) ? q.getName() : q.getTitle()))
+        .collect(Collectors.toList());
   }
 
   //TODO do this in parallel.
