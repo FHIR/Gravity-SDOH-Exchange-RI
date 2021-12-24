@@ -49,6 +49,22 @@ public class PatientTaskService {
   private final SmartOnFhirContext smartOnFhirContext;
   private final IGenericClient ehrClient;
 
+  public PatientTaskItemDto read(String id) {
+    Bundle taskBundle = new PatientTaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+        .include(Task.INCLUDE_PART_OF)
+        .where(Task.RES_ID.exactly()
+            .code(id))
+        //Get only patient tasks
+        .where(new TokenClientParam("owner:Patient").exactly()
+            .code(smartOnFhirContext.getPatient()))
+        .returnBundle(Bundle.class)
+        .execute();
+    return new PatientTaskBundleToItemDtoConverter().convert(taskBundle)
+        .stream()
+        .findFirst()
+        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)));
+  }
+
   public List<PatientTaskItemDto> listTasks() {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 

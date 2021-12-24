@@ -36,6 +36,12 @@ public class PatientTaskController {
 
   private final PatientTaskService patientTaskService;
 
+  @GetMapping("/{id}")
+  @ApiOperation(value = "Read Patient Task resource by id.")
+  public PatientTaskItemDto read(@PathVariable @NotBlank(message = "") String id) {
+    return patientTaskService.read(id);
+  }
+
   @GetMapping
   @ApiOperation(value = "List all Patient Task resources.",
       notes = "This will return all patient Task resources. Task instances can be created manually as well "
