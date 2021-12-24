@@ -9,6 +9,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewPatientTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.NewTaskResponseDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskItemDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.PatientTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class PatientTaskController {
 
   @GetMapping("/{id}")
   @ApiOperation(value = "Read Patient Task resource by id.")
-  public PatientTaskItemDto read(@PathVariable @NotBlank(message = "") String id) {
+  public PatientTaskDto read(@PathVariable @NotBlank(message = "") String id) {
     return patientTaskService.read(id);
   }
 

@@ -27,7 +27,7 @@ public class PatientTaskInfoHolderToItemDtoConverter
   public PatientTaskItemDto convert(PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder taskInfoHolder) {
     Task task = taskInfoHolder.getTask();
     Questionnaire questionnaire = taskInfoHolder.getQuestionnaire();
-    PatientTaskItemDto taskDto = new PatientTaskItemDto();
+    PatientTaskItemDto taskDto = createDto();
     taskDto.setId(task.getIdElement()
         .getIdPart());
     taskDto.setName(task.getDescription());
@@ -66,6 +66,10 @@ public class PatientTaskInfoHolderToItemDtoConverter
       }
     }
     return taskDto;
+  }
+
+  protected PatientTaskItemDto createDto() {
+    return new PatientTaskItemDto();
   }
 
   private void setTaskType(Task task, PatientTaskItemDto taskDto, PatientTaskCode code) {

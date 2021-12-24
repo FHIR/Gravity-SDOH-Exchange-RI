@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SDCTemporaryCode;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PatientTaskBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PatientTaskBundleToItemDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewFeedbackTaskRequestDto;
@@ -19,6 +20,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewMakeConta
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewPatientTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewSocialRiskTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskItemDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientFeedbackTaskPrepareBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientMakeContactTaskPrepareBundleExtractor;
@@ -49,7 +51,7 @@ public class PatientTaskService {
   private final SmartOnFhirContext smartOnFhirContext;
   private final IGenericClient ehrClient;
 
-  public PatientTaskItemDto read(String id) {
+  public PatientTaskDto read(String id) {
     Bundle taskBundle = new PatientTaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .include(Task.INCLUDE_PART_OF)
         .where(Task.RES_ID.exactly()
@@ -59,7 +61,7 @@ public class PatientTaskService {
             .code(smartOnFhirContext.getPatient()))
         .returnBundle(Bundle.class)
         .execute();
-    return new PatientTaskBundleToItemDtoConverter().convert(taskBundle)
+    return new PatientTaskBundleToDtoConverter().convert(taskBundle)
         .stream()
         .findFirst()
         .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)));
