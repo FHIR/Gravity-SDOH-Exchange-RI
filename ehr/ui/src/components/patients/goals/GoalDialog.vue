@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, reactive, computed, toRefs } from "vue";
 import { TableData, ACHIEVEMENT_STATUSES } from "@/components/patients/goals/Goals.vue";
-import { Coding, ServiceRequestCondition, UpdateGoalPayload,GoalAsCompletedPayload } from "@/types";
+import { Coding, Reference, UpdateGoalPayload,GoalAsCompletedPayload } from "@/types";
 import { RuleItem } from "async-validator";
 import { getCategories, getRequests, getServiceRequestConditions } from "@/api";
 import { GoalsModule } from "@/store/modules/goals";
@@ -62,7 +62,7 @@ export default defineComponent({
 		const showConfirm = computed<boolean>(() => phase.value === "mark-as-completed" || phase.value == "remove");
 		const categoryOptions = ref<Coding[]>([]);
 		const codeOptions = ref<Coding[]>([]);
-		const problemOptions = ref<ServiceRequestCondition[]>([]);
+		const problemOptions = ref<Reference[]>([]);
 
 		const formModel = reactive<FormModel>({
 			category: "",

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, PropType, reactive, ref, watch } from "vue";
 import { getServiceRequestGoals, getServiceRequestConditions, getOrganizations, getCategories, getRequests, getConsentList } from "@/api";
-import { ServiceRequestCondition, ServiceRequestGoal, newTaskPayload, Organization, Coding } from "@/types";
+import { Reference, newTaskPayload, Organization, Coding } from "@/types";
 import _ from "@/vendors/lodash";
 import { TasksModule } from "@/store/modules/tasks";
 import { RuleItem } from "async-validator";
@@ -37,8 +37,8 @@ export default defineComponent({
 	setup(props, { emit }) {
 		const categoryOptions = ref<Coding[]>([]);
 		const requestOptions = ref<Coding[]>([]);
-		const conditionOptions = ref<ServiceRequestCondition[]>([]);
-		const goalOptions = ref<ServiceRequestGoal[]>([]);
+		const conditionOptions = ref<Reference[]>([]);
+		const goalOptions = ref<Reference[]>([]);
 		const performerOptions = ref<Organization[]>([]);
 		const consentOptions = ref<{ id: string, name: string }[]>([]);
 

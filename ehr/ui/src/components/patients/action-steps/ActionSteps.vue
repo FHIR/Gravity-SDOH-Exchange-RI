@@ -2,7 +2,7 @@
 import { computed, defineComponent, onMounted, onUnmounted, ref, watch, h, PropType } from "vue";
 import RequestTable from "@/components/patients/action-steps/RequestTable.vue";
 import NewRequestDialog from "@/components/patients/action-steps/NewRequestDialog.vue";
-import { Comment, Occurrence, Task, ServiceRequestCondition, ServiceRequestGoal, Procedure, TaskStatus, Coding } from "@/types";
+import { Comment, Occurrence, Task, Reference, TaskStatus, Coding } from "@/types";
 import { TasksModule } from "@/store/modules/tasks";
 import { ElNotification } from "element-plus";
 import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
@@ -12,8 +12,8 @@ export type TableData = {
 	name: string,
 	status: TaskStatus,
 	category: Coding,
-	problems: ServiceRequestCondition[],
-	goals: ServiceRequestGoal[],
+	problems: Reference[],
+	goals: Reference[],
 	performer: string | null | undefined,
 	consent: string
 	outcomes: string | null,
@@ -22,7 +22,7 @@ export type TableData = {
 	request: Coding,
 	priority: string | null,
 	occurrence: Occurrence,
-	procedures: Procedure[],
+	procedures: Reference[],
 	id: string,
 	statusReason: string | null
 }
