@@ -5,6 +5,7 @@ import { TasksModule } from "@/store/modules/tasks";
 import { PatientTasksModule } from "@/store/modules/patientTasks";
 import { Task, NewPatientTaskPayload } from "@/types";
 import { prepareOccurrence } from "@/utils/utils";
+import { getAssessments } from "@/api";
 
 type FormModel = {
 	name: string,
@@ -64,11 +65,7 @@ export default defineComponent({
 			label: "Ready",
 			value: "ready"
 		}]);
-		// todo: probably will be BE call for list of questionnaires
-		const questionnaireOptions = ref<{ label: string, value: string }[]>([{
-			label: "Hunger Vital Signs",
-			value: "27867"
-		}]);
+		const questionnaireOptions = ref<{ label: string, value: string }[]>([]);
 		const formModel = ref<FormModel>({
 			name: "",
 			type: "",
@@ -112,11 +109,8 @@ export default defineComponent({
 		watch(() => formModel.value.type, val => {
 			if (val === "COMPLETE_SR_QUESTIONNAIRE" || val === "SERVICE_FEEDBACK") {
 				formModel.value.code = TYPE_CODE_MAP[val].code;
+				formModel.value.questionnaireType = "RISK_QUESTIONNAIRE";
 			}
-		});
-		watch(() => formModel.value.questionnaireId, () => {
-			// todo: based on chosen questionnaire set correct type
-			formModel.value.questionnaireType = "RISK_QUESTIONNAIRE";
 		});
 
 		const onDialogClose = () => {
@@ -124,7 +118,13 @@ export default defineComponent({
 			emit("close");
 		};
 		const onDialogOpen = async () => {
+			// to show inside referrals dropdown
 			await TasksModule.getTasks();
+			const assessments = await getAssessments();
+			questionnaireOptions.value = assessments.map(a => ({
+				label: a.display,
+				value: a.id
+			}));
 		};
 		const onFormSave = async () => {
 			await formEl.value?.validate();
@@ -148,7 +148,7 @@ export default defineComponent({
 					payload.referralTaskId = formModel.value.referralTaskId;
 				}
 
-				await PatientTasksModule.createTask(payload);
+				await PatientTasksModule.createPatientTask(payload);
 				emit("close");
 			} finally {
 				saveInProgress.value = false;

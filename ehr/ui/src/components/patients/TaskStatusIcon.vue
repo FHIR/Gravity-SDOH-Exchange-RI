@@ -89,6 +89,10 @@ export default defineComponent({
 		@include icon("~@/assets/images/status-requested.svg", 20px);
 	}
 
+	&.ready {
+		@include icon("~@/assets/images/status-ready.svg", 20px);
+	}
+
 	&.small {
 		width: 14px;
 		height: 14px;

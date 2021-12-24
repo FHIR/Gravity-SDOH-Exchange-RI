@@ -5,8 +5,7 @@ import {
 	Concern,
 	ContextResponse,
 	Task,
-	ServiceRequestCondition,
-	ServiceRequestGoal,
+	Reference,
 	Organization,
 	newTaskPayload,
 	updateTaskPayload,
@@ -37,7 +36,6 @@ export const getTasks = async (): Promise<Task[]> => {
 	return res.data;
 };
 
-// todo: change after BE sync
 export const getPatientTasks = async (): Promise<PatientTask[]> => {
 	const res = await axios.get("/patient-task");
 
@@ -82,7 +80,6 @@ export const createTask = async (payload: newTaskPayload): Promise<{ taskId: str
 	return res.data;
 };
 
-// todo: change after BE sync
 export const createPatientTask = async (payload: NewPatientTaskPayload): Promise<{ taskId: string }> => {
 	const res = await axios.post("/patient-task", payload);
 
@@ -102,13 +99,13 @@ export const updatePatientTask = async ({ id, ...data }: UpdatePatientTaskPayloa
 	return res.data;
 };
 
-export const getServiceRequestConditions = async (): Promise<ServiceRequestCondition[]> => {
+export const getServiceRequestConditions = async (): Promise<Reference[]> => {
 	const res = await axios.get("/support/conditions");
 
 	return res.data;
 };
 
-export const getServiceRequestGoals = async (): Promise<ServiceRequestGoal[]> => {
+export const getServiceRequestGoals = async (): Promise<Reference[]> => {
 	const res = await axios.get("/support/goals");
 
 	return res.data;
@@ -116,6 +113,12 @@ export const getServiceRequestGoals = async (): Promise<ServiceRequestGoal[]> =>
 
 export const getOrganizations = async (): Promise<Organization[]> => {
 	const res = await axios.get("/support/organizations");
+
+	return res.data;
+};
+
+export const getAssessments = async (): Promise<Reference[]> => {
+	const res = await axios.get("/support/assessments");
 
 	return res.data;
 };

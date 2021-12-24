@@ -44,7 +44,7 @@ export default defineComponent({
 	setup() {
 		const isTaskLoading = ref<boolean>(false);
 		const newPatientTaskDialogVisible = ref<boolean>(false);
-		const tasks = computed<PatientTask[]>(() => PatientTasksModule.tasks);
+		const tasks = computed<PatientTask[]>(() => PatientTasksModule.patientTasks);
 		const tableData = computed<TableData[]>(() =>
 			tasks.value.map((task: PatientTask) => ({
 				id: task.id,
@@ -65,7 +65,7 @@ export default defineComponent({
 		onMounted(async () => {
 			isTaskLoading.value = true;
 			try {
-				await PatientTasksTable.getTasks();
+				await PatientTasksModule.getPatientTasks();
 				pollData();
 			} finally {
 				isTaskLoading.value = false;
@@ -73,7 +73,7 @@ export default defineComponent({
 		});
 		const pollId = ref<number>();
 		const pollData = async () => {
-			await PatientTasksTable.getTasks();
+			await PatientTasksModule.getPatientTasks();
 			pollId.value = window.setTimeout(pollData, 5000);
 		};
 		onUnmounted(() => {
@@ -153,6 +153,7 @@ export default defineComponent({
 			v-if="activeTasks.length"
 			:data="activeTasks"
 			status="active"
+			@add-task="newPatientTaskDialogVisible = true"
 		/>
 		<NoActiveItems
 			v-else-if="!activeTasks.length && completedTasks.length"

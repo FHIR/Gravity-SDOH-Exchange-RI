@@ -44,10 +44,10 @@ export type Task = {
 	id: string,
 	lastModified: string | null,
 	name: string,
-	organization: TaskOrganization | null,
+	organization: Reference | null,
 	outcome: string | null,
 	priority: "ASAP" | "Routine" | "Urgent" | null,
-	procedures: Procedure[]
+	procedures: Reference[]
 	serviceRequest: ServiceRequest,
 	status: TaskStatus,
 	statusReason: string | null
@@ -60,30 +60,15 @@ export type Organization = {
 	type: "CBO" | "CBRO"
 };
 
-export type TaskOrganization = {
-	id: string,
-	display: string
-};
-
 export type Occurrence = {
 	start?: string | null,
 	end: string
 }
 
-export type ServiceRequestGoal = {
-	display: string,
-	id: string
-}
-
-export type ServiceRequestConsent = {
-	display: string,
-	id: string
-}
-
-export type GoalAddedBy = {
+export type Reference = {
 	id: string,
 	display: string
-}
+};
 
 export type Coding = {
 	code: string,
@@ -96,16 +81,6 @@ export type GoalCoding = {
 	codings: Coding[]
 }
 
-export type ServiceRequestCondition = {
-	display: string,
-	id: string
-};
-
-export type Procedure = {
-	display: string,
-	id: string
-}
-
 export type Period = {
 	start: string,
 	end?: string
@@ -114,10 +89,10 @@ export type Period = {
 export type ServiceRequest = {
 	category: Coding,
 	code: Coding,
-	conditions: ServiceRequestCondition[],
-	consent: ServiceRequestConsent,
+	conditions: Reference[],
+	consent: Reference,
 	errors: string[],
-	goals: ServiceRequestGoal[],
+	goals: Reference[],
 	id: string,
 	occurrence: Occurrence
 };
@@ -147,10 +122,7 @@ export type Concern = {
 	category: Coding,
 	icdCode: Coding,
 	snomedCode: Coding,
-	basedOn: string | {
-		display: string,
-		id: string,
-	},
+	basedOn: string | Reference,
 	assessmentDate?: string,
 	startDate?: string,
 	resolutionDate?: string,
@@ -186,10 +158,7 @@ export type Assessment = {
 	name: string,
 	questionnaireUrl: string,
 	date: string,
-	healthConcerns: {
-		id: string,
-		display: string
-	}[],
+	healthConcerns: Reference[],
 	previous?: Assessment[],
 	assessmentResponse: {
 		question: string,
@@ -201,10 +170,7 @@ export type Problem = {
 	id: string,
 	name: string,
 	authoredBy?: {},
-	basedOn: string | {
-		display: string,
-		id: string,
-	},
+	basedOn: string | Reference,
 	category: Coding,
 	assessmentDate?: string,
 	startDate?: string,
@@ -301,14 +267,8 @@ export type PatientTask = {
 	status: TaskStatus,
 	lastModified: string | null,
 	code: Coding | null,
-	referralTask: {
-		id: string,
-		display: string
-	} | null,
-	assessment: {
-		id: string,
-		display: string
-	} | null,
+	referralTask: Reference | null,
+	assessment: Reference | null,
 	assessmentResponse: {
 		question: string,
 		answer: string

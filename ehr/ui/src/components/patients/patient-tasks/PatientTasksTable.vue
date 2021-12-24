@@ -1,8 +1,12 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/patient-tasks/PatientTasks.vue";
+import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
 
 export default defineComponent({
+	components: {
+		TaskStatusIcon
+	},
 	props: {
 		data: {
 			type: Array as PropType<TableData[]>,
