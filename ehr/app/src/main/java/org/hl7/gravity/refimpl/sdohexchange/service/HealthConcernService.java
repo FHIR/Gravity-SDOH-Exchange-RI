@@ -17,8 +17,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.SDOHMappings;
-import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.HealthConcernBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewHealthConcernDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.HealthConcernDto;
@@ -31,6 +29,8 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.CurrentContextPrepareBu
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.ConditionBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.CurrentContextPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.query.HealthConcernQueryFactory;
+import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.System;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ public class HealthConcernService {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).include(
-        Condition.INCLUDE_EVIDENCE_DETAIL)
+            Condition.INCLUDE_EVIDENCE_DETAIL)
         .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .returnBundle(Bundle.class)
         .execute();
@@ -66,7 +66,7 @@ public class HealthConcernService {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.RESOLVED).include(
-        Condition.INCLUDE_EVIDENCE_DETAIL)
+            Condition.INCLUDE_EVIDENCE_DETAIL)
         .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .returnBundle(Bundle.class)
         .execute();
@@ -104,7 +104,7 @@ public class HealthConcernService {
 
     IdType healthConcernId = FhirUtil.getFromResponseBundle(healthConcernCreateBundle, Condition.class);
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
-        .code(healthConcernId.getIdPart()))
+            .code(healthConcernId.getIdPart()))
         .returnBundle(Bundle.class)
         .execute();
     return new HealthConcernBundleToDtoConverter().convert(responseBundle)
@@ -117,7 +117,7 @@ public class HealthConcernService {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
-        .code(id))
+            .code(id))
         .returnBundle(Bundle.class)
         .execute();
 
@@ -140,7 +140,7 @@ public class HealthConcernService {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
-        .code(id))
+            .code(id))
         .returnBundle(Bundle.class)
         .execute();
     Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
@@ -163,7 +163,7 @@ public class HealthConcernService {
     Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
-        .code(id))
+            .code(id))
         .returnBundle(Bundle.class)
         .execute();
     Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
@@ -195,8 +195,7 @@ public class HealthConcernService {
         .returnBundle(Bundle.class)
         .execute();
 
-    Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
-    return merged;
+    return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
   }
 
   private IQuery<IBaseBundle> searchHealthConcernQuery(ConditionClinicalStatus status) {

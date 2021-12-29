@@ -1,5 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PatientTaskItemDto implements Validated {
 
   private String id;
