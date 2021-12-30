@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class PatientTaskBundleToDtoConverter implements Converter<Bundle, List<PatientTaskDto>> {
 
   private final PatientTaskInfoHolderToDtoConverter taskToDtoConverter = new PatientTaskInfoHolderToDtoConverter();
-  PatientTaskItemInfoBundleExtractor extractor = new PatientTaskItemInfoBundleExtractor();
+  private final PatientTaskItemInfoBundleExtractor extractor = new PatientTaskItemInfoBundleExtractor();
 
   @Override
   public List<PatientTaskDto> convert(Bundle bundle) {

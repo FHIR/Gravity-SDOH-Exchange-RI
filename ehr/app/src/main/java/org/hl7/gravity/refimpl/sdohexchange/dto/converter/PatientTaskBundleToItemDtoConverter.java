@@ -13,7 +13,7 @@ public class PatientTaskBundleToItemDtoConverter implements Converter<Bundle, Li
 
   private final PatientTaskInfoHolderToItemDtoConverter taskToDtoConverter =
       new PatientTaskInfoHolderToItemDtoConverter();
-  PatientTaskItemInfoBundleExtractor extractor = new PatientTaskItemInfoBundleExtractor();
+  private final PatientTaskItemInfoBundleExtractor extractor = new PatientTaskItemInfoBundleExtractor();
 
   @Override
   public List<PatientTaskItemDto> convert(Bundle bundle) {
