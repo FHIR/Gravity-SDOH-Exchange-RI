@@ -61,6 +61,7 @@ public class PatientTaskService {
             .code(smartOnFhirContext.getPatient()))
         .returnBundle(Bundle.class)
         .execute();
+    taskBundle = addQuestionnairesToTaskBundle(taskBundle);
     return new PatientTaskBundleToDtoConverter().convert(taskBundle)
         .stream()
         .findFirst()
