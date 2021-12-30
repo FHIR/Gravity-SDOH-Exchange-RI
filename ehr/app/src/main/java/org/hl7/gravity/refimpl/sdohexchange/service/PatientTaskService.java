@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
@@ -45,7 +44,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Slf4j
 public class PatientTaskService {
 
   private final SmartOnFhirContext smartOnFhirContext;
@@ -61,6 +59,7 @@ public class PatientTaskService {
             .code(smartOnFhirContext.getPatient()))
         .returnBundle(Bundle.class)
         .execute();
+    taskBundle = addQuestionnairesToTaskBundle(taskBundle);
     return new PatientTaskBundleToDtoConverter().convert(taskBundle)
         .stream()
         .findFirst()
@@ -105,8 +104,7 @@ public class PatientTaskService {
         .returnBundle(Bundle.class)
         .execute();
 
-    Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
-    return merged;
+    return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
   }
 
   public void update(String id, UpdateTaskRequestDto update, UserDto user) {
