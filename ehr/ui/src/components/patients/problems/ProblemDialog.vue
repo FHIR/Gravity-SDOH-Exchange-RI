@@ -119,7 +119,7 @@ export default defineComponent({
 				{{ problem.name }}
 			</el-form-item>
 			<el-form-item label="Category">
-				{{ problem.category.display }}
+				{{ problem.category ? problem.category.display : "N/A" }}
 			</el-form-item>
 			<el-form-item label="ICD-10 Code">
 				{{ problem.icdCode ? `${problem.icdCode.display} (${problem.icdCode.code})` : "N/A" }}

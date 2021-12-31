@@ -94,7 +94,7 @@ export default defineComponent({
 				label="Category"
 			>
 				<template #default="scope">
-					{{ scope.row.category.display }}
+					{{ scope.row.category ? scope.row.category.display : "N/A" }}
 				</template>
 			</el-table-column>
 			<el-table-column

@@ -2,10 +2,13 @@
 import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/patient-tasks/PatientTasks.vue";
 import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
+import TaskDialog from "@/components/patients/patient-tasks/TaskDialog.vue";
 
 export default defineComponent({
 	components: {
-		TaskStatusIcon
+		TaskStatusIcon,
+		TaskDialog
+
 	},
 	props: {
 		data: {
@@ -17,17 +20,28 @@ export default defineComponent({
 			default: "active"
 		}
 	},
-	emits: ["add-task"],
-	setup(props) {
+	emits: ["add-task", "trigger-open-assessment"],
+	setup(props, { emit }) {
 		const title = ref<string>(props.status === "active" ? "Active Tasks" : "Completed Tasks");
+		const taskDialogVisible = ref<boolean>(false);
+		const activeTask = ref<TableData | null>(null);
+
 
 		const onTaskClick = (row: TableData) => {
-			console.log(row);
+			taskDialogVisible.value = true;
+			activeTask.value = row;
+		};
+		const handleOpenAssessment = (id: string) => {
+			taskDialogVisible.value = false;
+			emit("trigger-open-assessment", id);
 		};
 
 		return {
 			title,
-			onTaskClick
+			onTaskClick,
+			taskDialogVisible,
+			activeTask,
+			handleOpenAssessment
 		};
 	}
 });
@@ -103,6 +117,12 @@ export default defineComponent({
 				</template>
 			</el-table-column>
 		</el-table>
+		<TaskDialog
+			:visible="taskDialogVisible"
+			:task="activeTask"
+			@close="taskDialogVisible = false"
+			@trigger-open-assessment="handleOpenAssessment"
+		/>
 	</div>
 </template>
 
