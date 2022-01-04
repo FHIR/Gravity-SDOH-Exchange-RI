@@ -1,7 +1,7 @@
-import { getPatientTasks, createPatientTask, updatePatientTask } from "@/api";
-import { VuexModule, Module, Action, Mutation, getModule } from "vuex-module-decorators";
+import { createPatientTask, getPatientTask, getPatientTasks, updatePatientTask } from "@/api";
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import store from "@/store";
-import { PatientTask, NewPatientTaskPayload, UpdatePatientTaskPayload } from "@/types";
+import { NewPatientTaskPayload, PatientTask, UpdatePatientTaskPayload } from "@/types";
 
 export interface IPatientTasks {
 	patientTasks: PatientTask[]
@@ -39,6 +39,11 @@ class PatientTasks extends VuexModule implements IPatientTasks {
 	async updatePatientTask(payload: UpdatePatientTaskPayload): Promise<void> {
 		const updatedTask = await updatePatientTask(payload);
 		this.changePatientTask(updatedTask);
+	}
+
+	@Action
+	async getPatientTask(id: string): Promise<PatientTask> {
+		return await getPatientTask(id);
 	}
 }
 

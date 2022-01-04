@@ -22,16 +22,16 @@ export type TableData = {
 	lastModified: string | null,
 	code: Coding | null,
 	priority: string | null,
-	referral: {
+	referralTask?: {
 		id: string,
 		display: string
 	} | null,
-	assessment: {
+	assessment?: {
 		id: string,
 		display: string
 	} | null,
-	outcomes: string | null,
-	statusReason: string | null
+	outcomes?: string | null,
+	statusReason?: string | null
 };
 
 const TYPE_VALUE_MAP: { [key: string]: string} = {
@@ -60,7 +60,7 @@ export default defineComponent({
 				status: task.status,
 				lastModified: task.lastModified,
 				code: task.code,
-				referral: task.referralTask,
+				referralTask: task.referralTask,
 				assessment: task.assessment,
 				outcomes: task.outcome,
 				statusReason: task.statusReason,

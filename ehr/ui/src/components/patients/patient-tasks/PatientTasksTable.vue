@@ -24,13 +24,15 @@ export default defineComponent({
 	setup(props, { emit }) {
 		const title = ref<string>(props.status === "active" ? "Active Tasks" : "Completed Tasks");
 		const taskDialogVisible = ref<boolean>(false);
-		const activeTask = ref<TableData | null>(null);
-
+		const activeTaskId = ref<string | null>(null);
+		const activeTaskName = ref<string | null>(null);
 
 		const onTaskClick = (row: TableData) => {
+			activeTaskId.value = row.id;
+			activeTaskName.value = row.name;
 			taskDialogVisible.value = true;
-			activeTask.value = row;
 		};
+
 		const handleOpenAssessment = (id: string) => {
 			taskDialogVisible.value = false;
 			emit("trigger-open-assessment", id);
@@ -40,8 +42,9 @@ export default defineComponent({
 			title,
 			onTaskClick,
 			taskDialogVisible,
-			activeTask,
-			handleOpenAssessment
+			activeTaskId,
+			handleOpenAssessment,
+			activeTaskName
 		};
 	}
 });
@@ -101,7 +104,7 @@ export default defineComponent({
 
 			<el-table-column label="Referral">
 				<template #default="scope">
-					{{ scope.row.referral?.display || "N/A" }}
+					{{ scope.row.referralTask?.display || "N/A" }}
 				</template>
 			</el-table-column>
 
@@ -119,7 +122,8 @@ export default defineComponent({
 		</el-table>
 		<TaskDialog
 			:visible="taskDialogVisible"
-			:task="activeTask"
+			:task-id="activeTaskId"
+			:task-name="activeTaskName"
 			@close="taskDialogVisible = false"
 			@trigger-open-assessment="handleOpenAssessment"
 		/>

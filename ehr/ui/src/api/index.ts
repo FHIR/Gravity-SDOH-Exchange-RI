@@ -42,6 +42,11 @@ export const getPatientTasks = async (): Promise<PatientTask[]> => {
 	return res.data;
 };
 
+export const getPatientTask = async (id: string): Promise<PatientTask> => {
+	const res = await axios.get(`/patient-task/${id}`);
+	return res.data;
+};
+
 export const getActiveConcerns = async (): Promise<Concern[]> => {
 	const res = await axios.get("/health-concern/active");
 
