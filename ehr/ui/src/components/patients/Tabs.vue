@@ -128,7 +128,9 @@ export default defineComponent({
 			name="patientTasks"
 			:lazy="true"
 		>
-			<PatientTasks />
+			<PatientTasks
+				@trigger-open-assessment="openAssessment"
+			/>
 		</el-tab-pane>
 		<el-tab-pane
 			label="Social Risk Assessments"
