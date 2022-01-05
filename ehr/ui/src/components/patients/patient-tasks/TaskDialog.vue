@@ -44,8 +44,7 @@ export default defineComponent({
 			isLoading.value = true;
 			PatientTasksModule.getPatientTask(props.taskId).then(data => {
 				task.value = data;
-				init(data);
-				Object.assign(formModel, { status: task.value.status });
+				initFormModel(data);
 			}).finally(() => isLoading.value = false);
 		};
 
@@ -67,18 +66,11 @@ export default defineComponent({
 
 		const showStatusReasonInput = computed(() => formModel.status === "Cancelled" && task.value?.status !== "Cancelled");
 
-		const init = (task: PatientTask) => {
-			formModel.status = "";
+		const initFormModel = (task: PatientTask) => {
+			formModel.status = task.status ? task.status : "";
 			formModel.comment = "";
-			formModel.statusReason= "";
+			formModel.statusReason = "";
 		};
-
-		// watch(() => task.value, (newTask, prevTask) => {
-		// 	console.log("asdjagj");
-		// 	if (newTask && newTask.id !== prevTask?.id) {
-		// 		init(newTask);
-		// 	}
-		// }, { immediate: true });
 
 		const onFormSave = async () => {
 			const payload = {
