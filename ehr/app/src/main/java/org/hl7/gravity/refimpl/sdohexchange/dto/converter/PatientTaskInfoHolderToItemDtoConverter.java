@@ -1,14 +1,17 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
+import com.google.common.collect.Lists;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.gravity.refimpl.sdohexchange.codes.PatientTaskCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.SDCTemporaryCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SDOHTemporaryCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.PatientTaskType;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
@@ -56,11 +59,18 @@ public class PatientTaskInfoHolderToItemDtoConverter
 
     for (TaskOutputComponent outputComponent : task.getOutput()) {
       Type componentValue = outputComponent.getValue();
-      if (componentValue instanceof Reference) {
+      Coding coding = FhirUtil.findCoding(Lists.newArrayList(outputComponent.getType()), SDCTemporaryCode.SYSTEM,
+          SDCTemporaryCode.QUESTIONNAIRE_RESPONSE.getCode());
+      if (coding != null) {
         Reference qrRef = (Reference) componentValue;
-        taskDto.setAssessmentResponse(new ReferenceDto(qrRef.getReferenceElement()
-            .getIdPart(), qrRef.getDisplay()));
-      } else if (componentValue instanceof CodeableConcept) {
+        if (QuestionnaireResponse.class.getSimpleName()
+            .equals(qrRef.getReferenceElement()
+                .getResourceType())) {
+          taskDto.setAssessmentResponse(new ReferenceDto(qrRef.getReferenceElement()
+              .getIdPart(), coding.getDisplay()));
+        }
+      }
+      if (componentValue instanceof CodeableConcept) {
         CodeableConcept outcome = (CodeableConcept) componentValue;
         taskDto.setOutcome(outcome.getText());
       }
