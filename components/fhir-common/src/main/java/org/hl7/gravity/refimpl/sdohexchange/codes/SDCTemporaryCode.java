@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum SDCTemporaryCode {
-  QUESTIONNAIRE("questionnaire", "Questionnaire");
+  QUESTIONNAIRE("questionnaire", "Questionnaire"),
+  QUESTIONNAIRE_RESPONSE("questionnaire-response", "Questionnaire Response");
 
   private final String code;
   private final String display;
