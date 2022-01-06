@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SDCTemporaryCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PatientTaskBundleToDtoConverter;
@@ -78,6 +79,17 @@ public class PatientTaskService {
         .execute();
     tasksBundle = addQuestionnairesToTaskBundle(tasksBundle);
     return new PatientTaskBundleToItemDtoConverter().convert(tasksBundle);
+  }
+
+  private Bundle addQuestionnaireResponseToTaskBundle(Bundle responseBundle) {
+    Task patientTask = FhirUtil.getFirstFromBundle(responseBundle, Task.class);
+
+    Bundle questionnaireResponse = ehrClient.search()
+        .forResource(QuestionnaireResponse.class)
+        .returnBundle(Bundle.class)
+        .execute();
+
+    return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaireResponse);
   }
 
   private Bundle addQuestionnairesToTaskBundle(Bundle responseBundle) {
