@@ -2,10 +2,12 @@
 import { defineComponent, PropType, ref } from "vue";
 import { TableData } from "@/components/patients/patient-tasks/PatientTasks.vue";
 import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
+import TaskDialog from "@/components/patients/patient-tasks/TaskDialog.vue";
 
 export default defineComponent({
 	components: {
-		TaskStatusIcon
+		TaskStatusIcon,
+		TaskDialog
 	},
 	props: {
 		data: {
@@ -17,17 +19,31 @@ export default defineComponent({
 			default: "active"
 		}
 	},
-	emits: ["add-task"],
-	setup(props) {
+	emits: ["add-task", "trigger-open-assessment"],
+	setup(props, { emit }) {
 		const title = ref<string>(props.status === "active" ? "Active Tasks" : "Completed Tasks");
+		const taskDialogVisible = ref<boolean>(false);
+		const activeTaskId = ref<string | null>(null);
+		const activeTaskName = ref<string | null>(null);
 
 		const onTaskClick = (row: TableData) => {
-			console.log(row);
+			activeTaskId.value = row.id;
+			activeTaskName.value = row.name;
+			taskDialogVisible.value = true;
+		};
+
+		const handleOpenAssessment = (id: string) => {
+			taskDialogVisible.value = false;
+			emit("trigger-open-assessment", id);
 		};
 
 		return {
 			title,
-			onTaskClick
+			onTaskClick,
+			taskDialogVisible,
+			activeTaskId,
+			handleOpenAssessment,
+			activeTaskName
 		};
 	}
 });
@@ -87,7 +103,7 @@ export default defineComponent({
 
 			<el-table-column label="Referral">
 				<template #default="scope">
-					{{ scope.row.referral?.display || "N/A" }}
+					{{ scope.row.referralTask?.display || "N/A" }}
 				</template>
 			</el-table-column>
 
@@ -103,6 +119,13 @@ export default defineComponent({
 				</template>
 			</el-table-column>
 		</el-table>
+		<TaskDialog
+			:visible="taskDialogVisible"
+			:task-id="activeTaskId"
+			:task-name="activeTaskName"
+			@close="taskDialogVisible = false"
+			@trigger-open-assessment="handleOpenAssessment"
+		/>
 	</div>
 </template>
 

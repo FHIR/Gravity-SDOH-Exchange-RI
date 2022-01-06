@@ -108,8 +108,8 @@ export default defineComponent({
 
 		watch(() => formModel.value.type, val => {
 			if (val === "COMPLETE_SR_QUESTIONNAIRE" || val === "SERVICE_FEEDBACK") {
-				formModel.value.code = TYPE_CODE_MAP[val].code;
-				formModel.value.questionnaireType = "RISK_QUESTIONNAIRE";
+				formModel.value.code = TYPE_CODE_MAP[val].display;
+				formModel.value.questionnaireType = "Risk Questionnaire";
 			}
 		});
 
@@ -131,7 +131,7 @@ export default defineComponent({
 			saveInProgress.value = true;
 			try {
 				const payload: NewPatientTaskPayload = {
-					code: formModel.value.code,
+					code: "complete-questionnaire",
 					comment: formModel.value.comment,
 					name: formModel.value.name,
 					occurrence: prepareOccurrence(formModel.value.occurrence),
@@ -140,7 +140,7 @@ export default defineComponent({
 				};
 
 				if (formModel.value.type === "COMPLETE_SR_QUESTIONNAIRE") {
-					payload.questionnaireType = formModel.value.questionnaireType;
+					payload.questionnaireType = "RISK_QUESTIONNAIRE";
 					payload.questionnaireFormat = formModel.value.questionnaireFormat;
 					payload.questionnaireId = formModel.value.questionnaireId;
 				}

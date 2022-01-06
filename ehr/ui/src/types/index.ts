@@ -263,7 +263,7 @@ export type PatientTask = {
 	id: string,
 	name: string,
 	priority: "ASAP" | "Routine" | "Urgent" | null,
-	type: string | null,
+	type: string,
 	status: TaskStatus,
 	lastModified: string | null,
 	code: Coding | null,

@@ -110,7 +110,7 @@ export default defineComponent({
 				{{ concern.name }}
 			</el-form-item>
 			<el-form-item label="Category">
-				{{ concern.category.display }}
+				{{ concern.category ? concern.category.display : "N/A" }}
 			</el-form-item>
 			<el-form-item label="ICD-10 Code">
 				{{ concern.icdCode ? `${concern.icdCode.display} (${concern.icdCode.code})` : "N/A" }}

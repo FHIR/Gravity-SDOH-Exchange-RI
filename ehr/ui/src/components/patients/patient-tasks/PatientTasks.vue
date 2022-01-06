@@ -21,18 +21,24 @@ export type TableData = {
 	status: TaskStatus,
 	lastModified: string | null,
 	code: Coding | null,
-	referral: {
+	priority: string | null,
+	referralTask?: {
 		id: string,
 		display: string
 	} | null,
-	assessment: {
+	assessment?: {
 		id: string,
 		display: string
 	} | null,
-	outcomes: string | null,
-	statusReason: string | null
+	outcomes?: string | null,
+	statusReason?: string | null
 };
 
+const TYPE_VALUE_MAP: { [key: string]: string} = {
+	MAKE_CONTACT: "Make Contact",
+	COMPLETE_SR_QUESTIONNAIRE: "Complete questionnaire regarding social risks",
+	SERVICE_FEEDBACK: "Provide feedback on service delivered"
+};
 
 export default defineComponent({
 	components: {
@@ -41,6 +47,7 @@ export default defineComponent({
 		PatientTasksTable,
 		NewPatientTaskDialog
 	},
+	emits: ["trigger-open-assessment"],
 	setup() {
 		const isTaskLoading = ref<boolean>(false);
 		const newPatientTaskDialogVisible = ref<boolean>(false);
@@ -49,14 +56,15 @@ export default defineComponent({
 			tasks.value.map((task: PatientTask) => ({
 				id: task.id,
 				name: task.name,
-				type: task.type,
+				type:  TYPE_VALUE_MAP[task.type],
 				status: task.status,
 				lastModified: task.lastModified,
 				code: task.code,
-				referral: task.referralTask,
+				referralTask: task.referralTask,
 				assessment: task.assessment,
 				outcomes: task.outcome,
-				statusReason: task.statusReason
+				statusReason: task.statusReason,
+				priority: task.priority
 			}))
 		);
 		const activeTasks = computed<TableData[]>(() => tableData.value.filter(t => t.status !== "Completed"));
@@ -154,6 +162,7 @@ export default defineComponent({
 			:data="activeTasks"
 			status="active"
 			@add-task="newPatientTaskDialogVisible = true"
+			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 		<NoActiveItems
 			v-else-if="!activeTasks.length && completedTasks.length"
@@ -165,6 +174,7 @@ export default defineComponent({
 			v-if="completedTasks.length"
 			:data="completedTasks"
 			status="completed"
+			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
 		/>
 		<NoItems
 			v-if="!isTaskLoading && !(completedTasks.length || activeTasks.length)"
