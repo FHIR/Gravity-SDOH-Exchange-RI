@@ -149,7 +149,7 @@ export default defineComponent({
 					{{ task.name }}
 				</el-form-item>
 				<el-form-item label="Type">
-					{{ task.type }}
+					{{ task.type === "COMPLETE_SR_QUESTIONNAIRE" ? "Complete questionnaire regarding social risks" : "Provide feedback on service delivered" }}
 				</el-form-item>
 				<el-form-item
 					v-if="task.referralTask"
@@ -161,19 +161,19 @@ export default defineComponent({
 					{{ task.code ? `${task.code.display}` : "N/A" }}
 				</el-form-item>
 				<el-form-item
-					v-if="task.type === 'Complete questionnaire regarding social risks'"
+					v-if="task.type === 'COMPLETE_SR_QUESTIONNAIRE'"
 					label="Questionnaire Type"
 				>
-					{{ task.type === "Complete questionnaire regarding social risks" ? "Risk Questionnaire" : "N/A" }}
+					{{ task.type === "COMPLETE_SR_QUESTIONNAIRE" ? "Risk Questionnaire" : "N/A" }}
 				</el-form-item>
 				<el-form-item
-					v-if="task.type === 'Complete questionnaire regarding social risks'"
+					v-if="task.type === 'COMPLETE_SR_QUESTIONNAIRE'"
 					label="Questionnaire Format"
 				>
-					{{ task.type === "Complete questionnaire regarding social risks" ? "FHIR Questionnaire" : "N/A" }}
+					{{ task.type === "COMPLETE_SR_QUESTIONNAIRE" ? "FHIR Questionnaire" : "N/A" }}
 				</el-form-item>
 				<el-form-item
-					v-if="task.type === 'Complete questionnaire regarding social risks'"
+					v-if="task.type === 'COMPLETE_SR_QUESTIONNAIRE'"
 					label="FHIR Questionnaire"
 				>
 					{{ task.assessment ? task.assessment.display : "N/A" }}
