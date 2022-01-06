@@ -1,8 +1,9 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PatientTaskInfoBundleExtractor.PatientTaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskItemInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 
 import java.util.stream.Collectors;
@@ -11,8 +12,7 @@ public class PatientTaskInfoHolderToDtoConverter extends PatientTaskInfoHolderTo
 
   private final AnnotationToDtoConverter annotationToDtoConverter = new AnnotationToDtoConverter();
 
-  @Override
-  public PatientTaskDto convert(PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder taskInfoHolder) {
+  public PatientTaskDto convert(PatientTaskInfoHolder taskInfoHolder) {
     Task task = taskInfoHolder.getTask();
     PatientTaskDto taskDto = (PatientTaskDto) super.convert(taskInfoHolder);
     taskDto.setCreatedAt(FhirUtil.toLocalDateTime(task.getAuthoredOnElement()));
@@ -20,6 +20,13 @@ public class PatientTaskInfoHolderToDtoConverter extends PatientTaskInfoHolderTo
         .stream()
         .map(annotationToDtoConverter::convert)
         .collect(Collectors.toList()));
+    if (taskInfoHolder.getQuestionnaireResponse() != null) {
+      taskDto.setAnswers(taskInfoHolder.getQuestionnaireResponse()
+          .getItem()
+          .stream()
+          .collect(Collectors.toMap(qr -> qr.getText(), qr -> ((Coding) qr.getAnswerFirstRep()
+              .getValue()).getDisplay())));
+    }
     return taskDto;
   }
 
