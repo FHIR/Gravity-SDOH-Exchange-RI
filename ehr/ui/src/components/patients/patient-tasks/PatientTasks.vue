@@ -47,7 +47,7 @@ export default defineComponent({
 		PatientTasksTable,
 		NewPatientTaskDialog
 	},
-	emits: ["trigger-open-assessment"],
+	emits: ["trigger-open-assessment", "trigger-open-action-step"],
 	setup() {
 		const isTaskLoading = ref<boolean>(false);
 		const newPatientTaskDialogVisible = ref<boolean>(false);
@@ -163,6 +163,7 @@ export default defineComponent({
 			status="active"
 			@add-task="newPatientTaskDialogVisible = true"
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
+			@trigger-open-action-step="$emit('trigger-open-action-step', $event)"
 		/>
 		<NoActiveItems
 			v-else-if="!activeTasks.length && completedTasks.length"
@@ -175,6 +176,7 @@ export default defineComponent({
 			:data="completedTasks"
 			status="completed"
 			@trigger-open-assessment="$emit('trigger-open-assessment', $event)"
+			@trigger-open-action-step="$emit('trigger-open-action-step', $event)"
 		/>
 		<NoItems
 			v-if="!isTaskLoading && !(completedTasks.length || activeTasks.length)"

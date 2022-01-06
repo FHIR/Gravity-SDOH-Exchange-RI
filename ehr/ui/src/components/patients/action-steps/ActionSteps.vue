@@ -49,12 +49,16 @@ export default defineComponent({
 			type: Boolean,
 			default: false
 		},
+		actionStepToOpen: {
+			type: String,
+			default: ""
+		},
 		newActionProblems: {
 			type: Array as PropType<string[]>,
 			default: () => []
 		}
 	},
-	emits: ["stop-add-action"],
+	emits: ["stop-add-action", "reset-active-task"],
 	setup(props, { emit }) {
 		const activeGroup = ref<string>("referrals");
 		const newRequestDialogVisible = ref<boolean>(false);
@@ -215,11 +219,15 @@ export default defineComponent({
 			<RequestTable
 				v-if="activeRequests.length"
 				:data="activeRequests"
+				:action-step-to-open="actionStepToOpen"
+				@reset-active-task="$emit('reset-active-task')"
 			/>
 			<RequestTable
 				v-if="completedRequests.length"
 				:data="completedRequests"
+				:action-step-to-open="actionStepToOpen"
 				title="Completed Requests"
+				@reset-active-task="$emit('reset-active-task')"
 			/>
 			<NoItems
 				v-if="!isRequestLoading && !(completedRequests.length || activeRequests.length)"
