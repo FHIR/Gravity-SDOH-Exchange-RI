@@ -15,10 +15,10 @@ import java.util.Map;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class PatientTaskDto extends PatientTaskItemDto {
 
   private LocalDateTime createdAt;
   private List<CommentDto> comments = new ArrayList<>();
-  private Map<String, String> questionnaireResponse = new HashMap<>();
+  private Map<String, String> answers = new HashMap<>();
 }
