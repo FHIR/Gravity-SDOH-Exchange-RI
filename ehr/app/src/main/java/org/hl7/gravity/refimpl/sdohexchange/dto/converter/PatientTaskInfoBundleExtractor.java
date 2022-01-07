@@ -17,6 +17,8 @@ public class PatientTaskInfoBundleExtractor extends BundleExtractor<List<Patient
   @Override
   public List<PatientTaskInfoHolder> extract(Bundle bundle) {
     List<PatientTaskItemInfoHolder> patientTaskInfoHolders = patientTaskItem.extract(bundle);
+
+//    return FhirUtil.getFromBundle(bundle, QuestionnaireResponse.class).stream().map();
     return null;
   }
 

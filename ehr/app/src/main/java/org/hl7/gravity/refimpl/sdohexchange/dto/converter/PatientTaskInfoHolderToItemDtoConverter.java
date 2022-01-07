@@ -18,13 +18,14 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskItemDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskItemInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
 
 public class PatientTaskInfoHolderToItemDtoConverter
-    implements Converter<PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder, PatientTaskItemDto> {
+    implements Converter<PatientTaskItemInfoHolder, PatientTaskItemDto> {
 
   @Override
   public PatientTaskItemDto convert(PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder taskInfoHolder) {

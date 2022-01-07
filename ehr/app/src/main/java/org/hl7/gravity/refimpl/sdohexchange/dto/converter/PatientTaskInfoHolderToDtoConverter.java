@@ -5,16 +5,20 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PatientTaskInfoBundleExtractor.PatientTaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
+import org.springframework.core.convert.converter.Converter;
 
 import java.util.stream.Collectors;
 
-public class PatientTaskInfoHolderToDtoConverter extends PatientTaskInfoHolderToItemDtoConverter {
+public class PatientTaskInfoHolderToDtoConverter implements Converter<PatientTaskInfoHolder, PatientTaskDto> {
 
   private final AnnotationToDtoConverter annotationToDtoConverter = new AnnotationToDtoConverter();
+  private final PatientTaskInfoHolderToItemDtoConverter patientTaskInfoHolderToItemDtoConverter =
+      new PatientTaskInfoHolderToItemDtoConverter();
 
+  @Override
   public PatientTaskDto convert(PatientTaskInfoHolder taskInfoHolder) {
     Task task = taskInfoHolder.getTask();
-    PatientTaskDto taskDto = (PatientTaskDto) super.convert(taskInfoHolder);
+    PatientTaskDto taskDto = (PatientTaskDto) patientTaskInfoHolderToItemDtoConverter.convert(taskInfoHolder);
     taskDto.setCreatedAt(FhirUtil.toLocalDateTime(task.getAuthoredOnElement()));
     taskDto.setComments(task.getNote()
         .stream()
@@ -30,7 +34,6 @@ public class PatientTaskInfoHolderToDtoConverter extends PatientTaskInfoHolderTo
     return taskDto;
   }
 
-  @Override
   protected PatientTaskDto createDto() {
     return new PatientTaskDto();
   }

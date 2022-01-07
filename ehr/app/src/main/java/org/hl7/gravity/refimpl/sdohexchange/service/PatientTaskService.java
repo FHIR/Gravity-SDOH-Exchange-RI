@@ -3,13 +3,17 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.collect.Lists;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SDCTemporaryCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PatientTaskBundleToDtoConverter;
@@ -61,6 +65,7 @@ public class PatientTaskService {
         .returnBundle(Bundle.class)
         .execute();
     taskBundle = addQuestionnairesToTaskBundle(taskBundle);
+    taskBundle = addQuestionnaireResponseToTaskBundle(taskBundle);
     return new PatientTaskBundleToDtoConverter().convert(taskBundle)
         .stream()
         .findFirst()
@@ -84,12 +89,26 @@ public class PatientTaskService {
   private Bundle addQuestionnaireResponseToTaskBundle(Bundle responseBundle) {
     Task patientTask = FhirUtil.getFirstFromBundle(responseBundle, Task.class);
 
-    Bundle questionnaireResponse = ehrClient.search()
-        .forResource(QuestionnaireResponse.class)
-        .returnBundle(Bundle.class)
-        .execute();
+    if (patientTask.hasOutput()) {
+      for (Task.TaskOutputComponent outputComponent : patientTask.getOutput()) {
+        Coding coding = FhirUtil.findCoding(Lists.newArrayList(outputComponent.getType()), SDCTemporaryCode.SYSTEM,
+            SDCTemporaryCode.QUESTIONNAIRE_RESPONSE.getCode());
+        if (coding != null) {
+          String questionnaireResponseId = ((Reference) outputComponent.getValue()).getReferenceElement()
+              .getIdPart();
+          Bundle questionnaireResponse = ehrClient.search()
+              .forResource(QuestionnaireResponse.class)
+              .where(BaseResource.RES_ID.exactly()
+                  .codes(questionnaireResponseId))
+              .returnBundle(Bundle.class)
+              .execute();
 
-    return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaireResponse);
+          return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaireResponse);
+        }
+      }
+    }
+
+    return responseBundle;
   }
 
   private Bundle addQuestionnairesToTaskBundle(Bundle responseBundle) {
