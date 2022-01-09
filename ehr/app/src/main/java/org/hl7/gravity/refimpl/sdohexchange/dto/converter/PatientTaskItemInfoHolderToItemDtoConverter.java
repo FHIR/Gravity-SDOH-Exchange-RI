@@ -17,18 +17,17 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.PatientTaskT
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskItemDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskItemInfoBundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
 
-public class PatientTaskInfoHolderToItemDtoConverter
-    implements Converter<PatientTaskItemInfoHolder, PatientTaskItemDto> {
+public class PatientTaskItemInfoHolderToItemDtoConverter<S extends PatientTaskItemInfoHolder, T extends PatientTaskItemDto>
+    implements Converter<S, T> {
 
   @Override
-  public PatientTaskItemDto convert(PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder taskInfoHolder) {
+  public T convert(S taskInfoHolder) {
     Task task = taskInfoHolder.getTask();
     Questionnaire questionnaire = taskInfoHolder.getQuestionnaire();
     PatientTaskItemDto taskDto = createDto();
@@ -76,7 +75,7 @@ public class PatientTaskInfoHolderToItemDtoConverter
         taskDto.setOutcome(outcome.getText());
       }
     }
-    return taskDto;
+    return (T) taskDto;
   }
 
   protected PatientTaskItemDto createDto() {
