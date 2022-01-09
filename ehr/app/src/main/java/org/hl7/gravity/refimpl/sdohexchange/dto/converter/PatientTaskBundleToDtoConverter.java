@@ -2,6 +2,7 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskDto;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskInfoBundleExtractor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.Assert;
 

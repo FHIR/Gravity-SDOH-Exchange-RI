@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 public class PatientTaskBundleToItemDtoConverter implements Converter<Bundle, List<PatientTaskItemDto>> {
 
-  private final PatientTaskInfoHolderToItemDtoConverter taskToDtoConverter =
-      new PatientTaskInfoHolderToItemDtoConverter();
+  private final PatientTaskItemInfoHolderToItemDtoConverter taskToDtoConverter =
+      new PatientTaskItemInfoHolderToItemDtoConverter();
   private final PatientTaskItemInfoBundleExtractor extractor = new PatientTaskItemInfoBundleExtractor();
 
   @Override
