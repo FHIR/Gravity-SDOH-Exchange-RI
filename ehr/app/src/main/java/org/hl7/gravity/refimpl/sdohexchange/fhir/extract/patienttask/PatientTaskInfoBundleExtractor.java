@@ -41,11 +41,4 @@ public class PatientTaskInfoBundleExtractor extends BundleExtractor<List<Patient
       this.questionnaireResponse = questionnaireResponse;
     }
   }
-
-  public static class PatientTaskInfoBundleExtractorException extends RuntimeException {
-
-    public PatientTaskInfoBundleExtractorException(String message) {
-      super(message);
-    }
-  }
 }
