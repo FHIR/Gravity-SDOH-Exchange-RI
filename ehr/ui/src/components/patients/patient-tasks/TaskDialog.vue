@@ -254,13 +254,13 @@ export default defineComponent({
 					{{ task.statusReason }}
 				</el-form-item>
 				<el-form-item
-					v-if="task.outcomes"
+					v-if="task.outcome"
 					label="Outcomes"
 				>
 					{{ task.outcomes }}
 				</el-form-item>
 				<el-form-item
-					v-if="task.comments.length > 0"
+					v-if="task.comments && task.comments.length > 0"
 					label="Comment(s)"
 				>
 					<div
@@ -271,6 +271,36 @@ export default defineComponent({
 						{{ item.text }}
 					</div>
 				</el-form-item>
+			</el-form>
+
+			<el-divider v-if=" task && task.answers" />
+
+			<el-form
+				v-if="task && task.answers"
+				label-width="90px"
+				label-position="left"
+				size="mini"
+			>
+				<h4>
+					Question-Answer Pairs
+				</h4>
+
+				<div
+					v-for="(value, key, index) in task.answers"
+					:key="index"
+					class="question"
+				>
+					<el-form-item
+						:label="`Question ${index+1}`"
+					>
+						{{ key }}
+					</el-form-item>
+					<el-form-item
+						label="Response"
+					>
+						{{ value }}
+					</el-form-item>
+				</div>
 			</el-form>
 		</div>
 		<template #footer>
