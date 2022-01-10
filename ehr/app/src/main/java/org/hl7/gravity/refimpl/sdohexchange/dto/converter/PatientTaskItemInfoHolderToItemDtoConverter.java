@@ -23,7 +23,8 @@ import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
 
-public class PatientTaskItemInfoHolderToItemDtoConverter<S extends PatientTaskItemInfoHolder, T extends PatientTaskItemDto>
+public class PatientTaskItemInfoHolderToItemDtoConverter<S extends PatientTaskItemInfoHolder,
+    T extends PatientTaskItemDto>
     implements Converter<S, T> {
 
   @Override

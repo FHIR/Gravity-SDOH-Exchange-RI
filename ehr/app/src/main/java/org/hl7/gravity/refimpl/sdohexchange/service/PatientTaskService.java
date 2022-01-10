@@ -89,21 +89,23 @@ public class PatientTaskService {
   private Bundle addQuestionnaireResponseToTaskBundle(Bundle responseBundle) {
     Task patientTask = FhirUtil.getFirstFromBundle(responseBundle, Task.class);
 
-    if (patientTask.hasOutput()) {
-      for (Task.TaskOutputComponent outputComponent : patientTask.getOutput()) {
-        Coding coding = FhirUtil.findCoding(Lists.newArrayList(outputComponent.getType()), SDCTemporaryCode.SYSTEM,
-            SDCTemporaryCode.QUESTIONNAIRE_RESPONSE.getCode());
-        if (coding != null) {
-          String questionnaireResponseId = ((Reference) outputComponent.getValue()).getReferenceElement()
-              .getIdPart();
-          Bundle questionnaireResponse = ehrClient.search()
-              .forResource(QuestionnaireResponse.class)
-              .where(BaseResource.RES_ID.exactly()
-                  .codes(questionnaireResponseId))
-              .returnBundle(Bundle.class)
-              .execute();
+    if (patientTask != null) {
+      if (patientTask.hasOutput()) {
+        for (Task.TaskOutputComponent outputComponent : patientTask.getOutput()) {
+          Coding coding = FhirUtil.findCoding(Lists.newArrayList(outputComponent.getType()), SDCTemporaryCode.SYSTEM,
+              SDCTemporaryCode.QUESTIONNAIRE_RESPONSE.getCode());
+          if (coding != null) {
+            String questionnaireResponseId = ((Reference) outputComponent.getValue()).getReferenceElement()
+                .getIdPart();
+            Bundle questionnaireResponse = ehrClient.search()
+                .forResource(QuestionnaireResponse.class)
+                .where(BaseResource.RES_ID.exactly()
+                    .codes(questionnaireResponseId))
+                .returnBundle(Bundle.class)
+                .execute();
 
-          return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaireResponse);
+            return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaireResponse);
+          }
         }
       }
     }

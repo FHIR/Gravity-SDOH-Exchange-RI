@@ -1,6 +1,5 @@
 package org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask;
 
-import com.google.common.collect.Lists;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -10,6 +9,7 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTask
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PatientTaskInfoBundleExtractor extends BundleExtractor<List<PatientTaskInfoHolder>> {
 
@@ -18,16 +18,16 @@ public class PatientTaskInfoBundleExtractor extends BundleExtractor<List<Patient
 
   @Override
   public List<PatientTaskInfoHolder> extract(Bundle bundle) {
-    PatientTaskItemInfoHolder patientTaskInfoHolder = patientTaskItemInfoBundleExtractor.extract(bundle)
-        .stream()
-        .findFirst()
-        .get();
+    List<PatientTaskItemInfoHolder> patientTaskInfoHolder = patientTaskItemInfoBundleExtractor.extract(bundle);
     QuestionnaireResponse questionnaireResponse = FhirUtil.getFromBundle(bundle, QuestionnaireResponse.class)
         .stream()
         .findFirst()
         .orElse(null);
 
-    return Lists.newArrayList(new PatientTaskInfoHolder(patientTaskInfoHolder, questionnaireResponse));
+    return patientTaskInfoHolder.stream()
+        .map(infoHolder -> new PatientTaskInfoHolder(infoHolder, questionnaireResponse))
+        .collect(Collectors.toList());
+
   }
 
   @Getter
@@ -39,6 +39,13 @@ public class PatientTaskInfoBundleExtractor extends BundleExtractor<List<Patient
         QuestionnaireResponse questionnaireResponse) {
       super(patientTaskItemInfoHolder.getTask(), patientTaskItemInfoHolder.getQuestionnaire());
       this.questionnaireResponse = questionnaireResponse;
+    }
+  }
+
+  public static class PatientTaskInfoBundleExtractorException extends RuntimeException {
+
+    public PatientTaskInfoBundleExtractorException(String message) {
+      super(message);
     }
   }
 }
