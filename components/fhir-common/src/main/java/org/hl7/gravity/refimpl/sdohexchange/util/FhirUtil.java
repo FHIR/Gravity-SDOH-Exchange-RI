@@ -74,14 +74,26 @@ public class FhirUtil {
   }
 
   /**
-   * Find {@link Coding} by system among a list of {@link CodeableConcept} instances. This is useful when searching for
-   * a specific code inside a FHIR resource.
+   * Find {@link Coding} by system among a list of {@link CodeableConcept} instances.
    */
   public Coding findCoding(List<CodeableConcept> codes, String system) {
+    return findCoding(codes, system, null);
+  }
+
+  /**
+   * Find {@link Coding} by system and code among a list of {@link CodeableConcept} instances.
+   */
+  public Coding findCoding(List<CodeableConcept> codes, String system, String code) {
     return codes.stream()
         .map(c -> c.getCoding()
             .stream()
-            .filter(coding -> system.equals(coding.getSystem()))
+            .filter(coding -> {
+              if (Strings.isNullOrEmpty(code)) {
+                return system.equals(coding.getSystem());
+              } else {
+                return system.equals(coding.getSystem()) && code.equals(coding.getCode());
+              }
+            })
             .findFirst()
             .orElse(null))
         .filter(Objects::nonNull)

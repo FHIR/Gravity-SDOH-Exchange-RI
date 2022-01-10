@@ -1,30 +1,34 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
+import com.google.common.collect.Lists;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.gravity.refimpl.sdohexchange.codes.PatientTaskCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.SDCTemporaryCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SDOHTemporaryCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.PatientTaskType;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskItemDto;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskItemInfoBundleExtractor;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
 
-public class PatientTaskInfoHolderToItemDtoConverter
-    implements Converter<PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder, PatientTaskItemDto> {
+public class PatientTaskItemInfoHolderToItemDtoConverter<S extends PatientTaskItemInfoHolder,
+    T extends PatientTaskItemDto>
+    implements Converter<S, T> {
 
   @Override
-  public PatientTaskItemDto convert(PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder taskInfoHolder) {
+  public T convert(S taskInfoHolder) {
     Task task = taskInfoHolder.getTask();
     Questionnaire questionnaire = taskInfoHolder.getQuestionnaire();
     PatientTaskItemDto taskDto = createDto();
@@ -56,16 +60,23 @@ public class PatientTaskInfoHolderToItemDtoConverter
 
     for (TaskOutputComponent outputComponent : task.getOutput()) {
       Type componentValue = outputComponent.getValue();
-      if (componentValue instanceof Reference) {
+      Coding coding = FhirUtil.findCoding(Lists.newArrayList(outputComponent.getType()), SDCTemporaryCode.SYSTEM,
+          SDCTemporaryCode.QUESTIONNAIRE_RESPONSE.getCode());
+      if (coding != null) {
         Reference qrRef = (Reference) componentValue;
-        taskDto.setAssessmentResponse(new ReferenceDto(qrRef.getReferenceElement()
-            .getIdPart(), qrRef.getDisplay()));
-      } else if (componentValue instanceof CodeableConcept) {
+        if (QuestionnaireResponse.class.getSimpleName()
+            .equals(qrRef.getReferenceElement()
+                .getResourceType())) {
+          taskDto.setAssessmentResponse(new ReferenceDto(qrRef.getReferenceElement()
+              .getIdPart(), coding.getDisplay()));
+        }
+      }
+      if (componentValue instanceof CodeableConcept) {
         CodeableConcept outcome = (CodeableConcept) componentValue;
         taskDto.setOutcome(outcome.getText());
       }
     }
-    return taskDto;
+    return (T) taskDto;
   }
 
   protected PatientTaskItemDto createDto() {
