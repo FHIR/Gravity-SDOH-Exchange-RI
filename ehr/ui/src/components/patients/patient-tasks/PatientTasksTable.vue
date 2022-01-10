@@ -19,7 +19,7 @@ export default defineComponent({
 			default: "active"
 		}
 	},
-	emits: ["add-task", "trigger-open-assessment"],
+	emits: ["add-task", "trigger-open-assessment", "trigger-open-action-step"],
 	setup(props, { emit }) {
 		const title = ref<string>(props.status === "active" ? "Active Tasks" : "Completed Tasks");
 		const taskDialogVisible = ref<boolean>(false);
@@ -40,6 +40,11 @@ export default defineComponent({
 		const tableEl = ref<HTMLFormElement>();
 		tableEl.value?.doLayout();
 
+		const handleOpenActionStep = (id: string) => {
+			taskDialogVisible.value = false;
+			emit("trigger-open-action-step", id);
+		};
+
 		return {
 			title,
 			onTaskClick,
@@ -47,6 +52,7 @@ export default defineComponent({
 			activeTaskId,
 			handleOpenAssessment,
 			activeTaskName,
+			handleOpenActionStep,
 			tableEl
 		};
 	}
@@ -111,6 +117,12 @@ export default defineComponent({
 			<el-table-column label="Referral">
 				<template #default="scope">
 					{{ scope.row.referralTask?.display || "N/A" }}
+					<span
+						v-if="scope.row.referralTask && scope.row.referralTask?.display"
+						class="icon-link"
+						@click="$emit('trigger-open-action-step', scope.row.referralTask.id)"
+					>
+					</span>
 				</template>
 			</el-table-column>
 
@@ -132,12 +144,14 @@ export default defineComponent({
 			:task-name="activeTaskName"
 			@close="taskDialogVisible = false"
 			@trigger-open-assessment="handleOpenAssessment"
+			@trigger-open-action-step="handleOpenActionStep"
 		/>
 	</div>
 </template>
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/abstracts/variables";
+@import "~@/assets/scss/abstracts/mixins";
 
 .title {
 	margin-top: 10px;
@@ -160,5 +174,13 @@ export default defineComponent({
 	+ .table-wrapper {
 		margin-top: 30px;
 	}
+}
+
+.icon-link {
+	position: relative;
+	left: 7px;
+	cursor: pointer;
+
+	@include icon("~@/assets/images/link.svg", 14px, 14px);
 }
 </style>

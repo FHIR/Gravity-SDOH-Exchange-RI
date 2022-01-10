@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType, ref, watch } from "vue";
 import EditRequestDialog from "@/components/patients/action-steps/EditRequestDialog.vue";
 import { TableData } from "@/components/patients/action-steps/ActionSteps.vue";
 import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
@@ -18,9 +18,14 @@ export default defineComponent({
 		title: {
 			type: String,
 			default: "Active Requests"
+		},
+		actionStepToOpen: {
+			type: String,
+			default: ""
 		}
 	},
-	setup() {
+	emits: ["reset-active-task"],
+	setup(props, { emit }) {
 		const editRequestDialogVisible = ref<boolean>(false);
 		const editRequest = ref<TableData>();
 		const onRequestClick = (row: TableData) => {
@@ -28,10 +33,23 @@ export default defineComponent({
 			editRequest.value = row;
 		};
 
+		watch(() => props.actionStepToOpen, () => {
+			if (props.actionStepToOpen) {
+				editRequest.value = props.data.find(task=> task.id === props.actionStepToOpen);
+				editRequestDialogVisible.value = true;
+			}
+		}, { immediate: true });
+
+		const handleClose = () => {
+			editRequestDialogVisible.value = false;
+			emit("reset-active-task");
+		};
+
 		return {
 			editRequestDialogVisible,
 			onRequestClick,
-			editRequest
+			editRequest,
+			handleClose
 		};
 	}
 });
@@ -126,7 +144,7 @@ export default defineComponent({
 		<EditRequestDialog
 			:visible="editRequestDialogVisible"
 			:task="editRequest"
-			@close="editRequestDialogVisible = false"
+			@close="handleClose"
 		/>
 	</div>
 </template>
