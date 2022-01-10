@@ -36,6 +36,9 @@ export default defineComponent({
 			taskDialogVisible.value = false;
 			emit("trigger-open-assessment", id);
 		};
+		// Fix for table in Safari browser.
+		const tableEl = ref<HTMLFormElement>();
+		tableEl.value?.doLayout();
 
 		return {
 			title,
@@ -43,7 +46,8 @@ export default defineComponent({
 			taskDialogVisible,
 			activeTaskId,
 			handleOpenAssessment,
-			activeTaskName
+			activeTaskName,
+			tableEl
 		};
 	}
 });
@@ -66,7 +70,10 @@ export default defineComponent({
 				Add Patient Task
 			</el-button>
 		</div>
-		<el-table :data="data">
+		<el-table
+			ref="tableEl"
+			:data="data"
+		>
 			<el-table-column label="Task Name">
 				<template #default="scope">
 					<el-button
