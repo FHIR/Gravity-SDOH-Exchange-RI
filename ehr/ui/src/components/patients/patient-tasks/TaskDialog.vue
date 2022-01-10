@@ -26,7 +26,7 @@ export default defineComponent({
 			default: undefined
 		}
 	},
-	emits: ["close", "trigger-open-assessment"],
+	emits: ["close", "trigger-open-assessment", "trigger-open-action-step"],
 	setup(props, { emit }) {
 		const saveInProgress = ref<boolean>(false);
 		const isLoading = ref<boolean>(false);
@@ -156,6 +156,12 @@ export default defineComponent({
 					label="Referral Task"
 				>
 					{{ task.referralTask.display }}
+					<span
+						v-if="task.referralTask && task.referralTask?.display"
+						class="icon-link"
+						@click="$emit('trigger-open-action-step', task.referralTask.id)"
+					>
+					</span>
 				</el-form-item>
 				<el-form-item label="Code">
 					{{ task.code ? `${task.code.display}` : "N/A" }}

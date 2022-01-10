@@ -2,6 +2,7 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.OccurrenceResponseDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskInfoBundleExtractor.PatientTaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
@@ -22,6 +23,9 @@ public class PatientTaskInfoHolderToDtoConverter
         .stream()
         .map(annotationToDtoConverter::convert)
         .collect(Collectors.toList()));
+    taskDto.setOccurrence(new OccurrenceResponseDto(FhirUtil.toLocalDateTime(task.getExecutionPeriod()
+        .getStartElement()), FhirUtil.toLocalDateTime(task.getExecutionPeriod()
+        .getEndElement())));
     if (taskDto.getAssessment() == null && taskInfoHolder.getQuestionnaireResponse() != null) {
       taskDto.setAnswers(taskInfoHolder.getQuestionnaireResponse()
           .getItem()

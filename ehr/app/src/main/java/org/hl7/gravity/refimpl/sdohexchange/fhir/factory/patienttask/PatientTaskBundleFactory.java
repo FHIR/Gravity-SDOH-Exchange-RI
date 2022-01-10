@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.OccurrenceRequestDto;
@@ -60,6 +61,12 @@ public class PatientTaskBundleFactory {
     task.setDescription(name);
     task.setFor(getPatientReference());
     task.setOwner(getPatientReference());
+    if (occurrence.isPeriod()) {
+      task.setExecutionPeriod(new Period().setStartElement(occurrence.getStart())
+          .setEndElement(occurrence.getEnd()));
+    } else {
+      task.setExecutionPeriod(new Period().setEndElement(occurrence.getEnd()));
+    }
     task.setRequester(requester);
 
     if (!Strings.isNullOrEmpty(comment)) {
