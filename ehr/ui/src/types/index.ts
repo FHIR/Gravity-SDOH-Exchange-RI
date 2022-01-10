@@ -259,6 +259,10 @@ export type ActiveResources = {
 	activeProblemsCount: number
 }
 
+export type Answer = {
+	[key: string]: string
+}
+
 export type PatientTask = {
 	id: string,
 	name: string,
@@ -275,7 +279,8 @@ export type PatientTask = {
 	}[] | null,
 	outcome: string | null,
 	statusReason: string | null,
-	errors: string[]
+	errors: string[],
+	answers?: any
 };
 
 export type NewPatientTaskPayload = {
