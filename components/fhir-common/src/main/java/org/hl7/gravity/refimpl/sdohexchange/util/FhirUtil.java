@@ -105,8 +105,21 @@ public class FhirUtil {
    * Get all resources of specific type from a resource bundle. Resources are retrieved from Bundle.getResource().
    */
   public <T extends IBaseResource> List<T> getFromBundle(Bundle bundle, Class<T> resourceType) {
+    return getFromBundle(bundle, resourceType, null);
+  }
+
+  /**
+   * Get all resources of specific type from a resource bundle by search mode. Resources are retrieved from Bundle
+   * .getResource().
+   */
+  public <T extends IBaseResource> List<T> getFromBundle(Bundle bundle, Class<T> resourceType,
+      Bundle.SearchEntryMode searchMode) {
     return bundle.getEntry()
         .stream()
+        .filter(o -> Optional.ofNullable(searchMode)
+            .map(e -> e.equals(o.getSearch()
+                .getMode()))
+            .orElse(true))
         .map(Bundle.BundleEntryComponent::getResource)
         .filter(resourceType::isInstance)
         .map(resourceType::cast)
