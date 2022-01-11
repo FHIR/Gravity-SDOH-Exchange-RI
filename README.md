@@ -8,7 +8,7 @@ All reference implementations are usually available for testing during connectat
 
 ## Local Testing
 ### Configure
-To configure both apps to use custom Sandbox URLs - set the following system variables:
+To configure the EHR and CP apps to use custom Sandbox URLs - set the following system variables:
 Replace **{APP}** with either `ehr` or `cp`.
 
 | Variable | Description |
@@ -22,6 +22,7 @@ Replace **{APP}** with either `ehr` or `cp`.
 | **spring.security.oauth2.client.provider.{APP}-provider.user-info-uri** | OAuth2 UserInfo endpoint. Defaults to the Logica UserInfo ednpoint. |
 | **spring.security.oauth2.client.provider.{APP}-provider.jwk-set-uri** | JSON Web Key Set endpoint. Defaults to the Logica JWKS ednpoint. |
 
+In CBO app the source FHIR Servers are added dynamically through UI, so no any configuration is needed on start.
 ### Build
 Latest Java and Maven have to be installed. Just run a command from a base directory:
 ```sh
@@ -31,12 +32,18 @@ mvn clean install
 ```sh
 java -Dserver.port=8080 -jar ehr/app/target/app-1.0-SNAPSHOT.jar
 ```
-or
 ```sh
 java -Dserver.port=8082 -jar cp/app/target/app-1.0-SNAPSHOT.jar
 ```
+```sh
+java -Dserver.port=8084 -jar cbo/app/target/app-1.0-SNAPSHOT.jar
+```
 
-Change port `8080` to any other port you want an application to listen to. Specify varaibles before the `-jar` flag in format `-Dvariable=value`. 
+Change port `8080` to any other port you want an application to listen to. Specify varaibles before the `-jar` flag in format `-Dvariable=value`.
+EHR run command example:
+```sh
+java -Dserver.port=8080 -Dehr.fhir-server-uri=https://api.logicahealth.org/GravitySandboxNew/data -Dehr.open-fhir-server-uri=https://api.logicahealth.org/GravitySandboxNew/open -Dspring.security.oauth2.client.registration.ehr-client.client-id=1c4d149f-9995-4c5c-ac42-018150437355 -Dspring.security.oauth2.client.registration.ehr-client.client-secret=secret -jar ehr/app/target/app-1.0-SNAPSHOT.jar
+```
 
 ## Prepare a Sandbox
 ### Delete data from the previous runs
