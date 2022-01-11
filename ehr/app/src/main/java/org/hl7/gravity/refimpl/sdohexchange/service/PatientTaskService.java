@@ -64,8 +64,8 @@ public class PatientTaskService {
             .code(smartOnFhirContext.getPatient()))
         .returnBundle(Bundle.class)
         .execute();
-    taskBundle = addQuestionnairesToTaskBundle(taskBundle);
-    taskBundle = addQuestionnaireResponseToTaskBundle(taskBundle);
+    addQuestionnairesToTaskBundle(taskBundle);
+    addQuestionnaireResponsesToTaskBundle(taskBundle);
     return new PatientTaskBundleToDtoConverter().convert(taskBundle)
         .stream()
         .findFirst()
@@ -82,20 +82,21 @@ public class PatientTaskService {
             .code(smartOnFhirContext.getPatient()))
         .returnBundle(Bundle.class)
         .execute();
-    tasksBundle = addQuestionnairesToTaskBundle(tasksBundle);
+    addQuestionnairesToTaskBundle(tasksBundle);
     return new PatientTaskBundleToItemDtoConverter().convert(tasksBundle);
   }
 
-  private Bundle addQuestionnaireResponseToTaskBundle(Bundle responseBundle) {
-    Task patientTask = FhirUtil.getFirstFromBundle(responseBundle, Task.class);
-
-    if (patientTask != null) {
-      if (patientTask.hasOutput()) {
-        for (Task.TaskOutputComponent outputComponent : patientTask.getOutput()) {
-          Coding coding = FhirUtil.findCoding(Lists.newArrayList(outputComponent.getType()), SDCTemporaryCode.SYSTEM,
+  private void addQuestionnaireResponsesToTaskBundle(Bundle responseBundle) {
+    FhirUtil.getFromBundle(responseBundle, Task.class, Bundle.SearchEntryMode.MATCH)
+        .stream()
+        .filter(Task::hasOutput)
+        .flatMap(t -> t.getOutput()
+            .stream())
+        .forEach(c -> {
+          Coding coding = FhirUtil.findCoding(Lists.newArrayList(c.getType()), SDCTemporaryCode.SYSTEM,
               SDCTemporaryCode.QUESTIONNAIRE_RESPONSE.getCode());
           if (coding != null) {
-            String questionnaireResponseId = ((Reference) outputComponent.getValue()).getReferenceElement()
+            String questionnaireResponseId = ((Reference) c.getValue()).getReferenceElement()
                 .getIdPart();
             Bundle questionnaireResponse = ehrClient.search()
                 .forResource(QuestionnaireResponse.class)
@@ -104,18 +105,14 @@ public class PatientTaskService {
                 .returnBundle(Bundle.class)
                 .execute();
 
-            return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaireResponse);
+            FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaireResponse);
           }
-        }
-      }
-    }
-
-    return responseBundle;
+        });
   }
 
-  private Bundle addQuestionnairesToTaskBundle(Bundle responseBundle) {
+  private void addQuestionnairesToTaskBundle(Bundle responseBundle) {
     // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
-    List<String> urls = FhirUtil.getFromBundle(responseBundle, Task.class)
+    List<String> urls = FhirUtil.getFromBundle(responseBundle, Task.class, Bundle.SearchEntryMode.MATCH)
         .stream()
         .map(t -> t.getInput()
             .stream()
@@ -137,7 +134,7 @@ public class PatientTaskService {
         .returnBundle(Bundle.class)
         .execute();
 
-    return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+    FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
   }
 
   public void update(String id, UpdateTaskRequestDto update, UserDto user) {

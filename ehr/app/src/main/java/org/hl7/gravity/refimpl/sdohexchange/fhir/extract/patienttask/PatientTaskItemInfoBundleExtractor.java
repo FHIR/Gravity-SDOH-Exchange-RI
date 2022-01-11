@@ -5,11 +5,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SDCTemporaryCode;
-import org.hl7.gravity.refimpl.sdohexchange.fhir.SDOHProfiles;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.BundleExtractor;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskItemInfoBundleExtractor.PatientTaskItemInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
@@ -27,14 +25,8 @@ public class PatientTaskItemInfoBundleExtractor extends BundleExtractor<List<Pat
         .stream()
         .collect(Collectors.toMap(q -> q.getUrl(), Function.identity()));
 
-    return FhirUtil.getFromBundle(bundle, Task.class)
+    return FhirUtil.getFromBundle(bundle, Task.class, Bundle.SearchEntryMode.MATCH)
         .stream()
-        //Get only Patient tasks and not included referral tasks.
-        .filter(t -> t.getMeta()
-            .hasProfile(SDOHProfiles.PATIENT_TASK) && t.hasOwner() && Patient.class.getSimpleName()
-            .equals(t.getOwner()
-                .getReferenceElement()
-                .getResourceType()))
         .map(task -> {
           String url = task.getInput()
               .stream()

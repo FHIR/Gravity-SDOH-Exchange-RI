@@ -10,14 +10,14 @@ import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import java.util.stream.Collectors;
 
 public class PatientTaskInfoHolderToDtoConverter
-    extends PatientTaskItemInfoHolderToItemDtoConverter<PatientTaskInfoHolder, PatientTaskDto> {
+    extends PatientTaskItemInfoHolderToItemDtoConverter<PatientTaskInfoHolder> {
 
   private final AnnotationToDtoConverter annotationToDtoConverter = new AnnotationToDtoConverter();
 
   @Override
   public PatientTaskDto convert(PatientTaskInfoHolder taskInfoHolder) {
     Task task = taskInfoHolder.getTask();
-    PatientTaskDto taskDto = super.convert(taskInfoHolder);
+    PatientTaskDto taskDto = (PatientTaskDto) super.convert(taskInfoHolder);
     taskDto.setCreatedAt(FhirUtil.toLocalDateTime(task.getAuthoredOnElement()));
     taskDto.setComments(task.getNote()
         .stream()

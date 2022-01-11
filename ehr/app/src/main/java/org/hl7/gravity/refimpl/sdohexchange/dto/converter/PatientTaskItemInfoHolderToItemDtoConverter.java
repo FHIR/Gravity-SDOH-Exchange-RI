@@ -23,12 +23,11 @@ import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
 
-public class PatientTaskItemInfoHolderToItemDtoConverter<S extends PatientTaskItemInfoHolder,
-    T extends PatientTaskItemDto>
-    implements Converter<S, T> {
+public class PatientTaskItemInfoHolderToItemDtoConverter<T extends PatientTaskItemInfoHolder>
+    implements Converter<T, PatientTaskItemDto> {
 
   @Override
-  public T convert(S taskInfoHolder) {
+  public PatientTaskItemDto convert(T taskInfoHolder) {
     Task task = taskInfoHolder.getTask();
     Questionnaire questionnaire = taskInfoHolder.getQuestionnaire();
     PatientTaskItemDto taskDto = createDto();
@@ -76,7 +75,7 @@ public class PatientTaskItemInfoHolderToItemDtoConverter<S extends PatientTaskIt
         taskDto.setOutcome(outcome.getText());
       }
     }
-    return (T) taskDto;
+    return taskDto;
   }
 
   protected PatientTaskItemDto createDto() {
