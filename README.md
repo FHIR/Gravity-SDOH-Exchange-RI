@@ -248,4 +248,4 @@ curl --location --request POST 'https://sdoh-exchange-ri-ehr.herokuapp.com/admin
 --data-raw '{QuestionnaireResponse resource}'
 ```
 All examples can be found at http://build.fhir.org/ig/HL7/fhir-sdoh-clinicalcare/artifacts.html#examples.
-A Health Concerns should refererence a QuestionnaireResponse resource it is derived from. And a QuestionnaireResponse resource will contain a reference to Group Observation resource tree.
+A Health Concern should refererence a QuestionnaireResponse resource it is derived from. And a QuestionnaireResponse resource will contain a reference to Group Observation resource tree (find examples in the IG Artifacts page).
