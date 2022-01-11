@@ -24,14 +24,14 @@ public class PatientTaskInfoBundleExtractor extends BundleExtractor<List<Patient
 
   @Override
   public List<PatientTaskInfoHolder> extract(Bundle bundle) {
-    List<PatientTaskItemInfoHolder> patientTaskInfoHolder = patientTaskItemInfoBundleExtractor.extract(bundle);
+    List<PatientTaskItemInfoHolder> patientTaskItemInfoHolders = patientTaskItemInfoBundleExtractor.extract(bundle);
     Map<String, QuestionnaireResponse> questionnaireResponsesMap = FhirUtil.getFromBundle(bundle,
             QuestionnaireResponse.class)
         .stream()
         .collect(Collectors.toMap(qr -> qr.getIdElement()
             .getIdPart(), Function.identity()));
 
-    return patientTaskInfoHolder.stream()
+    return patientTaskItemInfoHolders.stream()
         .map(infoHolder -> {
           Task.TaskOutputComponent outputComponent = infoHolder.getTask()
               .getOutput()
