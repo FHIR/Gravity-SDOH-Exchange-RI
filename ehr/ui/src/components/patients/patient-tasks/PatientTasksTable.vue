@@ -127,7 +127,20 @@ export default defineComponent({
 
 			<el-table-column label="Code">
 				<template #default="scope">
-					{{ scope.row.code?.display || "N/A" }}
+					<el-popover
+						effect="light"
+						trigger="hover"
+						placement="bottom"
+					>
+						<template #default>
+							{{ scope.row.code?.display || "N/A" }}
+						</template>
+						<template #reference>
+							<div class="cell-text">
+								{{ scope.row.code?.display || "N/A" }}
+							</div>
+						</template>
+					</el-popover>
 				</template>
 			</el-table-column>
 
@@ -146,6 +159,7 @@ export default defineComponent({
 			<el-table-column label="Document">
 				<template #default="scope">
 					<el-popover
+						:disabled="!scope.row.assessment"
 						effect="light"
 						trigger="hover"
 						placement="bottom"
@@ -172,7 +186,21 @@ export default defineComponent({
 
 			<el-table-column label="Outcomes/Reason">
 				<template #default="scope">
-					{{ scope.row.statusReason || scope.row.outcomes || scope.row.assessmentResponse?.display || "N/A" }}
+					<el-popover
+						:disabled="!scope.row.statusReason && !scope.row.outcomes && !scope.row.assessmentResponse?.display"
+						effect="light"
+						trigger="hover"
+						placement="bottom"
+					>
+						<template #default>
+							{{ scope.row.statusReason || scope.row.outcomes || scope.row.assessmentResponse?.display || "N/A" }}
+						</template>
+						<template #reference>
+							<div class="cell-text">
+								{{ scope.row.statusReason || scope.row.outcomes || scope.row.assessmentResponse?.display || "N/A" }}
+							</div>
+						</template>
+					</el-popover>
 				</template>
 			</el-table-column>
 		</el-table>
