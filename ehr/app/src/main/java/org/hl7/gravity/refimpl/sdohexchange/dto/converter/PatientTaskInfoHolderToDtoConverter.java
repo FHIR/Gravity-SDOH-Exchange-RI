@@ -26,7 +26,7 @@ public class PatientTaskInfoHolderToDtoConverter
     taskDto.setOccurrence(new OccurrenceResponseDto(FhirUtil.toLocalDateTime(task.getExecutionPeriod()
         .getStartElement()), FhirUtil.toLocalDateTime(task.getExecutionPeriod()
         .getEndElement())));
-    if (taskDto.getAssessment() == null && taskInfoHolder.getQuestionnaireResponse() != null) {
+    if (taskInfoHolder.getQuestionnaireResponse() != null) {
       taskDto.setAnswers(taskInfoHolder.getQuestionnaireResponse()
           .getItem()
           .stream()
