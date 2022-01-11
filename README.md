@@ -68,7 +68,8 @@ Optional (if these resources have been updated in the IG artifacts page):
 - Hunger Vital Sign Questionnaire
 - Hunger Vital Sign StructureMap
 
-##Initialize EHR Sandbox
+## Initialize EHR Sandbox
+
 ### Create an EHR Organization resource with the PractitionerRole
 Send a `POST` request to `https://{EHR server base}/` with the following content. This will create an EHR Organization entry and link it to the performing Practitioner using the PractitionerRole resource. This practitioner with corresponding PractitionerRole resource and Organization referencing the current EHR, should be launching the EHR app, in other case the launch will fail. Please take into account that **both resources should belong to the US-Core profile**.
 ```yaml
@@ -251,3 +252,20 @@ curl --location --request POST 'https://sdoh-exchange-ri-ehr.herokuapp.com/admin
 ```
 All examples can be found at http://build.fhir.org/ig/HL7/fhir-sdoh-clinicalcare/artifacts.html#examples.
 A Health Concern should refererence a QuestionnaireResponse resource it is derived from. And a QuestionnaireResponse resource will contain a reference to Group Observation resource tree (find examples in the IG Artifacts page).
+
+## Initialize CP Sandbox
+### Create a CP Organization resource with the PractitionerRole
+Instuctions are the same as for the EHR. Just put the proper CP organization name, and set type to:
+```yaml
+"type": [
+    {
+        "coding": [
+            {
+                "code": "cp",
+                "display": "Community Platform",
+                "system": "http://hl7.org/gravity/CodeSystem/sdohcc-temporary-organization-type-codes"
+            }
+        ]
+    }
+]
+```
