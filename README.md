@@ -47,18 +47,27 @@ java -Dserver.port=8080 -Dehr.fhir-server-uri=https://api.logicahealth.org/Gravi
 
 ## Prepare a Sandbox
 ### Delete data from the previous runs
-Run the following command to delete all data for a specific Resource type:
+Run the following command to delete all data for a specific Resource type belonging to your test Patient resource:
 ```sh
-DELETE https://{server base}/Task?_profile:contains={SDOH Profile or no string to match all}&_cascade=delete
+DELETE https://{server base}/Task?patient={patient id}&_profile:contains={SDOH Profile or no string to match all}&_cascade=delete
 ```
-Reource types to delete:
-- Task
+All SDOH profiles can be found in the official SDOH IG documetnation at http://hl7.org/fhir/us/sdoh-clinicalcare/2022Jan/
+
+Recource types to delete:
+- Task (this includes both Referrals and Patient Tasks)
 - ServiceRequest
 - Procedure
 - Consent
+- Condition
+- Goal
+- QuestionnaireResponse
+
+Optional (if these resources have been updated in the IG artifacts page):
+- Hunger Vital Sign Questionnaire
+- Hunger Vital Sign StructureMap
 
 ### Create an EHR Organization resource with the PractitionerRole
-Send a `POST` request to `https://{EHR server base}/` with the following content. This will create an EHR Organization entry and link it to the performing Practitioner using the PractitionerRole resource. This practtioner with corresponding PractitionerRole resource and Organization referencing the current EHR, should be launching the EHR app, in other case the launch will fail. Please take into account that **both resources should belong to the US-Core profile**.
+Send a `POST` request to `https://{EHR server base}/` with the following content. This will create an EHR Organization entry and link it to the performing Practitioner using the PractitionerRole resource. This practitioner with corresponding PractitionerRole resource and Organization referencing the current EHR, should be launching the EHR app, in other case the launch will fail. Please take into account that **both resources should belong to the US-Core profile**.
 ```yaml
 {
     "resourceType": "Bundle",
@@ -162,7 +171,7 @@ Send a `POST` request to `https://{EHR server base}/` with the following content
 }
 ```
 
-### Create Organization resources with Endpoints
+### Create CP Organization resources with Endpoints
 Send a `POST` request to `https://{EHR server base}/` with the following content. This will create a CP Organization entry with a corresponding Endpoint. Please take into account that currently **only OPEN FHIR endpoints are supported**.
 ```yaml
 {
@@ -231,13 +240,13 @@ Send a `POST` request to `https://{EHR server base}/` with the following content
 }
 ```
 ### Create Goals and Conditions
-Goals and Conditios must be pre-created manually for now. In future they will be promoted from the Questionnaire results. All examples can be found at http://build.fhir.org/ig/HL7/fhir-sdoh-clinicalcare/artifacts.html#examples. To create a Condition resource for a specific Patient and Food Insecurity category - run the following POST request to `https://{EHR server base}/{Resource Type}`. Please notice, `the profile should be set to  "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Condition-Base-1"`:
+Goals and Conditios must be pre-created manually for now. In future they will be promoted from the Questionnaire results. All examples can be found at http://build.fhir.org/ig/HL7/fhir-sdoh-clinicalcare/artifacts.html#examples. To create a Condition resource for a specific Patient and Food Insecurity category - run the following POST request to `https://{EHR server base}/{Resource Type}`. Please notice, `the profile should be set to  "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Condition"`:
 ```yaml
 {
     "resourceType": "Condition",
     "meta": {
         "profile": [
-            "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Condition-Base-1"
+            "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Condition"
         ]
     },
     "clinicalStatus": {
@@ -311,7 +320,7 @@ Goal resource example:
     "resourceType": "Goal",
     "meta": {
         "profile": [
-            "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Goal-Base-1"
+            "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Goal"
         ]
     },
     "lifecycleStatus": "active",
