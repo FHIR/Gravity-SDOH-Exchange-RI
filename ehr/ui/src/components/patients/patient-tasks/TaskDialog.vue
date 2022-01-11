@@ -1,8 +1,9 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, ref } from "vue";
 import TaskStatusIcon from "@/components/patients/TaskStatusIcon.vue";
-import { TaskStatus, PatientTask } from "@/types";
+import { TaskStatus, PatientTask, Occurrence } from "@/types";
 import { PatientTasksModule } from "@/store/modules/patientTasks";
+import moment from "moment";
 
 export type FormModel = {
 	status: string,
@@ -103,6 +104,13 @@ export default defineComponent({
 			statusReason: [{ required: true, message: "This field is required" }]
 		}));
 
+		const showOccurrence = (occurrence: Occurrence) => {
+			if (occurrence.start !== null) {
+				return `From ${moment(occurrence.start).format("MMM DD, YYYY")} to ${moment(occurrence.end).format("MMM DD, YYYY")}`;
+			}
+			return `Until ${moment(occurrence.end).format("MMM DD, YYYY")}`;
+		};
+
 		return {
 			saveInProgress,
 			onDialogClose,
@@ -115,7 +123,8 @@ export default defineComponent({
 			onDialogOpen,
 			showStatusReasonInput,
 			isLoading,
-			task
+			task,
+			showOccurrence
 		};
 	}
 });
@@ -224,6 +233,9 @@ export default defineComponent({
 				<el-form-item label="Priority">
 					{{ task.priority }}
 				</el-form-item>
+				<el-form-item label="Occurrence">
+					{{ showOccurrence(task.occurrence) }}
+				</el-form-item>
 				<el-form-item
 					v-if="showStatusReasonInput"
 					label="Reason"
@@ -257,7 +269,7 @@ export default defineComponent({
 					v-if="task.outcome"
 					label="Outcomes"
 				>
-					{{ task.outcomes }}
+					{{ task.outcome }}
 				</el-form-item>
 				<el-form-item
 					v-if="task.comments && task.comments.length > 0"
