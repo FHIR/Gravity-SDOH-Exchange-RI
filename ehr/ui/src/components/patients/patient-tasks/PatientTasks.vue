@@ -64,7 +64,8 @@ export default defineComponent({
 				assessment: task.assessment,
 				outcomes: task.outcome,
 				statusReason: task.statusReason,
-				priority: task.priority
+				priority: task.priority,
+				assessmentResponse: task.assessmentResponse
 			}))
 		);
 		const activeTasks = computed<TableData[]>(() => tableData.value.filter(t => t.status !== "Completed"));

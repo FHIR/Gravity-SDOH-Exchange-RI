@@ -94,7 +94,24 @@ export default defineComponent({
 			<el-table-column
 				prop="type"
 				label="Type"
-			/>
+			>
+				<template #default="scope">
+					<el-popover
+						effect="light"
+						trigger="hover"
+						placement="bottom"
+					>
+						<template #default>
+							{{ scope.row.type }}
+						</template>
+						<template #reference>
+							<div class="cell-text">
+								{{ scope.row.type }}
+							</div>
+						</template>
+					</el-popover>
+				</template>
+			</el-table-column>
 
 			<el-table-column label="Status">
 				<template #default="scope">
@@ -126,15 +143,36 @@ export default defineComponent({
 				</template>
 			</el-table-column>
 
-			<el-table-column label="Assessment">
+			<el-table-column label="Document">
 				<template #default="scope">
-					{{ scope.row.assessment?.display || "N/A" }}
+					<el-popover
+						effect="light"
+						trigger="hover"
+						placement="bottom"
+					>
+						<template #default>
+							{{ scope.row.assessment?.display || "N/A" }}
+						</template>
+						<template #reference>
+							<div class="cell-wrapper">
+								<div class="cell-text">
+									{{ scope.row.assessment?.display || "N/A" }}
+								</div>
+								<span
+									v-if="scope.row.assessment && scope.row.assessment?.display"
+									class="icon-link"
+									@click="$emit('trigger-open-assessment', scope.row.assessment?.id)"
+								>
+								</span>
+							</div>
+						</template>
+					</el-popover>
 				</template>
 			</el-table-column>
 
 			<el-table-column label="Outcomes/Reason">
 				<template #default="scope">
-					{{ scope.row.statusReason || scope.row.outcomes || "N/A" }}
+					{{ scope.row.statusReason || scope.row.outcomes || scope.row.assessmentResponse?.display || "N/A" }}
 				</template>
 			</el-table-column>
 		</el-table>
@@ -182,5 +220,21 @@ export default defineComponent({
 	cursor: pointer;
 
 	@include icon("~@/assets/images/link.svg", 14px, 14px);
+}
+
+.cell-wrapper {
+	display: flex;
+	min-width: 60%;
+
+	.icon-link {
+		min-height: 14px;
+		min-width: 14px;
+	}
+}
+
+.cell-text {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 </style>
