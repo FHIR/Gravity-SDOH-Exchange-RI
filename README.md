@@ -37,7 +37,7 @@ java -Dserver.port=8080 -jar ehr/app/target/app-1.0-SNAPSHOT.jar
 java -Dserver.port=8082 -jar cp/app/target/app-1.0-SNAPSHOT.jar
 ```
 ```sh
-java -Dserver.port=8084 -jar cbo/app/target/app-1.0-SNAPSHOT.jar
+java -Dserver.port=8084 -Dapp.url=http://localhost:8084 -jar cbo/app/target/app-1.0-SNAPSHOT.jar
 ```
 
 Change port `8080` to any other port you want an application to listen to. Specify varaibles before the `-jar` flag in format `-Dvariable=value`.
@@ -45,6 +45,7 @@ EHR run command example:
 ```sh
 java -Dserver.port=8080 -Dehr.fhir-server-uri=https://api.logicahealth.org/GravitySandboxNew/data -Dehr.open-fhir-server-uri=https://api.logicahealth.org/GravitySandboxNew/open -Dspring.security.oauth2.client.registration.ehr-client.client-id=1c4d149f-9995-4c5c-ac42-018150437355 -Dspring.security.oauth2.client.registration.ehr-client.client-secret=secret -jar ehr/app/target/app-1.0-SNAPSHOT.jar
 ```
+The -Dapp.url parameter value should match the identifier of the CBO organization resource stored at CP FHIR server.
 
 ## Prepare a Sandbox
 ## Delete data from the previous runs
@@ -271,7 +272,9 @@ Instuctions are the same as for the [EHR](https://github.com/FHIR/Gravity-SDOH-E
 ```
 
 ### Create CBO Organization resources with Endpoints
+Send a `POST` request to `https://{CP server base}/Organization` with the following content. This will create a CBO Organization entry with a corresponding name and identifier.
 
+> :warning: **The identifier should match the -Dapp.url parameter specified at the CBO application start.**
 ```yaml
 {
     "id": "16180",
