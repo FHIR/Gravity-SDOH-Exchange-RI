@@ -255,7 +255,7 @@ A Health Concern should refererence a QuestionnaireResponse resource it is deriv
 
 ## Initialize CP Sandbox
 ### Create a CP Organization resource with the PractitionerRole
-Instuctions are the same as for the EHR. Just put the proper CP organization name, and set type to:
+Instuctions are the same as for the [EHR](https://github.com/FHIR/Gravity-SDOH-Exchange-RI/blob/main/README.md#create-an-ehr-organization-resource-with-the-practitionerrole). Just put the proper CP organization name, and set type to:
 ```yaml
 "type": [
     {
@@ -268,4 +268,39 @@ Instuctions are the same as for the EHR. Just put the proper CP organization nam
         ]
     }
 ]
+```
+
+### Create CBO Organization resources with Endpoints
+
+```yaml
+{
+    "id": "16180",
+    "identifier": [
+        {
+            "system": "urn:ietf:rfc:3986",
+            "value": "https://sdoh-exchange-ri-cbo.herokuapp.com"
+        }
+    ],
+    "meta": {
+        "lastUpdated": "2021-12-02T13:45:18.000+00:00",
+        "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+        ],
+        "source": "#mmPINEJ9JJ0CRPPV",
+        "versionId": "1"
+    },
+    "name": "Social Alliance",
+    "resourceType": "Organization",
+    "type": [
+        {
+            "coding": [
+                {
+                    "code": "cbo",
+                    "display": "Community Based Organization",
+                    "system": "http://hl7.org/gravity/CodeSystem/sdohcc-temporary-organization-type-codes"
+                }
+            ]
+        }
+    ]
+}
 ```
