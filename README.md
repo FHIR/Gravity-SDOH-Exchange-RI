@@ -1,8 +1,10 @@
 # Gravity SDOH Exchange RI
 Reference Implementation for the Gravity use cases specified at https://confluence.hl7.org/display/FHIR/2021-01+Gravity+SDOH+Clinical+Care+Track.
 ## Live Example
+All reference implementations are usually available for testing during connectathons. There is a high chance at any other time that the apps have been undeployed to reduce costs. If so - try to deploy them locally.
 - The EHR app is running at https://sdoh-exchange-ri-ehr.herokuapp.com. To log in please request access to the Logica Sandbox at https://sandbox.logicahealth.org/GravitySandboxNew from the Track leads.
 - The CP app is running at https://sdoh-exchange-ri-cp.herokuapp.com. To log in please request access to the Logica Sandbox at https://sandbox.logicahealth.org/GravitySDOHCBRO from the Track leads.
+- The CBO app is running at https://sdoh-exchange-ri-cbo.herokuapp.com. Creentials: user/user.
 
 ## Local Testing
 ### Configure
