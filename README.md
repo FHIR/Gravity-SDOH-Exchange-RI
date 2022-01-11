@@ -37,6 +37,7 @@ java -Dserver.port=8080 -jar ehr/app/target/app-1.0-SNAPSHOT.jar
 java -Dserver.port=8082 -jar cp/app/target/app-1.0-SNAPSHOT.jar
 ```
 ```sh
+#The -Dapp.url parameter value should match the identifier of the CBO organization resource stored at CP FHIR server.
 java -Dserver.port=8084 -Dapp.url=http://localhost:8084 -jar cbo/app/target/app-1.0-SNAPSHOT.jar
 ```
 
@@ -45,7 +46,6 @@ EHR run command example:
 ```sh
 java -Dserver.port=8080 -Dehr.fhir-server-uri=https://api.logicahealth.org/GravitySandboxNew/data -Dehr.open-fhir-server-uri=https://api.logicahealth.org/GravitySandboxNew/open -Dspring.security.oauth2.client.registration.ehr-client.client-id=1c4d149f-9995-4c5c-ac42-018150437355 -Dspring.security.oauth2.client.registration.ehr-client.client-secret=secret -jar ehr/app/target/app-1.0-SNAPSHOT.jar
 ```
-The -Dapp.url parameter value should match the identifier of the CBO organization resource stored at CP FHIR server.
 
 ## Prepare a Sandbox
 ## Delete data from the previous runs
