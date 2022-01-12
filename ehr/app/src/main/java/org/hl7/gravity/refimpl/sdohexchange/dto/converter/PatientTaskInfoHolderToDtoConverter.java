@@ -9,6 +9,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTask
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskInfoBundleExtractor.PatientTaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 public class PatientTaskInfoHolderToDtoConverter
@@ -37,9 +38,20 @@ public class PatientTaskInfoHolderToDtoConverter
                 .getValue();
             if (itemAnswer instanceof StringType) {
               return ((StringType) itemAnswer).getValue();
-            }
+            } else if (itemAnswer instanceof Coding) {
               return ((Coding) itemAnswer).getDisplay();
-          })));
+            } else {
+              taskDto.getErrors()
+                  .add(String.format("Answer cannot be resolved. %s type is not expected.", itemAnswer.getClass()
+                      .getSimpleName()));
+              return "Answer cannot be parsed.";
+            }
+          }, (existing, replacement) -> {
+            taskDto.getErrors()
+                .add(String.format("Duplicating questions detected. Value '%s' overwrites the value '%s'", replacement,
+                    existing));
+            return replacement;
+          }, LinkedHashMap::new)));
     }
     return taskDto;
   }

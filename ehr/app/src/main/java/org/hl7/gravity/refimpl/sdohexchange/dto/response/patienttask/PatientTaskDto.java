@@ -9,7 +9,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.OccurrenceResponseDto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,5 +22,5 @@ public class PatientTaskDto extends PatientTaskItemDto {
   private LocalDateTime createdAt;
   private OccurrenceResponseDto occurrence;
   private List<CommentDto> comments = new ArrayList<>();
-  private Map<String, String> answers = new HashMap<>();
+  private Map<String, String> answers = new LinkedHashMap<>();
 }
