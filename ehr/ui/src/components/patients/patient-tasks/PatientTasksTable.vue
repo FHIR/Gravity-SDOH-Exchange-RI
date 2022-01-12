@@ -217,7 +217,7 @@ export default defineComponent({
 									{{ scope.row.statusReason || scope.row.outcomes || scope.row.assessmentResponse?.display || "N/A" }}
 								</div>
 								<span
-									v-if="scope.row.assessmentResponse && scope.row.assessmentResponse?.display"
+									v-if="scope.row.type === 'Complete questionnaire regarding social risks' && scope.row.assessmentResponse && scope.row.assessmentResponse?.display"
 									class="icon-link"
 									@click="$emit('trigger-open-assessment', scope.row.assessmentResponse.id)"
 								>
