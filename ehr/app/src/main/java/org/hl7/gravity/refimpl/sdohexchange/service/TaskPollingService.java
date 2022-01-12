@@ -1,25 +1,17 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
@@ -39,14 +31,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,8 +50,6 @@ public class TaskPollingService {
 
   private final IGenericClient openEhrClient;
   private final CpService cpService;
-  private final ConvertService convertService;
-  private final FhirContext fhirContext;
 
   @Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
   public void updateTasks() {
@@ -115,68 +103,6 @@ public class TaskPollingService {
           .execute();
     }
     log.info("Task update process finished.");
-  }
-
-  /*
-  A TEST polling service, implemented during January 2022 Connectathon, that automatically runs questionnaireResponse
-  resources through a StructureMap. If any exception occurs - just ignore it.
-   */
-  @Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
-  public void demoRunQRThroughStructureMap() throws IOException, ParseException {
-    log.info("Looking for TOP 3 Patient QuestionnaireResponse resources without derived Observations...");
-    //TODO use repository instead
-    Bundle tasksBundle = openEhrClient.search()
-        .forResource(QuestionnaireResponse.class)
-        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
-            .value(SDOHProfiles.QUESTIONNAIRE_RESPONSE))
-        .revInclude(Observation.INCLUDE_DERIVED_FROM)
-        .sort()
-        .descending(QuestionnaireResponse.AUTHORED)
-        .count(3)
-        .returnBundle(Bundle.class)
-        .execute();
-
-    List<QuestionnaireResponse> responses = FhirUtil.getFromBundle(tasksBundle, QuestionnaireResponse.class,
-        Bundle.SearchEntryMode.MATCH);
-    Set<String> derivedFrom = FhirUtil.getFromBundle(tasksBundle, Observation.class, Bundle.SearchEntryMode.INCLUDE)
-        .stream()
-        .map(o -> o.getDerivedFromFirstRep()
-            .getReferenceElement()
-            .getIdPart())
-        .collect(Collectors.toSet());
-
-    if (responses.size() != derivedFrom.size()) {
-      log.info(
-          "Found " + (responses.size() - derivedFrom.size()) + "QuestionnaireResponse resources without observations.");
-      List<QuestionnaireResponse> newResponses = responses.stream()
-          .filter(qr -> !derivedFrom.contains(qr.getIdElement()
-              .getIdPart()))
-          .collect(Collectors.toList());
-      for (QuestionnaireResponse nr : newResponses) {
-        log.info("Converting QuestionnaireResponse with id: " + nr.getIdElement()
-            .getIdPart());
-        try {
-          //TODO move parser logic within the convert service. Use resources instead
-          JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
-          Map<String, Object> result = convertService.convert((JSONObject) parser.parse(fhirContext.newJsonParser()
-              .encodeResourceToString(nr)));
-          Bundle bundle = (Bundle) fhirContext.newJsonParser()
-              .parseResource(new JSONObject(result).toJSONString());
-          bundle.getEntry()
-              .forEach(e -> e.setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.POST)
-                  .setUrl(e.getResource()
-                      .getClass()
-                      .getSimpleName())));
-          openEhrClient.transaction()
-              .withBundle(bundle)
-              .execute();
-        } catch (Exception exc) {
-          //Just ignore this specific resource and go to the next one
-          log.warn(exc.getMessage(), exc);
-        }
-      }
-    }
-    log.info("QuestionnaireResponse update process finished.");
   }
 
   protected Bundle getUpdateBundle(Task task, ServiceRequest serviceRequest, Endpoint endpoint)
