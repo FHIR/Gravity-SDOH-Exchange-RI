@@ -212,8 +212,16 @@ export default defineComponent({
 							{{ scope.row.statusReason || scope.row.outcomes || scope.row.assessmentResponse?.display || "N/A" }}
 						</template>
 						<template #reference>
-							<div class="cell-text">
-								{{ scope.row.statusReason || scope.row.outcomes || scope.row.assessmentResponse?.display || "N/A" }}
+							<div class="cell-wrapper">
+								<div class="cell-text">
+									{{ scope.row.statusReason || scope.row.outcomes || scope.row.assessmentResponse?.display || "N/A" }}
+								</div>
+								<span
+									v-if="scope.row.assessmentResponse && scope.row.assessmentResponse?.display"
+									class="icon-link"
+									@click="$emit('trigger-open-assessment', scope.row.assessmentResponse.id)"
+								>
+								</span>
 							</div>
 						</template>
 					</el-popover>
