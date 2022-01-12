@@ -38,11 +38,18 @@ public class PatientTaskInfoHolderToDtoConverter
                 .getValue();
             if (itemAnswer instanceof StringType) {
               return ((StringType) itemAnswer).getValue();
+            } else if (itemAnswer instanceof Coding) {
+              return ((Coding) itemAnswer).getDisplay();
+            } else {
+              taskDto.getErrors()
+                  .add(String.format("Answer cannot be resolved. %s type is not expected.", itemAnswer.getClass()
+                      .getSimpleName()));
+              return "Answer cannot be parsed.";
             }
-            return ((Coding) itemAnswer).getDisplay();
           }, (existing, replacement) -> {
             taskDto.getErrors()
-                .add(String.format("Value '%s' was replaced with value '%s'", existing, replacement));
+                .add(String.format("Duplicating questions detected. Value '%s' overwrites the value '%s'", replacement,
+                    existing));
             return replacement;
           }, LinkedHashMap::new)));
     }
