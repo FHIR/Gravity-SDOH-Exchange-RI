@@ -47,12 +47,7 @@ export default defineComponent({
 			emit("close");
 		};
 
-		const showOccurrence = (occurrence: Occurrence) => {
-			if (occurrence.start !== null) {
-				return `From ${moment(occurrence.start).format("MMM DD, YYYY")} to ${moment(occurrence.end).format("MMM DD, YYYY")}`;
-			}
-			return `Until ${moment(occurrence.end).format("MMM DD, YYYY")}`;
-		};
+		const showOccurrence = (occurrence: Occurrence) => occurrence.start ? `From ${moment(occurrence.start).format("MMM DD, YYYY")} to ${moment(occurrence.end).format("MMM DD, YYYY")}` : `Until ${moment(occurrence.end).format("MMM DD, YYYY")}`;
 
 		const getStatusOptions = (status: TaskStatus): { name: string, value: string }[] => {
 			if (status === "Completed" || status === "Cancelled") {

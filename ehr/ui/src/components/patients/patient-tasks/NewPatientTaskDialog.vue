@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from "vue";
+import { defineComponent, ref, computed, watch, reactive } from "vue";
 import { RuleItem } from "async-validator";
 import { TasksModule } from "@/store/modules/tasks";
 import { PatientTasksModule } from "@/store/modules/patientTasks";
@@ -13,7 +13,7 @@ type FormModel = {
 	code: string,
 	status: string,
 	priority: string,
-	occurrence: string[],
+	occurrence: "",
 	comment: string,
 	// additional type related fields
 	questionnaireType: string,
@@ -54,6 +54,7 @@ export default defineComponent({
 	emits: ["close"],
 	setup(_, { emit }) {
 		const saveInProgress = ref<boolean>(false);
+		const occurrenceType = ref<string>("");
 		const typeOptions = ref<{ label: string, value: TaskType }[]>([{
 			label: "Complete questionnaire regarding social risks",
 			value: "COMPLETE_SR_QUESTIONNAIRE"
@@ -66,13 +67,13 @@ export default defineComponent({
 			value: "ready"
 		}]);
 		const questionnaireOptions = ref<{ label: string, value: string }[]>([]);
-		const formModel = ref<FormModel>({
+		const formModel = reactive<FormModel>({
 			name: "",
 			type: "",
 			code: "",
 			status: "Ready",
 			priority: "Routine",
-			occurrence: [],
+			occurrence: "",
 			comment: "",
 			questionnaireType: "",
 			questionnaireFormat: "FHIR_QUESTIONNAIRE",
@@ -91,13 +92,13 @@ export default defineComponent({
 		};
 		const formHasChanges = computed<boolean>(() =>
 			(
-				formModel.value.name !== "" ||
-				formModel.value.type !== "" ||
-				formModel.value.code !== "" ||
-				formModel.value.status !== "Ready" ||
-				formModel.value.priority !== "Routine" ||
-				formModel.value.occurrence !== [""] ||
-				formModel.value.comment !== ""
+				formModel.name !== "" ||
+				formModel.type !== "" ||
+				formModel.code !== "" ||
+				formModel.status !== "Ready" ||
+				formModel.priority !== "Routine" ||
+				formModel.occurrence !== "" ||
+				formModel.comment !== ""
 			)
 		);
 		const referralTasks = computed<Task[]>(() => TasksModule.tasks);
@@ -106,15 +107,16 @@ export default defineComponent({
 			value: t.id
 		})));
 
-		watch(() => formModel.value.type, val => {
+		watch(() => formModel.type, val => {
 			if (val === "COMPLETE_SR_QUESTIONNAIRE" || val === "SERVICE_FEEDBACK") {
-				formModel.value.code = TYPE_CODE_MAP[val].display;
-				formModel.value.questionnaireType = "Risk Questionnaire";
+				formModel.code = TYPE_CODE_MAP[val].display;
+				formModel.questionnaireType = "Risk Questionnaire";
 			}
 		});
 
 		const onDialogClose = () => {
 			formEl.value?.resetFields();
+			occurrenceType.value = "";
 			emit("close");
 		};
 		const onDialogOpen = async () => {
@@ -132,20 +134,20 @@ export default defineComponent({
 			try {
 				const payload: NewPatientTaskPayload = {
 					code: "complete-questionnaire",
-					comment: formModel.value.comment,
-					name: formModel.value.name,
-					occurrence: prepareOccurrence(formModel.value.occurrence),
-					priority: formModel.value.priority,
-					type: formModel.value.type
+					comment: formModel.comment,
+					name: formModel.name,
+					occurrence: prepareOccurrence(formModel.occurrence),
+					priority: formModel.priority,
+					type: formModel.type
 				};
 
-				if (formModel.value.type === "COMPLETE_SR_QUESTIONNAIRE") {
+				if (formModel.type === "COMPLETE_SR_QUESTIONNAIRE") {
 					payload.questionnaireType = "RISK_QUESTIONNAIRE";
-					payload.questionnaireFormat = formModel.value.questionnaireFormat;
-					payload.questionnaireId = formModel.value.questionnaireId;
+					payload.questionnaireFormat = formModel.questionnaireFormat;
+					payload.questionnaireId = formModel.questionnaireId;
 				}
-				if (formModel.value.type === "SERVICE_FEEDBACK") {
-					payload.referralTaskId = formModel.value.referralTaskId;
+				if (formModel.type === "SERVICE_FEEDBACK") {
+					payload.referralTaskId = formModel.referralTaskId;
 				}
 
 				await PatientTasksModule.createPatientTask(payload);
@@ -154,6 +156,18 @@ export default defineComponent({
 				saveInProgress.value = false;
 			}
 		};
+
+		//
+		// On every until/from...to change clear model, element-ui can't work with array or date in both datepicker and range datepicker.
+		//
+		const onOccurrenceSelectChange = () => {
+			formModel.occurrence = "";
+		};
+
+		//
+		// Disable all dates that are less than today. Used inside occurrence date-pickers.
+		//
+		const disabledOccurrenceDate = (time: Date): boolean => time.getTime() < Date.now();
 
 		return {
 			onDialogClose,
@@ -167,7 +181,10 @@ export default defineComponent({
 			statusOptions,
 			formHasChanges,
 			questionnaireOptions,
-			referralTaskOptions
+			referralTaskOptions,
+			occurrenceType,
+			onOccurrenceSelectChange,
+			disabledOccurrenceDate
 		};
 	}
 });
@@ -320,12 +337,35 @@ export default defineComponent({
 				label="Occurrence"
 				prop="occurrence"
 			>
+				<el-select
+					v-model="occurrenceType"
+					placeholder="Select"
+					class="small"
+					@change="onOccurrenceSelectChange"
+				>
+					<el-option
+						label="Until"
+						value="until"
+					/>
+					<el-option
+						label="From...to"
+						value="range"
+					/>
+				</el-select>
 				<el-date-picker
+					v-if="occurrenceType === 'until'"
+					v-model="formModel.occurrence"
+					:disabled-date="disabledOccurrenceDate"
+					placeholder="Select date"
+				/>
+				<el-date-picker
+					v-if="occurrenceType === 'range'"
 					v-model="formModel.occurrence"
 					type="daterange"
 					range-separator="To"
 					start-placeholder="Select date"
 					end-placeholder="Select date"
+					:disabled-date="disabledOccurrenceDate"
 				/>
 			</el-form-item>
 			<el-form-item
@@ -374,11 +414,20 @@ export default defineComponent({
 			width: 50%;
 			margin-right: 15px;
 		}
+
+		&.small {
+			width: 20%;
+			margin-right: 15px;
+		}
 	}
 
 	.el-divider {
 		margin: 20px 0;
 	}
+}
+
+::v-deep(.el-date-editor.el-input) {
+	width: 125px;
 }
 
 </style>
