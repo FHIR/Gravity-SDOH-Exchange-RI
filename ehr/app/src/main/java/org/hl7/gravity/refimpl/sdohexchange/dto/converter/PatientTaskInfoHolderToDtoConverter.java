@@ -40,8 +40,10 @@ public class PatientTaskInfoHolderToDtoConverter
               return ((StringType) itemAnswer).getValue();
             }
             return ((Coding) itemAnswer).getDisplay();
-          }, (v1, v2) -> {
-            throw new IllegalStateException(String.format("Duplicate key for values '%s' and '%s'", v1, v2));
+          }, (existing, replacement) -> {
+            taskDto.getErrors()
+                .add(String.format("Value '%s' was replaced with value '%s'", existing, replacement));
+            return replacement;
           }, LinkedHashMap::new)));
     }
     return taskDto;
