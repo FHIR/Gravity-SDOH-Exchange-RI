@@ -9,6 +9,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTask
 import org.hl7.gravity.refimpl.sdohexchange.fhir.extract.patienttask.PatientTaskInfoBundleExtractor.PatientTaskInfoHolder;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 public class PatientTaskInfoHolderToDtoConverter
@@ -38,8 +39,10 @@ public class PatientTaskInfoHolderToDtoConverter
             if (itemAnswer instanceof StringType) {
               return ((StringType) itemAnswer).getValue();
             }
-              return ((Coding) itemAnswer).getDisplay();
-          })));
+            return ((Coding) itemAnswer).getDisplay();
+          }, (v1, v2) -> {
+            throw new IllegalStateException(String.format("Duplicate key for values '%s' and '%s'", v1, v2));
+          }, LinkedHashMap::new)));
     }
     return taskDto;
   }
