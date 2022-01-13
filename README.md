@@ -7,7 +7,66 @@ All reference implementations are usually available for testing during connectat
 - The CP app is running at https://sdoh-exchange-ri-cp.herokuapp.com. To log in please request access to the Logica Sandbox at https://sandbox.logicahealth.org/GravitySDOHCBRO from the Track leads.
 - The CBO app is running at https://sdoh-exchange-ri-cbo.herokuapp.com. Creentials: user/user.
 
-## Local Testing
+## Prototypes
+
+Interaction prototype between Provider and Patient:
+
+Provider/ Complete questionnaire regarding social risks
+https://invis.io/2J10RH2AKAR3#/462516921_Complete_Questionnaire_Regarding_Social_Risks-_1
+
+Patient/ Complete questionnaire regarding social risks
+
+https://invis.io/87115OS1XTCG#/462518145_Complete_Questionnaire_Regarding_Social_Risks-_14
+
+
+Provider/ Collect information for a service
+
+https://invis.io/2J10RH2AKAR3#/462518690_Collect_Information_For_A_Service-_1
+
+Patient/ Collect information for a service
+
+https://invis.io/87115OS1XTCG#/462519058_Collect_Information_For_A_Service-_16
+
+
+
+Provider/ Information regarding service
+
+https://invis.io/2J10RH2AKAR3#/462519533_Information_Regarding_Service-_1
+
+Patient/ Information regarding service
+
+https://invis.io/87115OS1XTCG#/462519895_Information_Regarding_Service-_13
+
+
+
+Provider/ Schedule appointment for service requested created and sent to the performer
+
+https://invis.io/2J10RH2AKAR3#/462586427_Schedule_Appointment_For_Service_Requested_Created_And_Sent_To_The_Performer-_1
+
+Patient/ Schedule appointment for service requested created and sent to the performer
+
+https://invis.io/87115OS1XTCG#/462586725_Schedule_Appointment_For_Service_Requested_Created_And_Sent_To_The_Performer-_18
+
+
+
+Provider/ Provide patient with service performer contact information
+
+https://invis.io/2J10RH2AKAR3#/462520020_Provide_Patient_With_Service_Performer_Contact_Information-_1
+
+Patient/ Provide patient with service performer contact information
+
+https://invis.io/87115OS1XTCG#/462520439_Provide_Patient_With_Service_Performer_Contact_Information-_18
+
+
+
+Provider/ Provide feedback on service delivered
+
+https://invis.io/2J10RH2AKAR3#/462587973_Provide_Feedback_On_Service_Delivered-_1
+
+Patient/ Provide feedback on service delivered
+
+https://invis.io/87115OS1XTCG#/462604660_Provide_Feedback_On_Service_Delivered_1## Local Testing
+
 ### Configure
 To configure the EHR and CP apps to use custom Sandbox URLs - set the following system variables:
 Replace **{APP}** with either `ehr` or `cp`.
