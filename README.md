@@ -366,3 +366,10 @@ Send a `POST` request to `https://{CP server base}/Organization` with the follow
     ]
 }
 ```
+
+TODOs
+1. Update handling of Race/Ethnicity according to STU2
+2. Review latest changes in STU2 and synchronize them with code
+3. Task.restriction.period should be used instead of Task.execution
+4. Support other types of Patient tasks
+5. Support (or just verify) EHR-to-CBO exchange
