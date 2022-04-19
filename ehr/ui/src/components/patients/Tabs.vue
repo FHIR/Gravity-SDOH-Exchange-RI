@@ -7,10 +7,12 @@ import Problems from "@/components/patients/problems/Problems.vue";
 import Goals from "@/components/patients/goals/Goals.vue";
 import Consents from "@/components/patients/consents/Consents.vue";
 import PatientTasks from "@/components/patients/patient-tasks/PatientTasks.vue";
+import PersonalCharacteristics from "@/components/patients/personal-characteristics/PersonalCharacteristics.vue";
 
 export default defineComponent({
 	name: "Tabs",
 	components: {
+		PersonalCharacteristics,
 		HealthConcerns,
 		Problems,
 		ActionSteps,
@@ -161,6 +163,14 @@ export default defineComponent({
 			:lazy="true"
 		>
 			<Consents />
+		</el-tab-pane>
+		<el-tab-pane
+				label="Personal Characteristics"
+				name="PersonalCharacteris"
+				:lazy="true"
+		>
+
+			<PersonalCharacteristics/>
 		</el-tab-pane>
 	</el-tabs>
 </template>
