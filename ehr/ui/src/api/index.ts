@@ -133,6 +133,15 @@ export const getCategories = async (): Promise<Coding[]> => {
 
 	return res.data;
 };
+/* check right url for get Locations
+	const res = await axios.get("patient-task/locations");
+	return res.data;
+	*/
+export const getLocations =async (): Promise<Coding[]>=> ([{ display: "Family Counseling Services", code: "Family Counseling Services" },
+	{ display: "Family Counseling Services of Northern Illinois", code: "Family Counseling Services of Northern Illinois" },
+	{ display: "Family Counseling Services of NNY, Inc.", code : "Family Counseling Services of NNY, Inc." },
+	{ display: "Family Counseling Services of Cortland Country, Inc.", code : "Family Counseling Services of Cortland Country, Inc." }]);
+
 
 export const getConditionCodes = async (category: string): Promise<{ codings: Coding[], display: "ICD-10-CM" | "SNOMED CT" }[]> => {
 	const res = await axios.get(`/mappings/categories/${category}/condition/codings`);

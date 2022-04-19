@@ -294,7 +294,9 @@ export type NewPatientTaskPayload = {
 	questionnaireFormat?: string,
 	questionnaireId?: string,
 	referralTaskId?: string,
-	healthcareServiceId?: string
+	healthcareServiceId?: string,
+	servicePerformer?: string,
+	serviceLocation?: string
 };
 
 // todo: change after BE sync

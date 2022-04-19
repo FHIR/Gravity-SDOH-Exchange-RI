@@ -3,9 +3,9 @@ import { defineComponent, ref, computed, watch, reactive } from "vue";
 import { RuleItem } from "async-validator";
 import { TasksModule } from "@/store/modules/tasks";
 import { PatientTasksModule } from "@/store/modules/patientTasks";
-import { Task, NewPatientTaskPayload } from "@/types";
+import { Task, NewPatientTaskPayload, Coding } from "@/types";
 import { prepareOccurrence } from "@/utils/utils";
-import { getAssessments } from "@/api";
+import { getAssessments, getLocations } from "@/api";
 
 type FormModel = {
 	name: string,
@@ -19,7 +19,9 @@ type FormModel = {
 	questionnaireType: string,
 	questionnaireFormat: string,
 	questionnaireId: string,
-	referralTaskId: string
+	referralTaskId: string,
+	servicePerformer: string,
+	serviceLocation: string
 };
 
 const DEFAULT_REQUIRED_RULE = {
@@ -53,6 +55,7 @@ export default defineComponent({
 	},
 	emits: ["close"],
 	setup(_, { emit }) {
+		const serviceLocationOtions = ref<Coding[]>([]);
 		const saveInProgress = ref<boolean>(false);
 		const occurrenceType = ref<string>("");
 		const typeOptions = ref<{ label: string, value: TaskType }[]>([{
@@ -61,7 +64,12 @@ export default defineComponent({
 		}, {
 			label: "Provide feedback on service delivered",
 			value: "SERVICE_FEEDBACK"
-		}]);
+		},
+		{
+			label: "Provide patient with service performer contact information",
+			value: "MAKE_CONTACT"
+		}
+		]);
 		const statusOptions = ref<{ label: string, value: string }[]>([{
 			label: "Ready",
 			value: "ready"
@@ -78,7 +86,9 @@ export default defineComponent({
 			questionnaireType: "",
 			questionnaireFormat: "FHIR_QUESTIONNAIRE",
 			questionnaireId: "",
-			referralTaskId: ""
+			referralTaskId: "",
+			servicePerformer: "",
+			serviceLocation: ""
 		});
 		const formEl = ref<HTMLFormElement>();
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
@@ -88,7 +98,9 @@ export default defineComponent({
 			occurrence: DEFAULT_REQUIRED_RULE,
 			questionnaireFormat: DEFAULT_REQUIRED_RULE,
 			questionnaireId: DEFAULT_REQUIRED_RULE,
-			referralTaskId: DEFAULT_REQUIRED_RULE
+			referralTaskId: DEFAULT_REQUIRED_RULE,
+			servicePerformer: DEFAULT_REQUIRED_RULE,
+			serviceLocation: DEFAULT_REQUIRED_RULE
 		};
 		const formHasChanges = computed<boolean>(() =>
 			(
@@ -108,7 +120,7 @@ export default defineComponent({
 		})));
 
 		watch(() => formModel.type, val => {
-			if (val === "COMPLETE_SR_QUESTIONNAIRE" || val === "SERVICE_FEEDBACK") {
+			if (val === "COMPLETE_SR_QUESTIONNAIRE" || val === "SERVICE_FEEDBACK" || val === "MAKE_CONTACT") {
 				formModel.code = TYPE_CODE_MAP[val].display;
 				formModel.questionnaireType = "Risk Questionnaire";
 			}
@@ -121,6 +133,7 @@ export default defineComponent({
 		};
 		const onDialogOpen = async () => {
 			// to show inside referrals dropdown
+			serviceLocationOtions.value = await getLocations();
 			await TasksModule.getTasks();
 			const assessments = await getAssessments();
 			questionnaireOptions.value = assessments.map(a => ({
@@ -149,7 +162,11 @@ export default defineComponent({
 				if (formModel.type === "SERVICE_FEEDBACK") {
 					payload.referralTaskId = formModel.referralTaskId;
 				}
-
+				if (formModel.type === "MAKE_CONTACT") {
+					payload.referralTaskId = formModel.referralTaskId;
+					payload.servicePerformer = formModel.servicePerformer;
+					payload.serviceLocation = formModel.serviceLocation;
+				}
 				await PatientTasksModule.createPatientTask(payload);
 				emit("close");
 			} finally {
@@ -184,7 +201,8 @@ export default defineComponent({
 			referralTaskOptions,
 			occurrenceType,
 			onOccurrenceSelectChange,
-			disabledOccurrenceDate
+			disabledOccurrenceDate,
+			serviceLocationOtions
 		};
 	}
 });
@@ -302,6 +320,50 @@ export default defineComponent({
 					</el-select>
 				</el-form-item>
 			</template>
+			<template v-if="formModel.type === 'MAKE_CONTACT'">
+				<el-form-item
+					label="Referral Task"
+					prop="referralTaskId"
+				>
+					<el-select
+						v-model="formModel.referralTaskId"
+						placeholder="Select referral task"
+					>
+						<el-option
+							v-for="item in referralTaskOptions"
+							:key="item.value"
+							:label="item.label"
+							:value="item.value"
+						/>
+					</el-select>
+				</el-form-item>
+				<el-form-item
+					label="Service Performer"
+					prop="servicePerformer"
+				>
+					<el-input
+						v-model="formModel.servicePerformer"
+						:disabled="true"
+						placeholder="Healthcare Organization"
+					/>
+				</el-form-item>
+				<el-form-item
+					label="Service Location"
+					prop="serviceLocation"
+				>
+					<el-select
+						v-model="formModel.serviceLocation"
+						placeholder="Select service location"
+					>
+						<el-option
+							v-for="item in serviceLocationOtions"
+							:key="item.code"
+							:label="item.display"
+							:value="item.code"
+						/>
+					</el-select>
+				</el-form-item>
+			</template>
 
 			<el-divider />
 
@@ -333,41 +395,43 @@ export default defineComponent({
 					<el-radio label="ASAP" />
 				</el-radio-group>
 			</el-form-item>
-			<el-form-item
-				label="Occurrence"
-				prop="occurrence"
-			>
-				<el-select
-					v-model="occurrenceType"
-					placeholder="Select"
-					class="small"
-					@change="onOccurrenceSelectChange"
+			<template v-if="formModel.type === 'COMPLETE_SR_QUESTIONNAIRE' || formModel.type === 'SERVICE_FEEDBACK'">
+				<el-form-item
+					label="Occurrence"
+					prop="occurrence"
 				>
-					<el-option
-						label="Until"
-						value="until"
+					<el-select
+						v-model="occurrenceType"
+						placeholder="Select"
+						class="small"
+						@change="onOccurrenceSelectChange"
+					>
+						<el-option
+							label="Until"
+							value="until"
+						/>
+						<el-option
+							label="From...to"
+							value="range"
+						/>
+					</el-select>
+					<el-date-picker
+						v-if="occurrenceType === 'until'"
+						v-model="formModel.occurrence"
+						:disabled-date="disabledOccurrenceDate"
+						placeholder="Select date"
 					/>
-					<el-option
-						label="From...to"
-						value="range"
+					<el-date-picker
+						v-if="occurrenceType === 'range'"
+						v-model="formModel.occurrence"
+						type="daterange"
+						range-separator="To"
+						start-placeholder="Select date"
+						end-placeholder="Select date"
+						:disabled-date="disabledOccurrenceDate"
 					/>
-				</el-select>
-				<el-date-picker
-					v-if="occurrenceType === 'until'"
-					v-model="formModel.occurrence"
-					:disabled-date="disabledOccurrenceDate"
-					placeholder="Select date"
-				/>
-				<el-date-picker
-					v-if="occurrenceType === 'range'"
-					v-model="formModel.occurrence"
-					type="daterange"
-					range-separator="To"
-					start-placeholder="Select date"
-					end-placeholder="Select date"
-					:disabled-date="disabledOccurrenceDate"
-				/>
-			</el-form-item>
+				</el-form-item>
+			</template>
 			<el-form-item
 				label="Comment"
 				prop="comment"
