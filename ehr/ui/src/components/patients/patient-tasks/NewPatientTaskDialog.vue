@@ -55,7 +55,7 @@ export default defineComponent({
 	},
 	emits: ["close"],
 	setup(_, { emit }) {
-		const serviceLocationOtions = ref<Coding[]>([]);
+		const serviceLocationOptions = ref<Coding[]>([]);
 		const saveInProgress = ref<boolean>(false);
 		const occurrenceType = ref<string>("");
 		const typeOptions = ref<{ label: string, value: TaskType }[]>([{
@@ -133,7 +133,7 @@ export default defineComponent({
 		};
 		const onDialogOpen = async () => {
 			// to show inside referrals dropdown
-			serviceLocationOtions.value = await getLocations();
+			serviceLocationOptions.value = await getLocations();
 			await TasksModule.getTasks();
 			const assessments = await getAssessments();
 			questionnaireOptions.value = assessments.map(a => ({
@@ -202,7 +202,7 @@ export default defineComponent({
 			occurrenceType,
 			onOccurrenceSelectChange,
 			disabledOccurrenceDate,
-			serviceLocationOtions
+			serviceLocationOptions
 		};
 	}
 });
@@ -356,7 +356,7 @@ export default defineComponent({
 						placeholder="Select service location"
 					>
 						<el-option
-							v-for="item in serviceLocationOtions"
+							v-for="item in serviceLocationOptions"
 							:key="item.code"
 							:label="item.display"
 							:value="item.code"
@@ -395,43 +395,41 @@ export default defineComponent({
 					<el-radio label="ASAP" />
 				</el-radio-group>
 			</el-form-item>
-			<template v-if="formModel.type === 'COMPLETE_SR_QUESTIONNAIRE' || formModel.type === 'SERVICE_FEEDBACK'">
-				<el-form-item
-					label="Occurrence"
-					prop="occurrence"
+			<el-form-item
+				label="Occurrence"
+				prop="occurrence"
+			>
+				<el-select
+					v-model="occurrenceType"
+					placeholder="Select"
+					class="small"
+					@change="onOccurrenceSelectChange"
 				>
-					<el-select
-						v-model="occurrenceType"
-						placeholder="Select"
-						class="small"
-						@change="onOccurrenceSelectChange"
-					>
-						<el-option
-							label="Until"
-							value="until"
-						/>
-						<el-option
-							label="From...to"
-							value="range"
-						/>
-					</el-select>
-					<el-date-picker
-						v-if="occurrenceType === 'until'"
-						v-model="formModel.occurrence"
-						:disabled-date="disabledOccurrenceDate"
-						placeholder="Select date"
+					<el-option
+						label="Until"
+						value="until"
 					/>
-					<el-date-picker
-						v-if="occurrenceType === 'range'"
-						v-model="formModel.occurrence"
-						type="daterange"
-						range-separator="To"
-						start-placeholder="Select date"
-						end-placeholder="Select date"
-						:disabled-date="disabledOccurrenceDate"
+					<el-option
+						label="From...to"
+						value="range"
 					/>
-				</el-form-item>
-			</template>
+				</el-select>
+				<el-date-picker
+					v-if="occurrenceType === 'until'"
+					v-model="formModel.occurrence"
+					:disabled-date="disabledOccurrenceDate"
+					placeholder="Select date"
+				/>
+				<el-date-picker
+					v-if="occurrenceType === 'range'"
+					v-model="formModel.occurrence"
+					type="daterange"
+					range-separator="To"
+					start-placeholder="Select date"
+					end-placeholder="Select date"
+					:disabled-date="disabledOccurrenceDate"
+				/>
+			</el-form-item>
 			<el-form-item
 				label="Comment"
 				prop="comment"
