@@ -13,8 +13,6 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.SDOHMappings;
-import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.GoalBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.CompleteGoalRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewGoalDto;
@@ -26,6 +24,8 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.GoalBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.GoalPrepareBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.query.GoalQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.query.TaskQueryFactory;
+import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.System;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,12 +41,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GoalService {
 
-  private final SmartOnFhirContext smartOnFhirContext;
   private final SDOHMappings sdohMappings;
   private final IGenericClient ehrClient;
 
   public List<GoalDto> listActive() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.ACTIVE).returnBundle(Bundle.class)
         .execute();
@@ -58,7 +58,8 @@ public class GoalService {
   }
 
   public List<GoalDto> listCompleted() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.COMPLETED).returnBundle(Bundle.class)
         .execute();
@@ -70,10 +71,11 @@ public class GoalService {
   }
 
   public GoalDto create(NewGoalDto newGoalDto, UserDto user) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
-    GoalPrepareBundleFactory goalPrepareBundleFactory = new GoalPrepareBundleFactory(smartOnFhirContext.getPatient(),
-        user.getId(), newGoalDto.getProblemIds());
+    GoalPrepareBundleFactory goalPrepareBundleFactory = new GoalPrepareBundleFactory(SmartOnFhirContext.get()
+        .getPatient(), user.getId(), newGoalDto.getProblemIds());
     Bundle goalRelatedResources = ehrClient.transaction()
         .withBundle(goalPrepareBundleFactory.createPrepareBundle())
         .execute();
@@ -101,7 +103,7 @@ public class GoalService {
 
     IdType goalId = FhirUtil.getFromResponseBundle(goalCreateBundle, Goal.class);
     Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.ACTIVE).where(Condition.RES_ID.exactly()
-        .code(goalId.getIdPart()))
+            .code(goalId.getIdPart()))
         .returnBundle(Bundle.class)
         .execute();
 
@@ -115,10 +117,11 @@ public class GoalService {
 
   //TODO forbid close for goals WITH active tasks!
   public void complete(String id, CompleteGoalRequestDto dto) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.ACTIVE).where(Condition.RES_ID.exactly()
-        .code(id))
+            .code(id))
         .returnBundle(Bundle.class)
         .execute();
     Goal goal = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Goal.class))
@@ -135,10 +138,11 @@ public class GoalService {
   }
 
   public void remove(String id) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchGoalQuery(Goal.GoalLifecycleStatus.ACTIVE).where(Condition.RES_ID.exactly()
-        .code(id))
+            .code(id))
         .returnBundle(Bundle.class)
         .execute();
     Goal goal = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Goal.class))
@@ -154,7 +158,8 @@ public class GoalService {
 
   //TODO refactor. this fragmet ins used in a ProblemService as well.
   private Bundle addTasksAndSRsToGoalBundle(Bundle responseBundle) {
-    Bundle tasksWithServiceRequests = new TaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    Bundle tasksWithServiceRequests = new TaskQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+            .getPatient())
         .include(Task.INCLUDE_FOCUS)
         //Handle as much tasks as possible without pagination..
         //TODO use pagination
@@ -197,7 +202,8 @@ public class GoalService {
   }
 
   private IQuery<IBaseBundle> searchGoalQuery(Goal.GoalLifecycleStatus status) {
-    return new GoalQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    return new GoalQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+            .getPatient())
         .where(Goal.LIFECYCLE_STATUS.exactly()
             .code(status.toCode()))
         .sort()

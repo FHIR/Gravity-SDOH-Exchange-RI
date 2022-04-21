@@ -45,12 +45,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class HealthConcernService {
 
-  private final SmartOnFhirContext smartOnFhirContext;
   private final SDOHMappings sdohMappings;
   private final IGenericClient ehrClient;
 
   public List<HealthConcernDto> listActive() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).include(
             Condition.INCLUDE_EVIDENCE_DETAIL)
@@ -63,7 +63,8 @@ public class HealthConcernService {
   }
 
   public List<HealthConcernDto> listResolved() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.RESOLVED).include(
             Condition.INCLUDE_EVIDENCE_DETAIL)
@@ -75,10 +76,12 @@ public class HealthConcernService {
   }
 
   public HealthConcernDto create(NewHealthConcernDto newHealthConcernDto, UserDto user) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     CurrentContextPrepareBundleFactory healthConcernPrepareBundleFactory = new CurrentContextPrepareBundleFactory(
-        smartOnFhirContext.getPatient(), user.getId());
+        SmartOnFhirContext.get()
+            .getPatient(), user.getId());
     Bundle healthConcernRelatedResources = ehrClient.transaction()
         .withBundle(healthConcernPrepareBundleFactory.createPrepareBundle())
         .execute();
@@ -114,7 +117,8 @@ public class HealthConcernService {
   }
 
   public void promote(String id) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
             .code(id))
@@ -137,7 +141,8 @@ public class HealthConcernService {
   }
 
   public void resolve(String id) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
             .code(id))
@@ -160,7 +165,8 @@ public class HealthConcernService {
   }
 
   public void remove(String id) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
             .code(id))
@@ -199,7 +205,8 @@ public class HealthConcernService {
   }
 
   private IQuery<IBaseBundle> searchHealthConcernQuery(ConditionClinicalStatus status) {
-    return new HealthConcernQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    return new HealthConcernQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+            .getPatient())
         .where(Condition.CLINICAL_STATUS.exactly()
             .code(status.toCode()))
         .sort()

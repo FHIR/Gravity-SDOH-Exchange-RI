@@ -48,16 +48,16 @@ import java.util.List;
 @Slf4j
 public class TaskService {
 
-  private final SmartOnFhirContext smartOnFhirContext;
   private final IGenericClient ehrClient;
   private final CpService cpService;
   private final SDOHMappings sdohMappings;
 
   public String newTask(NewTaskRequestDto taskRequest, UserDto user) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
-    TaskPrepareBundleFactory taskPrepareBundleFactory = new TaskPrepareBundleFactory(smartOnFhirContext.getPatient(),
-        user.getId(), taskRequest.getPerformerId(), taskRequest.getConsent(), taskRequest.getConditionIds(),
-        taskRequest.getGoalIds());
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
+    TaskPrepareBundleFactory taskPrepareBundleFactory = new TaskPrepareBundleFactory(SmartOnFhirContext.get()
+        .getPatient(), user.getId(), taskRequest.getPerformerId(), taskRequest.getConsent(),
+        taskRequest.getConditionIds(), taskRequest.getGoalIds());
     Bundle taskRelatedResources = ehrClient.transaction()
         .withBundle(taskPrepareBundleFactory.createPrepareBundle())
         .execute();
@@ -110,9 +110,11 @@ public class TaskService {
   }
 
   public List<TaskDto> listTasks() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
-    Bundle tasksBundle = new TaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    Bundle tasksBundle = new TaskQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+            .getPatient())
         .include(Task.INCLUDE_FOCUS)
         //Get only referral tasks
         .where(new TokenClientParam("owner:Organization.type").hasSystemWithAnyCode(OrganizationTypeCode.SYSTEM))

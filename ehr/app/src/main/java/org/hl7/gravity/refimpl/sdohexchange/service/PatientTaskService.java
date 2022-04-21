@@ -51,17 +51,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class PatientTaskService {
 
-  private final SmartOnFhirContext smartOnFhirContext;
   private final IGenericClient ehrClient;
 
   public PatientTaskDto read(String id) {
-    Bundle taskBundle = new PatientTaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    Bundle taskBundle = new PatientTaskQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+            .getPatient())
         .include(Task.INCLUDE_PART_OF)
         .where(Task.RES_ID.exactly()
             .code(id))
         //Get only patient tasks
         .where(new TokenClientParam("owner:Patient").exactly()
-            .code(smartOnFhirContext.getPatient()))
+            .code(SmartOnFhirContext.get()
+                .getPatient()))
         .returnBundle(Bundle.class)
         .execute();
     addQuestionnairesToTaskBundle(taskBundle);
@@ -73,13 +74,16 @@ public class PatientTaskService {
   }
 
   public List<PatientTaskItemDto> listTasks() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
-    Bundle tasksBundle = new PatientTaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    Bundle tasksBundle = new PatientTaskQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+            .getPatient())
         .include(Task.INCLUDE_PART_OF)
         //Get only patient tasks
         .where(new TokenClientParam("owner:Patient").exactly()
-            .code(smartOnFhirContext.getPatient()))
+            .code(SmartOnFhirContext.get()
+                .getPatient()))
         .returnBundle(Bundle.class)
         .execute();
     addQuestionnairesToTaskBundle(tasksBundle);
@@ -158,7 +162,8 @@ public class PatientTaskService {
   }
 
   public String newTask(NewPatientTaskRequestDto taskRequest, UserDto user) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     PatientTaskBundleFactory taskBundleFactory;
     if (taskRequest instanceof NewMakeContactTaskRequestDto) {
@@ -183,8 +188,9 @@ public class PatientTaskService {
   private PatientMakeContactTaskBundleFactory createMakeContactTaskBundleFactory(UserDto user,
       NewMakeContactTaskRequestDto makeContactTaskRequest) {
     PatientMakeContactTaskPrepareBundleFactory taskPrepareBundleFactory =
-        new PatientMakeContactTaskPrepareBundleFactory(smartOnFhirContext.getPatient(), user.getId(),
-            makeContactTaskRequest.getHealthcareServiceId(), makeContactTaskRequest.getReferralTaskId());
+        new PatientMakeContactTaskPrepareBundleFactory(SmartOnFhirContext.get()
+            .getPatient(), user.getId(), makeContactTaskRequest.getHealthcareServiceId(),
+            makeContactTaskRequest.getReferralTaskId());
     Bundle taskRelatedResources = ehrClient.transaction()
         .withBundle(taskPrepareBundleFactory.createPrepareBundle())
         .execute();
@@ -209,7 +215,8 @@ public class PatientTaskService {
   private PatientSocialRiskTaskBundleFactory createSocialRiskTaskBundleFactory(UserDto user,
       NewSocialRiskTaskRequestDto socialRiskTaskRequest) {
     PatientSocialRiskTaskPrepareBundleFactory taskPrepareBundleFactory = new PatientSocialRiskTaskPrepareBundleFactory(
-        smartOnFhirContext.getPatient(), user.getId(), socialRiskTaskRequest.getQuestionnaireId());
+        SmartOnFhirContext.get()
+            .getPatient(), user.getId(), socialRiskTaskRequest.getQuestionnaireId());
     Bundle taskRelatedResources = ehrClient.transaction()
         .withBundle(taskPrepareBundleFactory.createPrepareBundle())
         .execute();
@@ -231,7 +238,8 @@ public class PatientTaskService {
   private PatientTaskBundleFactory createFeedbackTaskBundleFactory(UserDto user,
       NewFeedbackTaskRequestDto feedbackTaskRequest) {
     PatientFeedbackTaskPrepareBundleFactory taskPrepareBundleFactory = new PatientFeedbackTaskPrepareBundleFactory(
-        smartOnFhirContext.getPatient(), user.getId(), feedbackTaskRequest.getReferralTaskId());
+        SmartOnFhirContext.get()
+            .getPatient(), user.getId(), feedbackTaskRequest.getReferralTaskId());
     Bundle taskRelatedResources = ehrClient.transaction()
         .withBundle(taskPrepareBundleFactory.createPrepareBundle())
         .execute();

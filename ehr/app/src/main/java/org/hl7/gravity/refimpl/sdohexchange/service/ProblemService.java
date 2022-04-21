@@ -18,8 +18,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.SDOHMappings;
-import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.System;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ProblemBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewProblemDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProblemDto;
@@ -33,6 +31,8 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.ProblemBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.query.GoalQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.query.ProblemQueryFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.query.TaskQueryFactory;
+import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.SDOHMappings;
+import org.hl7.gravity.refimpl.sdohexchange.sdohmappings.System;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,15 +47,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProblemService {
 
-  private final SmartOnFhirContext smartOnFhirContext;
   private final SDOHMappings sdohMappings;
   private final IGenericClient ehrClient;
 
   public List<ProblemDto> listActive() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchProblemQuery(ConditionClinicalStatusCodes.ACTIVE).include(
-        Condition.INCLUDE_EVIDENCE_DETAIL)
+            Condition.INCLUDE_EVIDENCE_DETAIL)
         .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .returnBundle(Bundle.class)
         .execute();
@@ -69,10 +69,11 @@ public class ProblemService {
   }
 
   public List<ProblemDto> listClosed() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchProblemQuery(ConditionClinicalStatusCodes.RESOLVED).include(
-        Condition.INCLUDE_EVIDENCE_DETAIL)
+            Condition.INCLUDE_EVIDENCE_DETAIL)
         .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .returnBundle(Bundle.class)
         .execute();
@@ -82,10 +83,12 @@ public class ProblemService {
   }
 
   public ProblemDto create(NewProblemDto newProblemDto, UserDto user) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     CurrentContextPrepareBundleFactory currentContextPrepareBundleFactory = new CurrentContextPrepareBundleFactory(
-        smartOnFhirContext.getPatient(), user.getId());
+        SmartOnFhirContext.get()
+            .getPatient(), user.getId());
     Bundle problemRelatedResources = ehrClient.transaction()
         .withBundle(currentContextPrepareBundleFactory.createPrepareBundle())
         .execute();
@@ -112,7 +115,7 @@ public class ProblemService {
 
     IdType problemId = FhirUtil.getFromResponseBundle(problemCreateBundle, Condition.class);
     Bundle responseBundle = searchProblemQuery(ConditionClinicalStatusCodes.ACTIVE).where(Condition.RES_ID.exactly()
-        .code(problemId.getIdPart()))
+            .code(problemId.getIdPart()))
         .returnBundle(Bundle.class)
         .execute();
     return new ProblemBundleToDtoConverter().convert(responseBundle)
@@ -123,10 +126,11 @@ public class ProblemService {
 
   //TODO forbid close for problems WITH active tasks!
   public void close(String id) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchProblemQuery(ConditionClinicalStatusCodes.ACTIVE).where(Condition.RES_ID.exactly()
-        .code(id))
+            .code(id))
         .returnBundle(Bundle.class)
         .execute();
     Condition problem = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
@@ -146,7 +150,8 @@ public class ProblemService {
   }
 
   private Bundle addTasksAndSRsToConditionBundle(Bundle responseBundle) {
-    Bundle tasksWithServiceRequests = new TaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    Bundle tasksWithServiceRequests = new TaskQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+            .getPatient())
         .include(Task.INCLUDE_FOCUS)
         //Handle as much tasks as possible without pagination..
         //TODO use pagination
@@ -164,7 +169,8 @@ public class ProblemService {
   }
 
   private Bundle addGoalsToConditionBundle(Bundle responseBundle) {
-    Bundle goals = new GoalQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    Bundle goals = new GoalQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+            .getPatient())
         //We request only the ones showed on UI
         .where(Goal.LIFECYCLE_STATUS.exactly()
             .codes(Goal.GoalLifecycleStatus.ACTIVE.toCode(), Goal.GoalLifecycleStatus.COMPLETED.toCode()))
@@ -202,7 +208,8 @@ public class ProblemService {
   }
 
   private IQuery<IBaseBundle> searchProblemQuery(ConditionClinicalStatusCodes status) {
-    return new ProblemQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    return new ProblemQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+            .getPatient())
         .where(Condition.CLINICAL_STATUS.exactly()
             .code(status.toCode()))
         .sort()

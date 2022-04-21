@@ -29,14 +29,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AssessmentService {
 
-  private final SmartOnFhirContext smartOnFhirContext;
   private final IGenericClient ehrClient;
 
   public List<AssessmentDto> listCompleted() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchAssessmentQuery().where(QuestionnaireResponse.STATUS.exactly()
-        .code(QuestionnaireResponseStatus.COMPLETED.toCode()))
+            .code(QuestionnaireResponseStatus.COMPLETED.toCode()))
         .returnBundle(Bundle.class)
         .execute();
     responseBundle = addQuestionnairesToAssessmentBundle(responseBundle);
@@ -44,7 +44,8 @@ public class AssessmentService {
   }
 
   public AssessmentDto search(String questionnaireUrl) {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchAssessmentQuery().where(QuestionnaireResponse.QUESTIONNAIRE.hasId(questionnaireUrl))
         .returnBundle(Bundle.class)
@@ -79,7 +80,8 @@ public class AssessmentService {
   }
 
   private IQuery<IBaseBundle> searchAssessmentQuery() {
-    return new AssessmentQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+    return new AssessmentQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+            .getPatient())
         .revInclude(Observation.INCLUDE_DERIVED_FROM)
         .revInclude(Condition.INCLUDE_EVIDENCE_DETAIL.setRecurse(true))
         .sort()

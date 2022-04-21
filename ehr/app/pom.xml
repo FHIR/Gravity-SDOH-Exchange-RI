@@ -32,9 +32,18 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.healthlx.smartonfhir</groupId>
       <artifactId>config</artifactId>
-      <version>0.3</version>
+      <version>0.3.5</version>
+    </dependency>
+    <dependency>
+      <groupId>com.healthlx.smartonfhir</groupId>
+      <artifactId>core</artifactId>
+      <version>0.3.5</version>
     </dependency>
     <dependency>
       <groupId>io.springfox</groupId>

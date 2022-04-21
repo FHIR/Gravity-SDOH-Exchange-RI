@@ -38,12 +38,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ConsentService {
 
-  private final SmartOnFhirContext smartOnFhirContext;
   private final ConsentRepository consentRepository;
   private final IGenericClient ehrClient;
 
   public List<ConsentDto> listConsents() {
-    Bundle bundle = consentRepository.findAllByPatient(smartOnFhirContext.getPatient());
+    Bundle bundle = consentRepository.findAllByPatient(SmartOnFhirContext.get()
+        .getPatient());
     List<Consent> consentResources = FhirUtil.getFromBundle(bundle, Consent.class);
     return consentResources.stream()
         .map(consent -> new ConsentToDtoConverter().convert(consent))
@@ -51,20 +51,25 @@ public class ConsentService {
   }
 
   public List<BaseConsentDto> listBaseConsentsInfo() {
-    Bundle bundle = consentRepository.findAllByPatient(smartOnFhirContext.getPatient());
+    Bundle bundle = consentRepository.findAllByPatient(SmartOnFhirContext.get()
+        .getPatient());
     List<Consent> consentResources = FhirUtil.getFromBundle(bundle, Consent.class);
     return consentResources.stream()
-        .map(consent ->
-            new BaseConsentDto(consent.getIdElement().getIdPart(), consent.getSourceAttachment().getTitle()))
+        .map(consent -> new BaseConsentDto(consent.getIdElement()
+            .getIdPart(), consent.getSourceAttachment()
+            .getTitle()))
         .collect(Collectors.toList());
   }
 
   public ConsentDto createConsent(String name, MultipartFile attachment, UserDto userDto) {
-    Reference patient = FhirUtil.toReference(Patient.class, smartOnFhirContext.getPatient());
+    Reference patient = FhirUtil.toReference(Patient.class, SmartOnFhirContext.get()
+        .getPatient());
     Reference organization = retrieveOrganization(userDto);
     Consent consent = new CreateConsentFactory(name, patient, attachment, organization).createConsent();
 
-    MethodOutcome methodOutcome = ehrClient.create().resource(consent).execute();
+    MethodOutcome methodOutcome = ehrClient.create()
+        .resource(consent)
+        .execute();
     Consent savedConsent = (Consent) methodOutcome.getResource();
     return new ConsentToDtoConverter().convert(savedConsent);
   }

@@ -45,16 +45,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class SupportService {
 
-  private final SmartOnFhirContext smartOnFhirContext;
   private final IGenericClient ehrClient;
 
   public List<ConditionDto> listProblems() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
     Bundle conditionsBundle = ehrClient.search()
         .forResource(Condition.class)
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
-        .where(Condition.PATIENT.hasId(smartOnFhirContext.getPatient()))
+        .where(Condition.PATIENT.hasId(SmartOnFhirContext.get()
+            .getPatient()))
         .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
             .value(SDOHProfiles.CONDITION))
         .where(Condition.CLINICAL_STATUS.exactly()
@@ -71,12 +72,14 @@ public class SupportService {
   }
 
   public List<GoalInfoDto> listGoals() {
-    Assert.notNull(smartOnFhirContext.getPatient(), "Patient id cannot be null.");
+    Assert.notNull(SmartOnFhirContext.get()
+        .getPatient(), "Patient id cannot be null.");
     Bundle goalsBundle = ehrClient.search()
         .forResource(Goal.class)
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
-        .where(Goal.PATIENT.hasId(smartOnFhirContext.getPatient()))
+        .where(Goal.PATIENT.hasId(SmartOnFhirContext.get()
+            .getPatient()))
         .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
             .value(SDOHProfiles.GOAL))
         .where(Goal.LIFECYCLE_STATUS.exactly()
@@ -131,6 +134,7 @@ public class SupportService {
 
   //TODO do this in parallel.
   public ActiveResourcesDto getActiveResources() {
+    SmartOnFhirContext smartOnFhirContext = SmartOnFhirContext.get();
     IQuery hcQuery = new HealthConcernQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
         .where(Condition.CLINICAL_STATUS.exactly()
             .code(ConditionClinicalStatusCodes.ACTIVE.toCode()));
