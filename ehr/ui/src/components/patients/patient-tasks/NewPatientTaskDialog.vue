@@ -3,9 +3,9 @@ import { defineComponent, ref, computed, watch, reactive } from "vue";
 import { RuleItem } from "async-validator";
 import { TasksModule } from "@/store/modules/tasks";
 import { PatientTasksModule } from "@/store/modules/patientTasks";
-import { Task, NewPatientTaskPayload } from "@/types";
+import { Task, NewPatientTaskPayload, Services } from "@/types";
 import { prepareOccurrence } from "@/utils/utils";
-import { getAssessments } from "@/api";
+import { getAssessments, getServices } from "@/api";
 
 type FormModel = {
 	name: string,
@@ -19,7 +19,10 @@ type FormModel = {
 	questionnaireType: string,
 	questionnaireFormat: string,
 	questionnaireId: string,
-	referralTaskId: string
+	referralTaskId: string,
+	servicePerformerId: string,
+	servicePerformerName: string
+	healthcareServiceId: string,
 };
 
 const DEFAULT_REQUIRED_RULE = {
@@ -53,6 +56,7 @@ export default defineComponent({
 	},
 	emits: ["close"],
 	setup(_, { emit }) {
+		const serviceOptions = ref<Services[]>([]);
 		const saveInProgress = ref<boolean>(false);
 		const occurrenceType = ref<string>("");
 		const typeOptions = ref<{ label: string, value: TaskType }[]>([{
@@ -61,7 +65,12 @@ export default defineComponent({
 		}, {
 			label: "Provide feedback on service delivered",
 			value: "SERVICE_FEEDBACK"
-		}]);
+		},
+		{
+			label: "Provide patient with service performer contact information",
+			value: "MAKE_CONTACT"
+		}
+		]);
 		const statusOptions = ref<{ label: string, value: string }[]>([{
 			label: "Ready",
 			value: "ready"
@@ -78,7 +87,10 @@ export default defineComponent({
 			questionnaireType: "",
 			questionnaireFormat: "FHIR_QUESTIONNAIRE",
 			questionnaireId: "",
-			referralTaskId: ""
+			referralTaskId: "",
+			servicePerformerId: "",
+			healthcareServiceId: "",
+			servicePerformerName: ""
 		});
 		const formEl = ref<HTMLFormElement>();
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
@@ -88,7 +100,9 @@ export default defineComponent({
 			occurrence: DEFAULT_REQUIRED_RULE,
 			questionnaireFormat: DEFAULT_REQUIRED_RULE,
 			questionnaireId: DEFAULT_REQUIRED_RULE,
-			referralTaskId: DEFAULT_REQUIRED_RULE
+			referralTaskId: DEFAULT_REQUIRED_RULE,
+			servicePerformerId: DEFAULT_REQUIRED_RULE,
+			healthcareServiceId: DEFAULT_REQUIRED_RULE
 		};
 		const formHasChanges = computed<boolean>(() =>
 			(
@@ -111,6 +125,9 @@ export default defineComponent({
 			if (val === "COMPLETE_SR_QUESTIONNAIRE" || val === "SERVICE_FEEDBACK") {
 				formModel.code = TYPE_CODE_MAP[val].display;
 				formModel.questionnaireType = "Risk Questionnaire";
+			} else if (val === "MAKE_CONTACT") {
+				formModel.code = TYPE_CODE_MAP[val].display;
+				formModel.questionnaireType = "";
 			}
 		});
 
@@ -149,7 +166,14 @@ export default defineComponent({
 				if (formModel.type === "SERVICE_FEEDBACK") {
 					payload.referralTaskId = formModel.referralTaskId;
 				}
-
+				if (formModel.type === "MAKE_CONTACT") {
+					payload.code = "make-contact";
+					payload.referralTaskId = formModel.referralTaskId;
+					payload.servicePerformer = formModel.servicePerformerId;
+					payload.healthcareServiceId = formModel.healthcareServiceId;
+					const healthCareService = serviceOptions.value.find(t => t.id === formModel.healthcareServiceId);
+					payload.healthcareService = healthCareService?.name;
+				}
 				await PatientTasksModule.createPatientTask(payload);
 				emit("close");
 			} finally {
@@ -169,6 +193,15 @@ export default defineComponent({
 		//
 		const disabledOccurrenceDate = (time: Date): boolean => time.getTime() < Date.now();
 
+		const onReferralChange = async (referralId: string) => {
+			const referralTaskObj = referralTasks.value.find(item => item.id === referralId);
+			if (referralTaskObj && referralTaskObj.organization) {
+				formModel.servicePerformerId = referralTaskObj?.organization.id;
+				formModel.servicePerformerName  = referralTaskObj?.organization.display ;
+				serviceOptions.value = await getServices(referralTaskObj.organization.id);
+			}
+		};
+
 		return {
 			onDialogClose,
 			onDialogOpen,
@@ -184,7 +217,9 @@ export default defineComponent({
 			referralTaskOptions,
 			occurrenceType,
 			onOccurrenceSelectChange,
-			disabledOccurrenceDate
+			disabledOccurrenceDate,
+			serviceOptions,
+			onReferralChange
 		};
 	}
 });
@@ -298,6 +333,50 @@ export default defineComponent({
 							:key="item.value"
 							:label="item.label"
 							:value="item.value"
+						/>
+					</el-select>
+				</el-form-item>
+			</template>
+			<template v-if="formModel.type === 'MAKE_CONTACT'">
+				<el-form-item
+					label="Referral Task"
+					prop="referralTaskId"
+				>
+					<el-select
+						v-model="formModel.referralTaskId"
+						placeholder="Select referral task"
+						@change="onReferralChange"
+					>
+						<el-option
+							v-for="item in referralTaskOptions"
+							:key="item.value"
+							:label="item.label"
+							:value="item.value"
+						/>
+					</el-select>
+				</el-form-item>
+				<el-form-item
+					label="Service Performer"
+					prop="servicePerformerId"
+				>
+					<el-input
+						:model-value="formModel.servicePerformerName"
+						:disabled="true"
+					/>
+				</el-form-item>
+				<el-form-item
+					label="Service"
+					prop="healthcareServiceId"
+				>
+					<el-select
+						v-model="formModel.healthcareServiceId"
+						placeholder="Select service"
+					>
+						<el-option
+							v-for="item in serviceOptions"
+							:key="item.id"
+							:label="item.name"
+							:value="item.id"
 						/>
 					</el-select>
 				</el-form-item>

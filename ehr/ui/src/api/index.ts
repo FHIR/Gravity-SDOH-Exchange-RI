@@ -21,7 +21,8 @@ import {
 	ActiveResources,
 	PatientTask,
 	NewPatientTaskPayload,
-	UpdatePatientTaskPayload
+	UpdatePatientTaskPayload,
+	Services
 } from "@/types";
 import { PersonalCharacteristic } from "@/types/personal-characteristics";
 
@@ -132,6 +133,11 @@ export const getAssessments = async (): Promise<Reference[]> => {
 export const getCategories = async (): Promise<Coding[]> => {
 	const res = await axios.get("/mappings/categories");
 
+	return res.data;
+};
+
+export const getServices =async (id:string): Promise<Services[]> => {
+	const res = await axios.get(`/support/healthcare-services?organizationId=${id}`);
 	return res.data;
 };
 
