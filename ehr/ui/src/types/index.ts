@@ -75,6 +75,16 @@ export type Coding = {
 	display: string
 }
 
+export type Services = {
+	id: string,
+	locations: Location[],
+	name: string
+}
+
+export type Location = {
+	id: string,
+	text: string
+}
 export type GoalCoding = {
 	system: string,
 	display: string,
@@ -296,7 +306,7 @@ export type NewPatientTaskPayload = {
 	referralTaskId?: string,
 	healthcareServiceId?: string,
 	servicePerformer?: string,
-	serviceLocation?: string
+	healthcareService?: string
 };
 
 // todo: change after BE sync

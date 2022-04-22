@@ -4,7 +4,7 @@ const StylelintPlugin = require("stylelint-webpack-plugin");
 module.exports = {
 	lintOnSave: process.env.NODE_ENV === "development" ? "warning" : "default",
 	devServer: {
-		port: 8081,
+		port: 8080,
 		proxy: {
 			"/*": {
 				target: "http://localhost:8080"

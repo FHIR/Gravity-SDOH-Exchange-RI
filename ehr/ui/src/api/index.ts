@@ -21,7 +21,8 @@ import {
 	ActiveResources,
 	PatientTask,
 	NewPatientTaskPayload,
-	UpdatePatientTaskPayload
+	UpdatePatientTaskPayload,
+	Services
 } from "@/types";
 
 export const getContext = async (): Promise<ContextResponse> => {
@@ -133,16 +134,11 @@ export const getCategories = async (): Promise<Coding[]> => {
 
 	return res.data;
 };
-/* check right url for get Locations
-	const res = await axios.get("patient-task/locations");
+
+export const getServices =async (id:string): Promise<Services[]>=> {
+	const res = await axios.get(`/support/healthcare-services?organizationId=${id}`);
 	return res.data;
-	*/
-export const getLocations =async (): Promise<Coding[]>=> ([{ display: "Family Counseling Services", code: "Family Counseling Services" },
-	{ display: "Family Counseling Services of Northern Illinois", code: "Family Counseling Services of Northern Illinois" },
-	{ display: "Family Counseling Services of NNY, Inc.", code : "Family Counseling Services of NNY, Inc." },
-	{ display: "Family Counseling Services of Cortland Country, Inc.", code : "Family Counseling Services of Cortland Country, Inc." }]);
-
-
+};
 export const getConditionCodes = async (category: string): Promise<{ codings: Coding[], display: "ICD-10-CM" | "SNOMED CT" }[]> => {
 	const res = await axios.get(`/mappings/categories/${category}/condition/codings`);
 	return res.data;
