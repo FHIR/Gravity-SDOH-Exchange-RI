@@ -23,6 +23,7 @@ import {
 	NewPatientTaskPayload,
 	UpdatePatientTaskPayload
 } from "@/types";
+import { PersonalCharacteristic } from "@/types/personal-characteristics";
 
 export const getContext = async (): Promise<ContextResponse> => {
 	const res = await axios.get("/current-context");
@@ -242,3 +243,6 @@ export const getActiveResources = async (): Promise<ActiveResources> => {
 	const res = await axios.get("/support/activeResources");
 	return res.data;
 };
+
+export const addPersonalCharacteristic = async (payload: PersonalCharacteristic): Promise<void> =>
+	axios.post("/personal-characteristics", payload);

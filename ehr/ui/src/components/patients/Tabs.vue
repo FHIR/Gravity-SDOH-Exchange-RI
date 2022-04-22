@@ -165,12 +165,11 @@ export default defineComponent({
 			<Consents />
 		</el-tab-pane>
 		<el-tab-pane
-				label="Personal Characteristics"
-				name="PersonalCharacteris"
-				:lazy="true"
+			label="Personal Characteristics"
+			name="PersonalCharacteris"
+			:lazy="true"
 		>
-
-			<PersonalCharacteristics/>
+			<PersonalCharacteristics />
 		</el-tab-pane>
 	</el-tabs>
 </template>

@@ -1,24 +1,31 @@
-<script>
-import { defineComponent } from "vue";
+<script lang="ts">
+import { PersonalCharacteristic } from "@/types/personal-characteristics";
+import { defineComponent, PropType } from "vue";
 
 export default defineComponent( {
-	name: "PersonalCharacteristicsTable",
+	// props: {
+	// 	data: {
+	// 		type: Array as PropType<PersonalCharacteristic[]>,
+	// 		default: () => []
+	// 	}
+	// },
 	data(){
 		return{
-			tableData:[{
-				type: "Personal Pronouns",
-				performer: "John Doe",
-				method: "Self Reported",
-				value: "he/him/his/his/himself",
-				detailedValue: ""
-			},
-			{
-				type: "Observation Ethnicity",
-				performer: "John Doe",
-				method: "Self Reported",
-				value: "Hispanic or Latino",
-				detailedValue: "American Indian or Alaska Native"
-			}
+			tableData:[
+				{
+					type: "Personal Pronouns",
+					performer: "John Doe",
+					method: "Self Reported",
+					value: "he/him/his/his/himself",
+					detailedValue: ""
+				},
+				{
+					type: "Observation Ethnicity",
+					performer: "John Doe",
+					method: "Self Reported",
+					value: "Hispanic or Latino",
+					detailedValue: "American Indian or Alaska Native"
+				}
 			]
 		};
 	}
