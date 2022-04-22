@@ -135,10 +135,11 @@ export const getCategories = async (): Promise<Coding[]> => {
 	return res.data;
 };
 
-export const getServices =async (id:string): Promise<Services[]>=> {
+export const getServices =async (id:string): Promise<Services[]> => {
 	const res = await axios.get(`/support/healthcare-services?organizationId=${id}`);
 	return res.data;
 };
+
 export const getConditionCodes = async (category: string): Promise<{ codings: Coding[], display: "ICD-10-CM" | "SNOMED CT" }[]> => {
 	const res = await axios.get(`/mappings/categories/${category}/condition/codings`);
 	return res.data;
