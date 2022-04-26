@@ -13,7 +13,8 @@ public enum SDOHTemporaryCode {
   CONTACT_CODE("contact-entity", "Contact Entity"),
   QUESTIONNAIRE_CATEGORY("questionnaire-category", "Questionnaire Category"),
   RISK_QUESTIONNAIRE("risk-questionnaire", "Risk Questionnaire"),
-  FEEDBACK_QUESTIONNAIRE("feedback-questionnaire", "Feedback Questionnaire");
+  FEEDBACK_QUESTIONNAIRE("feedback-questionnaire", "Feedback Questionnaire"),
+  PERSONAL_CHARACTERISTIC_CODE("personal-characteristic", "Personal Characteristic");
 
   private final String code;
   private final String display;
