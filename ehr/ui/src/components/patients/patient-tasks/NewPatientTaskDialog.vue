@@ -6,6 +6,7 @@ import { PatientTasksModule } from "@/store/modules/patientTasks";
 import { Task, NewPatientTaskPayload, Services } from "@/types";
 import { prepareOccurrence } from "@/utils/utils";
 import { getAssessments, getServices } from "@/api";
+import FileInput from "@/components/FileInput.vue";
 
 type FormModel = {
 	name: string,
@@ -23,6 +24,9 @@ type FormModel = {
 	servicePerformerId: string,
 	servicePerformerName: string
 	healthcareServiceId: string,
+	questionnairePDF: File | null,
+	questionnaireURL: string
+
 };
 
 const DEFAULT_REQUIRED_RULE = {
@@ -48,6 +52,7 @@ const TYPE_CODE_MAP: Record<TaskType, { code: string, display: string }> = {
 };
 
 export default defineComponent({
+	components: { FileInput },
 	props: {
 		visible: {
 			type: Boolean,
@@ -85,12 +90,16 @@ export default defineComponent({
 			occurrence: "",
 			comment: "",
 			questionnaireType: "",
-			questionnaireFormat: "FHIR_QUESTIONNAIRE",
+			questionnaireFormat: "FHIR_QUESTIONNAIRE" || "PDF" || "URL",
 			questionnaireId: "",
+			questionnairePDF: null,
 			referralTaskId: "",
 			servicePerformerId: "",
 			healthcareServiceId: "",
-			servicePerformerName: ""
+			servicePerformerName: "",
+			questionnaireURL: ""
+
+
 		});
 		const formEl = ref<HTMLFormElement>();
 		const formRules: { [field: string]: RuleItem & { trigger?: string } } = {
@@ -318,9 +327,16 @@ export default defineComponent({
 						<el-radio label="FHIR_QUESTIONNAIRE">
 							FHIR Questionnaire
 						</el-radio>
+						<el-radio label="PDF">
+							PDF
+						</el-radio>
+						<el-radio label="URL">
+							URL
+						</el-radio>
 					</el-radio-group>
 				</el-form-item>
 				<el-form-item
+					v-if="formModel.questionnaireFormat === 'FHIR_QUESTIONNAIRE'"
 					label="FHIR Questionnaire"
 					prop="questionnaireId"
 				>
@@ -335,6 +351,24 @@ export default defineComponent({
 							:value="item.value"
 						/>
 					</el-select>
+				</el-form-item>
+				<el-form-item
+						v-if="formModel.questionnaireFormat === 'PDF'"
+						label="Document Attachment"
+						prop="questionnaireId"
+				>
+					<FileInput
+							v-model:value="formModel.questionnairePDF"
+							:disabled="saveInProgress"
+							accept="application/pdf,.pdf"
+					/>
+				</el-form-item>
+				<el-form-item
+						v-model="formModel.questionnaireURL"
+						v-if="formModel.questionnaireFormat === 'URL'"
+						label="Attached URL"
+				>
+					<el-input />
 				</el-form-item>
 			</template>
 			<template v-if="formModel.type === 'MAKE_CONTACT'">
