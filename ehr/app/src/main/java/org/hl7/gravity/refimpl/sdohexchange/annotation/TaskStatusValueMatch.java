@@ -1,13 +1,14 @@
 package org.hl7.gravity.refimpl.sdohexchange.annotation;
 
+import org.hl7.gravity.refimpl.sdohexchange.dto.request.TaskStatus;
+import org.hl7.gravity.refimpl.sdohexchange.validation.TaskStatusValueMatchValidator;
+
+import javax.validation.Constraint;
+import javax.validation.Payload;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import javax.validation.Constraint;
-import javax.validation.Payload;
-import org.hl7.gravity.refimpl.sdohexchange.dto.request.TaskStatus;
-import org.hl7.gravity.refimpl.sdohexchange.validation.TaskStatusValueMatchValidator;
 
 @Constraint(validatedBy = TaskStatusValueMatchValidator.class)
 @Target({ElementType.TYPE})
