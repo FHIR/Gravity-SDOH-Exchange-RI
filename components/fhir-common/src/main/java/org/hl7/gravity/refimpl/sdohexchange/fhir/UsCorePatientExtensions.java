@@ -13,9 +13,9 @@ public class UsCorePatientExtensions {
   /**
    * This Complex Extension for race allows one or more race codes.
    */
-  public static final String RACE = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race";
+  public final String RACE = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race";
   /**
    * This Complex Extension for ethnicity allows one or more ethnicity codes.
    */
-  public static final String ETHNICITY = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity";
+  public final String ETHNICITY = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity";
 }

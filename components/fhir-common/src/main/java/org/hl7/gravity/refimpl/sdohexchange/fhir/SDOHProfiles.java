@@ -9,12 +9,15 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class SDOHProfiles {
 
-  public String TASK = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Task";
-  public String PATIENT_TASK = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-TaskForPatient";
-  public String CONDITION = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Condition";
-  public String SERVICE_REQUEST = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-ServiceRequest";
-  public String GOAL = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Goal";
-  public String PROCEDURE = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Procedure";
-  public String CONSENT = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Consent";
-  public String QUESTIONNAIRE_RESPONSE = "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaireresponse|2.7";
+  public final String TASK = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Task";
+  public final String PATIENT_TASK =
+      "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-TaskForPatient";
+  public final String CONDITION = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Condition";
+  public final String SERVICE_REQUEST =
+      "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-ServiceRequest";
+  public final String GOAL = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Goal";
+  public final String PROCEDURE = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Procedure";
+  public final String CONSENT = "http://hl7.org/fhir/us/sdoh-clinicalcare/StructureDefinition/SDOHCC-Consent";
+  public final String QUESTIONNAIRE_RESPONSE =
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaireresponse|2.7";
 }
