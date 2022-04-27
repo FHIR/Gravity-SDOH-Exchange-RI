@@ -84,6 +84,14 @@ public class TaskUpdateBundleFactory {
       task.setStatus(status);
       task.setLastModifiedElement(DateTimeType.now());
 
+      if (StringUtils.hasText(comment)) {
+        Assert.notNull(user, "User cannot be null.");
+        task.addNote()
+            .setText(comment)
+            .setTimeElement(DateTimeType.now())
+            .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
+      }
+
       Assert.notNull(serviceRequest, "ServiceRequest can't be null.");
       if (status == TaskStatus.ACCEPTED) {
         Assert.notNull(priorityForCBO, "Priority for CBO cannot be null.");
@@ -128,13 +136,6 @@ public class TaskUpdateBundleFactory {
       } else {
         throw new TaskUpdateException("Status " + status.getDisplay() + " cannot be set explicitly.");
       }
-    }
-    if (StringUtils.hasText(comment)) {
-      Assert.notNull(user, "User cannot be null.");
-      task.addNote()
-          .setText(comment)
-          .setTimeElement(DateTimeType.now())
-          .setAuthor(new Reference(new IdType(user.getUserType(), user.getId())).setDisplay(user.getName()));
     }
   }
 
