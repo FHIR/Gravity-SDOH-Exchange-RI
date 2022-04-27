@@ -3,16 +3,26 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public abstract class NewPersonalCharacteristicDto {
+public class NewPersonalCharacteristicDto {
 
-  @NotEmpty
-  private String type;
-  @NotEmpty
-  private String method;
-  @NotEmpty
+  @NotNull
+  private CharacteristicCode type;
+  @NotNull
+  private CharacteristicMethod method;
+  // Required if method is derived or other.
+  private String methodDetail;
+
+  // Either value or values is expected depending on characteristic type.
   private String value;
+  // Required for "Other" flavored values.
+  private String valueDetail;
+  private String[] values;
+  // Can be set for race and ethnicity.
+  private String[] detailedValues;
+  // Can be set for race and ethnicity.
+  private String description;
 }
