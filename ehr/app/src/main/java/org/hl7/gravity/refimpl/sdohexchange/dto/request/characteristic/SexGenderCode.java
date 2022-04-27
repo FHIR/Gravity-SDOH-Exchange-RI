@@ -3,7 +3,7 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.hl7.gravity.refimpl.sdohexchange.exception.UnknownCodeException;
+import org.hl7.fhir.exceptions.FHIRException;
 
 import java.util.stream.Stream;
 
@@ -21,10 +21,10 @@ public enum SexGenderCode {
   public static final String SYSTEM = "http://loinc.org";
 
   @JsonCreator
-  public static SexGenderCode fromText(String value) {
+  public static SexGenderCode fromCode(String codeString) throws FHIRException {
     return Stream.of(SexGenderCode.values())
-        .filter(targetEnum -> targetEnum.display.equals(value))
+        .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new UnknownCodeException(String.format("Unsupported Sex Gender code '%s'", value)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Sex Gender code '%s'", codeString)));
   }
 }

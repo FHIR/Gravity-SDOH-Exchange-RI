@@ -3,7 +3,7 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.hl7.gravity.refimpl.sdohexchange.exception.UnknownCodeException;
+import org.hl7.fhir.exceptions.FHIRException;
 
 import java.util.stream.Stream;
 
@@ -22,10 +22,10 @@ public enum CharacteristicMethod {
       "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/SDOHCC-CodeSystemTemporaryCodes";
 
   @JsonCreator
-  public static CharacteristicMethod fromText(String value) {
+  public static CharacteristicMethod fromCode(String codeString) throws FHIRException {
     return Stream.of(CharacteristicMethod.values())
-        .filter(targetEnum -> targetEnum.display.equals(value))
+        .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new UnknownCodeException(String.format("Unsupported Observation method '%s'", value)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Observation method '%s'", codeString)));
   }
 }

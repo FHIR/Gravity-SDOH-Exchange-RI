@@ -3,7 +3,7 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.hl7.gravity.refimpl.sdohexchange.exception.UnknownCodeException;
+import org.hl7.fhir.exceptions.FHIRException;
 
 import java.util.stream.Stream;
 
@@ -24,10 +24,10 @@ public enum CharacteristicCode {
   public static final String SYSTEM = "http://loinc.org";
 
   @JsonCreator
-  public static CharacteristicCode fromText(String value) {
+  public static CharacteristicCode fromCode(String codeString) throws FHIRException {
     return Stream.of(CharacteristicCode.values())
-        .filter(targetEnum -> targetEnum.display.equals(value))
+        .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new UnknownCodeException(String.format("Unsupported Characteristic code '%s'", value)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Characteristic code '%s'", codeString)));
   }
 }
