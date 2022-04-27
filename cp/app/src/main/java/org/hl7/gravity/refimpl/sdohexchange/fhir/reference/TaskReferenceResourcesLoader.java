@@ -60,6 +60,7 @@ public class TaskReferenceResourcesLoader {
 
     Patient patient = referenceResolver.getPatient();
     if (referenceResolver.createPatient()) {
+      updateResourceRefs(patient, ehrClient.getServerBase(), new HashMap());
       // Create CP Patient resource
       bundle.addEntry(FhirUtil.createPostEntry(patient));
     }

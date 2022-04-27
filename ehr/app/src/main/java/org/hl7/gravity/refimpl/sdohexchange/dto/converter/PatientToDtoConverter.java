@@ -1,16 +1,10 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import com.google.common.base.Strings;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -25,6 +19,15 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.UsCorePatientExtensions;
 import org.hl7.gravity.refimpl.sdohexchange.info.PatientInfo;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.core.convert.converter.Converter;
+
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto> {
 
@@ -51,14 +54,17 @@ public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto>
         .stream()
         .filter(Patient.PatientCommunicationComponent::getPreferred)
         .map(c -> c.getLanguage()
-            .getCodingFirstRep()
-            .getDisplay())
+            .getCodingFirstRep())
+        .map(c -> c.getDisplay() != null ? c.getDisplay() : c.getCode())
+        .filter(Objects::nonNull)
         .findFirst()
         .orElse(null));
     //Get Address full String. No need to compose it on UI side.
     patientDto.setAddress(patient.getAddress()
         .stream()
-        .filter(a -> Address.AddressUse.HOME.equals(a.getUse()))
+        //if there is only one address without use - try to parse it.
+        .filter(a -> (patient.getAddress()
+            .size() == 1 && a.getUse() == null) || Address.AddressUse.HOME.equals(a.getUse()))
         .map(this::convertAddress)
         .findFirst()
         .orElse(null));
@@ -109,10 +115,11 @@ public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto>
     Extension ethnicity = patient.getExtensionByUrl(UsCorePatientExtensions.ETHNICITY);
     patientDto.setEthnicity(convertExtension(ethnicity));
     //Get marital status
-    patientDto.setMaritalStatus(Optional.ofNullable(patient.getMaritalStatus()
-        .getCodingFirstRep()
-        .getDisplay())
-        .orElse(null));
+    Coding ms = patient.getMaritalStatus()
+        .getCodingFirstRep();
+    patientDto.setMaritalStatus(Optional.ofNullable(ms.getDisplay())
+        .orElse(Optional.ofNullable(ms.getCode())
+            .orElse(null)));
     patientDto.getInsurances()
         .addAll(convertPayors(patientInfo.getPayors()));
     return patientDto;
@@ -137,6 +144,9 @@ public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto>
   }
 
   private String convertAddress(Address address) {
+    if (ObjectUtils.isNotEmpty(address.getText())) {
+      return address.getText();
+    }
     StringBuilder addressBuilder = new StringBuilder().append(address.hasLine() ? address.getLine()
         .get(0) + "\n" : "");
     addressBuilder.append(Strings.isNullOrEmpty(address.getCity()) ? "" : address.getCity() + ", ");
@@ -149,8 +159,20 @@ public class PatientToDtoConverter implements Converter<PatientInfo, PatientDto>
     if (extension == null) {
       return null;
     }
-    StringType extensionValue = (StringType) extension.getExtensionByUrl("text")
-        .getValue();
-    return extensionValue.getValue();
+    //First try to get the value from text, then from coding.
+    String value = Optional.ofNullable(extension.getExtensionByUrl("text"))
+        .map(Extension::getValue)
+        .map(StringType.class::cast)
+        .map(StringType::getValue)
+        .orElse(null);
+
+    if (ObjectUtils.isEmpty(value)) {
+      value = Optional.ofNullable(extension.getExtensionByUrl("ombCategory"))
+          .map(Extension::getValue)
+          .map(Coding.class::cast)
+          .map(Coding::getDisplay)
+          .orElse(null);
+    }
+    return value;
   }
 }
