@@ -41,7 +41,7 @@ public class ObservationRepository extends FhirRepository<Observation> {
         .execute();
   }
 
-  public Bundle findPatientPersonalCharacteristics(String patientId) {
+  public Bundle findPatientPersonalCharacteristics(String patientId, Integer count) {
     return getClient().search()
         .forResource(getResourceType())
         .sort()
@@ -49,6 +49,8 @@ public class ObservationRepository extends FhirRepository<Observation> {
         .where(Observation.PATIENT.hasId(patientId))
         .where(Observation.CATEGORY.exactly()
             .code(SDOHTemporaryCode.PERSONAL_CHARACTERISTIC.getCode()))
+        .include(Observation.INCLUDE_PERFORMER)
+        .count(count == null ? 0 : count)
         .returnBundle(Bundle.class)
         .execute();
   }
