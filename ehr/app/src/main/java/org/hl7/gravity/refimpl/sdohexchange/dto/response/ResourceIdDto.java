@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class NewTaskResponseDto {
+public class ResourceIdDto {
 
   private final String id;
 }

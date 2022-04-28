@@ -7,7 +7,7 @@ import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.UserInfoToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.patienttask.NewPatientTaskRequestDto;
-import org.hl7.gravity.refimpl.sdohexchange.dto.response.NewTaskResponseDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.ResourceIdDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.patienttask.PatientTaskItemDto;
@@ -56,7 +56,7 @@ public class PatientTaskController {
   @ApiOperation(value = "Create a new Patient task.",
       notes = "This endpoint will fail if request is invalid or preconditions are not met. All details will be "
           + "provided in error response description.")
-  public NewTaskResponseDto create(@RequestBody @Valid NewPatientTaskRequestDto newTaskRequestDto,
+  public ResourceIdDto create(@RequestBody @Valid NewPatientTaskRequestDto newTaskRequestDto,
       @ApiIgnore @AuthenticationPrincipal OidcUser user) {
     //TODO replace with validator
     if (!newTaskRequestDto.getType()
@@ -69,7 +69,7 @@ public class PatientTaskController {
               .toString()));
     }
     UserDto userDto = new UserInfoToDtoConverter().convert(user.getClaims());
-    return new NewTaskResponseDto(patientTaskService.newTask(newTaskRequestDto, userDto));
+    return new ResourceIdDto(patientTaskService.newTask(newTaskRequestDto, userDto));
   }
 
   @PutMapping("{id}")

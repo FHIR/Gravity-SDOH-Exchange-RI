@@ -2,6 +2,8 @@ package org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicMethod;
 
 import javax.validation.constraints.NotNull;
 

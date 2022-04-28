@@ -1,10 +1,9 @@
-package org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic;
+package org.hl7.gravity.refimpl.sdohexchange.codes;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.gravity.refimpl.sdohexchange.exception.UnknownCodeException;
 
 import java.util.stream.Stream;
 

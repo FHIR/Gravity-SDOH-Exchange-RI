@@ -1,4 +1,4 @@
-package org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic;
+package org.hl7.gravity.refimpl.sdohexchange.codes;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;

@@ -7,7 +7,7 @@ import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.UserInfoToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.NewTaskRequestDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.UpdateTaskRequestDto;
-import org.hl7.gravity.refimpl.sdohexchange.dto.response.NewTaskResponseDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.ResourceIdDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.TaskService;
@@ -42,10 +42,10 @@ public class TaskController {
           + "etc. This endpoint will fail if request is invalid or preconditions are not met. All details will be "
           + "provided in error response description. In some cases a Task creation might succeed but a Task of a "
           + "status will be set to FAILED. Refer to an 'outcome' field for more details.")
-  public NewTaskResponseDto create(@RequestBody @Valid NewTaskRequestDto newTaskRequestDto,
+  public ResourceIdDto create(@RequestBody @Valid NewTaskRequestDto newTaskRequestDto,
       @ApiIgnore @AuthenticationPrincipal OidcUser user) {
     UserDto userDto = new UserInfoToDtoConverter().convert(user.getClaims());
-    return new NewTaskResponseDto(taskService.newTask(newTaskRequestDto, userDto));
+    return new ResourceIdDto(taskService.newTask(newTaskRequestDto, userDto));
   }
 
   @GetMapping

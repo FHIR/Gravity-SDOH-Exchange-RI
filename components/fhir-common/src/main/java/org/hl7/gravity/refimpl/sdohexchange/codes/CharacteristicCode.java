@@ -1,9 +1,9 @@
-package org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic;
+package org.hl7.gravity.refimpl.sdohexchange.codes;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Coding;
 
 import java.util.stream.Stream;
 
@@ -23,11 +23,14 @@ public enum CharacteristicCode {
 
   public static final String SYSTEM = "http://loinc.org";
 
-  @JsonCreator
   public static CharacteristicCode fromCode(String codeString) throws FHIRException {
     return Stream.of(CharacteristicCode.values())
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
         .orElseThrow(() -> new FHIRException(String.format("Unsupported Characteristic code '%s'", codeString)));
+  }
+
+  public Coding toCoding() {
+    return new Coding(SYSTEM, this.getCode(), this.getDisplay());
   }
 }
