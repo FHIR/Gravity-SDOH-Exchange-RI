@@ -9,11 +9,13 @@ import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.EthnicityCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.PersonalPronounsCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.RaceCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.SexualOrientationCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic.NewPersonalCharacteristicDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.EthnicityBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.PersonalCharacteristicBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.PersonalPronounsBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.RaceBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.SexualOrientationBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,8 @@ public class PersonalCharacteristicsService {
       characteristicBundleFactory = createRaceBundleFactory(newPersonalCharacteristicDto);
     } else if (CharacteristicCode.ETHNICITY.equals(newPersonalCharacteristicDto.getType())) {
       characteristicBundleFactory = createEthnicityBundleFactory(newPersonalCharacteristicDto);
+    } else if (CharacteristicCode.SEXUAL_ORIENTATION.equals(newPersonalCharacteristicDto.getType())) {
+      characteristicBundleFactory = createSexualOrientationBundleFactory(newPersonalCharacteristicDto);
     }
     Bundle obsCreateBundle = ehrClient.transaction()
         .withBundle(characteristicBundleFactory.createBundle())
@@ -43,6 +47,14 @@ public class PersonalCharacteristicsService {
   private PersonalCharacteristicBundleFactory createPersonalPronounsBundleFactory(NewPersonalCharacteristicDto dto) {
     PersonalPronounsBundleFactory pronounsBundleFactory = new PersonalPronounsBundleFactory(dto.getType(),
         dto.getMethod(), PersonalPronounsCode.fromCode(dto.getValue()));
+    pronounsBundleFactory.setMethodDetail(dto.getMethodDetail());
+    pronounsBundleFactory.setValueDetail(dto.getValueDetail());
+    return pronounsBundleFactory;
+  }
+
+  private PersonalCharacteristicBundleFactory createSexualOrientationBundleFactory(NewPersonalCharacteristicDto dto) {
+    SexualOrientationBundleFactory pronounsBundleFactory = new SexualOrientationBundleFactory(dto.getType(),
+        dto.getMethod(), SexualOrientationCode.fromCode(dto.getValue()));
     pronounsBundleFactory.setMethodDetail(dto.getMethodDetail());
     pronounsBundleFactory.setValueDetail(dto.getValueDetail());
     return pronounsBundleFactory;
