@@ -14,8 +14,8 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.ConsentRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.ConsentToDtoConverter;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.AttachmentDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.BaseConsentDto;
-import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConsentAttachmentDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConsentDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.exception.ConsentCreateException;
@@ -74,14 +74,14 @@ public class ConsentService {
     return new ConsentToDtoConverter().convert(savedConsent);
   }
 
-  public ConsentAttachmentDto retrieveAttachmentInfo(String id) {
+  public AttachmentDto retrieveAttachmentInfo(String id) {
     Optional<Consent> foundConsent = consentRepository.find(id);
     if (!foundConsent.isPresent()) {
       throw new ResourceNotFoundException(String.format("Consent with id '%s' was not found.", id));
     }
     Consent consent = foundConsent.get();
     Attachment attachment = consent.getSourceAttachment();
-    return ConsentAttachmentDto.builder()
+    return AttachmentDto.builder()
         .content(attachment.getData())
         .contentType(attachment.getContentType())
         .title(attachment.getTitle())

@@ -8,7 +8,8 @@ import lombok.Getter;
  */
 @Builder
 @Getter
-public class ConsentAttachmentDto {
+public class AttachmentDto {
+
   private String title;
   private byte[] content;
   private String contentType;
