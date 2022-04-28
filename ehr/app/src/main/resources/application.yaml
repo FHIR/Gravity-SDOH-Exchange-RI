@@ -31,6 +31,10 @@ spring:
       max-file-size: 2MB
       max-request-size: 10MB
 
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+
 swagger:
   title: SDOH Exchange EHR App API
   contact:
