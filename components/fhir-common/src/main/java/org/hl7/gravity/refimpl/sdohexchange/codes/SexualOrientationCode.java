@@ -26,7 +26,7 @@ public enum SexualOrientationCode {
   @JsonCreator
   public static SexualOrientationCode fromCode(String codeString) throws FHIRException {
     return Stream.of(SexualOrientationCode.values())
-        .filter(targetEnum -> targetEnum.display.equals(codeString))
+        .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
         .orElseThrow(() -> new FHIRException(String.format("Unsupported Sexual Orientation code '%s'", codeString)));
   }
