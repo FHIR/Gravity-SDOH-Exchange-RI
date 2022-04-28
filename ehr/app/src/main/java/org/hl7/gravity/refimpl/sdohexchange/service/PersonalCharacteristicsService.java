@@ -7,11 +7,13 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.EthnicityCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.GenderIdentityCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.PersonalPronounsCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.RaceCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SexualOrientationCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic.NewPersonalCharacteristicDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.EthnicityBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.GenderIdentityBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.PersonalCharacteristicBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.PersonalPronounsBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.RaceBundleFactory;
@@ -35,7 +37,10 @@ public class PersonalCharacteristicsService {
       characteristicBundleFactory = createEthnicityBundleFactory(newPersonalCharacteristicDto);
     } else if (CharacteristicCode.SEXUAL_ORIENTATION.equals(newPersonalCharacteristicDto.getType())) {
       characteristicBundleFactory = createSexualOrientationBundleFactory(newPersonalCharacteristicDto);
+    } else if (CharacteristicCode.GENDER_IDENTITY.equals(newPersonalCharacteristicDto.getType())) {
+      characteristicBundleFactory = createGenderIdentityBundleFactory(newPersonalCharacteristicDto);
     }
+
     Bundle obsCreateBundle = ehrClient.transaction()
         .withBundle(characteristicBundleFactory.createBundle())
         .execute();
@@ -53,11 +58,19 @@ public class PersonalCharacteristicsService {
   }
 
   private PersonalCharacteristicBundleFactory createSexualOrientationBundleFactory(NewPersonalCharacteristicDto dto) {
-    SexualOrientationBundleFactory pronounsBundleFactory = new SexualOrientationBundleFactory(dto.getType(),
+    SexualOrientationBundleFactory sexualOrientationBundleFactory = new SexualOrientationBundleFactory(dto.getType(),
         dto.getMethod(), SexualOrientationCode.fromCode(dto.getValue()));
-    pronounsBundleFactory.setMethodDetail(dto.getMethodDetail());
-    pronounsBundleFactory.setValueDetail(dto.getValueDetail());
-    return pronounsBundleFactory;
+    sexualOrientationBundleFactory.setMethodDetail(dto.getMethodDetail());
+    sexualOrientationBundleFactory.setValueDetail(dto.getValueDetail());
+    return sexualOrientationBundleFactory;
+  }
+
+  private GenderIdentityBundleFactory createGenderIdentityBundleFactory(NewPersonalCharacteristicDto dto) {
+    GenderIdentityBundleFactory genderIdentityBundleFactory = new GenderIdentityBundleFactory(dto.getType(),
+        dto.getMethod(), GenderIdentityCode.fromCode(dto.getValue()));
+    genderIdentityBundleFactory.setMethodDetail(dto.getMethodDetail());
+    genderIdentityBundleFactory.setValueDetail(dto.getValueDetail());
+    return genderIdentityBundleFactory;
   }
 
   private PersonalCharacteristicBundleFactory createRaceBundleFactory(NewPersonalCharacteristicDto dto) {
