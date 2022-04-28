@@ -29,6 +29,7 @@ public class SpringFoxConfig {
   public static final String MAPPINGS_API_TAG = "Mappings Controller";
   public static final String CONSENT_API_TAG = "Consent Controller";
   public static final String ADMINISTRATION_API_TAG = "Administration Controller";
+  public static final String PERSONAL_CHARACTERISTICS = "Personal Characteristics";
 
   @Bean
   public Docket api(ApiInfo apiInfo) {
@@ -54,7 +55,8 @@ public class SpringFoxConfig {
             new Tag(MAPPINGS_API_TAG, "Get details of SDOH categories and codes."), new Tag(ADMINISTRATION_API_TAG,
                 "Perform operations and manipulations with FHIR resources, for example "
                     + "converts resources from one to another."),
-            new Tag(CONSENT_API_TAG, "Perform operations on Consent resources."))
+            new Tag(CONSENT_API_TAG, "Perform operations on Consent resources."),
+            new Tag(PERSONAL_CHARACTERISTICS, "Perform operations on Personal Characteristics."))
         .apiInfo(apiInfo)
         .useDefaultResponseMessages(false);
   }
