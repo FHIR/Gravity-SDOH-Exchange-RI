@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Coding;
 
 import java.util.stream.Stream;
 
@@ -25,5 +26,9 @@ public enum EthnicityCode {
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
         .orElseThrow(() -> new FHIRException(String.format("Unsupported Ethnicity code '%s'", codeString)));
+  }
+
+  public Coding toCoding() {
+    return new Coding(SYSTEM, getCode(), getDisplay());
   }
 }

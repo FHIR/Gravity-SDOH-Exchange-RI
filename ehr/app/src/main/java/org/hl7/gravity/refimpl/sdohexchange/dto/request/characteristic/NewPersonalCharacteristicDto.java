@@ -22,6 +22,7 @@ public class NewPersonalCharacteristicDto {
   private String value;
   // Required for "Other" flavored values.
   private String valueDetail;
+  // Used only for the race
   private String[] values;
   // Can be set for race and ethnicity.
   private String[] detailedValues;

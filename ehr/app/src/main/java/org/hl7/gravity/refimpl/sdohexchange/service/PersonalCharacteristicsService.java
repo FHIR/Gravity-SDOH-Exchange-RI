@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.EthnicityCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.PersonalPronounsCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.RaceCode;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic.NewPersonalCharacteristicDto;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.EthnicityBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.PersonalCharacteristicBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.PersonalPronounsBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.RaceBundleFactory;
@@ -27,6 +29,8 @@ public class PersonalCharacteristicsService {
       characteristicBundleFactory = createPersonalPronounsBundleFactory(newPersonalCharacteristicDto);
     } else if (CharacteristicCode.RACE.equals(newPersonalCharacteristicDto.getType())) {
       characteristicBundleFactory = createRaceBundleFactory(newPersonalCharacteristicDto);
+    } else if (CharacteristicCode.ETHNICITY.equals(newPersonalCharacteristicDto.getType())) {
+      characteristicBundleFactory = createEthnicityBundleFactory(newPersonalCharacteristicDto);
     }
     Bundle obsCreateBundle = ehrClient.transaction()
         .withBundle(characteristicBundleFactory.createBundle())
@@ -53,6 +57,15 @@ public class PersonalCharacteristicsService {
           .map(RaceCode::fromCode)
           .toArray(RaceCode[]::new));
     }
+    raceBundleFactory.setDetailedValues(dto.getDetailedValues());
+    raceBundleFactory.setDescription(dto.getDescription());
+    return raceBundleFactory;
+  }
+
+  private PersonalCharacteristicBundleFactory createEthnicityBundleFactory(NewPersonalCharacteristicDto dto) {
+    EthnicityBundleFactory raceBundleFactory = new EthnicityBundleFactory(dto.getType(), dto.getMethod());
+    raceBundleFactory.setMethodDetail(dto.getMethodDetail());
+    raceBundleFactory.setValue(EthnicityCode.fromCode(dto.getValue()));
     raceBundleFactory.setDetailedValues(dto.getDetailedValues());
     raceBundleFactory.setDescription(dto.getDescription());
     return raceBundleFactory;
