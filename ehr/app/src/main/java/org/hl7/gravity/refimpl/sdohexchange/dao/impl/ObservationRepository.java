@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.gravity.refimpl.sdohexchange.codes.LoincCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SDOHTemporaryCode;
 import org.hl7.gravity.refimpl.sdohexchange.dao.FhirRepository;
+import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.stereotype.Component;
 
 /**
@@ -39,6 +40,21 @@ public class ObservationRepository extends FhirRepository<Observation> {
         .and(Observation.CODE.hasSystemWithAnyCode(LoincCode.SYSTEM))
         .returnBundle(Bundle.class)
         .execute();
+  }
+
+  // DocumentReference is included!
+  public Observation getWithDocumentReference(String observationId) {
+    Bundle b = getClient().search()
+        .forResource(getResourceType())
+        .where(Observation.RES_ID.exactly()
+            .code(observationId))
+        .include(Observation.INCLUDE_DERIVED_FROM)
+        .returnBundle(Bundle.class)
+        .execute();
+    return FhirUtil.getFromBundle(b, Observation.class)
+        .stream()
+        .findFirst()
+        .orElse(null);
   }
 
   public Bundle findPatientPersonalCharacteristics(String patientId) {

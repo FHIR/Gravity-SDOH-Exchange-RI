@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.hl7.gravity.refimpl.sdohexchange.config.SpringFoxConfig;
 import org.hl7.gravity.refimpl.sdohexchange.dto.converter.UserInfoToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.BaseConsentDto;
-import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConsentAttachmentDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.AttachmentDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ConsentDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.UserDto;
 import org.hl7.gravity.refimpl.sdohexchange.service.ConsentService;
@@ -61,7 +61,7 @@ public class ConsentController {
   @ApiOperation(value = "Downloads a Consent attachment file")
   @GetMapping("/{id}/attachment")
   public ResponseEntity<byte[]> downloadAttachment(@PathVariable String id) {
-    ConsentAttachmentDto attachment = consentService.retrieveAttachmentInfo(id);
+    AttachmentDto attachment = consentService.retrieveAttachmentInfo(id);
     return ResponseEntity.ok()
         .header("Content-disposition", String.format("attachment; filename=%s.pdf", attachment.getTitle()))
         .contentType(MediaType.valueOf(attachment.getContentType()))

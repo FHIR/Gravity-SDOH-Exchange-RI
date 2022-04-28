@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Coding;
 
 import java.util.stream.Stream;
 
@@ -13,7 +14,8 @@ public enum SexGenderCode {
 
   F("LA13504-8", "F"),
   M("LA15170-6", "M"),
-  X("LA32969-0", "X");
+  OTHER("LA32969-0", "X"),
+  NOT_REPORTED("LA32970-8", "<");
 
   private final String code;
   private final String display;
@@ -26,5 +28,9 @@ public enum SexGenderCode {
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
         .orElseThrow(() -> new FHIRException(String.format("Unsupported Sex Gender code '%s'", codeString)));
+  }
+
+  public Coding toCoding() {
+    return new Coding(SYSTEM, getCode(), getDisplay());
   }
 }

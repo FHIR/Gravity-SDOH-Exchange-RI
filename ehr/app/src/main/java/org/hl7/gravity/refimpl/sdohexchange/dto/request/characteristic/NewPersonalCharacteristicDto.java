@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicMethod;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -28,4 +29,7 @@ public class NewPersonalCharacteristicDto {
   private String[] detailedValues;
   // Can be set for race and ethnicity.
   private String description;
+  //Only for the Recorded Sex Gender
+  @Valid
+  private FileData derivedFrom;
 }

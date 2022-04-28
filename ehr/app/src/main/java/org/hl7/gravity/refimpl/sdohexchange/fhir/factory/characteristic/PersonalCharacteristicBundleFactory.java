@@ -33,6 +33,7 @@ public class PersonalCharacteristicBundleFactory {
     Observation observation = createObservation();
     bundle.addEntry(FhirUtil.createPostEntry(observation));
 
+    onBundleCreated(bundle);
     return bundle;
   }
 
@@ -42,7 +43,7 @@ public class PersonalCharacteristicBundleFactory {
 
     CodeableConcept codeableConcept = new CodeableConcept(method.toCoding());
     if (!CharacteristicMethod.SELF_REPORTED.equals(method)) {
-      Assert.hasLength(methodDetail, "Method detail cannot be empty if type is 'Derived' or 'Other'.");
+      assertMethodDetail();
       codeableConcept.setText(methodDetail);
     }
     return new Observation().setSubject(FhirUtil.toReference(Patient.class, SmartOnFhirContext.get()
@@ -54,5 +55,14 @@ public class PersonalCharacteristicBundleFactory {
         .setMethod(codeableConcept)
         .setStatus(Observation.ObservationStatus.FINAL)
         .setEffective(DateTimeType.now());
+  }
+
+  //Override if this assertion is not needed (e.g. for the Sexual Orientation)
+  protected void assertMethodDetail() {
+    Assert.hasLength(methodDetail, "Method detail cannot be empty if type is 'Derived' or 'Other'.");
+  }
+
+  protected void onBundleCreated(Bundle bundle) {
+    //do nothing.
   }
 }

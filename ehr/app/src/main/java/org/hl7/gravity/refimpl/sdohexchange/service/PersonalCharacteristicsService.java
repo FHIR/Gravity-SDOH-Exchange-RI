@@ -1,22 +1,32 @@
 package org.hl7.gravity.refimpl.sdohexchange.service;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.Lists;
+import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.EthnicityCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.GenderIdentityCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.PersonalPronounsCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.RaceCode;
+import org.hl7.gravity.refimpl.sdohexchange.codes.SexGenderCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SexualOrientationCode;
+import org.hl7.gravity.refimpl.sdohexchange.dao.impl.ObservationRepository;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic.NewPersonalCharacteristicDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.AttachmentDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.EthnicityBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.GenderIdentityBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.PersonalCharacteristicBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.PersonalPronounsBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.RaceBundleFactory;
+import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.RecordedSexGenderBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.SexualOrientationBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.stereotype.Service;
@@ -25,7 +35,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PersonalCharacteristicsService {
 
-  private final IGenericClient ehrClient;
+  private final ObservationRepository observationRepository;
 
   public String newPersonalCharacteristic(NewPersonalCharacteristicDto newPersonalCharacteristicDto) {
     PersonalCharacteristicBundleFactory characteristicBundleFactory = null;
@@ -39,14 +49,40 @@ public class PersonalCharacteristicsService {
       characteristicBundleFactory = createSexualOrientationBundleFactory(newPersonalCharacteristicDto);
     } else if (CharacteristicCode.GENDER_IDENTITY.equals(newPersonalCharacteristicDto.getType())) {
       characteristicBundleFactory = createGenderIdentityBundleFactory(newPersonalCharacteristicDto);
+    } else if (CharacteristicCode.SEX_GENDER.equals(newPersonalCharacteristicDto.getType())) {
+      characteristicBundleFactory = createSexGenderBundleFactory(newPersonalCharacteristicDto);
     }
 
-    Bundle obsCreateBundle = ehrClient.transaction()
-        .withBundle(characteristicBundleFactory.createBundle())
-        .execute();
+    Bundle obsCreateBundle = observationRepository.transaction(characteristicBundleFactory.createBundle());
 
     return FhirUtil.getFromResponseBundle(obsCreateBundle, Observation.class)
         .getIdPart();
+  }
+
+  public AttachmentDto retrieveDerivedFrom(String id) {
+    Observation obs = observationRepository.getWithDocumentReference(id);
+    if (obs == null) {
+      throw new ResourceNotFoundException(new IdType(Observation.class.getSimpleName(), id));
+    }
+    IBaseResource ref = obs.getDerivedFromFirstRep()
+        .getResource();
+    if (ref == null || !(ref instanceof DocumentReference)) {
+      throw new IllegalStateException(
+          "Observation with id " + id + " does not have a derived-from field set to a Document Reference resource.");
+    }
+
+    DocumentReference docRef = (DocumentReference) ref;
+    Attachment attachment = docRef.getContentFirstRep()
+        .getAttachment();
+    if (attachment == null) {
+      throw new IllegalStateException("DocumentReference with id " + docRef.getIdElement()
+          .getIdPart() + " does not have an attachment.");
+    }
+    return AttachmentDto.builder()
+        .content(attachment.getData())
+        .contentType(attachment.getContentType())
+        .title(attachment.getTitle())
+        .build();
   }
 
   private PersonalCharacteristicBundleFactory createPersonalPronounsBundleFactory(NewPersonalCharacteristicDto dto) {
@@ -70,6 +106,24 @@ public class PersonalCharacteristicsService {
         dto.getMethod(), GenderIdentityCode.fromCode(dto.getValue()));
     genderIdentityBundleFactory.setMethodDetail(dto.getMethodDetail());
     genderIdentityBundleFactory.setValueDetail(dto.getValueDetail());
+    return genderIdentityBundleFactory;
+  }
+
+  private PersonalCharacteristicBundleFactory createSexGenderBundleFactory(NewPersonalCharacteristicDto dto) {
+    RecordedSexGenderBundleFactory genderIdentityBundleFactory = new RecordedSexGenderBundleFactory(dto.getType(),
+        dto.getMethod(), SexGenderCode.fromCode(dto.getValue()));
+    genderIdentityBundleFactory.setValueDetail(dto.getValueDetail());
+    //The derived from file must be set but this is validated right in the bundle factory.
+    if (dto.getDerivedFrom() != null) {
+      try {
+        genderIdentityBundleFactory.setDerivedFromFileName(dto.getDerivedFrom()
+            .getName());
+        genderIdentityBundleFactory.setDerivedFromFile(Base64.decode(dto.getDerivedFrom()
+            .getBase64Content()));
+      } catch (Base64DecodingException e) {
+        throw new IllegalArgumentException("Content cannot be base64 decoded");
+      }
+    }
     return genderIdentityBundleFactory;
   }
 
