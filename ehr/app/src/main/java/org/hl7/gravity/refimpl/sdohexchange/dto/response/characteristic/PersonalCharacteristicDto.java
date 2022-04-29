@@ -17,6 +17,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PersonalCharacteristicDto {
 
+  private String id;
   private CharacteristicCode type;
   private CharacteristicMethod method;
   private String methodDetail;
