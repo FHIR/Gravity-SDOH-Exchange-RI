@@ -147,7 +147,8 @@ public class PatientTaskItemInfoHolderToItemDtoConverter<T extends PatientTaskIt
         code = PatientTaskCode.fromCode(coding.getCode());
       } catch (FHIRException ex) {
         taskDto.getErrors()
-            .add(String.format("Code %s cannot be converted to PatientTaskCode.", coding.getCode(), taskDto.getId()));
+            .add(String.format("Code %s from task with id %s cannot be converted to PatientTaskCode.", coding.getCode(),
+                taskDto.getId()));
       }
     }
     return code;
