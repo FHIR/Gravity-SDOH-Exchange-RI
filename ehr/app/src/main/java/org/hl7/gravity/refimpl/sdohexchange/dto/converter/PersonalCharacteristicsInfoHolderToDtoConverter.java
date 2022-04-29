@@ -81,7 +81,7 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
     return dto;
   }
 
-  private void convertRace(Observation obs, PersonalCharacteristicDto dto) throws FHIRException {
+  private void convertRace(Observation obs, PersonalCharacteristicDto dto) {
     List<CodeableConcept> detailedValues = new ArrayList<>();
     List<CodeableConcept> values = new ArrayList<>();
     obs.getComponent()
@@ -114,7 +114,7 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
         .collect(Collectors.toList()));
   }
 
-  private void convertEthnicity(Observation obs, PersonalCharacteristicDto dto) throws FHIRException {
+  private void convertEthnicity(Observation obs, PersonalCharacteristicDto dto) {
     List<CodeableConcept> detailedValues = new ArrayList<>();
     obs.getComponent()
         .stream()
