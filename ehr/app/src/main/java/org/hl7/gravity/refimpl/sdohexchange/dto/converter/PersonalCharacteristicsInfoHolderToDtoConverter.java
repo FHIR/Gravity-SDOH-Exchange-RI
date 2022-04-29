@@ -1,5 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
@@ -27,28 +28,37 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
   public PersonalCharacteristicDto convert(T infoHolder) {
     Observation obs = infoHolder.getObservation();
     PersonalCharacteristicDto dto = new PersonalCharacteristicDto();
+    dto.setId(obs.getIdElement()
+        .getIdPart());
     //Type
-    CharacteristicCode type = CharacteristicCode.fromCode(obs.getCode()
-        .getCodingFirstRep()
-        .getCode());
-    dto.setType(type);
-    //Method + detail
-    CodeableConcept method = obs.getMethod();
-    dto.setMethod(CharacteristicMethod.fromCode(method.getCodingFirstRep()
-        .getCode()));
-    dto.setMethodDetail(method.getText());
-    //Value + detail
-    if (obs.getValue() instanceof CodeableConcept) {
-      CodeableConcept value = (CodeableConcept) obs.getValue();
-      dto.setValue(new CodingDto(value.getCodingFirstRep()
-          .getCode(), value.getCodingFirstRep()
-          .getDisplay()));
-      dto.setValueDetail(value.getText());
-    } else if (obs.hasComponent() && CharacteristicCode.ETHNICITY.equals(type)) {
-      convertEthnicity(obs, dto);
-    } else if (obs.hasComponent() && CharacteristicCode.RACE.equals(type)) {
-      convertRace(obs, dto);
+    CharacteristicCode type = null;
+    try {
+      type = CharacteristicCode.fromCode(obs.getCode()
+          .getCodingFirstRep()
+          .getCode());
+      dto.setType(type);
+      //Method + detail
+      CodeableConcept method = obs.getMethod();
+      dto.setMethod(CharacteristicMethod.fromCode(method.getCodingFirstRep()
+          .getCode()));
+      dto.setMethodDetail(method.getText());
+      //Value + detail
+      if (obs.getValue() instanceof CodeableConcept) {
+        CodeableConcept value = (CodeableConcept) obs.getValue();
+        dto.setValue(new CodingDto(value.getCodingFirstRep()
+            .getCode(), value.getCodingFirstRep()
+            .getDisplay()));
+        dto.setValueDetail(value.getText());
+      } else if (obs.hasComponent() && CharacteristicCode.ETHNICITY.equals(type)) {
+        convertEthnicity(obs, dto);
+      } else if (obs.hasComponent() && CharacteristicCode.RACE.equals(type)) {
+        convertRace(obs, dto);
+      }
+    } catch (FHIRException exc) {
+      dto.getErrors()
+          .add(exc.getMessage());
     }
+
     //Description. Will make sense only for the race and ethnicity
     dto.setDescription(obs.getComponent()
         .stream()
@@ -71,7 +81,7 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
     return dto;
   }
 
-  private void convertRace(Observation obs, PersonalCharacteristicDto dto) {
+  private void convertRace(Observation obs, PersonalCharacteristicDto dto) throws FHIRException {
     List<CodeableConcept> detailedValues = new ArrayList<>();
     List<CodeableConcept> values = new ArrayList<>();
     obs.getComponent()
@@ -104,7 +114,7 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
         .collect(Collectors.toList()));
   }
 
-  private void convertEthnicity(Observation obs, PersonalCharacteristicDto dto) {
+  private void convertEthnicity(Observation obs, PersonalCharacteristicDto dto) throws FHIRException {
     List<CodeableConcept> detailedValues = new ArrayList<>();
     obs.getComponent()
         .stream()
