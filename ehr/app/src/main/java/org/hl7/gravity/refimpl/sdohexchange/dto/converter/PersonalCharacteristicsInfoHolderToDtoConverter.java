@@ -31,12 +31,11 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
     dto.setId(obs.getIdElement()
         .getIdPart());
     //Type
-    CharacteristicCode type = null;
+    CharacteristicCode type = CharacteristicCode.fromCode(obs.getCode()
+        .getCodingFirstRep()
+        .getCode());
+    dto.setType(type);
     try {
-      type = CharacteristicCode.fromCode(obs.getCode()
-          .getCodingFirstRep()
-          .getCode());
-      dto.setType(type);
       //Method + detail
       CodeableConcept method = obs.getMethod();
       dto.setMethod(CharacteristicMethod.fromCode(method.getCodingFirstRep()
@@ -58,7 +57,6 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
       dto.getErrors()
           .add(exc.getMessage());
     }
-
     //Description. Will make sense only for the race and ethnicity
     dto.setDescription(obs.getComponent()
         .stream()
