@@ -31,7 +31,7 @@ public enum GenderIdentityCode {
     return Stream.of(values())
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new FHIRException(String.format("Unsupported Gender Identity value '%s'", codeString)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Gender Identity code '%s'", codeString)));
   }
 
   public Coding toCoding() {

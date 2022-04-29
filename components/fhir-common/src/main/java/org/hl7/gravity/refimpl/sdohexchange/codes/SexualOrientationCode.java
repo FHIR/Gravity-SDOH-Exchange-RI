@@ -28,7 +28,7 @@ public enum SexualOrientationCode {
     return Stream.of(SexualOrientationCode.values())
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new FHIRException(String.format("Unsupported Sexual Orientation value '%s'", codeString)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Sexual Orientation code '%s'", codeString)));
   }
 
   public Coding toCoding() {

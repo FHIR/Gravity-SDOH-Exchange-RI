@@ -27,7 +27,7 @@ public enum SexGenderCode {
     return Stream.of(SexGenderCode.values())
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new FHIRException(String.format("Unsupported Sex Gender value '%s'", codeString)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Sex Gender code '%s'", codeString)));
   }
 
   public Coding toCoding() {

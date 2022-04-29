@@ -25,7 +25,7 @@ public enum EthnicityCode {
     return Stream.of(EthnicityCode.values())
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new FHIRException(String.format("Unsupported Ethnicity value '%s'", codeString)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Ethnicity code '%s'", codeString)));
   }
 
   public Coding toCoding() {
