@@ -1,6 +1,7 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.response.characteristic;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicMethod;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -32,4 +34,7 @@ public class PersonalCharacteristicDto {
   private ReferenceDto performer;
   //Only for the reported sex and gender
   private Boolean hasAttachment;
+
+  @Setter(AccessLevel.NONE)
+  private List<String> errors = new ArrayList<>();
 }
