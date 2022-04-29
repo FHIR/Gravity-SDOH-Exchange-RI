@@ -39,13 +39,14 @@ public class AseessmentInfoBundleExtractor extends BundleExtractor<List<Assessme
           //Observations might be derived not only from the Questionnaire, but also from other Observations.
           // If we do not include these "intermediate" observations - the link between the QuestionnaireResponse and
           // Condition will not be found.
-          List<Observation> allObservations = FhirUtil.getFromBundle(bundle, Observation.class)
+          List<Observation> derivedObservations = FhirUtil.getFromBundle(bundle, Observation.class)
               .stream()
               .filter(observation -> containsObservationReference(observation, observations))
               .collect(Collectors.toList());
+          observations.addAll(derivedObservations);
           List<Condition> conditions = FhirUtil.getFromBundle(bundle, Condition.class)
               .stream()
-              .filter(condition -> containsObservationReference(condition, allObservations))
+              .filter(condition -> containsObservationReference(condition, observations))
               .collect(Collectors.toList());
           Questionnaire questionnaire = questionnaires.get(questionnaireResponse.getQuestionnaire());
           return new AssessmentInfoHolder(questionnaireResponse, questionnaire, observations, conditions);
