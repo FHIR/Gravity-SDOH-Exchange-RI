@@ -940,7 +940,7 @@ public class DetailedRaceCode {
 
   public static Coding toCoding(String code) {
     String display = CODES.get(code);
-    Assert.notNull("display", "Detailed Race code " + code + " not found.");
+    Assert.notNull(display, "Detailed Race code " + code + " not found.");
     return new Coding(SYSTEM, code, display);
   }
 }

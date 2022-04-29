@@ -65,7 +65,7 @@ public class DetailedEthnicityCode {
 
   public static Coding toCoding(String code) {
     String display = CODES.get(code);
-    Assert.notNull("display", "Detailed Ethnicity code " + code + " not found.");
+    Assert.notNull(display, "Detailed Ethnicity code " + code + " not found.");
     return new Coding(SYSTEM, code, display);
   }
 }

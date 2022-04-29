@@ -2,6 +2,7 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.Lists;
+import com.healthlx.smartonfhir.core.SmartOnFhirContext;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,10 @@ import org.hl7.gravity.refimpl.sdohexchange.codes.RaceCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SexGenderCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.SexualOrientationCode;
 import org.hl7.gravity.refimpl.sdohexchange.dao.impl.ObservationRepository;
+import org.hl7.gravity.refimpl.sdohexchange.dto.converter.PersonalCharacteristicsBundleToDtoConverter;
 import org.hl7.gravity.refimpl.sdohexchange.dto.request.characteristic.NewPersonalCharacteristicDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.AttachmentDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.characteristic.PersonalCharacteristicDto;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.EthnicityBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.GenderIdentityBundleFactory;
 import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.PersonalCharacteristicBundleFactory;
@@ -31,11 +34,19 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.SexualOr
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PersonalCharacteristicsService {
 
   private final ObservationRepository observationRepository;
+
+  public List<PersonalCharacteristicDto> listPersonalCharacteristics(Integer count) {
+    Bundle bundle = observationRepository.findPatientPersonalCharacteristics(SmartOnFhirContext.get()
+        .getPatient(), count);
+    return new PersonalCharacteristicsBundleToDtoConverter().convert(bundle);
+  }
 
   public String newPersonalCharacteristic(NewPersonalCharacteristicDto newPersonalCharacteristicDto) {
     PersonalCharacteristicBundleFactory characteristicBundleFactory = null;
