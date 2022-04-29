@@ -82,7 +82,7 @@ public class AssessmentService {
   private IQuery<IBaseBundle> searchAssessmentQuery() {
     return new AssessmentQueryFactory().query(ehrClient, SmartOnFhirContext.get()
             .getPatient())
-        .revInclude(Observation.INCLUDE_DERIVED_FROM)
+        .revInclude(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .revInclude(Condition.INCLUDE_EVIDENCE_DETAIL.setRecurse(true))
         .sort()
         .descending(QuestionnaireResponse.AUTHORED);
