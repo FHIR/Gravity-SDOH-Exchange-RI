@@ -151,7 +151,9 @@ public class PersonalCharacteristicsService {
   private PersonalCharacteristicBundleFactory createEthnicityBundleFactory(NewPersonalCharacteristicDto dto) {
     EthnicityBundleFactory raceBundleFactory = new EthnicityBundleFactory(dto.getType(), dto.getMethod());
     raceBundleFactory.setMethodDetail(dto.getMethodDetail());
-    raceBundleFactory.setValue(EthnicityCode.fromCode(dto.getValue()));
+    if (dto.getValue() != null) {
+      raceBundleFactory.setValue(EthnicityCode.fromCode(dto.getValue()));
+    }
     raceBundleFactory.setDetailedValues(dto.getDetailedValues());
     raceBundleFactory.setDescription(dto.getDescription());
     return raceBundleFactory;
