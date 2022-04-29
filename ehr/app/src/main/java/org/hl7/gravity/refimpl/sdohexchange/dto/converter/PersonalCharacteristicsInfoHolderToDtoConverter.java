@@ -26,17 +26,18 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
   @Override
   public PersonalCharacteristicDto convert(T infoHolder) {
     Observation obs = infoHolder.getObservation();
-    Practitioner performer = infoHolder.getPerformer();
     PersonalCharacteristicDto dto = new PersonalCharacteristicDto();
-    CodeableConcept method = obs.getMethod();
+    //Type
     CharacteristicCode type = CharacteristicCode.fromCode(obs.getCode()
         .getCodingFirstRep()
         .getCode());
     dto.setType(type);
-    dto.setMethod(CharacteristicMethod.fromCode(obs.getMethod()
-        .getCodingFirstRep()
+    //Method + detail
+    CodeableConcept method = obs.getMethod();
+    dto.setMethod(CharacteristicMethod.fromCode(method.getCodingFirstRep()
         .getCode()));
     dto.setMethodDetail(method.getText());
+    //Value + detail
     if (obs.getValue() instanceof CodeableConcept) {
       CodeableConcept value = (CodeableConcept) obs.getValue();
       dto.setValue(new CodingDto(value.getCodingFirstRep()
@@ -44,61 +45,11 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
           .getDisplay()));
       dto.setValueDetail(value.getText());
     } else if (obs.hasComponent() && CharacteristicCode.ETHNICITY.equals(type)) {
-      List<CodeableConcept> detailedValues = new ArrayList<>();
-      obs.getComponent()
-          .stream()
-          .filter(c -> CharacteristicCode.SYSTEM.equals(c.getCode()
-              .getCodingFirstRep()
-              .getSystem()) && c.hasValueCodeableConcept())
-          .map(Observation.ObservationComponentComponent::getValueCodeableConcept)
-          .forEach(cc -> {
-            if (DetailedEthnicityCode.CODES.containsKey(cc.getCodingFirstRep()
-                .getCode())) {
-              detailedValues.add(cc);
-            } else {
-              EthnicityCode ethnicityCode = EthnicityCode.fromCode(cc.getCodingFirstRep()
-                  .getCode());
-              dto.setValue(new CodingDto(ethnicityCode.getCode(), ethnicityCode.getDisplay()));
-            }
-          });
-      dto.setDetailedValues(detailedValues.stream()
-          .map(v -> {
-            Coding coding = v.getCodingFirstRep();
-            return new CodingDto(coding.getCode(), coding.getDisplay());
-          })
-          .collect(Collectors.toList()));
+      convertEthnicity(obs, dto);
     } else if (obs.hasComponent() && CharacteristicCode.RACE.equals(type)) {
-      List<CodeableConcept> detailedValues = new ArrayList<>();
-      List<CodeableConcept> values = new ArrayList<>();
-      obs.getComponent()
-          .stream()
-          .filter(c -> CharacteristicCode.SYSTEM.equals(c.getCode()
-              .getCodingFirstRep()
-              .getSystem()) && c.hasValueCodeableConcept())
-          .map(Observation.ObservationComponentComponent::getValueCodeableConcept)
-          .forEach(cc -> {
-            if (DetailedRaceCode.CODES.containsKey(cc.getCodingFirstRep()
-                .getCode())) {
-              detailedValues.add(cc);
-            } else {
-              RaceCode.fromCode(cc.getCodingFirstRep()
-                  .getCode());
-              values.add(cc);
-            }
-          });
-      dto.setDetailedValues(detailedValues.stream()
-          .map(v -> {
-            Coding coding = v.getCodingFirstRep();
-            return new CodingDto(coding.getCode(), coding.getDisplay());
-          })
-          .collect(Collectors.toList()));
-      dto.setValues(values.stream()
-          .map(v -> {
-            Coding coding = v.getCodingFirstRep();
-            return new CodingDto(coding.getCode(), coding.getDisplay());
-          })
-          .collect(Collectors.toList()));
+      convertRace(obs, dto);
     }
+    //Description. Will make sense only for the race and ethnicity
     dto.setDescription(obs.getComponent()
         .stream()
         .filter(c -> CharacteristicCode.SYSTEM.equals(c.getCode()
@@ -108,10 +59,74 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
             .getValue())
         .findFirst()
         .orElse(null));
+    //Performer
+    Practitioner performer = infoHolder.getPerformer();
     dto.setPerformer(new ReferenceDto(performer.getIdElement()
         .getIdPart(), performer.getNameFirstRep()
         .getNameAsSingleString()));
-
+    //Has Attachment
+    if (CharacteristicCode.SEX_GENDER.equals(type) && obs.hasDerivedFrom()) {
+      dto.setHasAttachment(true);
+    }
     return dto;
+  }
+
+  private void convertRace(Observation obs, PersonalCharacteristicDto dto) {
+    List<CodeableConcept> detailedValues = new ArrayList<>();
+    List<CodeableConcept> values = new ArrayList<>();
+    obs.getComponent()
+        .stream()
+        .filter(c -> CharacteristicCode.SYSTEM.equals(c.getCode()
+            .getCodingFirstRep()
+            .getSystem()) && c.hasValueCodeableConcept())
+        .map(Observation.ObservationComponentComponent::getValueCodeableConcept)
+        .forEach(cc -> {
+          if (DetailedRaceCode.CODES.containsKey(cc.getCodingFirstRep()
+              .getCode())) {
+            detailedValues.add(cc);
+          } else {
+            RaceCode.fromCode(cc.getCodingFirstRep()
+                .getCode());
+            values.add(cc);
+          }
+        });
+    dto.setDetailedValues(detailedValues.stream()
+        .map(v -> {
+          Coding coding = v.getCodingFirstRep();
+          return new CodingDto(coding.getCode(), coding.getDisplay());
+        })
+        .collect(Collectors.toList()));
+    dto.setValues(values.stream()
+        .map(v -> {
+          Coding coding = v.getCodingFirstRep();
+          return new CodingDto(coding.getCode(), coding.getDisplay());
+        })
+        .collect(Collectors.toList()));
+  }
+
+  private void convertEthnicity(Observation obs, PersonalCharacteristicDto dto) {
+    List<CodeableConcept> detailedValues = new ArrayList<>();
+    obs.getComponent()
+        .stream()
+        .filter(c -> CharacteristicCode.SYSTEM.equals(c.getCode()
+            .getCodingFirstRep()
+            .getSystem()) && c.hasValueCodeableConcept())
+        .map(Observation.ObservationComponentComponent::getValueCodeableConcept)
+        .forEach(cc -> {
+          if (DetailedEthnicityCode.CODES.containsKey(cc.getCodingFirstRep()
+              .getCode())) {
+            detailedValues.add(cc);
+          } else {
+            EthnicityCode ethnicityCode = EthnicityCode.fromCode(cc.getCodingFirstRep()
+                .getCode());
+            dto.setValue(new CodingDto(ethnicityCode.getCode(), ethnicityCode.getDisplay()));
+          }
+        });
+    dto.setDetailedValues(detailedValues.stream()
+        .map(v -> {
+          Coding coding = v.getCodingFirstRep();
+          return new CodingDto(coding.getCode(), coding.getDisplay());
+        })
+        .collect(Collectors.toList()));
   }
 }

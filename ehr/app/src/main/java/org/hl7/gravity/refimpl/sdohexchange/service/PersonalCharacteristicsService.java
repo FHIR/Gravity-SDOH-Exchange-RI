@@ -3,8 +3,6 @@ package org.hl7.gravity.refimpl.sdohexchange.service;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.Lists;
 import com.healthlx.smartonfhir.core.SmartOnFhirContext;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Attachment;
@@ -34,6 +32,7 @@ import org.hl7.gravity.refimpl.sdohexchange.fhir.factory.characteristic.SexualOr
 import org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -126,14 +125,11 @@ public class PersonalCharacteristicsService {
     genderIdentityBundleFactory.setValueDetail(dto.getValueDetail());
     //The derived from file must be set but this is validated right in the bundle factory.
     if (dto.getDerivedFrom() != null) {
-      try {
-        genderIdentityBundleFactory.setDerivedFromFileName(dto.getDerivedFrom()
-            .getName());
-        genderIdentityBundleFactory.setDerivedFromFile(Base64.decode(dto.getDerivedFrom()
-            .getBase64Content()));
-      } catch (Base64DecodingException e) {
-        throw new IllegalArgumentException("Content cannot be base64 decoded");
-      }
+      genderIdentityBundleFactory.setDerivedFromFileName(dto.getDerivedFrom()
+          .getName());
+      genderIdentityBundleFactory.setDerivedFromFile(Base64.getDecoder()
+          .decode(dto.getDerivedFrom()
+              .getBase64Content()));
     }
     return genderIdentityBundleFactory;
   }

@@ -29,4 +29,6 @@ public class PersonalCharacteristicDto {
   // Only for race and ethnicity
   private String description;
   private ReferenceDto performer;
+  //Only for the reported sex and gender
+  private Boolean hasAttachment;
 }
