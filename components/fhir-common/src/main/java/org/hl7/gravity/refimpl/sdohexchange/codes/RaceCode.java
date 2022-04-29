@@ -28,7 +28,7 @@ public enum RaceCode {
     return Stream.of(RaceCode.values())
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new FHIRException(String.format("Unsupported Race code '%s'", codeString)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Race value '%s'", codeString)));
   }
 
   public Coding toCoding() {

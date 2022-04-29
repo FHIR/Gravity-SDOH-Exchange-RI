@@ -27,7 +27,7 @@ public enum CharacteristicCode {
     return Stream.of(CharacteristicCode.values())
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new FHIRException(String.format("Unsupported Characteristic code '%s'", codeString)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Characteristic type '%s'", codeString)));
   }
 
   public Coding toCoding() {

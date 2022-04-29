@@ -29,7 +29,7 @@ public enum PersonalPronounsCode {
     return Stream.of(PersonalPronounsCode.values())
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new FHIRException(String.format("Unsupported Personal pronouns type '%s'", codeString)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Personal Pronouns value '%s'", codeString)));
   }
 
   public Coding toCoding() {

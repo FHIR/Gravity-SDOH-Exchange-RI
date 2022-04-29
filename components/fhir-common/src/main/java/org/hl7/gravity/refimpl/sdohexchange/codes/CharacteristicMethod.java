@@ -25,7 +25,7 @@ public enum CharacteristicMethod {
     return Stream.of(CharacteristicMethod.values())
         .filter(targetEnum -> targetEnum.code.equals(codeString))
         .findFirst()
-        .orElseThrow(() -> new FHIRException(String.format("Unsupported Observation method '%s'", codeString)));
+        .orElseThrow(() -> new FHIRException(String.format("Unsupported Characteristic method '%s'", codeString)));
   }
 
   public Coding toCoding() {
