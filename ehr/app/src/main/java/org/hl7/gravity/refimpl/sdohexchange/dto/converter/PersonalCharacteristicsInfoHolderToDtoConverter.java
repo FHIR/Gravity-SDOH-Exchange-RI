@@ -26,7 +26,8 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
   @Override
   public PersonalCharacteristicDto convert(T infoHolder) {
     Observation obs = infoHolder.getObservation();
-    PersonalCharacteristicDto dto = new PersonalCharacteristicDto();
+    PersonalCharacteristicDto dto = new PersonalCharacteristicDto(obs.getIdElement()
+        .getIdPart());
     //Type
     CharacteristicCode type = CharacteristicCode.fromCode(obs.getCode()
         .getCodingFirstRep()
