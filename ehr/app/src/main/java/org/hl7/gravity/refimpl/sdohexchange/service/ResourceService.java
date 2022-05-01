@@ -23,11 +23,8 @@ public class ResourceService {
         .getResource();
     Practitioner performer = (Practitioner) characteristic.getPerformerFirstRep()
         .getResource();
-    PersonalCharacteristicJsonResourcesDto characteristicJsonResourcesDto =
-        new PersonalCharacteristicJsonResourcesDto();
-    characteristicJsonResourcesDto.setPersonalCharacteristic(resourceParser.parse(characteristic));
-    characteristicJsonResourcesDto.setPatient(resourceParser.parse(patient));
-    characteristicJsonResourcesDto.setPerformer(resourceParser.parse(performer));
-    return characteristicJsonResourcesDto;
+    return new PersonalCharacteristicJsonResourcesDto().setPersonalCharacteristic(resourceParser.parse(characteristic))
+        .setPatient(resourceParser.parse(patient))
+        .setPerformer(resourceParser.parse(performer));
   }
 }
