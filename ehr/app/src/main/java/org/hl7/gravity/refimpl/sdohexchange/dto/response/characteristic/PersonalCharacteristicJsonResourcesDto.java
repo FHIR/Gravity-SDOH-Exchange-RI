@@ -1,10 +1,14 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.response.characteristic;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
+@Accessors(chain = true)
 public class PersonalCharacteristicJsonResourcesDto {
 
   private String personalCharacteristic;
