@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -39,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -64,6 +62,11 @@ public class TaskPollingService {
   private final FhirContext fhirContext;
 
   @Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
+  public void poll() {
+    updateTasks();
+    demoRunQRThroughStructureMap();
+  }
+
   public void updateTasks() {
     log.info("Updating tasks from CP Organizations...");
     Bundle tasksBundle = openEhrClient.search()
@@ -121,15 +124,15 @@ public class TaskPollingService {
   A TEST polling service, implemented during January 2022 Connectathon, that automatically runs questionnaireResponse
   resources through a StructureMap. If any exception occurs - just ignore it.
    */
-  //@Scheduled(fixedDelayString = "${scheduling.task-polling-delay-millis}")
-  public void demoRunQRThroughStructureMap() throws IOException, ParseException {
+  public void demoRunQRThroughStructureMap() {
     log.info("Looking for TOP 3 Patient QuestionnaireResponse resources without derived Observations...");
     //TODO use repository instead
     Bundle tasksBundle = openEhrClient.search()
         .forResource(QuestionnaireResponse.class)
         .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
             .value(SDOHProfiles.QUESTIONNAIRE_RESPONSE))
-        .revInclude(Observation.INCLUDE_DERIVED_FROM)
+        // Explicitly set recurse to false. It is true by default
+        .revInclude(Observation.INCLUDE_DERIVED_FROM.setRecurse(false))
         .sort()
         .descending(QuestionnaireResponse.AUTHORED)
         .count(3)
@@ -146,8 +149,8 @@ public class TaskPollingService {
         .collect(Collectors.toSet());
 
     if (responses.size() != derivedFrom.size()) {
-      log.info(
-          "Found " + (responses.size() - derivedFrom.size()) + " QuestionnaireResponse resources without observations.");
+      log.info("Found " + (responses.size() - derivedFrom.size())
+          + " QuestionnaireResponse resources without observations.");
       List<QuestionnaireResponse> newResponses = responses.stream()
           .filter(qr -> !derivedFrom.contains(qr.getIdElement()
               .getIdPart()))
