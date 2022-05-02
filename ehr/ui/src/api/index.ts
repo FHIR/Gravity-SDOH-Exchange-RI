@@ -255,4 +255,4 @@ export const addPersonalCharacteristic = async (payload: PersonalCharacteristicP
 
 export const getPersonalCharacteristics = async (): Promise<PersonalCharacteristic[]> => (await axios.get("/personal-characteristics")).data;
 
-export const getPersonalCharacteristicsAttachment = async (id: string): Promise<string> => (await axios.get(`/personal-characteristics/${id}/derivedFrom`)).data;
+export const personalCharacteristicsAttachmentUrl = (id: string) => `/personal-characteristics/${id}/derivedFrom`;

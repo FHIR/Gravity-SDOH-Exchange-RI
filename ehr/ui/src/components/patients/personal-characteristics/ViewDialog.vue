@@ -1,7 +1,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, ref, watch } from "vue";
 import { TYPES, METHOD_TYPES, PersonalCharacteristic } from "@/types/personal-characteristics";
-import { getPersonalCharacteristicsAttachment } from "@/api";
+import { personalCharacteristicsAttachmentUrl } from "@/api";
 
 const addDetail = (value: string, detail?: string) => detail ? `${value} (${detail})` : value;
 
@@ -13,6 +13,7 @@ const format = (p: PersonalCharacteristic) => ({
 	value: (p.value && addDetail(p.value.display, p.valueDetail)) || p.values?.map(v => v.display).join(", ") || "",
 	description: p.description || "",
 	detailedValue: p.detailedValues?.map(v => v.display).join(", ") || "",
+	attachmentUrl: p.hasAttachment ? personalCharacteristicsAttachmentUrl(p.id) : null,
 });
 
 export default defineComponent({
@@ -30,33 +31,10 @@ export default defineComponent({
 
 		const data = computed(() => props.item ? format(props.item) : null);
 
-		type Attachment = "no" | "loading" | {
-			url: string
-		}
-
-		const attachment = ref<Attachment>("no");
-
-		const loadAttachment = async (id: string) => {
-			attachment.value = "loading";
-			const plain = await getPersonalCharacteristicsAttachment(id);
-			const blob = new Blob([plain]);
-			attachment.value = {
-				url: URL.createObjectURL(blob)
-			};
-		};
-
-		watch(() => props.item, item => {
-			attachment.value = "no";
-			if (item && item.hasAttachment) {
-				loadAttachment(item.id);
-			}
-		});
-
 		return {
 			visible: computed(() => props.item !== null),
 			data,
 			onDialogClose,
-			attachment,
 		};
 	}
 });
@@ -106,15 +84,10 @@ export default defineComponent({
 			</el-form-item>
 
 			<el-form-item
-				v-if="attachment !== 'no'"
+				v-if="data.attachmentUrl"
 				label="Attachment"
 			>
-				<span v-if="attachment === 'loading'">loading...</span>
-				<a
-					v-else
-					:href="attachment.url"
-					download
-				>
+				<a :href="data.attachmentUrl">
 					download
 				</a>
 			</el-form-item>

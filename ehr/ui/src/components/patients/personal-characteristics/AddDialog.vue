@@ -563,6 +563,7 @@ export default defineComponent({
 					<FileInput
 						v-model:value="model.payload.derivedFrom"
 						:disabled="saveInProgress"
+						accept="application/pdf,.pdf"
 						@update:value="formEl?.validateField(['payload.derivedFrom'])"
 					/>
 				</el-form-item>
