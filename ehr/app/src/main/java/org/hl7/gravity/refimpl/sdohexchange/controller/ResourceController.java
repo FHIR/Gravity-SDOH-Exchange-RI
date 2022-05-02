@@ -23,8 +23,8 @@ public class ResourceController {
   private final ResourceService resourceService;
 
   @ApiOperation(value = "Get all Personal Characteristic resources as JSON.")
-  @GetMapping("/{characteristicId}/characteristics")
-  public PersonalCharacteristicJsonResourcesDto getTaskResources(
+  @GetMapping("/personal-characteristics/{characteristicId}")
+  public PersonalCharacteristicJsonResourcesDto getPersonalCharacteristicResources(
       @PathVariable @NotBlank(message = "Personal Characteristic id can't be empty.") String characteristicId) {
     return resourceService.getCharacteristicResources(characteristicId);
   }
