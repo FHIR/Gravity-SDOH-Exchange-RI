@@ -64,6 +64,7 @@ public class ObservationRepository extends FhirRepository<Observation> {
             .code(observationId))
         .include(Observation.INCLUDE_PERFORMER)
         .include(Observation.INCLUDE_PATIENT)
+        .include(Observation.INCLUDE_DERIVED_FROM)
         .returnBundle(Bundle.class)
         .execute();
     return FhirUtil.getFromBundle(b, Observation.class)

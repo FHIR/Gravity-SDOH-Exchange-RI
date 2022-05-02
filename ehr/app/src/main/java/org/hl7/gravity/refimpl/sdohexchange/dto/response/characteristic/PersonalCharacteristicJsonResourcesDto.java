@@ -14,4 +14,5 @@ public class PersonalCharacteristicJsonResourcesDto {
   private String personalCharacteristic;
   private String patient;
   private String performer;
+  private String documentReference;
 }
