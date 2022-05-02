@@ -11,6 +11,7 @@ import org.hl7.gravity.refimpl.sdohexchange.codes.DetailedEthnicityCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.DetailedRaceCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.EthnicityCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.RaceCode;
+import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.characteristic.PersonalCharacteristicDto;
@@ -31,14 +32,14 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
         .getIdPart());
     List<String> errors = new ArrayList<>();
     //Type
-    withError(() -> dto.setType(CharacteristicCode.fromCode(obs.getCode()
+    Validated.withError(dto, () -> dto.setType(CharacteristicCode.fromCode(obs.getCode()
         .getCodingFirstRep()
-        .getCode())), dto);
+        .getCode())));
     try {
       //Method + detail
       CodeableConcept method = obs.getMethod();
-      withError(() -> dto.setMethod(CharacteristicMethod.fromCode(method.getCodingFirstRep()
-          .getCode())), dto);
+      Validated.withError(dto, () -> dto.setMethod(CharacteristicMethod.fromCode(method.getCodingFirstRep()
+          .getCode())));
       dto.setMethodDetail(method.getText());
       //Value + detail
       if (obs.getValue() instanceof CodeableConcept) {
@@ -92,11 +93,11 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
               .getCode())) {
             detailedValues.add(cc);
           } else {
-            withError(() -> {
+            Validated.withError(dto, () -> {
               RaceCode.fromCode(cc.getCodingFirstRep()
                   .getCode());
               values.add(cc);
-            }, dto);
+            });
           }
         });
     dto.setDetailedValues(detailedValues.stream()
@@ -126,11 +127,11 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
               .getCode())) {
             detailedValues.add(cc);
           } else {
-            withError(() -> {
+            Validated.withError(dto, () -> {
               EthnicityCode ethnicityCode = EthnicityCode.fromCode(cc.getCodingFirstRep()
                   .getCode());
               dto.setValue(new CodingDto(ethnicityCode.getCode(), ethnicityCode.getDisplay()));
-            }, dto);
+            });
           }
         });
     dto.setDetailedValues(detailedValues.stream()
@@ -139,20 +140,5 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
           return new CodingDto(coding.getCode(), coding.getDisplay());
         })
         .collect(Collectors.toList()));
-  }
-
-  /**
-   * Method to wrap runnable into try-catch and add error to dto if exception will be thrown
-   *
-   * @param runnable functional interface
-   * @param dto      PersonalCharacteristicDto
-   */
-  public void withError(Runnable runnable, PersonalCharacteristicDto dto) {
-    try {
-      runnable.run();
-    } catch (FHIRException exc) {
-      dto.getErrors()
-          .add(exc.getMessage());
-    }
   }
 }
