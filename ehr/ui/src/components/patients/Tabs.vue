@@ -22,7 +22,7 @@ export default defineComponent({
 		PatientTasks
 	},
 	setup() {
-		const activeTab = ref<string>("healthConcerns");
+		const activeTab = ref<string>("PersonalCharacteristics");
 		const addGoalPhase = ref<boolean>(false);
 		const newGoalProblems = ref<string[]>([]);
 		const assessmentToOpenId = ref<string>("");
@@ -87,6 +87,13 @@ export default defineComponent({
 
 <template>
 	<el-tabs v-model="activeTab">
+		<el-tab-pane
+			label="Personal Characteristics"
+			name="PersonalCharacteristics"
+			:lazy="true"
+		>
+			<PersonalCharacteristics />
+		</el-tab-pane>
 		<el-tab-pane
 			label="Health Concerns"
 			name="healthConcerns"
@@ -163,13 +170,6 @@ export default defineComponent({
 			:lazy="true"
 		>
 			<Consents />
-		</el-tab-pane>
-		<el-tab-pane
-			label="Personal Characteristics"
-			name="PersonalCharacteris"
-			:lazy="true"
-		>
-			<PersonalCharacteristics />
 		</el-tab-pane>
 	</el-tabs>
 </template>

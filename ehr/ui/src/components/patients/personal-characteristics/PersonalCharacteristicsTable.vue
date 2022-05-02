@@ -1,32 +1,30 @@
 <script lang="ts">
-import { PersonalCharacteristic } from "@/types/personal-characteristics";
-import { defineComponent, PropType } from "vue";
+import { METHOD_TYPES, PersonalCharacteristic, TYPES } from "@/types/personal-characteristics";
+import { computed, defineComponent, PropType } from "vue";
+
+const addDetail = (value: string, detail?: string) => detail ? `${value} (${detail})` : value;
+
+const format = (p: PersonalCharacteristic) => ({
+	id: p.id,
+	type: TYPES[p.type],
+	performer: p.performer.display,
+	method: addDetail(METHOD_TYPES[p.method], p.methodDetail),
+	value: (p.value && addDetail(p.value.display, p.valueDetail)) || p.values?.map(v => v.display).join(", ") || "",
+	description: p.description || "",
+	detailedValue: p.detailedValues?.map(v => v.display).join(", ") || "",
+});
 
 export default defineComponent( {
-	// props: {
-	// 	data: {
-	// 		type: Array as PropType<PersonalCharacteristic[]>,
-	// 		default: () => []
-	// 	}
-	// },
-	data(){
-		return{
-			tableData:[
-				{
-					type: "Personal Pronouns",
-					performer: "John Doe",
-					method: "Self Reported",
-					value: "he/him/his/his/himself",
-					detailedValue: ""
-				},
-				{
-					type: "Observation Ethnicity",
-					performer: "John Doe",
-					method: "Self Reported",
-					value: "Hispanic or Latino",
-					detailedValue: "American Indian or Alaska Native"
-				}
-			]
+	props: {
+		data: {
+			type: Array as PropType<PersonalCharacteristic[]>,
+			default: () => []
+		}
+	},
+	emits: ["add-item", "item-clicked"],
+	setup(props) {
+		return {
+			tableData: computed(() => props.data.map(format)),
 		};
 	}
 });
@@ -34,37 +32,89 @@ export default defineComponent( {
 </script>
 <template>
 	<div class="table-wrapper">
+		<div class="title">
+			<h3>
+				Personal Characteristics
+			</h3>
+			<el-button
+				plain
+				round
+				type="primary"
+				size="mini"
+				@click="$emit('add-item')"
+			>
+				Add Personal Characteristics
+			</el-button>
+		</div>
 		<el-table
 			ref="tableEl"
 			:data="tableData"
 		>
 			<el-table-column
-				property="type"
 				label="Type"
-			/>
+				:width="200"
+			>
+				<template #default="scope">
+					<el-button
+						type="text"
+						@click="$emit('item-clicked', scope?.row?.id)"
+					>
+						{{ scope?.row?.type }}
+					</el-button>
+				</template>
+			</el-table-column>
 
 			<el-table-column
 				label="Performer"
-				property="performer"
-			/>
+				:width="200"
+			>
+				<template #default="scope">
+					<div class="cell-text">
+						{{ scope?.row?.performer }}
+					</div>
+				</template>
+			</el-table-column>
+
 			<el-table-column
 				label="Method"
-				property="method"
-			/>
+				:width="200"
+			>
+				<template #default="scope">
+					<div class="cell-text">
+						{{ scope?.row?.method }}
+					</div>
+				</template>
+			</el-table-column>
 
 			<el-table-column
 				label="Value"
-				property="value"
-			/>
+			>
+				<template #default="scope">
+					<div class="cell-text">
+						{{ scope?.row?.value }}
+					</div>
+				</template>
+			</el-table-column>
+
 			<el-table-column
 				label="Description"
-				property="description"
-			/>
+			>
+				<template #default="scope">
+					<div class="cell-text">
+						{{ scope?.row?.description }}
+					</div>
+				</template>
+			</el-table-column>
 
 			<el-table-column
 				label="Detailed Value"
-				property="detailedValue"
-			/>
+			>
+				<template #default="scope">
+					<div class="cell-text">
+						{{ scope?.row?.detailedValue }}
+					</div>
+				</template>
+			</el-table-column>
 		</el-table>
 	</div>
 </template>

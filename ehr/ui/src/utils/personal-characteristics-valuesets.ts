@@ -5,23 +5,27 @@ export type RaceCode = typeof RACE[number]["code"]
 export type DetailedRaceCode = typeof DETAILED_RACE[number]["code"]
 export type SexGenderCode = typeof SEX_GENDER[number]["code"]
 export type SexualOrientationCode = typeof SEXUAL_ORIENTATION[number]["code"]
+export type GenderIdentiryCode = typeof GENDER_IDENTITY[number]["code"]
 
 
+export const PERSONAL_PRONOUNS_OTHER = "OTH";
+export const SEX_GENDER_OTHER = "LA32969-0";
 export const SEXUAL_ORIENTATION_OTHER = "LA46-8";
+export const GENDER_IDENTITY_OTHER = "OTH";
 
 
 export const PERSONAL_PRONOUNS = [
 	{ code: "LA29518-0", display: "he/him/his/his/himself" },
 	{ code: "LA29519-8", display: "she/her/her/hers/herself" },
 	{ code: "LA29520-6", display: "they/them/their/theirs/themselves" },
+	{ code: "UNK", display: "unknown" },
 	{ code: "OTH", display: "other" },
-	{ code: "UNK", display: "unknown" }
 ] as const;
 
 
 export const ETHNICITY = [
 	{ code: "2135-2", display: "Hispanic or Latino" },
-	{ code: "2186-5", display: "Non Hispanic or Latino" }
+	{ code: "2186-5", display: "Non Hispanic or Latino" },
 ] as const;
 
 
@@ -66,7 +70,7 @@ export const DETAILED_ETHNICITY = [
 	{ code: "2173-3", display: "Uruguayan" },
 	{ code: "2174-1", display: "Venezuelan" },
 	{ code: "2175-8", display: "South American Indian" },
-	{ code: "2176-6", display: "Criollo" }
+	{ code: "2176-6", display: "Criollo" },
 ] as const;
 
 
@@ -75,15 +79,15 @@ export const RACE = [
 	{ code: "2028-9", display: "Asian" },
 	{ code: "2054-5", display: "Black or African American" },
 	{ code: "2076-8", display: "Native Hawaiian or Other Pacific Islander" },
-	{ code: "2106-3", display: "White" }
+	{ code: "2106-3", display: "White" },
 ] as const;
 
 
 export const SEX_GENDER = [
 	{ code: "LA13504-8" , display: "F" },
 	{ code: "LA15170-6" , display: "M" },
+	{ code: "LA32970-8" , display: "Not Reported" },
 	{ code: "LA32969-0" , display: "X" },
-	{ code: "LA32970-8" , display: "<" }
 ] as const;
 
 
@@ -91,13 +95,20 @@ export const SEXUAL_ORIENTATION = [
 	{ code: "LA22877-7", display: "Bisexual" },
 	{ code: "LA22876-9", display: "Heterosexual" },
 	{ code: "LA22875-1", display: "Homosexual" },
-	{ code: "LA46-8", display: "Other" },
 	{ code: "LA20384-6", display: "Asked but unknown" },
-	{ code: "LA4489-6", display: "Unknown" }
+	{ code: "LA4489-6", display: "Unknown" },
+	{ code: "LA46-8", display: "Other" },
 ] as const;
 
 
 export const GENDER_IDENTITY = [
+	{ code: "407376001", display: "Male-to-female transsexual (finding)" },
+	{ code: "407377005", display: "Female-to-male transsexual (finding)" },
+	{ code: "446131000124102", display: "Identifies as non-conforming gender (finding)" },
+	{ code: "446141000124107", display: "Identifies as female gender (finding)" },
+	{ code: "446151000124109", display: "Identifies as male gender (finding)" },
+	{ code: "ASKU", display: "asked but unknown" },
+	{ code: "OTH", display: "other" },
 ] as const;
 
 
@@ -1017,5 +1028,5 @@ export const DETAILED_RACE = [
 	{ code: "2125-3", display: "Syrian" },
 	{ code: "2126-1", display: "Afghanistani" },
 	{ code: "2127-9", display: "Israeili" },
-	{ code: "2131-1", display: "Other Race" }
+	{ code: "2131-1", display: "Other Race" },
 ] as const;

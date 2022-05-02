@@ -31,7 +31,7 @@ module.exports = {
 		"no-unused-vars": "warn",
 		"no-console": "off",
 		"no-irregular-whitespace": "warn",
-		"comma-dangle": ["warn", "never"],
+		"comma-dangle": "off",
 		"func-call-spacing": ["error", "never"],
 		"no-trailing-spaces": "error",
 		"no-unneeded-ternary": "warn",

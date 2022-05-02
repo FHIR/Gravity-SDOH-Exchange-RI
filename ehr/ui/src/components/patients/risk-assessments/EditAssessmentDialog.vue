@@ -170,6 +170,7 @@ export default defineComponent({
 .edit-assessment-dialog {
 	::v-deep(.el-dialog__body) {
 		padding: 0;
+		overflow: hidden;
 
 		.el-button--text {
 			padding-left: 0;
