@@ -1,30 +1,57 @@
 <script lang="ts">
 import PersonalCharacteristicsTable from "./PersonalCharacteristicsTable.vue";
-import Dialog from "./Dialog.vue";
+import AddDialog from "./AddDialog.vue";
+import ViewDialog from "./ViewDialog.vue";
 import NoItems from "@/components/patients/NoItems.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { PersonalCharacteristic } from "@/types/personal-characteristics";
+import { getPersonalCharacteristics } from "@/api";
+
 
 
 export default {
 	components: {
 		PersonalCharacteristicsTable,
-		Dialog,
-		NoItems
+		AddDialog,
+		ViewDialog,
+		NoItems,
 	},
 	setup () {
 		const addDialogOpen = ref(false);
-		const data: PersonalCharacteristic[] = [];
+		const viewDialogId = ref<string | null>(null);
+		const data = ref<PersonalCharacteristic[]>([]);
+		const loading = ref(false);
+
+		const load = async () => {
+			loading.value = true;
+			const resp = await getPersonalCharacteristics();
+			data.value = resp;
+			loading.value = false;
+		};
+
+		const closeAddDialog = () => {
+			addDialogOpen.value = false;
+			load();
+		};
+
+		const viewDialogItem = computed(() => viewDialogId.value ? data.value.find(item => item.id === viewDialogId.value) || null : null);
+
+		load();
+
 		return {
 			data,
-			addDialogOpen
+			loading,
+			addDialogOpen,
+			closeAddDialog,
+			viewDialogId,
+			viewDialogItem,
 		};
 	}
 };
 </script>
 
 <template>
-	<div>
+	<div v-loading="loading">
 		<NoItems
 			v-if="data.length === 0"
 			message="No Personal Characteristics Yet"
@@ -34,10 +61,16 @@ export default {
 		<PersonalCharacteristicsTable
 			v-if="data.length > 0"
 			:data="data"
+			@add-item="addDialogOpen = true"
+			@item-clicked="viewDialogId = $event"
 		/>
-		<Dialog
+		<AddDialog
 			:visible="addDialogOpen"
-			@close="addDialogOpen = false"
+			@close="closeAddDialog"
+		/>
+		<ViewDialog
+			:item="viewDialogItem"
+			@close="viewDialogId = null"
 		/>
 	</div>
 </template>

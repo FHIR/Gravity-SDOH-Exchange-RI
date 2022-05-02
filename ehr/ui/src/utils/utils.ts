@@ -24,3 +24,17 @@ export const prepareOccurrence = (occurrence: string): { end: string, start?: st
 	}
 	return finalizeOccurrence;
 };
+
+export const file2Base64 = (file: File): Promise<string> =>
+	new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.readAsDataURL(file);
+		reader.onload = () => {
+			if (typeof reader.result !== "string") {
+				resolve("");
+			} else {
+				resolve(reader.result.replace(/^data:.*?,/, ""));
+			}
+		};
+		reader.onerror = error => reject(error);
+	});
