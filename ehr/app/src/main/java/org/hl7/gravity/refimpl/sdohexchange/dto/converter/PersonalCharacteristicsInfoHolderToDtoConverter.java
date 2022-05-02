@@ -29,16 +29,16 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
     Observation obs = infoHolder.getObservation();
     PersonalCharacteristicDto dto = new PersonalCharacteristicDto(obs.getIdElement()
         .getIdPart());
+    List<String> errors = new ArrayList<>();
     //Type
-    CharacteristicCode type = CharacteristicCode.fromCode(obs.getCode()
+    withError(() -> dto.setType(CharacteristicCode.fromCode(obs.getCode()
         .getCodingFirstRep()
-        .getCode());
-    dto.setType(type);
+        .getCode())), dto);
     try {
       //Method + detail
       CodeableConcept method = obs.getMethod();
-      dto.setMethod(CharacteristicMethod.fromCode(method.getCodingFirstRep()
-          .getCode()));
+      withError(() -> dto.setMethod(CharacteristicMethod.fromCode(method.getCodingFirstRep()
+          .getCode())), dto);
       dto.setMethodDetail(method.getText());
       //Value + detail
       if (obs.getValue() instanceof CodeableConcept) {
@@ -47,9 +47,9 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
             .getCode(), value.getCodingFirstRep()
             .getDisplay()));
         dto.setValueDetail(value.getText());
-      } else if (obs.hasComponent() && CharacteristicCode.ETHNICITY.equals(type)) {
+      } else if (obs.hasComponent() && CharacteristicCode.ETHNICITY.equals(dto.getType())) {
         convertEthnicity(obs, dto);
-      } else if (obs.hasComponent() && CharacteristicCode.RACE.equals(type)) {
+      } else if (obs.hasComponent() && CharacteristicCode.RACE.equals(dto.getType())) {
         convertRace(obs, dto);
       }
     } catch (FHIRException exc) {
@@ -72,7 +72,7 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
         .getIdPart(), performer.getNameFirstRep()
         .getNameAsSingleString()));
     //Has Attachment
-    if (CharacteristicCode.SEX_GENDER.equals(type) && obs.hasDerivedFrom()) {
+    if (CharacteristicCode.SEX_GENDER.equals(dto.getType()) && obs.hasDerivedFrom()) {
       dto.setHasAttachment(true);
     }
     return dto;
@@ -92,9 +92,11 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
               .getCode())) {
             detailedValues.add(cc);
           } else {
-            RaceCode.fromCode(cc.getCodingFirstRep()
-                .getCode());
-            values.add(cc);
+            withError(() -> {
+              RaceCode.fromCode(cc.getCodingFirstRep()
+                  .getCode());
+              values.add(cc);
+            }, dto);
           }
         });
     dto.setDetailedValues(detailedValues.stream()
@@ -124,9 +126,11 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
               .getCode())) {
             detailedValues.add(cc);
           } else {
-            EthnicityCode ethnicityCode = EthnicityCode.fromCode(cc.getCodingFirstRep()
-                .getCode());
-            dto.setValue(new CodingDto(ethnicityCode.getCode(), ethnicityCode.getDisplay()));
+            withError(() -> {
+              EthnicityCode ethnicityCode = EthnicityCode.fromCode(cc.getCodingFirstRep()
+                  .getCode());
+              dto.setValue(new CodingDto(ethnicityCode.getCode(), ethnicityCode.getDisplay()));
+            }, dto);
           }
         });
     dto.setDetailedValues(detailedValues.stream()
@@ -135,5 +139,20 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
           return new CodingDto(coding.getCode(), coding.getDisplay());
         })
         .collect(Collectors.toList()));
+  }
+
+  /**
+   * Method to wrap runnable into try-catch and add error to dto if exception will be thrown
+   *
+   * @param runnable functional interface
+   * @param dto      PersonalCharacteristicDto
+   */
+  public void withError(Runnable runnable, PersonalCharacteristicDto dto) {
+    try {
+      runnable.run();
+    } catch (FHIRException exc) {
+      dto.getErrors()
+          .add(exc.getMessage());
+    }
   }
 }
