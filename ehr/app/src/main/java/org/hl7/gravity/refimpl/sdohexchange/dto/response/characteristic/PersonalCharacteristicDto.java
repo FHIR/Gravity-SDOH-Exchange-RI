@@ -1,21 +1,24 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.response.characteristic;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.CharacteristicMethod;
+import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PersonalCharacteristicDto {
+public class PersonalCharacteristicDto implements Validated {
 
   private final String id;
   private CharacteristicCode type;
@@ -32,4 +35,7 @@ public class PersonalCharacteristicDto {
   private ReferenceDto performer;
   //Only for the reported sex and gender
   private Boolean hasAttachment;
+
+  @Setter(AccessLevel.NONE)
+  private List<String> errors = new ArrayList<>();
 }

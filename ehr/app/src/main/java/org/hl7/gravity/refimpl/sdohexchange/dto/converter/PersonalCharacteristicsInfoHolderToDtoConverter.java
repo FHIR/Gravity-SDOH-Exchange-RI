@@ -1,5 +1,6 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
@@ -10,6 +11,7 @@ import org.hl7.gravity.refimpl.sdohexchange.codes.DetailedEthnicityCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.DetailedRaceCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.EthnicityCode;
 import org.hl7.gravity.refimpl.sdohexchange.codes.RaceCode;
+import org.hl7.gravity.refimpl.sdohexchange.dto.Validated;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.CodingDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.characteristic.PersonalCharacteristicDto;
@@ -28,27 +30,32 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
     Observation obs = infoHolder.getObservation();
     PersonalCharacteristicDto dto = new PersonalCharacteristicDto(obs.getIdElement()
         .getIdPart());
+    List<String> errors = new ArrayList<>();
     //Type
-    CharacteristicCode type = CharacteristicCode.fromCode(obs.getCode()
+    Validated.withError(dto, () -> dto.setType(CharacteristicCode.fromCode(obs.getCode()
         .getCodingFirstRep()
-        .getCode());
-    dto.setType(type);
-    //Method + detail
-    CodeableConcept method = obs.getMethod();
-    dto.setMethod(CharacteristicMethod.fromCode(method.getCodingFirstRep()
-        .getCode()));
-    dto.setMethodDetail(method.getText());
-    //Value + detail
-    if (obs.getValue() instanceof CodeableConcept) {
-      CodeableConcept value = (CodeableConcept) obs.getValue();
-      dto.setValue(new CodingDto(value.getCodingFirstRep()
-          .getCode(), value.getCodingFirstRep()
-          .getDisplay()));
-      dto.setValueDetail(value.getText());
-    } else if (obs.hasComponent() && CharacteristicCode.ETHNICITY.equals(type)) {
-      convertEthnicity(obs, dto);
-    } else if (obs.hasComponent() && CharacteristicCode.RACE.equals(type)) {
-      convertRace(obs, dto);
+        .getCode())));
+    try {
+      //Method + detail
+      CodeableConcept method = obs.getMethod();
+      Validated.withError(dto, () -> dto.setMethod(CharacteristicMethod.fromCode(method.getCodingFirstRep()
+          .getCode())));
+      dto.setMethodDetail(method.getText());
+      //Value + detail
+      if (obs.getValue() instanceof CodeableConcept) {
+        CodeableConcept value = (CodeableConcept) obs.getValue();
+        dto.setValue(new CodingDto(value.getCodingFirstRep()
+            .getCode(), value.getCodingFirstRep()
+            .getDisplay()));
+        dto.setValueDetail(value.getText());
+      } else if (obs.hasComponent() && CharacteristicCode.ETHNICITY.equals(dto.getType())) {
+        convertEthnicity(obs, dto);
+      } else if (obs.hasComponent() && CharacteristicCode.RACE.equals(dto.getType())) {
+        convertRace(obs, dto);
+      }
+    } catch (FHIRException exc) {
+      dto.getErrors()
+          .add(exc.getMessage());
     }
     //Description. Will make sense only for the race and ethnicity
     dto.setDescription(obs.getComponent()
@@ -66,7 +73,7 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
         .getIdPart(), performer.getNameFirstRep()
         .getNameAsSingleString()));
     //Has Attachment
-    if (CharacteristicCode.SEX_GENDER.equals(type) && obs.hasDerivedFrom()) {
+    if (CharacteristicCode.SEX_GENDER.equals(dto.getType()) && obs.hasDerivedFrom()) {
       dto.setHasAttachment(true);
     }
     return dto;
@@ -86,9 +93,11 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
               .getCode())) {
             detailedValues.add(cc);
           } else {
-            RaceCode.fromCode(cc.getCodingFirstRep()
-                .getCode());
-            values.add(cc);
+            Validated.withError(dto, () -> {
+              RaceCode.fromCode(cc.getCodingFirstRep()
+                  .getCode());
+              values.add(cc);
+            });
           }
         });
     dto.setDetailedValues(detailedValues.stream()
@@ -118,9 +127,11 @@ public class PersonalCharacteristicsInfoHolderToDtoConverter<T extends PersonalC
               .getCode())) {
             detailedValues.add(cc);
           } else {
-            EthnicityCode ethnicityCode = EthnicityCode.fromCode(cc.getCodingFirstRep()
-                .getCode());
-            dto.setValue(new CodingDto(ethnicityCode.getCode(), ethnicityCode.getDisplay()));
+            Validated.withError(dto, () -> {
+              EthnicityCode ethnicityCode = EthnicityCode.fromCode(cc.getCodingFirstRep()
+                  .getCode());
+              dto.setValue(new CodingDto(ethnicityCode.getCode(), ethnicityCode.getDisplay()));
+            });
           }
         });
     dto.setDetailedValues(detailedValues.stream()
