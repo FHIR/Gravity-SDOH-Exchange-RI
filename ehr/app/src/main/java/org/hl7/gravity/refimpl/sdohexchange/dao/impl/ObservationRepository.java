@@ -57,6 +57,21 @@ public class ObservationRepository extends FhirRepository<Observation> {
         .orElse(null);
   }
 
+  public Observation getCharacteristicWithResources(String observationId) {
+    Bundle b = getClient().search()
+        .forResource(getResourceType())
+        .where(Observation.RES_ID.exactly()
+            .code(observationId))
+        .include(Observation.INCLUDE_PERFORMER)
+        .include(Observation.INCLUDE_PATIENT)
+        .returnBundle(Bundle.class)
+        .execute();
+    return FhirUtil.getFromBundle(b, Observation.class)
+        .stream()
+        .findFirst()
+        .orElse(null);
+  }
+
   public Bundle findPatientPersonalCharacteristics(String patientId, Integer count) {
     return getClient().search()
         .forResource(getResourceType())
