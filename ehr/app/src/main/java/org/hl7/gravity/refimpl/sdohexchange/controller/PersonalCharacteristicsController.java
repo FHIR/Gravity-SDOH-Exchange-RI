@@ -48,7 +48,7 @@ public class PersonalCharacteristicsController {
   public ResponseEntity<byte[]> downloadAttachment(@PathVariable String id) {
     AttachmentDto attachment = personalCharacteristicsService.retrieveDerivedFrom(id);
     return ResponseEntity.ok()
-        .header("Content-disposition", String.format("attachment; filename=%s.pdf", attachment.getTitle()))
+        .header("Content-disposition", String.format("attachment; filename=%s", attachment.getTitle()))
         .contentType(MediaType.valueOf(attachment.getContentType()))
         .body(attachment.getContent());
   }
