@@ -21,7 +21,7 @@ export default defineComponent( {
 			default: () => []
 		}
 	},
-	emits: ["add-item", "item-clicked"],
+	emits: ["add-item", "item-clicked", "view-resources"],
 	setup(props) {
 		return {
 			tableData: computed(() => props.data.map(format)),
@@ -113,6 +113,20 @@ export default defineComponent( {
 					<div class="cell-text">
 						{{ scope?.row?.detailedValue }}
 					</div>
+				</template>
+			</el-table-column>
+
+			<el-table-column
+				label="Resources"
+				:width="140"
+			>
+				<template #default="scope">
+					<el-button
+						type="text"
+						@click="$emit('view-resources', scope?.row?.id)"
+					>
+						view resources
+					</el-button>
 				</template>
 			</el-table-column>
 		</el-table>

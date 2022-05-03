@@ -2,6 +2,7 @@
 import PersonalCharacteristicsTable from "./PersonalCharacteristicsTable.vue";
 import AddDialog from "./AddDialog.vue";
 import ViewDialog from "./ViewDialog.vue";
+import ResourcesDialog from "./ResourcesDialog.vue";
 import NoItems from "@/components/patients/NoItems.vue";
 import { ref, computed } from "vue";
 import { PersonalCharacteristic } from "@/types/personal-characteristics";
@@ -15,12 +16,14 @@ export default {
 		AddDialog,
 		ViewDialog,
 		NoItems,
+		ResourcesDialog,
 	},
 	setup () {
 		const addDialogOpen = ref(false);
 		const viewDialogId = ref<string | null>(null);
 		const data = ref<PersonalCharacteristic[]>([]);
 		const loading = ref(false);
+		const viewResourcesId = ref<string | null>(null);
 
 		const load = async () => {
 			loading.value = true;
@@ -45,6 +48,7 @@ export default {
 			closeAddDialog,
 			viewDialogId,
 			viewDialogItem,
+			viewResourcesId,
 		};
 	}
 };
@@ -63,6 +67,7 @@ export default {
 			:data="data"
 			@add-item="addDialogOpen = true"
 			@item-clicked="viewDialogId = $event"
+			@view-resources="viewResourcesId = $event"
 		/>
 		<AddDialog
 			:visible="addDialogOpen"
@@ -71,6 +76,10 @@ export default {
 		<ViewDialog
 			:item="viewDialogItem"
 			@close="viewDialogId = null"
+		/>
+		<ResourcesDialog
+			:id="viewResourcesId"
+			@close="viewResourcesId = null"
 		/>
 	</div>
 </template>
