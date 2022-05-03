@@ -18,10 +18,12 @@
 		"normalize.css": "8.0.1",
 		"vue": "3.0.9",
 		"vue-router": "4.0.5",
-		"vuex": "4.0.0"
+		"vuex": "4.0.0",
+		"codemirror": "5.61.0"
 	},
 	"devDependencies": {
 		"@types/lodash": "4.14.168",
+		"@types/codemirror": "5.60.0",
 		"@typescript-eslint/eslint-plugin": "4.20.0",
 		"@typescript-eslint/parser": "4.20.0",
 		"@vue/cli-plugin-babel": "4.5.12",

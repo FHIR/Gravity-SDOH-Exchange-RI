@@ -171,6 +171,7 @@ export default defineComponent({
 	::v-deep(.el-dialog__body) {
 		padding: 0;
 		overflow: hidden;
+		max-height: unset;
 
 		.el-button--text {
 			padding-left: 0;
