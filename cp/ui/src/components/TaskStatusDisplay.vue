@@ -74,6 +74,8 @@ export default defineComponent({
 		&.received { background-image: url("~@/assets/images/status-received.svg"); }
 
 		&.rejected { background-image: url("~@/assets/images/status-rejected.svg"); }
+
+		&.failed { background-image: url("~@/assets/images/status-failed.svg"); }
 	}
 
 	.label {
