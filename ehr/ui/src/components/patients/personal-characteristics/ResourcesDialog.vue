@@ -2,8 +2,9 @@
 import { defineComponent, PropType, computed, ref, watch } from "vue";
 import JsonViewer from "@/components/JsonViewer.vue";
 import { getPersonalCharacteristicsResources } from "@/api";
-import { capitalize } from "lodash";
 
+
+const capitalize = (s: string) => s.slice(0, 1).toUpperCase() + s.slice(1);
 
 const prettyPrint = (raw: string) => JSON.stringify(JSON.parse(raw), null, "\t");
 
