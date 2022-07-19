@@ -46,7 +46,7 @@ const Flow: { [status in TaskStatus]?: TaskStatus[] } = {
 	"On Hold":     ["In Progress", "Cancelled"]
 };
 
-const showOccurrence = (ocr: Occurrence) => ocr.start ? `From ${showDate(ocr.start)} to ${showDate(ocr.end)}` : (ocr.start ? `Until ${showDate(ocr.end)}` : "");
+const showOccurrence = (ocr: Occurrence) => ocr.start ? `From ${showDate(ocr.start)} to ${showDate(ocr.end)}` : (ocr.end ? `Until ${showDate(ocr.end)}` : "");
 
 const prepareTaskStuff = (task: Task): TaskStuff => ({
 	id: task.id,
