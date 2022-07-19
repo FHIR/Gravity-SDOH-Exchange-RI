@@ -31,13 +31,15 @@ public class ServiceRequestToDtoConverter implements Converter<ServiceRequest, S
   }
 
   private OccurrenceResponseDto convertOccurrence(Type occurrence) {
-    OccurrenceResponseDto occurrenceResponseDto = null;
+    OccurrenceResponseDto occurrenceResponseDto;
     if (occurrence instanceof DateTimeType) {
       occurrenceResponseDto = new OccurrenceResponseDto(null, FhirUtil.toLocalDateTime((DateTimeType) occurrence));
     } else if (occurrence instanceof Period) {
       occurrenceResponseDto = new OccurrenceResponseDto(
           FhirUtil.toLocalDateTime(((Period) occurrence).getStartElement()),
           FhirUtil.toLocalDateTime(((Period) occurrence).getEndElement()));
+    } else {
+      occurrenceResponseDto = new OccurrenceResponseDto();
     }
     return occurrenceResponseDto;
   }

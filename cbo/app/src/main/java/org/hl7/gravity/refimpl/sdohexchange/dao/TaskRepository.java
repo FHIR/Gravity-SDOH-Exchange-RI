@@ -25,7 +25,7 @@ public class TaskRepository extends FhirRepository<Task> {
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.REQUESTED.toCode()))
         .and(Task.INTENT.exactly()
-            .code(Task.TaskIntent.FILLERORDER.toCode()))
+            .codes(Task.TaskIntent.FILLERORDER.toCode(), Task.TaskIntent.ORDER.toCode()))
         .and(new TokenClientParam(
             Task.SP_OWNER + ":" + Organization.class.getSimpleName() + "." + Organization.SP_IDENTIFIER).exactly()
             .code(applicationUrl))

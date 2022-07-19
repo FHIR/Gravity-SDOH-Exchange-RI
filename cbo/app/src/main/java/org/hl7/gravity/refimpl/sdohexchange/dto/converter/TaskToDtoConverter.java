@@ -8,6 +8,7 @@ import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProcedureDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
 import org.springframework.core.convert.converter.Converter;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hl7.gravity.refimpl.sdohexchange.util.FhirUtil.toLocalDateTime;
@@ -26,8 +27,9 @@ public class TaskToDtoConverter implements Converter<Task, TaskDto> {
     taskDto.setName(task.getDescription());
     taskDto.setCreatedAt(toLocalDateTime(task.getAuthoredOnElement()));
     taskDto.setLastModified(toLocalDateTime(task.getLastModifiedElement()));
-    taskDto.setPriority(task.getPriority()
-        .getDisplay());
+    taskDto.setPriority(Optional.ofNullable(task.getPriority())
+        .map(Task.TaskPriority::getDisplay)
+        .orElse(null));
     taskDto.setStatus(task.getStatus()
         .getDisplay());
     taskDto.setRequester(typeToDtoConverter.convert(task.getRequester()));
