@@ -47,6 +47,7 @@ const Flow: { [status in TaskStatus]?: TaskStatus[] } = {
 };
 
 const showOccurrence = (ocr: Occurrence) => ocr.start ? `From ${showDate(ocr.start)} to ${showDate(ocr.end)}` : (ocr.end ? `Until ${showDate(ocr.end)}` : "");
+const showLastModified = (task: Task) => task.lastModified ? `${showDateTime(task.lastModified)}` : ""`;
 
 const prepareTaskStuff = (task: Task): TaskStuff => ({
 	id: task.id,
@@ -57,7 +58,7 @@ const prepareTaskStuff = (task: Task): TaskStuff => ({
 	priority: task.priority,
 	occurrence: showOccurrence(task.serviceRequest.occurrence),
 	status: task.status,
-	statusDate: showDateTime(task.lastModified),
+	statusDate: showLastModified(task),
 	outcome: task.outcome || "",
 	statusReason: task.statusReason || "",
 	previousComments: task.comments.map(({ text }) => text),
