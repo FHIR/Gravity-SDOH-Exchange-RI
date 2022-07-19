@@ -1,11 +1,15 @@
 package org.hl7.gravity.refimpl.sdohexchange.dto.converter;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.ProcedureDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.ReferenceDto;
 import org.hl7.gravity.refimpl.sdohexchange.dto.response.TaskDto;
+import org.hl7.gravity.refimpl.sdohexchange.dto.response.TypeDto;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.Optional;
@@ -32,8 +36,21 @@ public class TaskToDtoConverter implements Converter<Task, TaskDto> {
         .orElse(null));
     taskDto.setStatus(task.getStatus()
         .getDisplay());
-    taskDto.setRequester(typeToDtoConverter.convert(task.getRequester()));
-    taskDto.setPatient(typeToDtoConverter.convert(task.getFor()));
+    taskDto.setRequester(Optional.ofNullable(task.getRequester()
+            .getResource())
+        .filter(Organization.class::isInstance)
+        .map(Organization.class::cast)
+        .map(o -> (TypeDto) new ReferenceDto(o.getIdElement()
+            .getIdPart(), o.getName()))
+        .orElse(typeToDtoConverter.convert(task.getRequester())));
+    taskDto.setPatient(Optional.ofNullable(task.getFor()
+            .getResource())
+        .filter(Patient.class::isInstance)
+        .map(Patient.class::cast)
+        .map(p -> (TypeDto) new ReferenceDto(p.getIdElement()
+            .getIdPart(), p.getNameFirstRep()
+            .getNameAsSingleString()))
+        .orElse(typeToDtoConverter.convert(task.getFor())));
     //TODO: Change to consent id in future
     taskDto.setConsent("yes");
     taskDto.setComments(task.getNote()

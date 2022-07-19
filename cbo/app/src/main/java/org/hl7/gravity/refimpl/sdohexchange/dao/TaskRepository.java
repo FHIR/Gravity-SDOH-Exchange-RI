@@ -30,6 +30,8 @@ public class TaskRepository extends FhirRepository<Task> {
             Task.SP_OWNER + ":" + Organization.class.getSimpleName() + "." + Organization.SP_IDENTIFIER).exactly()
             .code(applicationUrl))
         .include(Task.INCLUDE_FOCUS)
+        .include(Task.INCLUDE_SUBJECT)
+        .include(Task.INCLUDE_REQUESTER)
         .sort()
         .descending(Constants.PARAM_LASTUPDATED)
         .returnBundle(Bundle.class)
