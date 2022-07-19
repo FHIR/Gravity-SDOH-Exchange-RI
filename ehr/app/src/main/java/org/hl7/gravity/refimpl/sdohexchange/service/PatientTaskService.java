@@ -131,14 +131,15 @@ public class PatientTaskService {
         .map(i -> ((CanonicalType) i.getValue()).getValue())
         .collect(Collectors.toList());
 
-    Bundle questionnaires = ehrClient.search()
-        .forResource(Questionnaire.class)
-        .where(Questionnaire.URL.matches()
-            .values(urls))
-        .returnBundle(Bundle.class)
-        .execute();
-
-    FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+    if (urls.size() != 0) {
+      Bundle questionnaires = ehrClient.search()
+          .forResource(Questionnaire.class)
+          .where(Questionnaire.URL.matches()
+              .values(urls))
+          .returnBundle(Bundle.class)
+          .execute();
+      FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+    }
   }
 
   public void update(String id, UpdateTaskRequestDto update, UserDto user) {

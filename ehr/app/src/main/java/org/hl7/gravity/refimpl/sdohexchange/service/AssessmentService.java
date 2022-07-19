@@ -68,15 +68,17 @@ public class AssessmentService {
         .map(q -> q.getQuestionnaire())
         .collect(Collectors.toList());
 
-    Bundle questionnaires = ehrClient.search()
-        .forResource(Questionnaire.class)
-        .where(Questionnaire.URL.matches()
-            .values(urls))
-        .returnBundle(Bundle.class)
-        .execute();
+    if (urls.size() != 0) {
+      Bundle questionnaires = ehrClient.search()
+          .forResource(Questionnaire.class)
+          .where(Questionnaire.URL.matches()
+              .values(urls))
+          .returnBundle(Bundle.class)
+          .execute();
 
-    Bundle merged = FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
-    return merged;
+      return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+    }
+    return responseBundle;
   }
 
   private IQuery<IBaseBundle> searchAssessmentQuery() {

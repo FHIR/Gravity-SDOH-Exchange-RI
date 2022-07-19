@@ -194,14 +194,16 @@ public class HealthConcernService {
         .map(q -> q.getQuestionnaire())
         .collect(Collectors.toList());
 
-    Bundle questionnaires = ehrClient.search()
-        .forResource(Questionnaire.class)
-        .where(Questionnaire.URL.matches()
-            .values(urls))
-        .returnBundle(Bundle.class)
-        .execute();
-
-    return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+    if (urls.size() != 0) {
+      Bundle questionnaires = ehrClient.search()
+          .forResource(Questionnaire.class)
+          .where(Questionnaire.URL.matches()
+              .values(urls))
+          .returnBundle(Bundle.class)
+          .execute();
+      return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+    }
+    return responseBundle;
   }
 
   private IQuery<IBaseBundle> searchHealthConcernQuery(ConditionClinicalStatus status) {
