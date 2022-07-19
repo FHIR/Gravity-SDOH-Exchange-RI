@@ -50,10 +50,10 @@ const showOccurrence = (ocr: Occurrence) => ocr.start ? `From ${showDate(ocr.sta
 
 const prepareTaskStuff = (task: Task): TaskStuff => ({
 	id: task.id,
-	requestName: `${task.name || "N/A"}`,
+	requestName: task.name || "",
 	requestor: task.requester.display,
 	request: `${task.serviceRequest.code.display || ""} (${task.serviceRequest.code.code})`,
-	forPatient: task.patient.display,
+	forPatient: task.patient.display || task.patient.id,
 	priority: task.priority,
 	occurrence: showOccurrence(task.serviceRequest.occurrence),
 	status: task.status,

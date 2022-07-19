@@ -29,7 +29,7 @@ type TaskDisplayFields = {
 
 const displayTask = ({ task, isNew }: TaskWithState): TaskDisplayFields => ({
 	id: task.id,
-	taskName: task.name,
+	taskName: task.name || "N/A",
 	isNew,
 	requestDate: showDate(task.createdAt),
 	priority: task.priority,
