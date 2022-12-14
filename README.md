@@ -3,9 +3,9 @@ Reference Implementation for the Gravity use cases specified at https://confluen
 Current supported IG version is 1.1.0 (STU 2 ballot): http://hl7.org/fhir/us/sdoh-clinicalcare/2022Jan/
 ## Live Example
 All reference implementations are usually available for testing during connectathons. There is a high chance at any other time that the apps have been undeployed to reduce costs. If so - try to deploy them locally.
-- The EHR app is running at https://sdoh-exchange-ri-ehr.herokuapp.com. To log in please request access to the Logica Sandbox at https://sandbox.logicahealth.org/GravitySandboxNew from the Track leads.
-- The CP app is running at https://sdoh-exchange-ri-cp.herokuapp.com. To log in please request access to the Logica Sandbox at https://sandbox.logicahealth.org/GravitySDOHCBRO from the Track leads.
-- The CBO app is running at https://sdoh-exchange-ri-cbo.herokuapp.com. Creentials: user/user.
+- The EHR app is running at https://ri-sdoh-exchange-ehr.herokuapp.com. To log in please request access to the Logica Sandbox at https://sandbox.logicahealth.org/GravitySandboxNew from the Track leads.
+- The CP app is running at https://ri-sdoh-exchange-cp.herokuapp.com. To log in please request access to the Logica Sandbox at https://sandbox.logicahealth.org/GravitySDOHCBRO from the Track leads.
+- The CBO app is running at https://ri-sdoh-exchange-cbo.herokuapp.com. Creentials: user/user.
 
 ## Prototypes
 
