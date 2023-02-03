@@ -136,7 +136,7 @@ export const getCategories = async (): Promise<Coding[]> => {
 	return res.data;
 };
 
-export const getServices =async (id:string): Promise<Services[]> => {
+export const getServices = async (id: string): Promise<Services[]> => {
 	const res = await axios.get(`/support/healthcare-services?organizationId=${id}`);
 	return res.data;
 };
@@ -211,12 +211,12 @@ export const getGoalCodes = async (code: string): Promise<GoalCoding[]> => {
 };
 
 
-export const getActiveProblems = async(): Promise<Problem[]> => {
+export const getActiveProblems = async (): Promise<Problem[]> => {
 	const res = await axios.get("/problem/active");
 	return res.data;
 };
 
-export const getClosedProblems = async(): Promise<Problem[]> => {
+export const getClosedProblems = async (): Promise<Problem[]> => {
 	const res = await axios.get("/problem/closed");
 	return res.data;
 };
@@ -253,7 +253,18 @@ export const getActiveResources = async (): Promise<ActiveResources> => {
 export const addPersonalCharacteristic = async (payload: PersonalCharacteristicPayload): Promise<void> =>
 	axios.post("/personal-characteristics", payload);
 
-export const getPersonalCharacteristics = async (): Promise<PersonalCharacteristic[]> => (await axios.get("/personal-characteristics")).data;
+// export const getPersonalCharacteristics = async (): Promise<PersonalCharacteristic[]> => (await axios.get("/personal-characteristics")).data;
+export const getPersonalCharacteristics = async (): Promise<PersonalCharacteristic[] | string> => {
+	// (await axios.get("/personal-characteristics")).data
+	try {
+		const response = await axios.get("/personal-characteristics");
+		return response.data
+	} catch (error) {
+
+		return "Something wrong happened: Unable to fetch personal characteristics";
+	}
+
+};
 
 export const personalCharacteristicsAttachmentUrl = (id: string) => `/personal-characteristics/${id}/derivedFrom`;
 

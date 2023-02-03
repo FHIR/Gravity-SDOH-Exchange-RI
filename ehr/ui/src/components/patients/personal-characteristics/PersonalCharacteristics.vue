@@ -18,17 +18,23 @@ export default {
 		NoItems,
 		ResourcesDialog,
 	},
-	setup () {
+	setup() {
 		const addDialogOpen = ref(false);
 		const viewDialogId = ref<string | null>(null);
 		const data = ref<PersonalCharacteristic[]>([]);
 		const loading = ref(false);
 		const viewResourcesId = ref<string | null>(null);
+		const error = ref<string | null>(null);
 
 		const load = async () => {
 			loading.value = true;
 			const resp = await getPersonalCharacteristics();
-			data.value = resp;
+			if (typeof (resp) === "string") {
+				error.value = resp;
+			} else {
+				data.value = resp;
+			};
+			console.log({ resp });
 			loading.value = false;
 		};
 
@@ -49,6 +55,7 @@ export default {
 			viewDialogId,
 			viewDialogItem,
 			viewResourcesId,
+			error
 		};
 	}
 };
@@ -56,31 +63,18 @@ export default {
 
 <template>
 	<div v-loading="loading">
-		<NoItems
-			v-if="data.length === 0"
-			message="No Personal Characteristics Yet"
-			button-label="Add Personal Characteristics"
-			@add-item="addDialogOpen = true"
-		/>
-		<PersonalCharacteristicsTable
-			v-if="data.length > 0"
-			:data="data"
-			@add-item="addDialogOpen = true"
-			@item-clicked="viewDialogId = $event"
-			@view-resources="viewResourcesId = $event"
-		/>
-		<AddDialog
-			:visible="addDialogOpen"
-			@close="closeAddDialog"
-		/>
-		<ViewDialog
-			:item="viewDialogItem"
-			@close="viewDialogId = null"
-		/>
-		<ResourcesDialog
-			:id="viewResourcesId"
-			@close="viewResourcesId = null"
-		/>
+		<v-alert v-if="error" dense outlined type="error">
+			{{ error }}
+		</v-alert>
+		<NoItems v-if="error" message="Unable to fetch data" button-label="Add Personal Characteristics"
+			@add-item="addDialogOpen = true" />
+		<NoItems v-if="data.length === 0 && error === null" message="No Personal Characteristics Yet"
+			button-label="Add Personal Characteristics" @add-item="addDialogOpen = true" />
+		<PersonalCharacteristicsTable v-if="data.length > 0" :data="data" @add-item="addDialogOpen = true"
+			@item-clicked="viewDialogId = $event" @view-resources="viewResourcesId = $event" />
+		<AddDialog :visible="addDialogOpen" @close="closeAddDialog" />
+		<ViewDialog :item="viewDialogItem" @close="viewDialogId = null" />
+		<ResourcesDialog :id="viewResourcesId" @close="viewResourcesId = null" />
 	</div>
 </template>
 

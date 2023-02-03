@@ -95,7 +95,7 @@ public class TaskPollingService {
         .execute();
 
     TasksPollingInfo tasksPollingInfo = new TasksPollingBundleExtractor().extract(tasksBundle);
-    //Collect all entries from every Task bundle for performance considerations.
+    // Collect all entries from every Task bundle for performance considerations.
     Bundle updateBundle = new Bundle();
     updateBundle.setType(Bundle.BundleType.TRANSACTION);
 
@@ -109,7 +109,7 @@ public class TaskPollingService {
         combineResult(updateBundle, failTask(task, serviceRequest, exc.getMessage()));
       }
     }
-    //If there is at least one bundle entry - execute a transaction request.
+    // If there is at least one bundle entry - execute a transaction request.
     if (updateBundle.getEntry()
         .size() != 0) {
       log.info("One or more tasks were changed. Storing updates to EHR...");
@@ -121,12 +121,13 @@ public class TaskPollingService {
   }
 
   /*
-  A TEST polling service, implemented during January 2022 Connectathon, that automatically runs questionnaireResponse
-  resources through a StructureMap. If any exception occurs - just ignore it.
+   * A TEST polling service, implemented during January 2022 Connectathon, that
+   * automatically runs questionnaireResponse
+   * resources through a StructureMap. If any exception occurs - just ignore it.
    */
   public void demoRunQRThroughStructureMap() {
     log.info("Looking for TOP 3 Patient QuestionnaireResponse resources without derived Observations...");
-    //TODO use repository instead
+    // TODO use repository instead
     Bundle tasksBundle = openEhrClient.search()
         .forResource(QuestionnaireResponse.class)
         .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
@@ -159,7 +160,7 @@ public class TaskPollingService {
         log.info("Converting QuestionnaireResponse with id: " + nr.getIdElement()
             .getIdPart());
         try {
-          //TODO move parser logic within the convert service. Use resources instead
+          // TODO move parser logic within the convert service. Use resources instead
           JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
           Map<String, Object> result = convertService.convert((JSONObject) parser.parse(fhirContext.newJsonParser()
               .encodeResourceToString(nr)));
@@ -170,11 +171,12 @@ public class TaskPollingService {
                   .setUrl(e.getResource()
                       .getClass()
                       .getSimpleName())));
+          log.info(bundle.toString());
           openEhrClient.transaction()
               .withBundle(bundle)
               .execute();
         } catch (Exception exc) {
-          //Just ignore this specific resource and go to the next one
+          // Just ignore this specific resource and go to the next one
           log.warn(exc.getMessage(), exc);
         }
       }
@@ -186,18 +188,22 @@ public class TaskPollingService {
       throws CpClientException {
     Bundle resultBundle = new Bundle();
     resultBundle.setType(Bundle.BundleType.TRANSACTION);
-    // Do a copy not to modify an input Task. Possibly this method will fail during execution, and we don't want to
+    // Do a copy not to modify an input Task. Possibly this method will fail during
+    // execution, and we don't want to
     // end up with a modified Task.
     Task resultTask = task.copy();
 
     TaskInfoHolder cpTaskInfo = cpService.read(task.getIdElement()
         .getIdPart(), endpoint);
     Task cpTask = cpTaskInfo.getTask();
-    // If status is the same and comments size are the same  OR CP task in REQUESTED state - do nothing.
+    // If status is the same and comments size are the same OR CP task in REQUESTED
+    // state - do nothing.
     if ((cpTask.getStatus()
-        .equals(task.getStatus()) && cpTask.getNote()
-        .size() == task.getNote()
-        .size()) || Task.TaskStatus.REQUESTED.equals(cpTask.getStatus())) {
+        .equals(task.getStatus())
+        && cpTask.getNote()
+            .size() == task.getNote()
+                .size())
+        || Task.TaskStatus.REQUESTED.equals(cpTask.getStatus())) {
       return resultBundle;
     }
     log.info("Task status/field change detected for id '{}'. '{}' -> '{}'. Updating...", task.getIdElement()
@@ -206,7 +212,8 @@ public class TaskPollingService {
     copyTaskFields(resultTask, cpTask, endpoint);
     resultBundle.addEntry(FhirUtil.createPutEntry(resultTask));
     if (FINISHED_TASK_STATUSES.contains(cpTask.getStatus())) {
-      // It is critical to pass a resultTask, not a task, since it will be modified inside.
+      // It is critical to pass a resultTask, not a task, since it will be modified
+      // inside.
       handleFinishedTask(resultBundle, resultTask, serviceRequest, cpTask, endpoint);
     }
     return resultBundle;
@@ -238,25 +245,29 @@ public class TaskPollingService {
       ehrServiceRequest.setStatus(ServiceRequest.ServiceRequestStatus.COMPLETED);
       resultBundle.addEntry(FhirUtil.createPutEntry(ehrServiceRequest));
     }
-    // Procedure should be present if task status is COMPLETED or CANCELLED. Copy it. Also take care of a Task.output
+    // Procedure should be present if task status is COMPLETED or CANCELLED. Copy
+    // it. Also take care of a Task.output
     // property.
     if (Task.TaskStatus.COMPLETED.equals(cpTask.getStatus()) || Task.TaskStatus.CANCELLED.equals(cpTask.getStatus())) {
-      // Modify Task.output. If task output is of type resulting-activity and contains a Reference to a proper
+      // Modify Task.output. If task output is of type resulting-activity and contains
+      // a Reference to a proper
       // Procedure - copy output changing a Procedure reference to a local one.
       List<TaskOutputComponent> cpOutputs = cpTask.getOutput()
           .stream()
-          //We only copy outputs which reference a Code and a Reference
+          // We only copy outputs which reference a Code and a Reference
           .filter(t -> t.getValue() instanceof CodeableConcept || (t.getValue() instanceof Reference
               && ((Reference) t.getValue()).getReferenceElement()
-              .getResourceType()
-              .equals(Procedure.class.getSimpleName())))
+                  .getResourceType()
+                  .equals(Procedure.class.getSimpleName())))
           .collect(Collectors.toList());
       if (cpOutputs.size() == 0) {
         log.warn(
             "Not output of type 'http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/sdohcc-temporary-codes|resulting"
                 + "-activity' with a reference to a proper Procedure is present in task with id '{}' at '{}'. "
-                + "Expecting a reference to a Procedure resource.", cpTask.getIdElement()
-                .getIdPart(), endpoint.getAddress());
+                + "Expecting a reference to a Procedure resource.",
+            cpTask.getIdElement()
+                .getIdPart(),
+            endpoint.getAddress());
       }
       Map<String, Procedure> cpProcedureMap = getCpProcedures(cpOutputs, endpoint);
       for (Task.TaskOutputComponent cpOutput : cpOutputs) {
