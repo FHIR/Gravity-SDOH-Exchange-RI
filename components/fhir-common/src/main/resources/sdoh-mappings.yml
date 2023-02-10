@@ -195,6 +195,8 @@ sdoh-mappings:
                   code: "464311000124109"
                 - display: "Transportation by taxi (procedure)"
                   code: "715956002"
+                - display: "Transportation case management (procedure)"
+                  code: "410365006"
         - resource: "ServiceRequest"
           systems:
             - system: "http://snomed.info/sct"
@@ -230,6 +232,8 @@ sdoh-mappings:
                   code: "464001000124109"
                 - display: "Transportation request (procedure)"
                   code: "428632005"
+                - display: "Transportation case management (procedure)"
+                  code: "410365006"
             - system: "http://www.ama-assn.org/go/cpt"
               display: "CPT"
               codings:
