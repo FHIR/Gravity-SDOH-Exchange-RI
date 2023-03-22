@@ -31,30 +31,37 @@ public class CpService {
   private final FhirContext fhirContext;
   @Value("${ehr.open-fhir-server-uri}")
   private String identifierSystem;
+  // TODO: STU2: Org does not have a required endpoit. this is a temporary
+  // solution.
+  // TODO: Need to know how to extract the cp base url. or we can have cp pull
+  // task from ehr.
+  private String cpBaseUrl = "http://localhost:8080/fhir";
 
-  public void create(final Task ehrTask, final Endpoint endpoint) throws CpClientException {
-    Task cpTask = externalizeResource(ehrTask.copy(), identifierSystem);
-    //TODO: Remove this after Logica bug response
+  public void create(final Task ehrTask) throws CpClientException {
+    Task cpTask = externalizeResource(ehrTask.copy());
+    // TODO: Remove this after Logica bug response
     cpTask.setMeta(null);
     cpTask.addIdentifier()
         .setSystem(identifierSystem)
         .setValue(ehrTask.getIdElement()
             .getIdPart());
     try {
-      cpClient(endpoint).create()
+      cpClient().create()
           .resource(cpTask)
           .execute();
     } catch (BaseServerResponseException exc) {
       throw new CpClientException(
           String.format("Could not create a Task with identifier '%s' in CP at '%s'. Reason: %s.",
               identifierSystem + "|" + ehrTask.getIdElement()
-                  .getIdPart(), endpoint.getAddress(), exc.getMessage()), exc);
+                  .getIdPart(),
+              cpBaseUrl, exc.getMessage()),
+          exc);
     }
   }
 
-  public TaskInfoHolder read(final String id, final Endpoint endpoint) throws CpClientException {
+  public TaskInfoHolder read(final String id) throws CpClientException {
     try {
-      Bundle taskBundle = cpClient(endpoint).search()
+      Bundle taskBundle = cpClient().search()
           .forResource(Task.class)
           .where(Task.IDENTIFIER.exactly()
               .systemAndValues(identifierSystem, id))
@@ -66,10 +73,10 @@ public class CpService {
           .size();
       if (tasksSize == 0) {
         throw new CpClientException(String.format("No Task is present at '%s' for identifier '%s'.",
-            endpoint.getAddress(), identifierSystem + "|" + id));
+            cpBaseUrl, identifierSystem + "|" + id));
       } else if (tasksSize > 1) {
         throw new CpClientException(String.format("More than one Task is present at '%s' for identifier '%s'.",
-            endpoint.getAddress(), identifierSystem + "|" + id));
+            cpBaseUrl, identifierSystem + "|" + id));
       }
       return new TaskInfoBundleExtractor().extract(taskBundle)
           .stream()
@@ -78,17 +85,18 @@ public class CpService {
     } catch (BaseServerResponseException exc) {
       throw new CpClientException(
           String.format("Task retrieval failed for identifier '%s' at CP location '%s'. Reason: %s.",
-              identifierSystem + "|" + id, endpoint.getAddress(), exc.getMessage()), exc);
+              identifierSystem + "|" + id, cpBaseUrl, exc.getMessage()),
+          exc);
     }
   }
 
-  public void sync(final Task ehrTask, final ServiceRequest ehrServiceRequest, final Endpoint endpoint)
+  public void sync(final Task ehrTask, final ServiceRequest ehrServiceRequest)
       throws CpClientException {
     Bundle cpUpdateBundle = new Bundle();
     cpUpdateBundle.setType(BundleType.TRANSACTION);
 
     TaskInfoHolder cpTaskInfo = read(ehrTask.getIdElement()
-        .getIdPart(), endpoint);
+        .getIdPart());
     Task cpTask = cpTaskInfo.getTask();
     cpTask.setStatus(ehrTask.getStatus());
     cpTask.setStatusReason(ehrTask.getStatusReason());
@@ -102,11 +110,11 @@ public class CpService {
       cpServiceRequest.setStatus(ehrServiceRequest.getStatus());
       cpUpdateBundle.addEntry(FhirUtil.createPutEntry(cpServiceRequest));
     }
-    transaction(cpUpdateBundle, endpoint);
+    transaction(cpUpdateBundle);
   }
 
-  public Bundle search(final List<String> ids, Class<? extends IBaseResource> resource, Endpoint endpoint) {
-    return cpClient(endpoint).search()
+  public Bundle search(final List<String> ids, Class<? extends IBaseResource> resource) {
+    return cpClient().search()
         .forResource(resource)
         .where(Resource.RES_ID.exactly()
             .codes(ids))
@@ -114,33 +122,34 @@ public class CpService {
         .execute();
   }
 
-  protected Bundle transaction(final Bundle transactionBundle, final Endpoint endpoint) throws CpClientException {
+  protected Bundle transaction(final Bundle transactionBundle) throws CpClientException {
     try {
-      return cpClient(endpoint).transaction()
+      return cpClient().transaction()
           .withBundle(transactionBundle)
           .execute();
     } catch (BaseServerResponseException exc) {
       throw new CpClientException(
-          String.format("Transaction execution failed at CP location '%s'. Reason: %s.", endpoint.getAddress(),
-              exc.getMessage()), exc);
+          String.format("Transaction execution failed at CP location '%s'. Reason: %s.", cpBaseUrl,
+              exc.getMessage()),
+          exc);
     }
   }
 
-  protected <T extends Resource> T externalizeResource(T resource, String baseUrl) {
+  protected <T extends Resource> T externalizeResource(T resource) {
     FhirUtil.getAllReferences(fhirContext, resource)
-        .forEach(reference -> externalizeReference(reference, baseUrl));
+        .forEach(reference -> externalizeReference(reference));
     resource.setId(IdType.newRandomUuid());
     return resource;
   }
 
-  protected void externalizeReference(Reference reference, String baseUrl) {
+  protected void externalizeReference(Reference reference) {
     IIdType el = reference.getReferenceElement();
-    el.setParts(baseUrl, el.getResourceType(), el.getIdPart(), null);
+    el.setParts(cpBaseUrl, el.getResourceType(), el.getIdPart(), null);
     reference.setReferenceElement(el);
   }
 
-  private IGenericClient cpClient(Endpoint endpoint) {
-    return fhirContext.newRestfulGenericClient(endpoint.getAddress());
+  private IGenericClient cpClient() {
+    return fhirContext.newRestfulGenericClient(cpBaseUrl);
   }
 
   /**

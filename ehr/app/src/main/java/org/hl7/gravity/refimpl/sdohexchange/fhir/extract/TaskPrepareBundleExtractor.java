@@ -21,6 +21,9 @@ import java.util.Map;
 
 /**
  * Transaction bundle parser of resources required for Task creation.
+ * Required resources to create Task: focus (ServiceRequest), for (Patient),
+ * owner (Organization),
+ * requester (PractitionerRole),
  */
 public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoHolder> {
 
@@ -35,7 +38,7 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
     private final Patient patient;
     private final PractitionerRole practitionerRole;
     private final Organization performerOrganization;
-    private final Endpoint endpoint;
+    // private final Endpoint endpoint;
     private final Consent consent;
     private final List<Condition> conditions;
     private final List<Goal> goals;
@@ -48,7 +51,7 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
       this.performerOrganization = resourceList(resources, Organization.class).stream()
           .findFirst()
           .orElseThrow(() -> new PrepareBundleException("Performer Organization not found."));
-      this.endpoint = getEndpoint(resourceList(resources, Endpoint.class));
+      // this.endpoint = getEndpoint(resourceList(resources, Endpoint.class));
       this.conditions = resourceList(resources, Condition.class);
       this.goals = resourceList(resources, Goal.class);
       this.consent = getConsent(resourceList(resources, Consent.class));
@@ -99,7 +102,8 @@ public class TaskPrepareBundleExtractor extends BundleExtractor<TaskPrepareInfoH
         throw new PrepareBundleException(
             String.format("Endpoint resource with id '%s' for a CP organization '%s' does not contain an address.",
                 endpoint.getIdElement()
-                    .getIdPart(), organizationId));
+                    .getIdPart(),
+                organizationId));
       }
       return endpoint;
     }

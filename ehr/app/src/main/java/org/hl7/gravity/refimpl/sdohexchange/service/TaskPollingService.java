@@ -108,7 +108,7 @@ public class TaskPollingService {
       try {
         Endpoint endpoint = tasksPollingInfo.getEndpoint(organization);
         combineResult(updateBundle, getUpdateBundle(task, serviceRequest, endpoint));
-      } catch (TaskPollingUpdateException | CpClientException exc) {
+      } catch (CpClientException exc) {
         combineResult(updateBundle, failTask(task, serviceRequest, exc.getMessage()));
       }
     }
@@ -197,7 +197,7 @@ public class TaskPollingService {
     Task resultTask = task.copy();
 
     TaskInfoHolder cpTaskInfo = cpService.read(task.getIdElement()
-        .getIdPart(), endpoint);
+        .getIdPart());
     Task cpTask = cpTaskInfo.getTask();
     // If status is the same and comments size are the same OR CP task in REQUESTED
     // state - do nothing.
@@ -236,7 +236,7 @@ public class TaskPollingService {
           .stream()
           .filter(cpComment -> cpComment.getAuthor() instanceof Reference)
           .forEach(cpComment -> {
-            cpService.externalizeReference(cpComment.getAuthorReference(), endpoint.getAddress());
+            cpService.externalizeReference(cpComment.getAuthorReference());
             ehrTask.addNote(cpComment);
           });
     }
@@ -306,7 +306,7 @@ public class TaskPollingService {
         .map(procedureReference -> procedureReference.getReferenceElement()
             .getIdPart())
         .collect(Collectors.toList());
-    return cpService.search(procedureIds, Procedure.class, endpoint)
+    return cpService.search(procedureIds, Procedure.class)
         .getEntry()
         .stream()
         .map(BundleEntryComponent::getResource)

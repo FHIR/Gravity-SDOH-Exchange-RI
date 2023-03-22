@@ -62,30 +62,35 @@ public class TasksPollingBundleExtractor extends BundleExtractor<TasksPollingInf
           .getIdPart());
     }
 
-    public Endpoint getEndpoint(Organization organization) throws TaskPollingUpdateException {
-      if (organization.getEndpoint()
-          .size() != 1) {
-        throw new TaskPollingUpdateException("Task owner Organization has 0 or more that 1 endpoints.");
-      } else {
-        Endpoint endpoint = endpoints.get(organization.getEndpoint()
+    public Endpoint getEndpoint(Organization organization) {
+      Endpoint endpoint = null;
+      if (!organization.getEndpoint().isEmpty()) {
+        // Endpoint is not required for Organization
+        // throw new TaskPollingUpdateException("Task owner Organization has 0 or more
+        // that 1 endpoints.");
+
+        endpoint = endpoints.get(organization.getEndpoint()
             .get(0)
             .getReferenceElement()
             .getIdPart());
-        if (endpoint == null) {
-          String reason = String.format("Organization resource with id '%s' does not contain endpoint of type '%s'.",
-              organization.getIdElement()
-                  .getIdPart(), EndpointConnectionType.HL7FHIRREST);
-          throw new TaskPollingUpdateException(reason);
-        } else {
-          if (Strings.isNullOrEmpty(endpoint.getAddress())) {
-            String reason = String.format("Endpoint resource with id '%s' does not contain an address.",
-                endpoint.getIdElement()
-                    .getIdPart());
-            throw new TaskPollingUpdateException(reason);
-          }
-        }
-        return endpoint;
+        // if (endpoint == null) {
+        // // String reason = String.format("Organization resource with id '%s' does not
+        // contain endpoint of type '%s'.",
+        // // organization.getIdElement()
+        // // .getIdPart(), EndpointConnectionType.HL7FHIRREST);
+        // // throw new TaskPollingUpdateException(reason);
+        // // } else {
+        // if (Strings.isNullOrEmpty(endpoint.getAddress())) {
+        // String reason = String.format("Endpoint resource with id '%s' does not
+        // contain an address.",
+        // endpoint.getIdElement()
+        // .getIdPart());
+        // throw new TaskPollingUpdateException(reason);
+        // }
+        // }
+        // return endpoint;
       }
+      return endpoint;
     }
 
     private <R extends Resource> Map<String, R> collectResources(
@@ -100,7 +105,8 @@ public class TasksPollingBundleExtractor extends BundleExtractor<TasksPollingInf
   }
 
   /**
-   * Exception that should be thrown when task update process failed. This will usually lead to a Task with a status
+   * Exception that should be thrown when task update process failed. This will
+   * usually lead to a Task with a status
    * FAILED and corresponding statusReason.
    */
   public static class TaskPollingUpdateException extends Exception {
