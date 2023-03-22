@@ -29,20 +29,21 @@ public class SmartOnFhirSecurityConfiguration extends WebSecurityConfigurerAdapt
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.authorizeRequests()
-        .antMatchers("/administration/$extract")
-        .permitAll()
-        .anyRequest()
-        .authenticated()
-        .and()
-        .csrf()
-        .disable()
-        .oauth2Login()
-        .successHandler(authenticationSuccessHandler)
-        .authorizationEndpoint()
-        .authorizationRequestResolver(this.smartOnFhirAuthRequestResolver)
-        .and()
-        .tokenEndpoint()
-        .accessTokenResponseClient(this.smartOnFhirAccessTokenResponseClient);
+    // TODO: Enable when SMART on FHIR is ready
+    // http.authorizeRequests()
+    // .antMatchers("/administration/$extract")
+    // .permitAll()
+    // .anyRequest()
+    // .authenticated()
+    // .and()
+    // .csrf()
+    // .disable()
+    // .oauth2Login()
+    // .successHandler(authenticationSuccessHandler)
+    // .authorizationEndpoint()
+    // .authorizationRequestResolver(this.smartOnFhirAuthRequestResolver)
+    // .and()
+    // .tokenEndpoint()
+    // .accessTokenResponseClient(this.smartOnFhirAccessTokenResponseClient);
   }
 }

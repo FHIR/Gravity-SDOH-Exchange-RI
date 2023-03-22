@@ -45,173 +45,196 @@ import java.util.stream.Collectors;
 @Slf4j
 public class HealthConcernService {
 
-  private final SDOHMappings sdohMappings;
-  private final IGenericClient ehrClient;
+    private final SDOHMappings sdohMappings;
+    private final IGenericClient ehrClient;
+    // TODO: to be removed
+    private final String TEST_PATIENT_ID = "smart-1288992";
+    private final String TEST_USER_ID = "Smart-Practitioner-71482713";
 
-  public List<HealthConcernDto> listActive() {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
+    public List<HealthConcernDto> listActive() {
+        // TODO: to be reworked, remove TEST_PATIENT_ID
+        // Assert.notNull(SmartOnFhirContext.get()
+        // .getPatient(), "Patient id cannot be null.");
 
-    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).include(
-            Condition.INCLUDE_EVIDENCE_DETAIL)
-        .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
-        .returnBundle(Bundle.class)
-        .execute();
+        Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).include(
+                Condition.INCLUDE_EVIDENCE_DETAIL)
+                .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
+                .returnBundle(Bundle.class)
+                .execute();
 
-    responseBundle = addQuestionnairesToConditionBundle(responseBundle);
-    return new HealthConcernBundleToDtoConverter().convert(responseBundle);
-  }
-
-  public List<HealthConcernDto> listResolved() {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
-
-    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.RESOLVED).include(
-            Condition.INCLUDE_EVIDENCE_DETAIL)
-        .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
-        .returnBundle(Bundle.class)
-        .execute();
-    responseBundle = addQuestionnairesToConditionBundle(responseBundle);
-    return new HealthConcernBundleToDtoConverter().convert(responseBundle);
-  }
-
-  public HealthConcernDto create(NewHealthConcernDto newHealthConcernDto, UserDto user) {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
-
-    CurrentContextPrepareBundleFactory healthConcernPrepareBundleFactory = new CurrentContextPrepareBundleFactory(
-        SmartOnFhirContext.get()
-            .getPatient(), user.getId());
-    Bundle healthConcernRelatedResources = ehrClient.transaction()
-        .withBundle(healthConcernPrepareBundleFactory.createPrepareBundle())
-        .execute();
-    CurrentContextPrepareInfoHolder healthConcernPrepareInfoHolder = new CurrentContextPrepareBundleExtractor().extract(
-        healthConcernRelatedResources);
-
-    ConditionBundleFactory bundleFactory = new ConditionBundleFactory();
-    bundleFactory.setName(newHealthConcernDto.getName());
-    bundleFactory.setBasedOnText(newHealthConcernDto.getBasedOnText());
-    String category = newHealthConcernDto.getCategory();
-    bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
-    bundleFactory.setConditionType(UsCoreConditionCategory.HEALTHCONCERN);
-    bundleFactory.setIcdCode(
-        sdohMappings.findCoding(category, Condition.class, System.ICD_10, newHealthConcernDto.getIcdCode()));
-    bundleFactory.setSnomedCode(
-        sdohMappings.findCoding(category, Condition.class, System.SNOMED, newHealthConcernDto.getSnomedCode()));
-    bundleFactory.setPatient(healthConcernPrepareInfoHolder.getPatient());
-    bundleFactory.setPractitioner(healthConcernPrepareInfoHolder.getPractitioner());
-
-    Bundle healthConcernCreateBundle = ehrClient.transaction()
-        .withBundle(bundleFactory.createBundle())
-        .execute();
-
-    IdType healthConcernId = FhirUtil.getFromResponseBundle(healthConcernCreateBundle, Condition.class);
-    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
-            .code(healthConcernId.getIdPart()))
-        .returnBundle(Bundle.class)
-        .execute();
-    return new HealthConcernBundleToDtoConverter().convert(responseBundle)
-        .stream()
-        .findFirst()
-        .orElseThrow(() -> new HealthConcernCreateException("Health Concern is not found in the response bundle."));
-  }
-
-  public void promote(String id) {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
-
-    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
-            .code(id))
-        .returnBundle(Bundle.class)
-        .execute();
-
-    Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
-        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
-
-    UsCoreConditionCategory problem = UsCoreConditionCategory.PROBLEMLISTITEM;
-    Coding coding = FhirUtil.findCoding(healthConcern.getCategory(), problem.getSystem());
-    coding.setCode(problem.toCode());
-    coding.setDisplay(problem.getDisplay());
-    // set time when the problem becomes effective
-    healthConcern.setOnset(DateTimeType.now());
-
-    ehrClient.update()
-        .resource(healthConcern)
-        .execute();
-  }
-
-  public void resolve(String id) {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
-
-    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
-            .code(id))
-        .returnBundle(Bundle.class)
-        .execute();
-    Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
-        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
-
-    ConditionClinicalStatusCodes resolvedStatus = ConditionClinicalStatusCodes.RESOLVED;
-    Coding coding = healthConcern.getClinicalStatus()
-        .getCodingFirstRep();
-    coding.setCode(resolvedStatus.toCode());
-    coding.setDisplay(resolvedStatus.getDisplay());
-    // set time of resolution
-    healthConcern.setAbatement(DateTimeType.now());
-
-    ehrClient.update()
-        .resource(healthConcern)
-        .execute();
-  }
-
-  public void remove(String id) {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
-
-    Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE).where(Condition.RES_ID.exactly()
-            .code(id))
-        .returnBundle(Bundle.class)
-        .execute();
-    Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
-        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
-
-    ConditionClinicalStatusCodes resolvedStatus = ConditionClinicalStatusCodes.INACTIVE;
-    Coding coding = healthConcern.getClinicalStatus()
-        .getCodingFirstRep();
-    coding.setCode(resolvedStatus.toCode());
-    coding.setDisplay(resolvedStatus.getDisplay());
-
-    ehrClient.update()
-        .resource(healthConcern)
-        .execute();
-  }
-
-  //TODO refactor. This fragment is used across 3 services
-  private Bundle addQuestionnairesToConditionBundle(Bundle responseBundle) {
-    // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
-    List<String> urls = FhirUtil.getFromBundle(responseBundle, QuestionnaireResponse.class)
-        .stream()
-        .map(q -> q.getQuestionnaire())
-        .collect(Collectors.toList());
-
-    if (urls.size() != 0) {
-      Bundle questionnaires = ehrClient.search()
-          .forResource(Questionnaire.class)
-          .where(Questionnaire.URL.matches()
-              .values(urls))
-          .returnBundle(Bundle.class)
-          .execute();
-      return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+        responseBundle = addQuestionnairesToConditionBundle(responseBundle);
+        return new HealthConcernBundleToDtoConverter().convert(responseBundle);
     }
-    return responseBundle;
-  }
 
-  private IQuery<IBaseBundle> searchHealthConcernQuery(ConditionClinicalStatus status) {
-    return new HealthConcernQueryFactory().query(ehrClient, SmartOnFhirContext.get()
-            .getPatient())
-        .where(Condition.CLINICAL_STATUS.exactly()
-            .code(status.toCode()))
-        .sort()
-        .descending(Constants.PARAM_LASTUPDATED);
-  }
+    public List<HealthConcernDto> listResolved() {
+        // TODO: to be reworked, remove TEST_PATIENT_ID
+        // Assert.notNull(SmartOnFhirContext.get()
+        // .getPatient(), "Patient id cannot be null.");
+
+        Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.RESOLVED).include(
+                Condition.INCLUDE_EVIDENCE_DETAIL)
+                .include(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
+                .returnBundle(Bundle.class)
+                .execute();
+        responseBundle = addQuestionnairesToConditionBundle(responseBundle);
+        return new HealthConcernBundleToDtoConverter().convert(responseBundle);
+    }
+
+    public HealthConcernDto create(NewHealthConcernDto newHealthConcernDto, UserDto user) {
+        // TODO: to be reworked, remove TEST_PATIENT_ID
+        // Assert.notNull(SmartOnFhirContext.get()
+        // .getPatient(), "Patient id cannot be null.");
+
+        // CurrentContextPrepareBundleFactory healthConcernPrepareBundleFactory = new
+        // CurrentContextPrepareBundleFactory(
+        // SmartOnFhirContext.get()
+        // .getPatient(),
+        // user.getId());
+        CurrentContextPrepareBundleFactory healthConcernPrepareBundleFactory = new CurrentContextPrepareBundleFactory(
+                TEST_PATIENT_ID, TEST_USER_ID);
+        Bundle healthConcernRelatedResources = ehrClient.transaction()
+                .withBundle(healthConcernPrepareBundleFactory.createPrepareBundle())
+                .execute();
+        CurrentContextPrepareInfoHolder healthConcernPrepareInfoHolder = new CurrentContextPrepareBundleExtractor()
+                .extract(
+                        healthConcernRelatedResources);
+
+        ConditionBundleFactory bundleFactory = new ConditionBundleFactory();
+        bundleFactory.setName(newHealthConcernDto.getName());
+        bundleFactory.setBasedOnText(newHealthConcernDto.getBasedOnText());
+        String category = newHealthConcernDto.getCategory();
+        bundleFactory.setCategory(sdohMappings.findCategoryCoding(category));
+        bundleFactory.setConditionType(UsCoreConditionCategory.HEALTHCONCERN);
+        bundleFactory.setIcdCode(
+                sdohMappings.findCoding(category, Condition.class, System.ICD_10, newHealthConcernDto.getIcdCode()));
+        bundleFactory.setSnomedCode(
+                sdohMappings.findCoding(category, Condition.class, System.SNOMED, newHealthConcernDto.getSnomedCode()));
+        bundleFactory.setPatient(healthConcernPrepareInfoHolder.getPatient());
+        bundleFactory.setPractitioner(healthConcernPrepareInfoHolder.getPractitioner());
+
+        Bundle healthConcernCreateBundle = ehrClient.transaction()
+                .withBundle(bundleFactory.createBundle())
+                .execute();
+
+        IdType healthConcernId = FhirUtil.getFromResponseBundle(healthConcernCreateBundle, Condition.class);
+        Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE)
+                .where(Condition.RES_ID.exactly()
+                        .code(healthConcernId.getIdPart()))
+                .returnBundle(Bundle.class)
+                .execute();
+        return new HealthConcernBundleToDtoConverter().convert(responseBundle)
+                .stream()
+                .findFirst()
+                .orElseThrow(
+                        () -> new HealthConcernCreateException("Health Concern is not found in the response bundle."));
+    }
+
+    public void promote(String id) {
+        // TODO: to be reworked, remove TEST_PATIENT_ID
+        // Assert.notNull(SmartOnFhirContext.get()
+        // .getPatient(), "Patient id cannot be null.");
+
+        Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE)
+                .where(Condition.RES_ID.exactly()
+                        .code(id))
+                .returnBundle(Bundle.class)
+                .execute();
+
+        Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
+                .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
+
+        UsCoreConditionCategory problem = UsCoreConditionCategory.PROBLEMLISTITEM;
+        Coding coding = FhirUtil.findCoding(healthConcern.getCategory(), problem.getSystem());
+        coding.setCode(problem.toCode());
+        coding.setDisplay(problem.getDisplay());
+        // set time when the problem becomes effective
+        healthConcern.setOnset(DateTimeType.now());
+
+        ehrClient.update()
+                .resource(healthConcern)
+                .execute();
+    }
+
+    public void resolve(String id) {
+        // TODO: to be reworked, remove TEST_PATIENT_ID
+        // Assert.notNull(SmartOnFhirContext.get()
+        // .getPatient(), "Patient id cannot be null.");
+
+        Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE)
+                .where(Condition.RES_ID.exactly()
+                        .code(id))
+                .returnBundle(Bundle.class)
+                .execute();
+        Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
+                .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
+
+        ConditionClinicalStatusCodes resolvedStatus = ConditionClinicalStatusCodes.RESOLVED;
+        Coding coding = healthConcern.getClinicalStatus()
+                .getCodingFirstRep();
+        coding.setCode(resolvedStatus.toCode());
+        coding.setDisplay(resolvedStatus.getDisplay());
+        // set time of resolution
+        healthConcern.setAbatement(DateTimeType.now());
+
+        ehrClient.update()
+                .resource(healthConcern)
+                .execute();
+    }
+
+    public void remove(String id) {
+        // TODO: to be reworked, remove TEST_PATIENT_ID
+        // Assert.notNull(SmartOnFhirContext.get()
+        // .getPatient(), "Patient id cannot be null.");
+
+        Bundle responseBundle = searchHealthConcernQuery(ConditionClinicalStatus.ACTIVE)
+                .where(Condition.RES_ID.exactly()
+                        .code(id))
+                .returnBundle(Bundle.class)
+                .execute();
+        Condition healthConcern = Optional.ofNullable(FhirUtil.getFirstFromBundle(responseBundle, Condition.class))
+                .orElseThrow(() -> new ResourceNotFoundException(new IdType(Condition.class.getSimpleName(), id)));
+
+        ConditionClinicalStatusCodes resolvedStatus = ConditionClinicalStatusCodes.INACTIVE;
+        Coding coding = healthConcern.getClinicalStatus()
+                .getCodingFirstRep();
+        coding.setCode(resolvedStatus.toCode());
+        coding.setDisplay(resolvedStatus.getDisplay());
+
+        ehrClient.update()
+                .resource(healthConcern)
+                .execute();
+    }
+
+    // TODO refactor. This fragment is used across 3 services
+    private Bundle addQuestionnairesToConditionBundle(Bundle responseBundle) {
+        // Extract all 'addresses' references as ids and search for corresponding
+        // Conditions, since they cannot be included.
+        List<String> urls = FhirUtil.getFromBundle(responseBundle, QuestionnaireResponse.class)
+                .stream()
+                .map(q -> q.getQuestionnaire())
+                .collect(Collectors.toList());
+
+        if (urls.size() != 0) {
+            Bundle questionnaires = ehrClient.search()
+                    .forResource(Questionnaire.class)
+                    .where(Questionnaire.URL.matches()
+                            .values(urls))
+                    .returnBundle(Bundle.class)
+                    .execute();
+            return FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+        }
+        return responseBundle;
+    }
+
+    private IQuery<IBaseBundle> searchHealthConcernQuery(ConditionClinicalStatus status) {
+        // TODO: to be reworked, remove TEST_PATIENT_ID
+        // return new HealthConcernQueryFactory().query(ehrClient,
+        // SmartOnFhirContext.get()
+        // .getPatient())
+        return new HealthConcernQueryFactory().query(ehrClient, TEST_PATIENT_ID)
+                .where(Condition.CLINICAL_STATUS.exactly()
+                        .code(status.toCode()))
+                .sort()
+                .descending(Constants.PARAM_LASTUPDATED);
+    }
 }

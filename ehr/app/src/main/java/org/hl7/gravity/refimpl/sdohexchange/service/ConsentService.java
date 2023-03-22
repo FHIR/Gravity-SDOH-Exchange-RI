@@ -40,10 +40,14 @@ public class ConsentService {
 
   private final ConsentRepository consentRepository;
   private final IGenericClient ehrClient;
+  // TODO: to be removed
+  private final String TEST_PATIENT_ID = "smart-1288992";
 
   public List<ConsentDto> listConsents() {
-    Bundle bundle = consentRepository.findAllByPatient(SmartOnFhirContext.get()
-        .getPatient());
+    // TODO: to be removed
+    // Bundle bundle = consentRepository.findAllByPatient(SmartOnFhirContext.get()
+    // .getPatient());
+    Bundle bundle = consentRepository.findAllByPatient(TEST_PATIENT_ID);
     List<Consent> consentResources = FhirUtil.getFromBundle(bundle, Consent.class);
     return consentResources.stream()
         .map(consent -> new ConsentToDtoConverter().convert(consent))
@@ -51,19 +55,25 @@ public class ConsentService {
   }
 
   public List<BaseConsentDto> listBaseConsentsInfo() {
-    Bundle bundle = consentRepository.findAllByPatient(SmartOnFhirContext.get()
-        .getPatient());
+    // TODO: to be removed
+    // Bundle bundle = consentRepository.findAllByPatient(SmartOnFhirContext.get()
+    // .getPatient());
+    Bundle bundle = consentRepository.findAllByPatient(TEST_PATIENT_ID);
     List<Consent> consentResources = FhirUtil.getFromBundle(bundle, Consent.class);
     return consentResources.stream()
         .map(consent -> new BaseConsentDto(consent.getIdElement()
-            .getIdPart(), consent.getSourceAttachment()
-            .getTitle()))
+            .getIdPart(),
+            consent.getSourceAttachment()
+                .getTitle()))
         .collect(Collectors.toList());
   }
 
   public ConsentDto createConsent(String name, MultipartFile attachment, UserDto userDto) {
-    Reference patient = FhirUtil.toReference(Patient.class, SmartOnFhirContext.get()
-        .getPatient());
+    // TODO: to be removed
+    // Reference patient = FhirUtil.toReference(Patient.class,
+    // SmartOnFhirContext.get()
+    // .getPatient());
+    Reference patient = FhirUtil.toReference(Patient.class, TEST_PATIENT_ID);
     Reference organization = retrieveOrganization(userDto);
     Consent consent = new CreateConsentFactory(name, patient, attachment, organization).createConsent();
 

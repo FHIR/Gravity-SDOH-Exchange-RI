@@ -45,121 +45,137 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class SupportService {
 
-  private final IGenericClient ehrClient;
+    private final IGenericClient ehrClient;
+    // TODO: to be removed
+    private final String TEST_PATIENT_ID = "smart-1288992";
+    private final String TEST_USER_ID = "Smart-Practitioner-71482713";
 
-  public List<ConditionDto> listProblems() {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
-    Bundle conditionsBundle = ehrClient.search()
-        .forResource(Condition.class)
-        .sort()
-        .descending(Constants.PARAM_LASTUPDATED)
-        .where(Condition.PATIENT.hasId(SmartOnFhirContext.get()
-            .getPatient()))
-        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
-            .value(SDOHProfiles.CONDITION))
-        .where(Condition.CLINICAL_STATUS.exactly()
-            .code(ConditionClinicalStatusCodes.ACTIVE.toCode()))
-        .where(Condition.CATEGORY.exactly()
-            .systemAndCode(UsCoreConditionCategory.PROBLEMLISTITEM.getSystem(),
-                UsCoreConditionCategory.PROBLEMLISTITEM.toCode()))
-        .returnBundle(Bundle.class)
-        .execute();
-    return FhirUtil.getFromBundle(conditionsBundle, Condition.class)
-        .stream()
-        .map(condition -> new ConditionToDtoConverter().convert(condition))
-        .collect(Collectors.toList());
-  }
+    public List<ConditionDto> listProblems() {
+        // TODO: TO be rewritten, remove TEST_PATIENT_ID
+        // Assert.notNull(SmartOnFhirContext.get()
+        // .getPatient(), "Patient id cannot be null.");
 
-  public List<GoalInfoDto> listGoals() {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
-    Bundle goalsBundle = ehrClient.search()
-        .forResource(Goal.class)
-        .sort()
-        .descending(Constants.PARAM_LASTUPDATED)
-        .where(Goal.PATIENT.hasId(SmartOnFhirContext.get()
-            .getPatient()))
-        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
-            .value(SDOHProfiles.GOAL))
-        .where(Goal.LIFECYCLE_STATUS.exactly()
-            .code(Goal.GoalLifecycleStatus.ACTIVE.toCode()))
-        .returnBundle(Bundle.class)
-        .execute();
-    return FhirUtil.getFromBundle(goalsBundle, Goal.class)
-        .stream()
-        .map(goal -> new GoalToInfoDtoConverter().convert(goal))
-        .collect(Collectors.toList());
-  }
+        Bundle conditionsBundle = ehrClient.search()
+                .forResource(Condition.class)
+                .sort()
+                .descending(Constants.PARAM_LASTUPDATED)
+                // .where(Condition.PATIENT.hasId(SmartOnFhirContext.get()
+                // .getPatient()))
+                .where(Condition.PATIENT.hasId(TEST_PATIENT_ID))
+                .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
+                        .value(SDOHProfiles.CONDITION))
+                .where(Condition.CLINICAL_STATUS.exactly()
+                        .code(ConditionClinicalStatusCodes.ACTIVE.toCode()))
+                .where(Condition.CATEGORY.exactly()
+                        .systemAndCode(UsCoreConditionCategory.PROBLEMLISTITEM.getSystem(),
+                                UsCoreConditionCategory.PROBLEMLISTITEM.toCode()))
+                .returnBundle(Bundle.class)
+                .execute();
+        return FhirUtil.getFromBundle(conditionsBundle, Condition.class)
+                .stream()
+                .map(condition -> new ConditionToDtoConverter().convert(condition))
+                .collect(Collectors.toList());
+    }
 
-  public List<OrganizationDto> listOrganizations() {
-    Bundle organizationsBundle = ehrClient.search()
-        .forResource(Organization.class)
-        .sort()
-        .descending(Constants.PARAM_LASTUPDATED)
-        .where(Organization.TYPE.hasSystemWithAnyCode(OrganizationTypeCode.SYSTEM))
-        .returnBundle(Bundle.class)
-        .execute();
-    return FhirUtil.getFromBundle(organizationsBundle, Organization.class)
-        .stream()
-        .map(org -> new OrganizationToDtoConverter().convert(org))
-        .collect(Collectors.toList());
-  }
+    public List<GoalInfoDto> listGoals() {
+        // TODO: TO be rewritten, remove TEST_PATIENT_ID
+        // Assert.notNull(SmartOnFhirContext.get()
+        // .getPatient(), "Patient id cannot be null.");
 
-  public List<HealthcareServiceDto> listHealthcareServices(String organizationId) {
-    Bundle servicesBundle = ehrClient.search()
-        .forResource(HealthcareService.class)
-        .sort()
-        .descending(Constants.PARAM_LASTUPDATED)
-        .where(HealthcareService.ORGANIZATION.hasId(organizationId))
-        .include(HealthcareService.INCLUDE_LOCATION)
-        .returnBundle(Bundle.class)
-        .execute();
-    return new HealthcareServiceBundleToDtoConverter().convert(servicesBundle);
-  }
+        Bundle goalsBundle = ehrClient.search()
+                .forResource(Goal.class)
+                .sort()
+                .descending(Constants.PARAM_LASTUPDATED)
+                // .where(Goal.PATIENT.hasId(SmartOnFhirContext.get()
+                // .getPatient()))
+                .where(Goal.PATIENT.hasId(TEST_PATIENT_ID))
+                .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
+                        .value(SDOHProfiles.GOAL))
+                .where(Goal.LIFECYCLE_STATUS.exactly()
+                        .code(Goal.GoalLifecycleStatus.ACTIVE.toCode()))
+                .returnBundle(Bundle.class)
+                .execute();
+        return FhirUtil.getFromBundle(goalsBundle, Goal.class)
+                .stream()
+                .map(goal -> new GoalToInfoDtoConverter().convert(goal))
+                .collect(Collectors.toList());
+    }
 
-  public List<ReferenceDto> listAssessments() {
-    Bundle bundle = ehrClient.search()
-        .forResource(Questionnaire.class)
-        .sort()
-        .descending(Constants.PARAM_LASTUPDATED)
-        .returnBundle(Bundle.class)
-        .execute();
-    return FhirUtil.getFromBundle(bundle, Questionnaire.class)
-        .stream()
-        .map(q -> new ReferenceDto(q.getIdElement()
-            .getIdPart(), Strings.isNullOrEmpty(q.getTitle()) ? q.getName() : q.getTitle()))
-        .collect(Collectors.toList());
-  }
+    public List<OrganizationDto> listOrganizations() {
+        Bundle organizationsBundle = ehrClient.search()
+                .forResource(Organization.class)
+                .sort()
+                .descending(Constants.PARAM_LASTUPDATED)
+                // .where(Organization.TYPE.hasSystemWithAnyCode(OrganizationTypeCode.SYSTEM))
+                .returnBundle(Bundle.class)
+                .execute();
+        return FhirUtil.getFromBundle(organizationsBundle, Organization.class)
+                .stream()
+                .map(org -> new OrganizationToDtoConverter().convert(org))
+                .collect(Collectors.toList());
+    }
 
-  //TODO do this in parallel.
-  public ActiveResourcesDto getActiveResources() {
-    SmartOnFhirContext smartOnFhirContext = SmartOnFhirContext.get();
-    IQuery hcQuery = new HealthConcernQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
-        .where(Condition.CLINICAL_STATUS.exactly()
-            .code(ConditionClinicalStatusCodes.ACTIVE.toCode()));
+    public List<HealthcareServiceDto> listHealthcareServices(String organizationId) {
+        Bundle servicesBundle = ehrClient.search()
+                .forResource(HealthcareService.class)
+                .sort()
+                .descending(Constants.PARAM_LASTUPDATED)
+                .where(HealthcareService.ORGANIZATION.hasId(organizationId))
+                .include(HealthcareService.INCLUDE_LOCATION)
+                .returnBundle(Bundle.class)
+                .execute();
+        return new HealthcareServiceBundleToDtoConverter().convert(servicesBundle);
+    }
 
-    IQuery problemQuery = new ProblemQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
-        .where(Condition.CLINICAL_STATUS.exactly()
-            .code(ConditionClinicalStatusCodes.ACTIVE.toCode()));
+    public List<ReferenceDto> listAssessments() {
+        Bundle bundle = ehrClient.search()
+                .forResource(Questionnaire.class)
+                .sort()
+                .descending(Constants.PARAM_LASTUPDATED)
+                .returnBundle(Bundle.class)
+                .execute();
+        return FhirUtil.getFromBundle(bundle, Questionnaire.class)
+                .stream()
+                .map(q -> new ReferenceDto(q.getIdElement()
+                        .getIdPart(), Strings.isNullOrEmpty(q.getTitle()) ? q.getName() : q.getTitle()))
+                .collect(Collectors.toList());
+    }
 
-    IQuery goalQuery = new GoalQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
-        .where(Goal.LIFECYCLE_STATUS.exactly()
-            .code(Goal.GoalLifecycleStatus.ACTIVE.toCode()));
+    // TODO do this in parallel.
+    public ActiveResourcesDto getActiveResources() {
+        // TODO: TO be rewritten, remove TEST_PATIENT_ID
+        // SmartOnFhirContext smartOnFhirContext = SmartOnFhirContext.get();
+        // IQuery hcQuery = new HealthConcernQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+        IQuery hcQuery = new HealthConcernQueryFactory().query(ehrClient, TEST_PATIENT_ID)
+                        .where(Condition.CLINICAL_STATUS.exactly()
+                        .code(ConditionClinicalStatusCodes.ACTIVE.toCode()));
 
-    IQuery taskQuery = new TaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
-        .where(Task.STATUS.exactly()
-            .codes(Task.TaskStatus.ACCEPTED.toCode(), Task.TaskStatus.DRAFT.toCode(),
-                Task.TaskStatus.INPROGRESS.toCode(), Task.TaskStatus.ONHOLD.toCode(), Task.TaskStatus.READY.toCode(),
-                Task.TaskStatus.RECEIVED.toCode(), Task.TaskStatus.REQUESTED.toCode()));
+        // IQuery problemQuery = new ProblemQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+        IQuery problemQuery = new ProblemQueryFactory().query(ehrClient, TEST_PATIENT_ID)
+                .where(Condition.CLINICAL_STATUS.exactly()
+                        .code(ConditionClinicalStatusCodes.ACTIVE.toCode()));
 
-    return new ActiveResourcesDto(getTotal(hcQuery), getTotal(problemQuery), getTotal(goalQuery), getTotal(taskQuery));
-  }
+        // IQuery goalQuery = new GoalQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+        IQuery goalQuery = new GoalQueryFactory().query(ehrClient, TEST_PATIENT_ID)
+                .where(Goal.LIFECYCLE_STATUS.exactly()
+                        .code(Goal.GoalLifecycleStatus.ACTIVE.toCode()));
 
-  private int getTotal(IQuery<IBaseBundle> query) {
-    return query.count(0)
-        .returnBundle(Bundle.class)
-        .execute()
-        .getTotal();
-  }
+        // IQuery taskQuery = new TaskQueryFactory().query(ehrClient, smartOnFhirContext.getPatient())
+        IQuery taskQuery = new TaskQueryFactory().query(ehrClient, TEST_PATIENT_ID)
+                .where(Task.STATUS.exactly()
+                        .codes(Task.TaskStatus.ACCEPTED.toCode(), Task.TaskStatus.DRAFT.toCode(),
+                                Task.TaskStatus.INPROGRESS.toCode(), Task.TaskStatus.ONHOLD.toCode(),
+                                Task.TaskStatus.READY.toCode(),
+                                Task.TaskStatus.RECEIVED.toCode(), Task.TaskStatus.REQUESTED.toCode()));
+
+        return new ActiveResourcesDto(getTotal(hcQuery), getTotal(problemQuery), getTotal(goalQuery),
+                getTotal(taskQuery));
+    }
+
+    private int getTotal(IQuery<IBaseBundle> query) {
+        return query.count(0)
+                .returnBundle(Bundle.class)
+                .execute()
+                .getTotal();
+    }
 }

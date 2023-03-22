@@ -11,12 +11,17 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConsentRepository extends FhirRepository<Consent> {
+  // TODO: Temporary solution. should be queried from EHR.
+  public final String TEST_PATIENT_ID = "smart-1288992";
 
   public ConsentRepository(IGenericClient ehrClient) {
     super(ehrClient);
   }
 
   public Bundle findAllByPatient(String patientId) {
+    // TODO: To be removed
+    patientId = TEST_PATIENT_ID;
+
     return getClient().search()
         .forResource(getResourceType())
         .where(Consent.PATIENT.hasId(patientId))

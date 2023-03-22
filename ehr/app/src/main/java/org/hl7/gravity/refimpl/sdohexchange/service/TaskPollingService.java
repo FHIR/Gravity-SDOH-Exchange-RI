@@ -74,9 +74,12 @@ public class TaskPollingService {
         .include(Task.INCLUDE_FOCUS)
         .include(Task.INCLUDE_OWNER)
         .include(Organization.INCLUDE_ENDPOINT.setRecurse(true))
-        // Get only tasks sent to CP
-        .where(new TokenClientParam("owner:Organization.type").exactly()
-            .systemAndCode(OrganizationTypeCode.CP.getSystem(), OrganizationTypeCode.CP.toCode()))
+        // Get only tasks sent to CP (look up referral task management)
+        .where(new StringClientParam(Constants.PARAM_PROFILE).matches()
+            .value(SDOHProfiles.TASK))
+        // .where(new TokenClientParam("owner:Organization.type").exactly()
+        // .systemAndCode(OrganizationTypeCode.CP.getSystem(),
+        // OrganizationTypeCode.CP.toCode()))
         // Get only tasks in-progress
         .where(new TokenClientParam(Task.SP_STATUS + ":" + SearchModifierCode.NOT.toCode()).exactly()
             .code(Task.TaskStatus.FAILED.toCode()))

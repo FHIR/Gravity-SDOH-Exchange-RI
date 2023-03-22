@@ -30,13 +30,16 @@ import java.util.stream.Collectors;
 public class AssessmentService {
 
   private final IGenericClient ehrClient;
+  // TODO: to be removed
+  private final String TEST_PATIENT_ID = "smart-1288992";
 
   public List<AssessmentDto> listCompleted() {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
+    // TODO: REWORK THIS
+    // Assert.notNull(SmartOnFhirContext.get()
+    // .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchAssessmentQuery().where(QuestionnaireResponse.STATUS.exactly()
-            .code(QuestionnaireResponseStatus.COMPLETED.toCode()))
+        .code(QuestionnaireResponseStatus.COMPLETED.toCode()))
         .returnBundle(Bundle.class)
         .execute();
     responseBundle = addQuestionnairesToAssessmentBundle(responseBundle);
@@ -44,8 +47,9 @@ public class AssessmentService {
   }
 
   public AssessmentDto search(String questionnaireUrl) {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
+    // TODO: REWORK THIS
+    // Assert.notNull(SmartOnFhirContext.get()
+    // .getPatient(), "Patient id cannot be null.");
 
     Bundle responseBundle = searchAssessmentQuery().where(QuestionnaireResponse.QUESTIONNAIRE.hasId(questionnaireUrl))
         .returnBundle(Bundle.class)
@@ -62,7 +66,8 @@ public class AssessmentService {
   }
 
   private Bundle addQuestionnairesToAssessmentBundle(Bundle responseBundle) {
-    // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
+    // Extract all 'addresses' references as ids and search for corresponding
+    // Conditions, since they cannot be included.
     List<String> urls = FhirUtil.getFromBundle(responseBundle, QuestionnaireResponse.class)
         .stream()
         .map(q -> q.getQuestionnaire())
@@ -82,8 +87,10 @@ public class AssessmentService {
   }
 
   private IQuery<IBaseBundle> searchAssessmentQuery() {
-    return new AssessmentQueryFactory().query(ehrClient, SmartOnFhirContext.get()
-            .getPatient())
+    // TODO: REWORK THIS to remove the TEST_PATIENT_ID that will be querried
+    // return new AssessmentQueryFactory().query(ehrClient, SmartOnFhirContext.get()
+    // .getPatient())
+    return new AssessmentQueryFactory().query(ehrClient, TEST_PATIENT_ID)
         .revInclude(Observation.INCLUDE_DERIVED_FROM.setRecurse(true))
         .revInclude(Condition.INCLUDE_EVIDENCE_DETAIL.setRecurse(true))
         .sort()

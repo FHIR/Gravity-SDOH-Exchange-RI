@@ -23,7 +23,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Create a transaction bundle to retrieve all necessary resources for Task creation.
+ * Create a transaction bundle to retrieve all necessary resources for Task
+ * creation.
  */
 @AllArgsConstructor
 public class TaskPrepareBundleFactory extends PrepareBundleFactory {
@@ -62,7 +63,8 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
   }
 
   /**
-   * Create GET entry to retrieve a PractitionerRole by Practitioner id which has US Core profile related to US Core
+   * Create GET entry to retrieve a PractitionerRole by Practitioner id which has
+   * US Core profile related to US Core
    * Organization.
    *
    * @return practitioner role entry
@@ -88,7 +90,8 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
   }
 
   /**
-   * Create GET entry to retrieve a performing Organization by id and additionally check whether it has supported type,
+   * Create GET entry to retrieve a performing Organization by id and additionally
+   * check whether it has supported type,
    * also include all related Endpoint resources with specific connection type.
    *
    * @return organization and endpoint entry
@@ -98,7 +101,7 @@ public class TaskPrepareBundleFactory extends PrepareBundleFactory {
     EndpointConnectionType connectionType = EndpointConnectionType.HL7FHIRREST;
     return FhirUtil.createGetEntry(addParams(Organization.class.getSimpleName(),
         combineParams(eq(Organization.SP_RES_ID, performer),
-            eq(Organization.SP_TYPE, hasSystemWithAnyCode(OrganizationTypeCode.SYSTEM)),
+            // eq(Organization.SP_TYPE, hasSystemWithAnyCode(OrganizationTypeCode.SYSTEM)),
             eq(Constants.PARAM_INCLUDE, include(Organization.class.getSimpleName(), Organization.SP_ENDPOINT)),
             eq(resourceField(Organization.SP_ENDPOINT, Endpoint.SP_CONNECTION_TYPE),
                 hasSystemAndCode(connectionType.getSystem(), connectionType.toCode())))));

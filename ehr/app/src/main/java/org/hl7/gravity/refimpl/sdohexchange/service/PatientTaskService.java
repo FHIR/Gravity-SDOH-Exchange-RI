@@ -51,212 +51,244 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class PatientTaskService {
 
-  private final IGenericClient ehrClient;
+    private final IGenericClient ehrClient;
+    // TODO: to be removed
+    private final String TEST_PATIENT_ID = "smart-1288992";
+    private final String TEST_USER_ID = "Smart-Practitioner-71482713";
 
-  public PatientTaskDto read(String id) {
-    Bundle taskBundle = new PatientTaskQueryFactory().query(ehrClient, SmartOnFhirContext.get()
-            .getPatient())
-        .include(Task.INCLUDE_PART_OF)
-        .where(Task.RES_ID.exactly()
-            .code(id))
-        //Get only patient tasks
-        .where(new TokenClientParam("owner:Patient").exactly()
-            .code(SmartOnFhirContext.get()
-                .getPatient()))
-        .returnBundle(Bundle.class)
-        .execute();
-    addQuestionnairesToTaskBundle(taskBundle);
-    addQuestionnaireResponsesToTaskBundle(taskBundle);
-    return new PatientTaskBundleToDtoConverter().convert(taskBundle)
-        .stream()
-        .findFirst()
-        .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)));
-  }
-
-  public List<PatientTaskItemDto> listTasks() {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
-
-    Bundle tasksBundle = new PatientTaskQueryFactory().query(ehrClient, SmartOnFhirContext.get()
-            .getPatient())
-        .include(Task.INCLUDE_PART_OF)
-        //Get only patient tasks
-        .where(new TokenClientParam("owner:Patient").exactly()
-            .code(SmartOnFhirContext.get()
-                .getPatient()))
-        .returnBundle(Bundle.class)
-        .execute();
-    addQuestionnairesToTaskBundle(tasksBundle);
-    return new PatientTaskBundleToItemDtoConverter().convert(tasksBundle);
-  }
-
-  private void addQuestionnaireResponsesToTaskBundle(Bundle responseBundle) {
-    FhirUtil.getFromBundle(responseBundle, Task.class, Bundle.SearchEntryMode.MATCH)
-        .stream()
-        .filter(Task::hasOutput)
-        .flatMap(t -> t.getOutput()
-            .stream())
-        .forEach(c -> {
-          Coding coding = FhirUtil.findCoding(Lists.newArrayList(c.getType()), SDCTemporaryCode.SYSTEM,
-              SDCTemporaryCode.QUESTIONNAIRE_RESPONSE.getCode());
-          if (coding != null) {
-            String questionnaireResponseId = ((Reference) c.getValue()).getReferenceElement()
-                .getIdPart();
-            Bundle questionnaireResponse = ehrClient.search()
-                .forResource(QuestionnaireResponse.class)
-                .where(BaseResource.RES_ID.exactly()
-                    .codes(questionnaireResponseId))
+    public PatientTaskDto read(String id) {
+        // TODO: to be rewritten to work with hapi server
+        // Bundle taskBundle = new PatientTaskQueryFactory().query(ehrClient,
+        // SmartOnFhirContext.get()
+        // .getPatient())
+        Bundle taskBundle = new PatientTaskQueryFactory().query(ehrClient, TEST_PATIENT_ID)
+                .include(Task.INCLUDE_PART_OF)
+                .where(Task.RES_ID.exactly()
+                        .code(id))
+                // Get only patient tasks
+                // .where(new TokenClientParam("owner:Patient").exactly()
+                // .code(SmartOnFhirContext.get()
+                // .getPatient()))
+                .where(new TokenClientParam("owner:Patient").exactly()
+                        .code(TEST_PATIENT_ID))
                 .returnBundle(Bundle.class)
                 .execute();
-
-            FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaireResponse);
-          }
-        });
-  }
-
-  private void addQuestionnairesToTaskBundle(Bundle responseBundle) {
-    // Extract all 'addresses' references as ids and search for corresponding Conditions, since they cannot be included.
-    List<String> urls = FhirUtil.getFromBundle(responseBundle, Task.class, Bundle.SearchEntryMode.MATCH)
-        .stream()
-        .map(t -> t.getInput()
-            .stream()
-            .filter(i -> SDCTemporaryCode.QUESTIONNAIRE.getCode()
-                .equals(i.getType()
-                    .getCodingFirstRep()
-                    .getCode()))
-            .findAny()
-            .orElse(null))
-        .filter(Objects::nonNull)
-        .filter(i -> i.getValue() instanceof CanonicalType)
-        .map(i -> ((CanonicalType) i.getValue()).getValue())
-        .collect(Collectors.toList());
-
-    if (urls.size() != 0) {
-      Bundle questionnaires = ehrClient.search()
-          .forResource(Questionnaire.class)
-          .where(Questionnaire.URL.matches()
-              .values(urls))
-          .returnBundle(Bundle.class)
-          .execute();
-      FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
-    }
-  }
-
-  public void update(String id, UpdateTaskRequestDto update, UserDto user) {
-    Task task = ehrClient.read()
-        .resource(Task.class)
-        .withId(id)
-        .execute();
-    if (task == null) {
-      throw new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id));
-    }
-    PatientTaskUpdateBundleFactory updateBundleFactory = new PatientTaskUpdateBundleFactory();
-    updateBundleFactory.setTask(task);
-    updateBundleFactory.setStatus(update.getFhirStatus());
-    updateBundleFactory.setStatusReason(update.getStatusReason());
-    updateBundleFactory.setComment(update.getComment());
-    updateBundleFactory.setUser(user);
-
-    ehrClient.transaction()
-        .withBundle(updateBundleFactory.createUpdateBundle())
-        .execute();
-  }
-
-  public String newTask(NewPatientTaskRequestDto taskRequest, UserDto user) {
-    Assert.notNull(SmartOnFhirContext.get()
-        .getPatient(), "Patient id cannot be null.");
-
-    PatientTaskBundleFactory taskBundleFactory;
-    if (taskRequest instanceof NewMakeContactTaskRequestDto) {
-      taskBundleFactory = createMakeContactTaskBundleFactory(user, (NewMakeContactTaskRequestDto) taskRequest);
-    } else if (taskRequest instanceof NewSocialRiskTaskRequestDto) {
-      taskBundleFactory = createSocialRiskTaskBundleFactory(user, (NewSocialRiskTaskRequestDto) taskRequest);
-    } else if (taskRequest instanceof NewFeedbackTaskRequestDto) {
-      taskBundleFactory = createFeedbackTaskBundleFactory(user, (NewFeedbackTaskRequestDto) taskRequest);
-    } else {
-      throw new IllegalArgumentException(taskRequest.getClass()
-          .getSimpleName() + " instances not supported yet.");
+        addQuestionnairesToTaskBundle(taskBundle);
+        addQuestionnaireResponsesToTaskBundle(taskBundle);
+        return new PatientTaskBundleToDtoConverter().convert(taskBundle)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id)));
     }
 
-    Bundle taskCreateBundle = ehrClient.transaction()
-        .withBundle(taskBundleFactory.createBundle())
-        .execute();
+    public List<PatientTaskItemDto> listTasks() {
+        // TODO: to be rewritten to work with hapi server
+        // Assert.notNull(SmartOnFhirContext.get()
+        // .getPatient(), "Patient id cannot be null.");
 
-    return FhirUtil.getFromResponseBundle(taskCreateBundle, Task.class)
-        .getIdPart();
-  }
+        // Bundle tasksBundle = new PatientTaskQueryFactory().query(ehrClient,
+        // SmartOnFhirContext.get()
+        // .getPatient())
+        Bundle tasksBundle = new PatientTaskQueryFactory().query(ehrClient, TEST_PATIENT_ID)
+                .include(Task.INCLUDE_PART_OF)
+                // Get only patient tasks
+                // .where(new TokenClientParam("owner:Patient").exactly()
+                // .code(SmartOnFhirContext.get()
+                // .getPatient()))
+                .where(new TokenClientParam("owner:Patient").exactly()
+                        .code(TEST_PATIENT_ID))
+                .returnBundle(Bundle.class)
+                .execute();
+        addQuestionnairesToTaskBundle(tasksBundle);
+        return new PatientTaskBundleToItemDtoConverter().convert(tasksBundle);
+    }
 
-  private PatientMakeContactTaskBundleFactory createMakeContactTaskBundleFactory(UserDto user,
-      NewMakeContactTaskRequestDto makeContactTaskRequest) {
-    PatientMakeContactTaskPrepareBundleFactory taskPrepareBundleFactory =
-        new PatientMakeContactTaskPrepareBundleFactory(SmartOnFhirContext.get()
-            .getPatient(), user.getId(), makeContactTaskRequest.getHealthcareServiceId(),
-            makeContactTaskRequest.getReferralTaskId());
-    Bundle taskRelatedResources = ehrClient.transaction()
-        .withBundle(taskPrepareBundleFactory.createPrepareBundle())
-        .execute();
-    PatientMakeContactTaskPrepareBundleExtractor.PatientMakeContactTaskPrepareInfoHolder taskPrepareInfoHolder =
-        new PatientMakeContactTaskPrepareBundleExtractor().extract(taskRelatedResources);
+    private void addQuestionnaireResponsesToTaskBundle(Bundle responseBundle) {
+        FhirUtil.getFromBundle(responseBundle, Task.class, Bundle.SearchEntryMode.MATCH)
+                .stream()
+                .filter(Task::hasOutput)
+                .flatMap(t -> t.getOutput()
+                        .stream())
+                .forEach(c -> {
+                    Coding coding = FhirUtil.findCoding(Lists.newArrayList(c.getType()), SDCTemporaryCode.SYSTEM,
+                            SDCTemporaryCode.QUESTIONNAIRE_RESPONSE.getCode());
+                    if (coding != null) {
+                        String questionnaireResponseId = ((Reference) c.getValue()).getReferenceElement()
+                                .getIdPart();
+                        Bundle questionnaireResponse = ehrClient.search()
+                                .forResource(QuestionnaireResponse.class)
+                                .where(BaseResource.RES_ID.exactly()
+                                        .codes(questionnaireResponseId))
+                                .returnBundle(Bundle.class)
+                                .execute();
 
-    PatientMakeContactTaskBundleFactory taskBundleFactory = new PatientMakeContactTaskBundleFactory();
-    taskBundleFactory.setName(makeContactTaskRequest.getName());
-    taskBundleFactory.setPatient(taskPrepareInfoHolder.getPatient());
-    taskBundleFactory.setPriority(makeContactTaskRequest.getPriority());
-    taskBundleFactory.setOccurrence(makeContactTaskRequest.getOccurrence());
-    taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
-    //TODO verify whether the passed Task instance is related to the Patient
-    taskBundleFactory.setReferralTask(taskPrepareInfoHolder.getReferralTask());
-    taskBundleFactory.setComment(makeContactTaskRequest.getComment());
-    taskBundleFactory.setUser(user);
-    //TODO verify whether the passed HealthcareService instance is related to the task
-    taskBundleFactory.setContactInfo(taskPrepareInfoHolder.getHealthcareService());
-    return taskBundleFactory;
-  }
+                        FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaireResponse);
+                    }
+                });
+    }
 
-  private PatientSocialRiskTaskBundleFactory createSocialRiskTaskBundleFactory(UserDto user,
-      NewSocialRiskTaskRequestDto socialRiskTaskRequest) {
-    PatientSocialRiskTaskPrepareBundleFactory taskPrepareBundleFactory = new PatientSocialRiskTaskPrepareBundleFactory(
-        SmartOnFhirContext.get()
-            .getPatient(), user.getId(), socialRiskTaskRequest.getQuestionnaireId());
-    Bundle taskRelatedResources = ehrClient.transaction()
-        .withBundle(taskPrepareBundleFactory.createPrepareBundle())
-        .execute();
-    PatientSocialRiskTaskPrepareBundleExtractor.PatientSocialRiskTaskPrepareInfoHolder taskPrepareInfoHolder =
-        new PatientSocialRiskTaskPrepareBundleExtractor().extract(taskRelatedResources);
+    private void addQuestionnairesToTaskBundle(Bundle responseBundle) {
+        // Extract all 'addresses' references as ids and search for corresponding
+        // Conditions, since they cannot be included.
+        List<String> urls = FhirUtil.getFromBundle(responseBundle, Task.class, Bundle.SearchEntryMode.MATCH)
+                .stream()
+                .map(t -> t.getInput()
+                        .stream()
+                        .filter(i -> SDCTemporaryCode.QUESTIONNAIRE.getCode()
+                                .equals(i.getType()
+                                        .getCodingFirstRep()
+                                        .getCode()))
+                        .findAny()
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .filter(i -> i.getValue() instanceof CanonicalType)
+                .map(i -> ((CanonicalType) i.getValue()).getValue())
+                .collect(Collectors.toList());
 
-    PatientSocialRiskTaskBundleFactory taskBundleFactory = new PatientSocialRiskTaskBundleFactory();
-    taskBundleFactory.setName(socialRiskTaskRequest.getName());
-    taskBundleFactory.setPatient(taskPrepareInfoHolder.getPatient());
-    taskBundleFactory.setPriority(socialRiskTaskRequest.getPriority());
-    taskBundleFactory.setOccurrence(socialRiskTaskRequest.getOccurrence());
-    taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
-    taskBundleFactory.setComment(socialRiskTaskRequest.getComment());
-    taskBundleFactory.setUser(user);
-    taskBundleFactory.setQuestionniare(taskPrepareInfoHolder.getQuestionnaire());
-    return taskBundleFactory;
-  }
+        if (urls.size() != 0) {
+            Bundle questionnaires = ehrClient.search()
+                    .forResource(Questionnaire.class)
+                    .where(Questionnaire.URL.matches()
+                            .values(urls))
+                    .returnBundle(Bundle.class)
+                    .execute();
+            FhirUtil.mergeBundles(ehrClient.getFhirContext(), responseBundle, questionnaires);
+        }
+    }
 
-  private PatientTaskBundleFactory createFeedbackTaskBundleFactory(UserDto user,
-      NewFeedbackTaskRequestDto feedbackTaskRequest) {
-    PatientFeedbackTaskPrepareBundleFactory taskPrepareBundleFactory = new PatientFeedbackTaskPrepareBundleFactory(
-        SmartOnFhirContext.get()
-            .getPatient(), user.getId(), feedbackTaskRequest.getReferralTaskId());
-    Bundle taskRelatedResources = ehrClient.transaction()
-        .withBundle(taskPrepareBundleFactory.createPrepareBundle())
-        .execute();
-    PatientFeedbackTaskPrepareBundleExtractor.PatientFeedbackTaskPrepareInfoHolder taskPrepareInfoHolder =
-        new PatientFeedbackTaskPrepareBundleExtractor().extract(taskRelatedResources);
+    public void update(String id, UpdateTaskRequestDto update, UserDto user) {
+        Task task = ehrClient.read()
+                .resource(Task.class)
+                .withId(id)
+                .execute();
+        if (task == null) {
+            throw new ResourceNotFoundException(new IdType(Task.class.getSimpleName(), id));
+        }
+        PatientTaskUpdateBundleFactory updateBundleFactory = new PatientTaskUpdateBundleFactory();
+        updateBundleFactory.setTask(task);
+        updateBundleFactory.setStatus(update.getFhirStatus());
+        updateBundleFactory.setStatusReason(update.getStatusReason());
+        updateBundleFactory.setComment(update.getComment());
+        updateBundleFactory.setUser(user);
 
-    PatientFeedbackTaskBundleFactory taskBundleFactory = new PatientFeedbackTaskBundleFactory();
-    taskBundleFactory.setName(feedbackTaskRequest.getName());
-    taskBundleFactory.setPatient(taskPrepareInfoHolder.getPatient());
-    taskBundleFactory.setPriority(feedbackTaskRequest.getPriority());
-    taskBundleFactory.setOccurrence(feedbackTaskRequest.getOccurrence());
-    taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
-    //TODO verify whether the passed Task instance is related to the Patient
-    taskBundleFactory.setReferralTask(taskPrepareInfoHolder.getReferralTask());
-    taskBundleFactory.setComment(feedbackTaskRequest.getComment());
-    taskBundleFactory.setUser(user);
-    return taskBundleFactory;
-  }
+        ehrClient.transaction()
+                .withBundle(updateBundleFactory.createUpdateBundle())
+                .execute();
+    }
+
+    public String newTask(NewPatientTaskRequestDto taskRequest, UserDto user) {
+        // TODO: to be rewritten to work with hapi server
+        // Assert.notNull(SmartOnFhirContext.get()
+        // .getPatient(), "Patient id cannot be null.");
+
+        PatientTaskBundleFactory taskBundleFactory;
+        if (taskRequest instanceof NewMakeContactTaskRequestDto) {
+            taskBundleFactory = createMakeContactTaskBundleFactory(user, (NewMakeContactTaskRequestDto) taskRequest);
+        } else if (taskRequest instanceof NewSocialRiskTaskRequestDto) {
+            taskBundleFactory = createSocialRiskTaskBundleFactory(user, (NewSocialRiskTaskRequestDto) taskRequest);
+        } else if (taskRequest instanceof NewFeedbackTaskRequestDto) {
+            taskBundleFactory = createFeedbackTaskBundleFactory(user, (NewFeedbackTaskRequestDto) taskRequest);
+        } else {
+            throw new IllegalArgumentException(taskRequest.getClass()
+                    .getSimpleName() + " instances not supported yet.");
+        }
+
+        Bundle taskCreateBundle = ehrClient.transaction()
+                .withBundle(taskBundleFactory.createBundle())
+                .execute();
+
+        return FhirUtil.getFromResponseBundle(taskCreateBundle, Task.class)
+                .getIdPart();
+    }
+
+    private PatientMakeContactTaskBundleFactory createMakeContactTaskBundleFactory(UserDto user,
+            NewMakeContactTaskRequestDto makeContactTaskRequest) {
+        // TODO: to be rewritten to work with hapi server
+        // PatientMakeContactTaskPrepareBundleFactory taskPrepareBundleFactory = new
+        // PatientMakeContactTaskPrepareBundleFactory(
+        // SmartOnFhirContext.get()
+        // .getPatient(),
+        // user.getId(), makeContactTaskRequest.getHealthcareServiceId(),
+        // makeContactTaskRequest.getReferralTaskId());
+        PatientMakeContactTaskPrepareBundleFactory taskPrepareBundleFactory = new PatientMakeContactTaskPrepareBundleFactory(
+                TEST_PATIENT_ID, user.getId(), makeContactTaskRequest.getHealthcareServiceId(),
+                makeContactTaskRequest.getReferralTaskId());
+        Bundle taskRelatedResources = ehrClient.transaction()
+                .withBundle(taskPrepareBundleFactory.createPrepareBundle())
+                .execute();
+        PatientMakeContactTaskPrepareBundleExtractor.PatientMakeContactTaskPrepareInfoHolder taskPrepareInfoHolder = new PatientMakeContactTaskPrepareBundleExtractor()
+                .extract(taskRelatedResources);
+
+        PatientMakeContactTaskBundleFactory taskBundleFactory = new PatientMakeContactTaskBundleFactory();
+        taskBundleFactory.setName(makeContactTaskRequest.getName());
+        taskBundleFactory.setPatient(taskPrepareInfoHolder.getPatient());
+        taskBundleFactory.setPriority(makeContactTaskRequest.getPriority());
+        taskBundleFactory.setOccurrence(makeContactTaskRequest.getOccurrence());
+        taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
+        // TODO verify whether the passed Task instance is related to the Patient
+        taskBundleFactory.setReferralTask(taskPrepareInfoHolder.getReferralTask());
+        taskBundleFactory.setComment(makeContactTaskRequest.getComment());
+        taskBundleFactory.setUser(user);
+        // TODO verify whether the passed HealthcareService instance is related to the
+        // task
+        taskBundleFactory.setContactInfo(taskPrepareInfoHolder.getHealthcareService());
+        return taskBundleFactory;
+    }
+
+    private PatientSocialRiskTaskBundleFactory createSocialRiskTaskBundleFactory(UserDto user,
+            NewSocialRiskTaskRequestDto socialRiskTaskRequest) {
+        // TODO: to be rewritten to work with hapi server
+        // PatientSocialRiskTaskPrepareBundleFactory taskPrepareBundleFactory = new
+        // PatientSocialRiskTaskPrepareBundleFactory(
+        // SmartOnFhirContext.get()
+        // .getPatient(),
+        // user.getId(), socialRiskTaskRequest.getQuestionnaireId());
+        PatientSocialRiskTaskPrepareBundleFactory taskPrepareBundleFactory = new PatientSocialRiskTaskPrepareBundleFactory(
+                TEST_PATIENT_ID, user.getId(), socialRiskTaskRequest.getQuestionnaireId());
+        Bundle taskRelatedResources = ehrClient.transaction()
+                .withBundle(taskPrepareBundleFactory.createPrepareBundle())
+                .execute();
+        PatientSocialRiskTaskPrepareBundleExtractor.PatientSocialRiskTaskPrepareInfoHolder taskPrepareInfoHolder = new PatientSocialRiskTaskPrepareBundleExtractor()
+                .extract(taskRelatedResources);
+
+        PatientSocialRiskTaskBundleFactory taskBundleFactory = new PatientSocialRiskTaskBundleFactory();
+        taskBundleFactory.setName(socialRiskTaskRequest.getName());
+        taskBundleFactory.setPatient(taskPrepareInfoHolder.getPatient());
+        taskBundleFactory.setPriority(socialRiskTaskRequest.getPriority());
+        taskBundleFactory.setOccurrence(socialRiskTaskRequest.getOccurrence());
+        taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
+        taskBundleFactory.setComment(socialRiskTaskRequest.getComment());
+        taskBundleFactory.setUser(user);
+        taskBundleFactory.setQuestionniare(taskPrepareInfoHolder.getQuestionnaire());
+        return taskBundleFactory;
+    }
+
+    private PatientTaskBundleFactory createFeedbackTaskBundleFactory(UserDto user,
+            NewFeedbackTaskRequestDto feedbackTaskRequest) {
+        // TODO: to be rewritten to work with hapi server
+        // PatientFeedbackTaskPrepareBundleFactory taskPrepareBundleFactory = new
+        // PatientFeedbackTaskPrepareBundleFactory(
+        // SmartOnFhirContext.get()
+        // .getPatient(),
+        // user.getId(), feedbackTaskRequest.getReferralTaskId());
+        PatientFeedbackTaskPrepareBundleFactory taskPrepareBundleFactory = new PatientFeedbackTaskPrepareBundleFactory(
+                TEST_PATIENT_ID, TEST_USER_ID, feedbackTaskRequest.getReferralTaskId());
+        Bundle taskRelatedResources = ehrClient.transaction()
+                .withBundle(taskPrepareBundleFactory.createPrepareBundle())
+                .execute();
+        PatientFeedbackTaskPrepareBundleExtractor.PatientFeedbackTaskPrepareInfoHolder taskPrepareInfoHolder = new PatientFeedbackTaskPrepareBundleExtractor()
+                .extract(taskRelatedResources);
+
+        PatientFeedbackTaskBundleFactory taskBundleFactory = new PatientFeedbackTaskBundleFactory();
+        taskBundleFactory.setName(feedbackTaskRequest.getName());
+        taskBundleFactory.setPatient(taskPrepareInfoHolder.getPatient());
+        taskBundleFactory.setPriority(feedbackTaskRequest.getPriority());
+        taskBundleFactory.setOccurrence(feedbackTaskRequest.getOccurrence());
+        taskBundleFactory.setRequester(taskPrepareInfoHolder.getPerformer());
+        // TODO verify whether the passed Task instance is related to the Patient
+        taskBundleFactory.setReferralTask(taskPrepareInfoHolder.getReferralTask());
+        taskBundleFactory.setComment(feedbackTaskRequest.getComment());
+        taskBundleFactory.setUser(user);
+        return taskBundleFactory;
+    }
 }

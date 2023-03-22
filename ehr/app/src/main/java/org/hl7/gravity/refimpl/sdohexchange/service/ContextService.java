@@ -21,25 +21,33 @@ public class ContextService {
 
   private final IGenericClient ehrClient;
   private final PatientInfoComposer patientInfoComposer;
+  // TODO: to be removed
+  private final String TEST_PATIENT_ID = "smart-1288992";
+  private final String TEST_USER_ID = "Smart-Practitioner-71482713";
 
   public CurrentContextDto getCurrentContext() {
     return new CurrentContextDto(getPatient(), getUser());
   }
 
   protected PatientDto getPatient() {
-    String patientId = SmartOnFhirContext.get()
-        .getPatient();
+    // TODO: to be removed
+    // String patientId = SmartOnFhirContext.get()
+    // .getPatient();
+    String patientId = TEST_PATIENT_ID;
     Assert.notNull(patientId, "Patient id cannot be null.");
     return new PatientToDtoConverter().convert(patientInfoComposer.compose(patientId));
   }
 
   protected UserDto getUser() {
-    IdType fhirUser = new IdType(SmartOnFhirContext.get()
-        .getFhirUser());
+    // TODO: to be removed
+    IdType fhirUser = new IdType("Practitioner/" + TEST_USER_ID);
+    // IdType fhirUser = new IdType(SmartOnFhirContext.get()
+    // .getFhirUser());
     Assert.isTrue(fhirUser.hasIdPart(), "Current User cannot be null.");
-    // TODO support other user Resource types. For example another Patient can create Tasks.
+    // TODO support other user Resource types. For example another Patient can
+    // create Tasks.
     Assert.isTrue(Practitioner.class.getSimpleName()
-            .equals(fhirUser.getResourceType()),
+        .equals(fhirUser.getResourceType()),
         "Current user is not a Practitioner. Only Practitioner resource type is supported for now.");
     Practitioner practitioner = ehrClient.read()
         .resource(Practitioner.class)

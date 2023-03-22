@@ -99,7 +99,7 @@ export default defineComponent({
 		const pollId = ref<number>();
 		const pollData = async () => {
 			await TasksModule.getTasks();
-			pollId.value = window.setTimeout(pollData, 5000);
+			pollId.value = window.setTimeout(pollData, 60000);
 		};
 		onUnmounted(() => {
 			clearTimeout(pollId.value);
@@ -141,7 +141,7 @@ export default defineComponent({
 						showLabel: true
 					}),
 					" to ",
-					h(TaskStatusIcon,{
+					h(TaskStatusIcon, {
 						status: update.newStatus,
 						small: true,
 						showLabel: true
@@ -183,10 +183,7 @@ export default defineComponent({
 <template>
 	<div class="action-steps">
 		<div class="action-steps-switcher">
-			<el-radio-group
-				v-model="activeGroup"
-				size="mini"
-			>
+			<el-radio-group v-model="activeGroup" size="mini">
 				<el-radio-button label="interventions">
 					Interventions
 				</el-radio-button>
@@ -194,54 +191,24 @@ export default defineComponent({
 					Referrals
 				</el-radio-button>
 			</el-radio-group>
-			<el-button
-				v-if="activeGroup === 'referrals' && (activeRequests.length || completedRequests.length)"
-				plain
-				round
-				type="primary"
-				size="mini"
-				@click="newRequestDialogVisible = true"
-			>
+			<el-button v-if="activeGroup === 'referrals' && (activeRequests.length || completedRequests.length)" plain round
+				type="primary" size="mini" @click="newRequestDialogVisible = true">
 				Add New Request
 			</el-button>
 		</div>
-		<div
-			v-if="activeGroup === 'interventions'"
-			class="interventions"
-		>
+		<div v-if="activeGroup === 'interventions'" class="interventions">
 			Interventions
 		</div>
-		<div
-			v-else
-			v-loading="isRequestLoading"
-			class="referrals"
-		>
-			<RequestTable
-				v-if="activeRequests.length"
-				:data="activeRequests"
-				:action-step-to-open="actionStepToOpen"
-				@reset-active-task="$emit('reset-active-task')"
-			/>
-			<RequestTable
-				v-if="completedRequests.length"
-				:data="completedRequests"
-				:action-step-to-open="actionStepToOpen"
-				title="Completed Requests"
-				@reset-active-task="$emit('reset-active-task')"
-			/>
-			<NoItems
-				v-if="!isRequestLoading && !(completedRequests.length || activeRequests.length)"
-				message="No Referral Requests Yet"
-				button-label="Add Request"
-				@add-item="newRequestDialogVisible = true"
-			/>
+		<div v-else v-loading="isRequestLoading" class="referrals">
+			<RequestTable v-if="activeRequests.length" :data="activeRequests" :action-step-to-open="actionStepToOpen"
+				@reset-active-task="$emit('reset-active-task')" />
+			<RequestTable v-if="completedRequests.length" :data="completedRequests" :action-step-to-open="actionStepToOpen"
+				title="Completed Requests" @reset-active-task="$emit('reset-active-task')" />
+			<NoItems v-if="!isRequestLoading && !(completedRequests.length || activeRequests.length)"
+				message="No Referral Requests Yet" button-label="Add Request" @add-item="newRequestDialogVisible = true" />
 		</div>
 
-		<NewRequestDialog
-			:visible="newRequestDialogVisible"
-			:problems="newActionProblems"
-			@close="handleDialogClose"
-		/>
+		<NewRequestDialog :visible="newRequestDialogVisible" :problems="newActionProblems" @close="handleDialogClose" />
 	</div>
 </template>
 
